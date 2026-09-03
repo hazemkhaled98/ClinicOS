@@ -1,0 +1,56 @@
+@startuml Use Cases Overview
+left to right direction
+
+actor "Owner/Manager" as manager
+actor "Assistant" as assistant
+actor "Receptionist" as reception
+
+rectangle "Clinic Performance Management (عيادتي · إدارة الأداء)" {
+    usecase "UC-001\nLog In and Access the System" as UC001
+    usecase "UC-002\nManage Employees and Roles" as UC002
+    usecase "UC-003\nRecord Daily Work and Attendance" as UC003
+    usecase "UC-004\nEvaluate and Verify Employee Performance" as UC004
+    usecase "UC-005\nView My Performance Evaluation" as UC005
+    usecase "UC-006\nPrepare and Run Procedure Checklists" as UC006
+    usecase "UC-007\nComplete Onboarding Academy Training" as UC007
+    usecase "UC-008\nManage Clinic Inventory and Procedure Costs" as UC008
+    usecase "UC-009\nView Admin Dashboard and Operations Analytics" as UC009
+}
+
+manager --> UC001
+assistant --> UC001
+reception --> UC001
+
+manager --> UC002
+
+assistant --> UC003
+reception --> UC003
+
+manager --> UC004
+
+assistant --> UC005
+reception --> UC005
+
+assistant --> UC006
+reception --> UC006
+manager --> UC006
+
+assistant --> UC007
+reception --> UC007
+manager --> UC007
+
+manager --> UC008
+assistant --> UC008
+reception --> UC008
+
+manager --> UC009
+
+UC003 ..> UC001 : <<include>>
+UC004 ..> UC001 : <<include>>
+UC005 ..> UC001 : <<include>>
+UC006 ..> UC001 : <<include>>
+UC007 ..> UC001 : <<include>>
+UC008 ..> UC001 : <<include>>
+UC009 ..> UC001 : <<include>>
+
+@enduml
