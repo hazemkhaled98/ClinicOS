@@ -19,7 +19,6 @@ create table evaluation_snapshot (
     period_month        date not null,
     final_score         numeric(5,2) not null check (final_score between 0 and 100),
     incentive_amount    numeric(10,2) not null default 0 check (incentive_amount >= 0),
-    weights             jsonb not null,
     frozen_at           timestamptz not null default now(),
     frozen_by           uuid references membership (id),
     unlocked_at         timestamptz,

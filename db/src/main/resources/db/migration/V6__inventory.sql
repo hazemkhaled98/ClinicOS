@@ -27,36 +27,23 @@ create table inventory_item (
     unit_cost               numeric(10,2) not null check (unit_cost >= 0),
     preferred_supplier_id   uuid references supplier (id),
     expiry_date             date,
+    store_alert             integer check (store_alert >= 0),
+    tray_alert              integer check (tray_alert >= 0),
     archived_at             timestamptz
 );
 
 create index idx_inventory_item_clinic on inventory_item (clinic_id);
 
-create table stock_location (
-    id          uuid primary key default gen_random_uuid(),
-    clinic_id   uuid not null references clinic (id) on delete cascade,
-    name        text not null,
-    kind        location_kind not null,
-    unique (clinic_id, name)
-);
-
-create index idx_stock_location_clinic on stock_location (clinic_id);
-
-create table stock_alert_threshold (
-    item_id     uuid not null references inventory_item (id) on delete cascade,
-    location_id uuid not null references stock_location (id) on delete cascade,
-    threshold   integer not null check (threshold >= 0),
-    primary key (item_id, location_id)
-);
-
 -- Append-only ledger: on-hand quantity per (item, location) is sum(qty_delta).
+-- Locations are the fixed store/tray split the app has always had -- not an
+-- open table, since nothing needs a third pool.
 -- ponytail: balance computed by aggregate; add a materialized stock_balance table
 -- if the sum gets slow past ~1e6 movements per clinic.
 create table stock_movement (
     id          uuid primary key default gen_random_uuid(),
     clinic_id   uuid not null references clinic (id) on delete cascade,
     item_id     uuid not null references inventory_item (id) on delete cascade,
-    location_id uuid not null references stock_location (id) on delete cascade,
+    location    location_kind not null,
     qty_delta   numeric(12,2) not null,
     reason      movement_reason not null,
     ref_type    text,        -- e.g. 'purchase_order', 'procedure_case', 'supplier_return'
@@ -65,7 +52,7 @@ create table stock_movement (
     created_at  timestamptz not null default now()
 );
 
-create index idx_stock_movement_clinic on stock_movement (clinic_id, item_id, location_id);
+create index idx_stock_movement_clinic on stock_movement (clinic_id, item_id, location);
 create index idx_stock_movement_ref on stock_movement (ref_type, ref_id);
 
 create table purchase_order (

@@ -70,5 +70,5 @@ begin;
     select sum(qty_delta) as should_be_70
     from stock_movement
     where item_id = 'eeeeeeee-0000-0000-0000-000000000001'
-      and location_id = 'dddddddd-0000-0000-0000-000000000001';
+      and location = 'store';
 commit;

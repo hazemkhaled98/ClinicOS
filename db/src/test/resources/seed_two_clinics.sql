@@ -31,9 +31,6 @@ insert into task_definition (id, clinic_id, staff_role, name, dimension, frequen
     ('cccccccc-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'assistant', 'Sterilize tray', 'fanni', 'daily', 1);
 
 -- Inventory + a receive/issue/return chain for the stock_movement sum check.
-insert into stock_location (id, clinic_id, name, kind) values
-    ('dddddddd-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Main Store', 'store');
-
 insert into inventory_item (id, clinic_id, name, uom, unit_cost) values
     ('eeeeeeee-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Gloves box', 'box', 50);
 
@@ -49,14 +46,14 @@ insert into purchase_order_line (id, order_id, item_id, qty_ordered, unit_cost, 
      'eeeeeeee-0000-0000-0000-000000000001', 100, 50, 100);
 
 -- receipt: +100
-insert into stock_movement (clinic_id, item_id, location_id, qty_delta, reason, ref_type, ref_id) values
+insert into stock_movement (clinic_id, item_id, location, qty_delta, reason, ref_type, ref_id) values
     ('11111111-1111-1111-1111-111111111111', 'eeeeeeee-0000-0000-0000-000000000001',
-     'dddddddd-0000-0000-0000-000000000001', 100, 'receipt', 'purchase_order', '10000000-0000-0000-0000-000000000001');
+     'store', 100, 'receipt', 'purchase_order', '10000000-0000-0000-0000-000000000001');
 
 -- issue: -20
-insert into stock_movement (clinic_id, item_id, location_id, qty_delta, reason) values
+insert into stock_movement (clinic_id, item_id, location, qty_delta, reason) values
     ('11111111-1111-1111-1111-111111111111', 'eeeeeeee-0000-0000-0000-000000000001',
-     'dddddddd-0000-0000-0000-000000000001', -20, 'issue');
+     'store', -20, 'issue');
 
 -- return: -10 (within the 100 received, well under the ceiling)
 insert into supplier_return (id, clinic_id, purchase_order_id, supplier_id, status) values
@@ -64,13 +61,20 @@ insert into supplier_return (id, clinic_id, purchase_order_id, supplier_id, stat
      '10000000-0000-0000-0000-000000000001', 'ffffffff-0000-0000-0000-000000000001', 'approved');
 insert into supplier_return_line (supplier_return_id, purchase_order_line_id, qty) values
     ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 10);
-insert into stock_movement (clinic_id, item_id, location_id, qty_delta, reason, ref_type, ref_id) values
+insert into stock_movement (clinic_id, item_id, location, qty_delta, reason, ref_type, ref_id) values
     ('11111111-1111-1111-1111-111111111111', 'eeeeeeee-0000-0000-0000-000000000001',
-     'dddddddd-0000-0000-0000-000000000001', -10, 'return', 'supplier_return', '30000000-0000-0000-0000-000000000001');
+     'store', -10, 'return', 'supplier_return', '30000000-0000-0000-0000-000000000001');
 
--- Expected on-hand for eeeeeeee.../dddddddd... = 100 - 20 - 10 = 70
+-- Expected on-hand for eeeeeeee.../store = 100 - 20 - 10 = 70
 
 -- A frozen evaluation snapshot for the trigger check.
-insert into evaluation_snapshot (id, clinic_id, employee_id, period_month, final_score, weights) values
+insert into evaluation_snapshot (id, clinic_id, employee_id, period_month, final_score) values
     ('40000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
-     'bbbbbbbb-0000-0000-0000-000000000001', '2026-08-01', 88.5, '{"completion":30,"fanni":20,"solooki":20,"ibda3":10,"attendance":20}');
+     'bbbbbbbb-0000-0000-0000-000000000001', '2026-08-01', 88.5);
+
+insert into evaluation_component (snapshot_id, category, raw_score, weight, included) values
+    ('40000000-0000-0000-0000-000000000001', 'completion', 90, 30, true),
+    ('40000000-0000-0000-0000-000000000001', 'fanni', 85, 20, true),
+    ('40000000-0000-0000-0000-000000000001', 'solooki', 88, 20, true),
+    ('40000000-0000-0000-0000-000000000001', 'ibda3', 92, 10, true),
+    ('40000000-0000-0000-0000-000000000001', 'attendance', 95, 20, true);

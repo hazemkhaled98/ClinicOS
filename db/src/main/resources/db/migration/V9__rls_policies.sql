@@ -23,7 +23,7 @@ declare
         'employee', 'task_definition', 'daily_record', 'self_check', 'task_assignment',
         'evaluation_snapshot', 'operations_volume',
         'academy_unit', 'academy_step_submission', 'academy_exam_attempt', 'prep_checklist', 'prep_run',
-        'supplier', 'inventory_item', 'stock_location', 'stock_movement',
+        'supplier', 'inventory_item', 'stock_movement',
         'purchase_order', 'supplier_return', 'inventory_change_request',
         'procedure', 'procedure_case',
         'attachment', 'activity_log', 'notification'
@@ -38,69 +38,43 @@ begin
     end loop;
 end $$;
 
--- Child tables scoped through a parent's clinic_id.
-alter table membership_permission enable row level security;
-create policy tenant_isolation on membership_permission
-    using (exists (select 1 from membership m where m.id = membership_permission.membership_id
-                     and m.clinic_id = current_setting('app.clinic_id', true)::uuid));
+-- Child tables scoped through a parent's clinic_id: same loop technique as
+-- above, parameterized by (child table, its FK column, parent table).
+do $$
+declare
+    child_table  text;
+    fk_column    text;
+    parent_table text;
+    child_tables text[][] := array[
+        ['membership_permission', 'membership_id', 'membership'],
+        ['daily_task_completion', 'daily_record_id', 'daily_record'],
+        ['performance_override', 'employee_id', 'employee'],
+        ['evaluation_component', 'snapshot_id', 'evaluation_snapshot'],
+        ['academy_question', 'unit_id', 'academy_unit'],
+        ['prep_section', 'checklist_id', 'prep_checklist'],
+        ['prep_run_item', 'prep_run_id', 'prep_run'],
+        ['purchase_order_line', 'order_id', 'purchase_order'],
+        ['supplier_return_line', 'supplier_return_id', 'supplier_return'],
+        ['procedure_bom', 'procedure_id', 'procedure'],
+        ['procedure_case_item', 'procedure_case_id', 'procedure_case']
+    ];
+begin
+    for i in 1 .. array_upper(child_tables, 1) loop
+        child_table  := child_tables[i][1];
+        fk_column    := child_tables[i][2];
+        parent_table := child_tables[i][3];
+        execute format('alter table %I enable row level security', child_table);
+        execute format(
+            'create policy tenant_isolation on %I using (exists (select 1 from %I p where p.id = %I.%I and p.clinic_id = current_setting(''app.clinic_id'', true)::uuid))',
+            child_table, parent_table, child_table, fk_column
+        );
+    end loop;
+end $$;
 
-alter table daily_task_completion enable row level security;
-create policy tenant_isolation on daily_task_completion
-    using (exists (select 1 from daily_record d where d.id = daily_task_completion.daily_record_id
-                     and d.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table performance_override enable row level security;
-create policy tenant_isolation on performance_override
-    using (exists (select 1 from employee e where e.id = performance_override.employee_id
-                     and e.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table evaluation_component enable row level security;
-create policy tenant_isolation on evaluation_component
-    using (exists (select 1 from evaluation_snapshot s where s.id = evaluation_component.snapshot_id
-                     and s.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table academy_question enable row level security;
-create policy tenant_isolation on academy_question
-    using (exists (select 1 from academy_unit u where u.id = academy_question.unit_id
-                     and u.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table prep_section enable row level security;
-create policy tenant_isolation on prep_section
-    using (exists (select 1 from prep_checklist c where c.id = prep_section.checklist_id
-                     and c.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
+-- prep_item is scoped two hops away (via prep_section to prep_checklist), so
+-- it doesn't fit the single-parent loop above.
 alter table prep_item enable row level security;
 create policy tenant_isolation on prep_item
     using (exists (select 1 from prep_section s join prep_checklist c on c.id = s.checklist_id
                     where s.id = prep_item.section_id
                       and c.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table prep_run_item enable row level security;
-create policy tenant_isolation on prep_run_item
-    using (exists (select 1 from prep_run r where r.id = prep_run_item.prep_run_id
-                     and r.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table stock_alert_threshold enable row level security;
-create policy tenant_isolation on stock_alert_threshold
-    using (exists (select 1 from inventory_item i where i.id = stock_alert_threshold.item_id
-                     and i.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table purchase_order_line enable row level security;
-create policy tenant_isolation on purchase_order_line
-    using (exists (select 1 from purchase_order o where o.id = purchase_order_line.order_id
-                     and o.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table supplier_return_line enable row level security;
-create policy tenant_isolation on supplier_return_line
-    using (exists (select 1 from supplier_return r where r.id = supplier_return_line.supplier_return_id
-                     and r.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table procedure_bom enable row level security;
-create policy tenant_isolation on procedure_bom
-    using (exists (select 1 from procedure p where p.id = procedure_bom.procedure_id
-                     and p.clinic_id = current_setting('app.clinic_id', true)::uuid));
-
-alter table procedure_case_item enable row level security;
-create policy tenant_isolation on procedure_case_item
-    using (exists (select 1 from procedure_case c where c.id = procedure_case_item.procedure_case_id
-                     and c.clinic_id = current_setting('app.clinic_id', true)::uuid));

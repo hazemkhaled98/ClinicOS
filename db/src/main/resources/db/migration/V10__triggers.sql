@@ -21,7 +21,8 @@ create trigger trg_evaluation_snapshot_frozen
     execute function evaluation_snapshot_block_frozen_update();
 
 -- BR-G27: total returned quantity against a purchase order line can never
--- exceed what was actually received on that line.
+-- exceed what was actually received on that line. Return lines are created
+-- once and never edited, so this only needs to guard INSERT.
 create or replace function supplier_return_line_check_ceiling()
 returns trigger as $$
 declare
@@ -34,8 +35,7 @@ begin
 
     select coalesce(sum(qty), 0) into already_returned
     from supplier_return_line
-    where purchase_order_line_id = new.purchase_order_line_id
-      and id <> coalesce(new.id, '00000000-0000-0000-0000-000000000000'::uuid);
+    where purchase_order_line_id = new.purchase_order_line_id;
 
     if already_returned + new.qty > received then
         raise exception 'return qty % exceeds remaining receivable qty % (received %, already returned %)',
@@ -47,6 +47,6 @@ end;
 $$ language plpgsql;
 
 create trigger trg_supplier_return_line_ceiling
-    before insert or update on supplier_return_line
+    before insert on supplier_return_line
     for each row
     execute function supplier_return_line_check_ceiling();
