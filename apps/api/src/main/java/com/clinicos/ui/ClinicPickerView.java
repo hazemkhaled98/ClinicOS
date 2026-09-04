@@ -1,12 +1,15 @@
 package com.clinicos.ui;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.clinicos.identity.api.AuthenticatedUser;
 import com.clinicos.identity.api.MembershipLookupService;
 import com.clinicos.identity.api.MembershipLookupService.Membership;
+import com.clinicos.identity.api.PermissionsService;
+import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.TenantContext;
 import com.vaadin.flow.component.UI;
@@ -23,12 +26,17 @@ public class ClinicPickerView extends VerticalLayout {
 
     public static final String SESSION_CLINIC_ID = "clinicId";
     public static final String SESSION_MEMBERSHIP_ID = "membershipId";
+    public static final String SESSION_ROLE_CODE = "roleCode";
+    public static final String SESSION_PERMISSIONS = "permissions";
 
     private final MembershipLookupService membershipLookupService;
+    private final PermissionsService permissionsService;
     private final ActivityLogService activityLogService;
 
-    public ClinicPickerView(MembershipLookupService membershipLookupService, ActivityLogService activityLogService) {
+    public ClinicPickerView(MembershipLookupService membershipLookupService,
+            PermissionsService permissionsService, ActivityLogService activityLogService) {
         this.membershipLookupService = membershipLookupService;
+        this.permissionsService = permissionsService;
         this.activityLogService = activityLogService;
 
         setSizeFull();
@@ -42,7 +50,13 @@ public class ClinicPickerView extends VerticalLayout {
             return;
         }
 
-        List<Membership> memberships = membershipLookupService.findByUserId(user.getId());
+        List<Membership> memberships;
+        TenantContext.enterAuthMode();
+        try {
+            memberships = membershipLookupService.findByUserId(user.getId());
+        } finally {
+            TenantContext.exitAuthMode();
+        }
 
         if (memberships.isEmpty()) {
             add(new H2("لا توجد عيادات مسجلة"), new Paragraph("لا تملك صلاحية الدخول إلى أي عيادة."));
@@ -76,6 +90,10 @@ public class ClinicPickerView extends VerticalLayout {
                     membership.membershipId(),
                     "login",
                     "session");
+
+            MembershipAccess access = permissionsService.accessFor(membership.membershipId());
+            session.setAttribute(SESSION_ROLE_CODE, access.roleCode());
+            session.setAttribute(SESSION_PERMISSIONS, List.copyOf(access.permissionCodes()));
         } finally {
             TenantContext.clear();
         }

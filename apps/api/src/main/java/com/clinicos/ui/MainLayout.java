@@ -4,19 +4,25 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.clinicos.identity.api.AuthenticatedUser;
+import com.clinicos.ui.nav.NavSection;
+import com.clinicos.ui.nav.NavSectionResolver;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.server.VaadinSession;
 
 @Layout
 public class MainLayout extends AppLayout {
@@ -50,12 +56,35 @@ public class MainLayout extends AppLayout {
         Span brand = new Span("عيادتي");
         brand.addClassName("clinicos-brand");
 
+        Div nav = createNav();
+
         Div who = createUserBlock();
 
-        Div drawer = new Div(brand, who);
+        Div drawer = new Div(brand, nav, who);
         drawer.addClassName("clinicos-drawer");
         drawer.setSizeFull();
         return drawer;
+    }
+
+    private Div createNav() {
+        VaadinSession session = VaadinSession.getCurrent();
+        String roleCode = session == null ? null : (String) session.getAttribute(ClinicPickerView.SESSION_ROLE_CODE);
+        @SuppressWarnings("unchecked")
+        List<String> codes = session == null ? null : (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
+
+        Div nav = new Div();
+        nav.addClassName("clinicos-nav");
+
+        if (roleCode == null || codes == null) {
+            return nav;
+        }
+        for (NavSection section : NavSectionResolver.resolve(new HashSet<>(codes), roleCode)) {
+            Button item = new Button(section.label(), e -> UI.getCurrent().navigate(section.route()));
+            item.addClassName("clinicos-nav-item");
+            item.setWidthFull();
+            nav.add(item);
+        }
+        return nav;
     }
 
     private Div createUserBlock() {

@@ -1,9 +1,12 @@
 package com.clinicos.ui;
 
+import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
+import static com.github.mvysny.kaributesting.v10.LocatorJ._find;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,7 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.clinicos.identity.api.AuthenticatedUser;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.server.VaadinSession;
 
 class MainLayoutTest {
 
@@ -77,5 +84,67 @@ class MainLayoutTest {
         String formatted = MainLayout.arabicLongDate(java.time.LocalDate.of(2026, 9, 4));
 
         assertThat(formatted).isEqualTo("الجمعة 4 سبتمبر");
+    }
+
+    @Test
+    void navShowsNoSectionsWhenSessionHasNoPermissions() {
+        MainLayout layout = new MainLayout();
+
+        assertThat(navLabels(layout)).isEmpty();
+    }
+
+    @Test
+    void navFollowsLegacyRulesForManager() {
+        sessionPermissions("manager", Set.of("emp", "quick", "orders"));
+
+        MainLayout layout = new MainLayout();
+
+        assertThat(navLabels(layout)).containsExactly(
+                "إدارة الموظفين", "تقييمي", "الوصول السريع", "إعداد الإجراءات", "المخزون");
+    }
+
+    @Test
+    void ownerSeesFullNavigationExceptMyEvaluationAndTasks() {
+        sessionPermissions("owner", fullCatalog());
+
+        MainLayout layout = new MainLayout();
+
+        assertThat(navLabels(layout)).containsExactly(
+                "إدارة الموظفين", "الوصول السريع", "إعداد الإجراءات", "الأكاديمية", "المخزون", "لوحة التحكم");
+    }
+
+    @Test
+    void clickingNavItemNavigatesToSection() {
+        sessionPermissions("manager", Set.of("quick"));
+
+        MainLayout layout = new MainLayout();
+
+        Button quick = _get(layout, Button.class,
+                spec -> spec.withClasses("clinicos-nav-item").withText("الوصول السريع"));
+        _click(quick);
+
+        SectionPlaceholderView placeholder = _get(UI.getCurrent(), SectionPlaceholderView.class);
+        H1 title = _get(placeholder, H1.class);
+        assertThat(title.getText()).isEqualTo("الوصول السريع");
+    }
+
+    private static void sessionPermissions(String roleCode, Set<String> codes) {
+        VaadinSession session = VaadinSession.getCurrent();
+        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, roleCode);
+        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, List.copyOf(codes));
+    }
+
+    private static List<String> navLabels(MainLayout layout) {
+        return _find(layout, Button.class, spec -> spec.withClasses("clinicos-nav-item"))
+                .stream()
+                .map(Button::getText)
+                .toList();
+    }
+
+    private static Set<String> fullCatalog() {
+        return Set.of("emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit",
+                "tray", "issue", "procs", "myprocs", "manage", "orders", "receive", "returns",
+                "suppliers", "dash", "profit", "analytics", "waste", "doctors", "supAnalysis",
+                "received", "itemAnalysis", "approvals", "ledger");
     }
 }

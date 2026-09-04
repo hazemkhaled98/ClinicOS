@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.clinicos.identity.api.AuthenticatedUser;
 import com.clinicos.identity.api.MembershipLookupService;
 import com.clinicos.identity.api.MembershipLookupService.Membership;
+import com.clinicos.identity.api.PermissionsService;
+import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
@@ -37,6 +40,9 @@ class ClinicPickerViewTest {
 
     @Mock
     private MembershipLookupService membershipLookupService;
+
+    @Mock
+    private PermissionsService permissionsService;
 
     @Mock
     private ActivityLogService activityLogService;
@@ -69,7 +75,7 @@ class ClinicPickerViewTest {
                 new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الأمل", "owner"),
                 new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الشفاء", "manager")));
 
-        ClinicPickerView view = new ClinicPickerView(membershipLookupService, activityLogService);
+        ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
         H2 heading = _get(view, H2.class);
         assertThat(heading.getText()).isEqualTo("اختر العيادة");
@@ -82,7 +88,7 @@ class ClinicPickerViewTest {
     void showsEmptyMessageWhenNoMemberships() {
         when(membershipLookupService.findByUserId(testUser.getId())).thenReturn(List.of());
 
-        ClinicPickerView view = new ClinicPickerView(membershipLookupService, activityLogService);
+        ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
         H2 heading = _get(view, H2.class);
         assertThat(heading.getText()).isEqualTo("لا توجد عيادات مسجلة");
@@ -94,14 +100,21 @@ class ClinicPickerViewTest {
         UUID clinicId = UUID.randomUUID();
         when(membershipLookupService.findByUserId(testUser.getId())).thenReturn(List.of(
                 new Membership(membershipId, clinicId, "عيادة الأمل", "owner")));
+        when(permissionsService.accessFor(membershipId)).thenReturn(
+                new MembershipAccess(membershipId, "owner", Set.of("emp", "quick", "ceo")));
 
-        new ClinicPickerView(membershipLookupService, activityLogService);
+        new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
         VaadinSession session = VaadinSession.getCurrent();
         assertThat(session.getAttribute(ClinicPickerView.SESSION_CLINIC_ID)).isEqualTo(clinicId);
         assertThat(session.getAttribute(ClinicPickerView.SESSION_MEMBERSHIP_ID)).isEqualTo(membershipId);
+        assertThat(session.getAttribute(ClinicPickerView.SESSION_ROLE_CODE)).isEqualTo("owner");
+        @SuppressWarnings("unchecked")
+        List<String> permissions = (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
+        assertThat(permissions).containsExactlyInAnyOrder("emp", "quick", "ceo");
 
         verify(activityLogService).log(clinicId, membershipId, "login", "session");
+        verify(permissionsService).accessFor(membershipId);
     }
 
     @Test
@@ -111,8 +124,10 @@ class ClinicPickerViewTest {
         when(membershipLookupService.findByUserId(testUser.getId())).thenReturn(List.of(
                 new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الأمل", "owner"),
                 new Membership(membershipId, clinicId, "عيادة الشفاء", "manager")));
+        when(permissionsService.accessFor(membershipId)).thenReturn(
+                new MembershipAccess(membershipId, "manager", Set.of("emp", "quick")));
 
-        ClinicPickerView view = new ClinicPickerView(membershipLookupService, activityLogService);
+        ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
         Button button = _get(view, Button.class, spec -> spec.withText("عيادة الشفاء"));
         _click(button);
@@ -120,6 +135,10 @@ class ClinicPickerViewTest {
         VaadinSession session = VaadinSession.getCurrent();
         assertThat(session.getAttribute(ClinicPickerView.SESSION_CLINIC_ID)).isEqualTo(clinicId);
         assertThat(session.getAttribute(ClinicPickerView.SESSION_MEMBERSHIP_ID)).isEqualTo(membershipId);
+        assertThat(session.getAttribute(ClinicPickerView.SESSION_ROLE_CODE)).isEqualTo("manager");
+        @SuppressWarnings("unchecked")
+        List<String> permissions = (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
+        assertThat(permissions).containsExactlyInAnyOrder("emp", "quick");
 
         verify(activityLogService).log(clinicId, membershipId, "login", "session");
     }

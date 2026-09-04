@@ -83,6 +83,36 @@ vaadin-app-layout::part(navbar) {
   color: #fff;
 }
 
+.clinicos-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.clinicos-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: none;
+  border: none;
+  color: #e6eefb;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.clinicos-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 .clinicos-who {
   margin-top: auto;
   padding: 14px 18px 4px;
@@ -144,4 +174,38 @@ vaadin-app-layout::part(navbar) {
   max-width: 1060px;
   width: 100%;
   margin: 0 auto;
+}
+
+.clinicos-section {
+  padding: 22px 26px 50px;
+  max-width: 1060px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.clinicos-section-kicker {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.clinicos-section-title {
+  font-size: 32px;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.clinicos-section-sub {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.clinicos-section-soon {
+  color: var(--muted);
+  background: var(--mint);
+  border: 1px dashed var(--teal);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 0;
 }
