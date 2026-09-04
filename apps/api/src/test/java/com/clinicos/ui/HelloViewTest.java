@@ -12,10 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * Headless Vaadin view test proving the Karibu test layer works end to end
- * on the Phase 0 smoke route. Real view tests start in Phase 1.
- */
 class HelloViewTest {
 
     private static Routes routes;

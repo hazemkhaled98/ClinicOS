@@ -5,12 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Phase 0 placeholder only: permits every request so the smoke-test route
- * is reachable before real authentication exists. Deleted in Phase 1, which
- * replaces it with the actual login flow (UC-001) in the {@code identity}
- * module.
- */
 @Configuration
 public class TemporaryPermitAllSecurityConfig {
 

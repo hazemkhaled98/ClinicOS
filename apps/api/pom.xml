@@ -27,13 +27,6 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <karibu-testing.version>2.7.2</karibu-testing.version>
         <postgresql.version>42.7.4</postgresql.version>
-        <!--
-            jOOQ codegen target directory. Re-enable the jOOQ-codegen Maven
-            plugin (see comment near the bottom of this file) before the
-            first jOOQ query lands in code, it currently lives disabled
-            because Phase 0 has no jOOQ usage yet and the testcontainers
-            variant needs a working Docker daemon.
-        -->
         <jooq.codegen.package>com.clinicos.shared.jooq</jooq.codegen.package>
         <jooq.codegen.dir>${project.build.directory}/generated-sources/jooq</jooq.codegen.dir>
     </properties>
@@ -58,13 +51,11 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Vaadin Flow UI -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- Web + REST API surface (springdoc needs Spring MVC) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -75,13 +66,11 @@
             <version>${springdoc.version}</version>
         </dependency>
 
-        <!-- Security: form login + Argon2 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Persistence: jOOQ over a plain JDBC DataSource, Flyway for migrations -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jooq</artifactId>
@@ -102,13 +91,11 @@
             <version>${postgresql.version}</version>
         </dependency>
 
-        <!-- Module boundary verification -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
 
-        <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -164,25 +151,10 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--
-                jOOQ codegen: re-enable when the first jOOQ query is added to
-                code. Two options:
-                  (a) jOOQ's official jooq-codegen-maven plugin pointed at a
-                      running Postgres (dev: docker compose up postgres; CI:
-                      Testcontainers-managed). Needs a JDBC URL.
-                  (b) testcontainers-jooq-codegen-maven-plugin (the version
-                      originally here) that spins up a throwaway container,
-                      runs Flyway, generates, discards. No live DB needed.
-                      Requires a working Docker daemon.
-                For Phase 0 the plugin is disabled because no jOOQ sources
-                are referenced yet, so generation would have nothing to feed.
-            -->
         </plugins>
     </build>
 
     <profiles>
-        <!-- Production build: minifies/bundles the Vaadin frontend. Activate with -Pproduction. -->
         <profile>
             <id>production</id>
             <build>

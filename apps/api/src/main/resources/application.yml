@@ -2,18 +2,12 @@ spring:
   application:
     name: clinicos-api
 
-  # The app connects only as app_rw (see V9__rls_policies.sql) -- never as
-  # a superuser -- so Postgres RLS actually applies. Local values match
-  # docker-compose.yml; docker-compose ALTERs app_rw's password after
-  # Flyway migrates (V9 creates the role with none).
   datasource:
     url: jdbc:postgresql://localhost:5432/clinicos
     username: app_rw
     password: local-dev-only
 
   flyway:
-    # Runs as the compose file's superuser (postgres), not app_rw -- app_rw
-    # has no DDL rights (see V9). locations defaults to classpath:db/migration.
     user: postgres
     password: local-dev-only
 

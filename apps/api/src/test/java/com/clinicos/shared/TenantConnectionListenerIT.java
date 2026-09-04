@@ -20,12 +20,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 
-/**
- * Proves the two things Phase 0's tenant-context mechanism must guarantee:
- * a transaction with no tenant bound fails loudly instead of quietly
- * returning zero rows, and a transaction with a tenant bound sees only that
- * tenant's rows in an RLS-scoped table.
- */
 @SpringBootTest(classes = Application.class)
 class TenantConnectionListenerIT extends AbstractPostgresIntegrationTest {
 
@@ -69,18 +63,11 @@ class TenantConnectionListenerIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicB);
         long visibleToClinicB = transactionTemplate.execute(status -> countClinicSettingsRows());
 
-        // Two clinics were seeded, one clinic_settings row each; each tenant
-        // must see exactly its own row, never both.
         assertThat(visibleToClinicA).isEqualTo(1);
         assertThat(visibleToClinicB).isEqualTo(1);
     }
 
     private long countClinicSettingsRows() {
-        // The connection returned by DataSourceUtils.getConnection is the
-        // transaction-bound connection Spring already owns -- it must NOT be
-        // closed here (closing it returns the pooled connection to Hikari
-        // mid-transaction, and the later commit fails with "Connection is
-        // closed"). Only the statement and result set are closed.
         Connection connection = org.springframework.jdbc.datasource.DataSourceUtils.getConnection(dataSource);
         try (PreparedStatement statement = connection.prepareStatement("select count(*) from clinic_settings");
                 ResultSet resultSet = statement.executeQuery()) {
