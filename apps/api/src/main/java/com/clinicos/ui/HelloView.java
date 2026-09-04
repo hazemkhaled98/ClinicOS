@@ -12,9 +12,11 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.Cookie;
 
 @Route(value = "", layout = MainLayout.class)
+@PermitAll
 public class HelloView extends VerticalLayout {
 
     public HelloView() {

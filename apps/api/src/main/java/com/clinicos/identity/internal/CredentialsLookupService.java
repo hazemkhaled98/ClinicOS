@@ -1,7 +1,6 @@
 package com.clinicos.identity.internal;
 
 import java.util.UUID;
-import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,8 +22,8 @@ public class CredentialsLookupService {
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
 
-    public CredentialsLookupService(DataSource dataSource, TransactionTemplate transactionTemplate) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public CredentialsLookupService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 

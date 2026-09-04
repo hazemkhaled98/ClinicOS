@@ -20,8 +20,10 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import jakarta.annotation.security.PermitAll;
 
-@Route("select-clinic")
+@Route(value = "select-clinic", autoLayout = false)
+@PermitAll
 public class ClinicPickerView extends VerticalLayout {
 
     public static final String SESSION_CLINIC_ID = "clinicId";
@@ -79,11 +81,8 @@ public class ClinicPickerView extends VerticalLayout {
     }
 
     private void selectAndRedirect(Membership membership) {
-        VaadinSession session = VaadinSession.getCurrent();
-        session.setAttribute(SESSION_CLINIC_ID, membership.clinicId());
-        session.setAttribute(SESSION_MEMBERSHIP_ID, membership.membershipId());
-
         TenantContext.set(membership.clinicId());
+        MembershipAccess access;
         try {
             activityLogService.log(
                     membership.clinicId(),
@@ -91,12 +90,16 @@ public class ClinicPickerView extends VerticalLayout {
                     "login",
                     "session");
 
-            MembershipAccess access = permissionsService.accessFor(membership.membershipId());
-            session.setAttribute(SESSION_ROLE_CODE, access.roleCode());
-            session.setAttribute(SESSION_PERMISSIONS, List.copyOf(access.permissionCodes()));
+            access = permissionsService.accessFor(membership.membershipId());
         } finally {
             TenantContext.clear();
         }
+
+        VaadinSession session = VaadinSession.getCurrent();
+        session.setAttribute(SESSION_CLINIC_ID, membership.clinicId());
+        session.setAttribute(SESSION_MEMBERSHIP_ID, membership.membershipId());
+        session.setAttribute(SESSION_ROLE_CODE, access.roleCode());
+        session.setAttribute(SESSION_PERMISSIONS, List.copyOf(access.permissionCodes()));
 
         UI.getCurrent().navigate("");
     }

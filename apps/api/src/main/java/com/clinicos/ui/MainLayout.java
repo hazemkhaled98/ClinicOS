@@ -23,11 +23,28 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 
 @Layout
 public class MainLayout extends AppLayout {
 
+    private static final Locale ARABIC = Locale.of("ar");
+
+    private final AuthenticationContext authenticationContext;
+
+    /**
+     * No-arg overload so Vaadin test tooling that instantiates layouts by
+     * reflection (no Spring container, e.g. Karibu navigating to a view whose
+     * {@code @Route} names this as its layout) has a constructor to call.
+     * Spring's real container always resolves the greedier constructor below
+     * instead, since {@link AuthenticationContext} is a bean it can satisfy.
+     */
     public MainLayout() {
+        this(new AuthenticationContext());
+    }
+
+    public MainLayout(AuthenticationContext authenticationContext) {
+        this.authenticationContext = authenticationContext;
         addToNavbar(createTopbar());
         addToDrawer(createDrawer());
     }
@@ -108,7 +125,7 @@ public class MainLayout extends AppLayout {
         Span logout = new Span("🚪");
         logout.addClassName("clinicos-logout");
         logout.getElement().setAttribute("title", "تسجيل الخروج");
-        logout.getElement().addEventListener("click", event -> UI.getCurrent().getPage().setLocation("logout"));
+        logout.getElement().addEventListener("click", event -> authenticationContext.logout());
 
         Div who = new Div(avatar, meta, logout);
         who.addClassName("clinicos-who");
@@ -128,10 +145,9 @@ public class MainLayout extends AppLayout {
     }
 
     static String arabicLongDate(LocalDate date) {
-        Locale ar = new Locale("ar");
         DayOfWeek day = date.getDayOfWeek();
         Month month = date.getMonth();
-        return day.getDisplayName(TextStyle.FULL, ar) + " " + date.getDayOfMonth() + " "
-                + month.getDisplayName(TextStyle.FULL, ar);
+        return day.getDisplayName(TextStyle.FULL, ARABIC) + " " + date.getDayOfMonth() + " "
+                + month.getDisplayName(TextStyle.FULL, ARABIC);
     }
 }

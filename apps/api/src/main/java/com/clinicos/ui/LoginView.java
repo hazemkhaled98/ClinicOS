@@ -11,7 +11,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
  * component. The form is automatically wired to Spring Security's form-login
  * processing. RTL layout for Arabic UI.
  */
-@Route("login")
+@Route(value = "login", autoLayout = false)
 @AnonymousAllowed
 public class LoginView extends VerticalLayout {
 

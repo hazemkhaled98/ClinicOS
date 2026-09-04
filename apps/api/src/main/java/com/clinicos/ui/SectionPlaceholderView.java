@@ -11,6 +11,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinServletResponse;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.Cookie;
 
 @Route(value = "employees", layout = MainLayout.class)
@@ -21,6 +22,7 @@ import jakarta.servlet.http.Cookie;
 @RouteAlias(value = "academy", layout = MainLayout.class)
 @RouteAlias(value = "inventory", layout = MainLayout.class)
 @RouteAlias(value = "admin-dashboard", layout = MainLayout.class)
+@PermitAll
 public class SectionPlaceholderView extends VerticalLayout implements BeforeEnterObserver {
 
     public SectionPlaceholderView() {
@@ -32,6 +34,7 @@ public class SectionPlaceholderView extends VerticalLayout implements BeforeEnte
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        removeAll();
         String route = event.getLocation().getPath();
         writeCookie(route);
         NavSection section = NavSectionResolver.sectionByRoute(route);
@@ -57,6 +60,8 @@ public class SectionPlaceholderView extends VerticalLayout implements BeforeEnte
             Cookie cookie = new Cookie("lastSection", route);
             cookie.setPath("/");
             cookie.setMaxAge(30 * 24 * 60 * 60);
+            cookie.setHttpOnly(true);
+            cookie.setAttribute("SameSite", "Lax");
             response.addCookie(cookie);
         }
     }

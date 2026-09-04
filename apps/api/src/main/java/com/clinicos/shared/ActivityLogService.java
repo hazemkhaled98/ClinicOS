@@ -1,7 +1,6 @@
 package com.clinicos.shared;
 
 import java.util.UUID;
-import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,8 @@ public class ActivityLogService {
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
 
-    public ActivityLogService(DataSource dataSource, TransactionTemplate transactionTemplate) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public ActivityLogService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 

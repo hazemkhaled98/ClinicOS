@@ -2,7 +2,6 @@ package com.clinicos.identity.internal;
 
 import java.util.List;
 import java.util.UUID;
-import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -16,8 +15,8 @@ public class JdbcMembershipLookupService implements MembershipLookupService {
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
 
-    public JdbcMembershipLookupService(DataSource dataSource, TransactionTemplate transactionTemplate) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public JdbcMembershipLookupService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 

@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.github.mvysny.kaributesting.v10.BasicUtilsKt._fireDomEvent;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +28,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 
 class MainLayoutTest {
 
     private static Routes routes;
+
+    private AuthenticationContext authenticationContext;
 
     @BeforeAll
     static void discoverRoutes() {
@@ -37,6 +44,7 @@ class MainLayoutTest {
     @BeforeEach
     void setup() {
         MockVaadin.setup(routes);
+        authenticationContext = mock(AuthenticationContext.class);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(
                         new AuthenticatedUser(UUID.randomUUID(), "ahmed", "hash"), null, List.of()));
@@ -50,7 +58,7 @@ class MainLayoutTest {
 
     @Test
     void topbarShowsBrandAndArabicLongDate() {
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         Span brand = _get(layout, Span.class, spec -> spec.withClasses("clinicos-topbar-t2"));
         Span date = _get(layout, Span.class, spec -> spec.withClasses("clinicos-topbar-date"));
@@ -61,7 +69,7 @@ class MainLayoutTest {
 
     @Test
     void drawerShowsBrand() {
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         Span brand = _get(layout, Span.class, spec -> spec.withClasses("clinicos-brand"));
 
@@ -70,13 +78,23 @@ class MainLayoutTest {
 
     @Test
     void userBlockShowsLoggedInUserAndLogoutTrigger() {
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         Span name = _get(layout, Span.class, spec -> spec.withClasses("clinicos-who-name"));
         Span logout = _get(layout, Span.class, spec -> spec.withClasses("clinicos-logout"));
 
         assertThat(name.getText()).isEqualTo("ahmed");
         assertThat(logout.getText()).isEqualTo("🚪");
+    }
+
+    @Test
+    void clickingLogoutInvokesAuthenticationContextLogout() {
+        MainLayout layout = new MainLayout(authenticationContext);
+
+        Span logout = _get(layout, Span.class, spec -> spec.withClasses("clinicos-logout"));
+        _fireDomEvent(logout, "click");
+
+        verify(authenticationContext).logout();
     }
 
     @Test
@@ -88,7 +106,7 @@ class MainLayoutTest {
 
     @Test
     void navShowsNoSectionsWhenSessionHasNoPermissions() {
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         assertThat(navLabels(layout)).isEmpty();
     }
@@ -97,7 +115,7 @@ class MainLayoutTest {
     void navFollowsLegacyRulesForManager() {
         sessionPermissions("manager", Set.of("emp", "quick", "orders"));
 
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         assertThat(navLabels(layout)).containsExactly(
                 "إدارة الموظفين", "تقييمي", "الوصول السريع", "إعداد الإجراءات", "المخزون");
@@ -107,7 +125,7 @@ class MainLayoutTest {
     void ownerSeesFullNavigationExceptMyEvaluationAndTasks() {
         sessionPermissions("owner", fullCatalog());
 
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         assertThat(navLabels(layout)).containsExactly(
                 "إدارة الموظفين", "الوصول السريع", "إعداد الإجراءات", "الأكاديمية", "المخزون", "لوحة التحكم");
@@ -117,7 +135,7 @@ class MainLayoutTest {
     void clickingNavItemNavigatesToSection() {
         sessionPermissions("manager", Set.of("quick"));
 
-        MainLayout layout = new MainLayout();
+        MainLayout layout = new MainLayout(authenticationContext);
 
         Button quick = _get(layout, Button.class,
                 spec -> spec.withClasses("clinicos-nav-item").withText("الوصول السريع"));
@@ -151,7 +169,7 @@ class MainLayoutTest {
     @Test
     void postLogoutStateClearsNavigationAccess() {
         sessionPermissions("manager", Set.of("emp", "quick"));
-        MainLayout before = new MainLayout();
+        MainLayout before = new MainLayout(authenticationContext);
         assertThat(navLabels(before)).isNotEmpty();
 
         VaadinSession session = VaadinSession.getCurrent();
@@ -161,12 +179,7 @@ class MainLayoutTest {
         session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, null);
         SecurityContextHolder.clearContext();
 
-        MainLayout after = new MainLayout();
+        MainLayout after = new MainLayout(authenticationContext);
         assertThat(navLabels(after)).isEmpty();
-    }
-
-    @Test
-    void sectionPlaceholderWritesCookie() {
-        SectionPlaceholderView.writeCookie("employees");
     }
 }

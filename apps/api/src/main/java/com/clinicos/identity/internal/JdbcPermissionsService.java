@@ -3,7 +3,6 @@ package com.clinicos.identity.internal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,8 +29,8 @@ public class JdbcPermissionsService implements PermissionsService {
     private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
 
-    public JdbcPermissionsService(DataSource dataSource, TransactionTemplate transactionTemplate) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public JdbcPermissionsService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.transactionTemplate = transactionTemplate;
     }
 
