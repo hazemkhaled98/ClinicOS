@@ -33,4 +33,4 @@ These are referenced inside UC steps, so they cannot be fully deferred to backlo
 
 ## Login Identifier (V11)
 
-V11 adds `app_user.username citext unique`. The login field stays `اسم المستخدم` as in the legacy screen. `email` becomes nullable (password reset + invites only). A username-keyed sibling of `app_user_credentials_lookup` is needed for the privileged auth DataSource.
+V11 adds `app_user.username citext unique`. The login field stays `اسم المستخدم` as in the legacy screen. `email` becomes nullable (password reset + invites only). Done: `app_user_credentials_lookup_by_username` and `app_user_memberships_lookup`, both `SECURITY DEFINER` functions reached through a `TenantContext` auth-mode escape — no separate privileged DataSource/role, per the correction in roadmap.md step 7.

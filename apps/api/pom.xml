@@ -27,6 +27,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <karibu-testing.version>2.7.2</karibu-testing.version>
         <postgresql.version>42.7.4</postgresql.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
         <jooq.codegen.package>com.clinicos.shared.jooq</jooq.codegen.package>
         <jooq.codegen.dir>${project.build.directory}/generated-sources/jooq</jooq.codegen.dir>
     </properties>
@@ -90,6 +91,11 @@
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.modulith</groupId>
@@ -127,6 +133,17 @@
             <groupId>com.github.mvysny.kaributesting</groupId>
             <artifactId>karibu-testing-v10</artifactId>
             <version>${karibu-testing.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>dramafinder</artifactId>
+            <version>1.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

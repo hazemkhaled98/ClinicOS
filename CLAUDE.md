@@ -113,13 +113,16 @@ mvn -pl apps/api spring-boot:run
 ## Session Workflow
 
 1. **At the start of every session — new or resumed — run `git fetch origin`** before any work (or first read), so local refs/tracking match the remote. Applies even when resuming a previous session/branch.
-2. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
-3. **Open a PR after the phase is finished**, as specified by the plan (`docs/roadmap.md`), not before. Base the PR on `main`; push the phase branch and open the PR.
-4. Keep `main` clean — land phase work only via its PR.
+2. **Read `docs/roadmap.md` first.** Find the phase marked `in progress`, scan for the first `- [ ]` step — resume there. All `- [x]` steps are done.
+3. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
+4. **Open a PR after the phase is finished**, as specified by the plan (`docs/roadmap.md`), not before. Base the PR on `main`; push the phase branch and open the PR.
+5. Keep `main` clean — land phase work only via its PR.
 
 ## After Every Slice / Phase
 
 **Mid-phase slices:** commit each slice, but do **not** flip the phase status.
+
+**Before marking any phase `done`:** run the `/coverage-check` skill against the target use case to verify all implementation and test coverage gaps are closed. If the skill reports any missing items, **do not mark the phase complete** — flag the gaps, address them, and re-run `/coverage-check` until clean.
 
 **After a phase's PR is merged:** mark that phase `done` in **both** the `## Phase Status` table in this `CLAUDE.md` and the status table in `docs/roadmap.md` (same commit):
 1. Update `docs/roadmap.md` status table — flip the merged phase to `done`
@@ -130,8 +133,8 @@ mvn -pl apps/api spring-boot:run
 
 | Phase | Status |
 |-------|--------|
-| 0 — Scaffolding | in progress |
-| 1 — UC-001 Login | not started |
+| 0 — Scaffolding | done |
+| 1 — UC-001 Login | in progress |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | not started |
 | 4 — UC-004/005 Evaluation | not started |

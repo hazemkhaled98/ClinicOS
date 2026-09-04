@@ -11,17 +11,18 @@
 ## Preconditions
 
 - The staff member has an active account created by the owner or manager.
-- The clinic's shared data has finished loading from the cloud (or the device falls back to offline queuing).
+- ~~The clinic's shared data has finished loading from the cloud (or the device falls back to offline queuing).~~ Not applicable — see A2.
 
 ## Main Success Scenario
 
 1. The staff member opens the application and is shown the login screen.
 2. The staff member enters their username and password.
 3. The system verifies the credentials against the active accounts.
-4. The system starts a session for the staff member and remembers it on the device.
-5. The system determines which sections of the application the staff member's role is allowed to see.
-6. The system opens the first section the staff member is permitted to use and shows the navigation menu for their role.
-7. The staff member logs out when finished, ending the session.
+4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session.
+5. The system starts a session for the staff member and remembers it on the device.
+6. The system determines which sections of the application the staff member's role is allowed to see.
+7. The system opens the first section the staff member is permitted to use and shows the navigation menu for their role.
+8. The staff member logs out when finished, ending the session.
 
 ## Alternative Flows
 
@@ -33,21 +34,17 @@
 1. The system shows an error message and keeps the staff member on the login screen.
 2. Use case ends.
 
-### A2: No Confirmed Connection to the Shared Data
+### A2: No Confirmed Connection to the Shared Data — Not Applicable
 
-**Trigger:** The device cannot confirm it has the latest shared data from the cloud (step 1)
-**Flow:**
-
-1. The system warns the staff member that changes will be saved on the device only until the connection is confirmed.
-2. Use case continues at step 2.
+**Status:** Out of scope by decision (see `docs/roadmap.md`, "Offline mode" row and the UC-001 deviation note). ClinicOS is a server-rendered Vaadin app with no client-side offline queue — this flow does not exist and will not be implemented.
 
 ### A3: Returning to a Previously Open Section
 
-**Trigger:** The staff member has logged in before on this device (step 6)
+**Trigger:** The staff member has logged in before on this device (step 7)
 **Flow:**
 
 1. The system reopens the section the staff member last used, if their role still permits it.
-2. Use case continues at step 7.
+2. Use case continues at step 8.
 
 ## Postconditions
 

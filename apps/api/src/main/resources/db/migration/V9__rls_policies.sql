@@ -9,18 +9,18 @@
 -- app_rw only gets read access to them; writes go through a privileged path,
 -- not the per-request tenant connection.
 --
--- KNOWN GAP: membership is RLS-scoped by clinic_id like any tenant table, but
--- looking up "which clinics does this user belong to" at login happens before
--- app.clinic_id is known. That lookup needs its own path (e.g. a second policy
--- keyed on an app.user_id GUC set at authentication, before clinic selection,
--- or a separate privileged role) -- left for the application-tier auth design,
--- not decided here.
+-- RESOLVED in V11: membership is RLS-scoped by clinic_id like any tenant
+-- table, but looking up "which clinics does this user belong to" at login
+-- happens before app.clinic_id is known. V11's app_user_memberships_lookup
+-- (a SECURITY DEFINER function, same pattern as app_user_credentials_lookup
+-- below) is the sanctioned pre-tenant path, reached through TenantContext's
+-- auth-mode escape (nil UUID bound instead of a real clinic_id).
 --
--- KNOWN GAP: clinic itself is not RLS-scoped (it has no clinic_id -- it IS
--- the tenant), so app_rw can still SELECT every clinic's name/slug/settings
--- row, not just its own. Lower severity than the password_hash issue fixed
--- below (business metadata, not credentials) and has the same login-time
--- chicken-and-egg problem as membership above -- deferred with it.
+-- clinic itself is not RLS-scoped (it has no clinic_id -- it IS the tenant),
+-- so app_rw can still SELECT every clinic's name/slug/settings row, not just
+-- its own. Lower severity than the password_hash issue fixed below (business
+-- metadata, not credentials); the clinic picker reads it through the same
+-- auth-mode path as membership above, so this was never actually a blocker.
 
 -- Role creation must be idempotent: roles are cluster-global, so a bare
 -- `create role` fails (and leaves Flyway's migration history stuck) the
