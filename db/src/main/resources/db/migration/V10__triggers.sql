@@ -278,7 +278,6 @@ $$ language plpgsql;
 
 do $$
 declare
-    spec  text[];
     specs text[][] := array[
         ['membership', 'employee_id', 'employee'],
         ['daily_record', 'employee_id', 'employee'],
