@@ -1,15 +1,12 @@
 package com.clinicos.identity.internal;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -30,11 +27,11 @@ import com.clinicos.identity.api.PermissionsService;
 @Service
 public class JdbcPermissionsService implements PermissionsService {
 
-    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
     private final TransactionTemplate transactionTemplate;
 
     public JdbcPermissionsService(DataSource dataSource, TransactionTemplate transactionTemplate) {
-        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.transactionTemplate = transactionTemplate;
     }
 
@@ -50,24 +47,18 @@ public class JdbcPermissionsService implements PermissionsService {
     }
 
     private String roleCodeFor(UUID membershipId) {
-        Connection connection = DataSourceUtils.getConnection(dataSource);
-        try (PreparedStatement statement = connection.prepareStatement(
-                "select r.code from membership m join role r on r.id = m.role_id where m.id = ?")) {
-            statement.setObject(1, membershipId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getString(1);
-                }
-                throw new IllegalArgumentException("Unknown membership id: " + membershipId);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to resolve role for membership " + membershipId, e);
+        try {
+            return jdbcTemplate.queryForObject(
+                    "select r.code from membership m join role r on r.id = m.role_id where m.id = ?",
+                    String.class,
+                    membershipId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalArgumentException("Unknown membership id: " + membershipId);
         }
     }
 
     private Set<String> effectivePermissionCodes(UUID membershipId) {
-        Connection connection = DataSourceUtils.getConnection(dataSource);
-        try (PreparedStatement statement = connection.prepareStatement(
+        return new HashSet<>(jdbcTemplate.queryForList(
                 """
                 select p.code
                 from permission p
@@ -82,33 +73,12 @@ public class JdbcPermissionsService implements PermissionsService {
                     select mp.permission_id from membership_permission mp
                     where mp.membership_id = ? and mp.granted = false
                 )
-                """)) {
-            statement.setObject(1, membershipId);
-            statement.setObject(2, membershipId);
-            statement.setObject(3, membershipId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                Set<String> codes = new HashSet<>();
-                while (resultSet.next()) {
-                    codes.add(resultSet.getString(1));
-                }
-                return codes;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to resolve permissions for membership " + membershipId, e);
-        }
+                """,
+                String.class,
+                membershipId, membershipId, membershipId));
     }
 
     private Set<String> allPermissionCodes() {
-        Connection connection = DataSourceUtils.getConnection(dataSource);
-        try (PreparedStatement statement = connection.prepareStatement("select code from permission");
-                ResultSet resultSet = statement.executeQuery()) {
-            Set<String> codes = new HashSet<>();
-            while (resultSet.next()) {
-                codes.add(resultSet.getString(1));
-            }
-            return codes;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to load full permission catalog", e);
-        }
+        return new HashSet<>(jdbcTemplate.queryForList("select code from permission", String.class));
     }
 }
