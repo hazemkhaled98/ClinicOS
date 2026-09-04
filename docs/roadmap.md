@@ -95,7 +95,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | Phase | Status | Notes |
 |---|---|---|
 | 0 — Scaffolding | done | |
-| 1 — UC-001 Login | in progress | |
+| 1 — UC-001 Login | done | |
 | 2 — UC-002 Employees/roles | not started | |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |

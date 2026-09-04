@@ -47,11 +47,12 @@ Each business module exposes `api` and hides `internal`. The `ui` module is veri
 
 ## Database & Migrations
 
-- Migrations: `apps/api/src/main/resources/db/migration/V1__...V10__.sql`
+- Migrations: `apps/api/src/main/resources/db/migration/V1__...V12__.sql`
 - V1–V8: schema, tables, triggers
 - V9: RLS policies + `app_rw` role (created **without password**)
 - V10: cross-cutting triggers (frozen snapshot, return ceiling, append-only ledger, cross-tenant FK guard)
-- V11 (planned): `app_user.username citext unique`, privileged auth role, username-keyed credentials lookup
+- V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for the clinic picker (replaced the originally-planned privileged auth role)
+- V12: seeds `permission` codes and legacy default `role_permission` sets
 
 **Local dev**: `docker compose up -d postgres minio`
 - Postgres: `localhost:5432`, db `clinicos`, user `postgres` / `local-dev-only`
@@ -134,7 +135,7 @@ mvn -pl apps/api spring-boot:run
 | Phase | Status |
 |-------|--------|
 | 0 — Scaffolding | done |
-| 1 — UC-001 Login | in progress |
+| 1 — UC-001 Login | done |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | not started |
 | 4 — UC-004/005 Evaluation | not started |
