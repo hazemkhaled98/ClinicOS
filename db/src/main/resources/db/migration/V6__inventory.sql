@@ -74,7 +74,8 @@ create table purchase_order_line (
     item_id         uuid not null references inventory_item (id),
     qty_ordered     numeric(12,2) not null check (qty_ordered > 0),
     unit_cost       numeric(10,2) not null check (unit_cost >= 0),
-    qty_received    numeric(12,2) not null default 0 check (qty_received >= 0)
+    qty_received    numeric(12,2) not null default 0 check (qty_received >= 0),
+    check (qty_received <= qty_ordered)
 );
 
 create index idx_po_line_order on purchase_order_line (order_id);

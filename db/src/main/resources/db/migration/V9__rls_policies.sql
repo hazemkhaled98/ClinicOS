@@ -15,6 +15,12 @@
 -- keyed on an app.user_id GUC set at authentication, before clinic selection,
 -- or a separate privileged role) -- left for the application-tier auth design,
 -- not decided here.
+--
+-- KNOWN GAP: clinic itself is not RLS-scoped (it has no clinic_id -- it IS
+-- the tenant), so app_rw can still SELECT every clinic's name/slug/settings
+-- row, not just its own. Lower severity than the password_hash issue fixed
+-- below (business metadata, not credentials) and has the same login-time
+-- chicken-and-egg problem as membership above -- deferred with it.
 
 -- Role creation must be idempotent: roles are cluster-global, so a bare
 -- `create role` fails (and leaves Flyway's migration history stuck) the
@@ -32,6 +38,40 @@ grant usage on schema public to app_rw;
 grant select, insert, update, delete on all tables in schema public to app_rw;
 revoke insert, update, delete on clinic, app_user, role, permission, role_permission from app_rw;
 alter default privileges in schema public grant select, insert, update, delete on tables to app_rw;
+
+-- app_user.password_hash must never be reachable by a blanket table SELECT --
+-- a single injection or logic bug on the tenant connection would otherwise
+-- dump every user's credential hash across every tenant. Column-level grant
+-- excludes it; the login path gets it only through this SECURITY DEFINER
+-- function (owned by the migration role, which does have full table access,
+-- so it can return the column app_rw itself cannot see directly).
+revoke select on app_user from app_rw;
+grant select (id, email, full_name, status, last_login_at, created_at) on app_user to app_rw;
+
+create function app_user_credentials_lookup(p_email citext)
+returns table (id uuid, password_hash text, status text)
+language sql
+security definer
+set search_path = public
+as $$
+    select id, password_hash, status from app_user where email = p_email;
+$$;
+
+revoke all on function app_user_credentials_lookup(citext) from public;
+grant execute on function app_user_credentials_lookup(citext) to app_rw;
+
+-- Flyway's own bookkeeping table isn't a business table but sits in the same
+-- schema, so the blanket grant above swept it in too -- the tenant
+-- connection has no business rewriting migration history. Guarded by
+-- existence: Flyway creates this table before running any migration, so it's
+-- always present in a real deployment, but a manual/partial replay of just
+-- this file (e.g. schema verification tooling) may not have it.
+do $$
+begin
+    if exists (select 1 from pg_tables where schemaname = 'public' and tablename = 'flyway_schema_history') then
+        revoke all on flyway_schema_history from app_rw;
+    end if;
+end $$;
 
 -- Tables carrying clinic_id directly: uniform policy.
 do $$
