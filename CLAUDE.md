@@ -122,6 +122,8 @@ mvn -pl apps/api spring-boot:run
 
 **Mid-phase slices:** commit each slice, but do **not** flip the phase status.
 
+**Before marking any phase `done`:** run the `/coverage-check` skill against the target use case to verify all implementation and test coverage gaps are closed. If the skill reports any missing items, **do not mark the phase complete** — flag the gaps, address them, and re-run `/coverage-check` until clean.
+
 **After a phase's PR is merged:** mark that phase `done` in **both** the `## Phase Status` table in this `CLAUDE.md` and the status table in `docs/roadmap.md` (same commit):
 1. Update `docs/roadmap.md` status table — flip the merged phase to `done`
 2. Update this `CLAUDE.md` — flip the same phase to `done` in the `## Phase Status` table, and update this file if architecture/operations changed
