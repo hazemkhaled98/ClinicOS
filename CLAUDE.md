@@ -116,9 +116,12 @@ mvn -pl apps/api spring-boot:run
 
 ## After Every Slice / Phase
 
-1. Update `docs/roadmap.md` status table (flip phase to `done` in same commit)
-2. Update this `CLAUDE.md` if architecture/operations changed
-3. Commit both
+**Mid-phase slices:** commit each slice, but do **not** flip the phase status.
+
+**After a phase's PR is merged:** mark that phase `done` in **both** the `## Phase Status` table in this `CLAUDE.md` and the status table in `docs/roadmap.md` (same commit):
+1. Update `docs/roadmap.md` status table — flip the merged phase to `done`
+2. Update this `CLAUDE.md` — flip the same phase to `done` in the `## Phase Status` table, and update this file if architecture/operations changed
+3. Commit both (with the phase work or a follow-up status commit)
 
 ## Phase Status (from docs/roadmap.md)
 
