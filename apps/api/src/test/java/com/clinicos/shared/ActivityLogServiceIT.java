@@ -69,6 +69,18 @@ class ActivityLogServiceIT extends AbstractPostgresIntegrationTest {
         }
     }
 
+    @Test
+    void logSwallowsWriteFailureInsteadOfPropagatingIt() throws Exception {
+        TenantContext.set(clinicId);
+
+        activityLogService.log(clinicId, UUID.randomUUID(), "login", "session");
+
+        try (Connection connection = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
+            assertThat(countActivityRowsForClinic(connection, clinicId)).isZero();
+        }
+    }
+
     private long countActivityRowsForClinic(Connection connection, UUID clinic) throws Exception {
         try (PreparedStatement statement = connection.prepareStatement(
                 "select count(*) from activity_log where clinic_id = ?")) {

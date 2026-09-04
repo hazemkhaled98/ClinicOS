@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionExecutionListener;
@@ -36,7 +38,14 @@ import org.springframework.transaction.TransactionExecutionListener;
  * connection forever on the current thread, silently misrouting every
  * subsequent transaction on it through {@code handleExistingTransaction}
  * (which never invokes {@code afterBegin} at all), so this class must never
- * throw from {@code afterBegin}.
+ * throw from {@code afterBegin}. If the {@code SET LOCAL} itself fails (a
+ * dropped connection, statement timeout, pool hiccup), {@link #afterBegin}
+ * logs it and calls {@link TransactionExecution#setRollbackOnly()} instead —
+ * the transaction still completes normally through the manager (so no leaked
+ * "active" flag), just rolled back instead of committed. Any business SQL
+ * that runs before the rollback sees the same "unset app.clinic_id, RLS
+ * matches nothing" behavior described below, which is already this class's
+ * documented safe-empty fallback, not a new failure mode.
  *
  * <p>An unset {@code app.clinic_id} does not error in Postgres — RLS simply
  * matches nothing and every query in the transaction silently returns zero
@@ -48,6 +57,8 @@ import org.springframework.transaction.TransactionExecutionListener;
  * rows for that value.
  */
 public class TenantConnectionListener implements TransactionExecutionListener {
+
+    private static final Logger log = LoggerFactory.getLogger(TenantConnectionListener.class);
 
     private final DataSource dataSource;
 
@@ -84,7 +95,12 @@ public class TenantConnectionListener implements TransactionExecutionListener {
             // concatenation is safe, and SET does not accept JDBC bind params.
             statement.execute("SET LOCAL app.clinic_id = '" + clinicId + "'");
         } catch (SQLException e) {
-            throw new IllegalStateException("Failed to set app.clinic_id for tenant " + clinicId, e);
+            // Must not throw from afterBegin (see class javadoc) -- mark the
+            // transaction rollback-only instead, so it still completes
+            // normally through the manager instead of leaking the "active"
+            // flag onto this thread.
+            log.error("Failed to set app.clinic_id for tenant {}; marking transaction rollback-only", clinicId, e);
+            transaction.setRollbackOnly();
         }
     }
 }
