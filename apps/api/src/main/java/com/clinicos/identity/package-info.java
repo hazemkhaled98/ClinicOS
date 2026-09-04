@@ -3,4 +3,5 @@
  * permissions. Owns login and the clinic picker (UC-001) and the account
  * side of employee/role management (UC-002). Schema: V1, V11 (username).
  */
+@org.springframework.modulith.ApplicationModule
 package com.clinicos.identity;
