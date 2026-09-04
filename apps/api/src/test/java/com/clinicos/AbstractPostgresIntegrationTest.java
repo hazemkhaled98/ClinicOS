@@ -12,6 +12,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+/**
+ * Base class for integration tests that need a real, Flyway-migrated Postgres
+ * instance with the application connecting as {@code app_rw} — exactly as it
+ * does in production — so row-level security is actually exercised rather
+ * than bypassed by a superuser connection.
+ *
+ * <p>Sequencing matters: V9__rls_policies.sql creates {@code app_rw} with no
+ * password, so this class migrates as the container's own superuser first,
+ * gives {@code app_rw} a password, and only then lets Spring's own DataSource
+ * (configured to connect as {@code app_rw}) start. {@code spring.flyway.enabled}
+ * is disabled so Boot does not re-run migrations as {@code app_rw}, which has
+ * no DDL rights.
+ */
 @Testcontainers
 public abstract class AbstractPostgresIntegrationTest {
 
