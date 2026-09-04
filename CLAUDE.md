@@ -67,14 +67,17 @@ Each business module exposes `api` and hides `internal`. The `ui` module is veri
 ## Build & Test
 
 ```bash
-# Generate jOOQ sources + compile + test (requires Docker daemon for jOOQ codegen)
-mvn -pl apps/api verify
+# Generate jOOQ sources (requires Docker for Testcontainers Postgres)
+mvn -pl apps/api generate-sources -Pcodegen
 
-# Run only unit/Karibu tests (no Testcontainers)
-mvn -pl apps/api test -Dtest=!*IT
+# Compile + run unit tests (no Docker needed)
+mvn -pl apps/api test
 
-# Run only integration tests
-mvn -pl apps/api test -Dtest=*IT
+# Run only integration tests (Testcontainers spins up Postgres)
+mvn -pl apps/api verify -Dtest=*IT -DfailIfNoTests=false
+
+# Full build with codegen (requires Docker)
+mvn -pl apps/api verify -Pcodegen
 
 # Production build (minified frontend)
 mvn -pl apps/api -Pproduction package
