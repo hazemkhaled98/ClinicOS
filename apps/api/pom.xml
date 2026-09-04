@@ -27,6 +27,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <karibu-testing.version>2.7.2</karibu-testing.version>
         <postgresql.version>42.7.4</postgresql.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
         <jooq.codegen.package>com.clinicos.shared.jooq</jooq.codegen.package>
         <jooq.codegen.dir>${project.build.directory}/generated-sources/jooq</jooq.codegen.dir>
     </properties>
@@ -89,6 +90,11 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
 
         <dependency>
