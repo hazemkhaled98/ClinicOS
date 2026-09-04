@@ -11,9 +11,9 @@ insert into clinic_settings (clinic_id) values
     ('11111111-1111-1111-1111-111111111111'),
     ('22222222-2222-2222-2222-222222222222');
 
-insert into app_user (id, email, password_hash, full_name) values
-    ('aaaaaaaa-0000-0000-0000-000000000001', 'owner-a@example.com', 'x', 'Owner A'),
-    ('aaaaaaaa-0000-0000-0000-000000000002', 'owner-b@example.com', 'x', 'Owner B');
+insert into app_user (id, email, password_hash, full_name, username) values
+    ('aaaaaaaa-0000-0000-0000-000000000001', 'owner-a@example.com', 'x', 'Owner A', 'owner-a'),
+    ('aaaaaaaa-0000-0000-0000-000000000002', 'owner-b@example.com', 'x', 'Owner B', 'owner-b');
 
 insert into membership (clinic_id, user_id, role_id)
 select '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000001', id from role where code = 'owner';

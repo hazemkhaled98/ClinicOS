@@ -870,3 +870,63 @@ begin
         raise exception 'REGRESSION: daily_record insert with rated_by left NULL was rejected by the cross-tenant FK guard';
     end if;
 end $$;
+
+-- ===========================================================================
+-- 12. V11 auth-mode functions: app_user_credentials_lookup_by_username and
+--     app_user_memberships_lookup. Both are SECURITY DEFINER so they bypass
+--     RLS and serve the login flow before app.clinic_id is known.
+-- ===========================================================================
+
+do $$
+declare
+    v_hash text;
+begin
+    -- 12a. The username-keyed lookup function must work for app_rw and return
+    -- the expected password_hash for a seeded username.
+    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    if v_hash is distinct from 'x' then
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_username did not return the expected password_hash, got %', v_hash;
+    end if;
+end $$;
+
+do $$
+declare
+    v_hash text;
+begin
+    -- 12b. app_rw can create a temp table named app_user (it keeps the
+    -- default CREATE TEMP right) -- the username-keyed lookup function's
+    -- search_path must still resolve to the real public.app_user, not this
+    -- shadow, or an attacker with just enough access to run arbitrary SQL on
+    -- the app_rw connection could hand the login path any password_hash they
+    -- want.
+    create temp table app_user (id uuid, username citext, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), 'owner-a', 'attacker@example.com', 'attacker-controlled-hash', 'active');
+
+    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    if v_hash is distinct from 'x' then
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+    end if;
+
+    drop table app_user;
+end $$;
+
+do $$
+declare
+    v_clinic_id uuid;
+    v_clinic_name text;
+    v_role_code text;
+begin
+    -- 12c. The membership lookup function returns the correct clinic_id,
+    -- clinic_name, and role_code for a seeded user with an active membership.
+    select clinic_id, clinic_name, role_code into v_clinic_id, v_clinic_name, v_role_code
+    from app_user_memberships_lookup('aaaaaaaa-0000-0000-0000-000000000001');
+    if v_clinic_id is distinct from '11111111-1111-1111-1111-111111111111' then
+        raise exception 'REGRESSION: app_user_memberships_lookup returned wrong clinic_id: %', v_clinic_id;
+    end if;
+    if v_clinic_name is distinct from 'Clinic A' then
+        raise exception 'REGRESSION: app_user_memberships_lookup returned wrong clinic_name: %', v_clinic_name;
+    end if;
+    if v_role_code is distinct from 'owner' then
+        raise exception 'REGRESSION: app_user_memberships_lookup returned wrong role_code: %', v_role_code;
+    end if;
+end $$;
