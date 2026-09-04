@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: clinicos-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clinicos
+    username: app_rw
+    password: local-dev-only
+
+  flyway:
+    user: postgres
+    password: local-dev-only
+
+  jooq:
+    sql-dialect: postgres
+
+vaadin:
+  launch-browser: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /api-docs/ui
+
+server:
+  port: 8080
