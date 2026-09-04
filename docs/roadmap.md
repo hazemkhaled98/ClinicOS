@@ -66,19 +66,19 @@ Versions verified against Maven Central and the Vaadin docs during planning, not
 
 Work in this phase:
 
-0. Copy this plan to `docs/roadmap.md`, commit it, and mark Phase 0 `in progress` in its status table — the first action of the whole build.
-1. `git mv db/src/main/resources/db apps/api/src/main/resources/db`; the two SQL fixtures to `apps/api/src/test/resources/db/`.
-2. `apps/api/pom.xml` — dependencies above, Vaadin production profile, codegen bound to `generate-sources`. Generated jOOQ sources go to `target/generated-sources/jooq` and are **not** committed.
-3. Root package: `com.clinicos` — product name **ClinicOS**.
-4. Spring Modulith module layout, one module per schema area rather than per table: `identity`, `clinicconfig`, `staff`, `evaluation`, `academy`, `prep`, `inventory`, `procedures`, `shared`. Each exposes an `api` package and hides `internal`. The UI is a single `ui` module declaring `@ApplicationModule(allowedDependencies = {…api modules})`, so a view reaching into an internal fails the build. Generated jOOQ code sits in a technical package excluded from module verification — every module needs it and it has no business meaning.
-5. `ApplicationModules.of(Application.class).verify()` as a test.
-6. **Tenant context.** `clinic_id` lives in the Vaadin session, copied onto the Spring `SecurityContext` at clinic selection. A jOOQ `ExecuteListener` is the wrong place — it fires per query, not per transaction, and cannot guarantee ordering against the transaction's first statement. Use a `Connection`-level hook (a `DataSource` decorator issuing `SET LOCAL app.clinic_id` when the connection is enlisted, or a `TransactionSynchronization` on `beforeCommit`/begin) so the GUC is set exactly once, first, per transaction. **Its failure mode is the reason this matters: an unset GUC does not error — RLS simply matches nothing and every query returns empty.** So the decorator must throw when no tenant is bound, and Phase 9 must assert that behaviour.
-7. **The two RLS gaps.** Login happens before `clinic_id` exists, so it cannot run on the tenant connection. Corrected during Phase 1: rather than a second privileged `DataSource`/role, extend the `SECURITY DEFINER` function pattern V9 already established — `app_user_credentials_lookup` bypasses RLS safely today, so a username-keyed sibling plus `app_user_memberships_lookup` (for the clinic picker) are the sanctioned pre-tenant reads, reached through a narrow `TenantContext` auth-mode escape that binds the nil UUID instead of skipping tenant scoping entirely. One boundary to audit, no second role/pool/password to manage. Migration V11 adds `app_user.username citext unique` and both functions.
-8. `Argon2PasswordEncoder` — Spring Security's `defaultsForSpringSecurity_v5_8()` parameters (m=16384, t=2, p=1) unless you have a reason to raise them; benchmark on the target host and raise `m` until a hash costs ~0.5–1 s.
-9. `docker-compose.yml`: Postgres + MinIO. Note that V9 creates `app_rw` **without a password** — the compose file must `alter role app_rw password …` after migration, and prod does the same from a privileged connection. It does not belong in a migration.
-10. Testcontainers base class: migrate as the superuser, then reconnect as `app_rw` for assertions; a helper to set the tenant GUC; `schema_checks.sql` executed as part of `verify`.
-11. `docs/backlog/legacy-gaps.md` written from the gap table below.
-12. `CLAUDE.md` at repo root: stack, module layout, how to run migrations/codegen/tests/app locally, the tenant-context rule (`SET LOCAL app.clinic_id` — never skip it), and a pointer to `docs/roadmap.md` for status. Keep both current after every slice — see the update discipline in memory (`project-update-docs-after-slices`).
+- [x] 0. Copy this plan to `docs/roadmap.md`, commit it, and mark Phase 0 `in progress` in its status table — the first action of the whole build.
+- [x] 1. `git mv db/src/main/resources/db apps/api/src/main/resources/db`; the two SQL fixtures to `apps/api/src/test/resources/db/`.
+- [x] 2. `apps/api/pom.xml` — dependencies above, Vaadin production profile, codegen bound to `generate-sources`. Generated jOOQ sources go to `target/generated-sources/jooq` and are **not** committed.
+- [x] 3. Root package: `com.clinicos` — product name **ClinicOS**.
+- [x] 4. Spring Modulith module layout, one module per schema area rather than per table: `identity`, `clinicconfig`, `staff`, `evaluation`, `academy`, `prep`, `inventory`, `procedures`, `shared`. Each exposes an `api` package and hides `internal`. The UI is a single `ui` module declaring `@ApplicationModule(allowedDependencies = {…api modules})`, so a view reaching into an internal fails the build. Generated jOOQ code sits in a technical package excluded from module verification — every module needs it and it has no business meaning.
+- [x] 5. `ApplicationModules.of(Application.class).verify()` as a test.
+- [x] 6. **Tenant context.** `clinic_id` lives in the Vaadin session, copied onto the Spring `SecurityContext` at clinic selection. A jOOQ `ExecuteListener` is the wrong place — it fires per query, not per transaction, and cannot guarantee ordering against the transaction's first statement. Use a `Connection`-level hook (a `DataSource` decorator issuing `SET LOCAL app.clinic_id` when the connection is enlisted, or a `TransactionSynchronization` on `beforeCommit`/begin) so the GUC is set exactly once, first, per transaction. **Its failure mode is the reason this matters: an unset GUC does not error — RLS simply matches nothing and every query returns empty.** So the decorator must throw when no tenant is bound, and Phase 9 must assert that behaviour.
+- [x] 7. **The two RLS gaps.** Login happens before `clinic_id` exists, so it cannot run on the tenant connection. Corrected during Phase 1: rather than a second privileged `DataSource`/role, extend the `SECURITY DEFINER` function pattern V9 already established — `app_user_credentials_lookup` bypasses RLS safely today, so a username-keyed sibling plus `app_user_memberships_lookup` (for the clinic picker) are the sanctioned pre-tenant reads, reached through a narrow `TenantContext` auth-mode escape that binds the nil UUID instead of skipping tenant scoping entirely. One boundary to audit, no second role/pool/password to manage. Migration V11 adds `app_user.username citext unique` and both functions.
+- [x] 8. `Argon2PasswordEncoder` — Spring Security's `defaultsForSpringSecurity_v5_8()` parameters (m=16384, t=2, p=1) unless you have a reason to raise them; benchmark on the target host and raise `m` until a hash costs ~0.5–1 s.
+- [x] 9. `docker-compose.yml`: Postgres + MinIO. Note that V9 creates `app_rw` **without a password** — the compose file must `alter role app_rw password …` after migration, and prod does the same from a privileged connection. It does not belong in a migration.
+- [x] 10. Testcontainers base class: migrate as the superuser, then reconnect as `app_rw` for assertions; a helper to set the tenant GUC; `schema_checks.sql` executed as part of `verify`.
+- [x] 11. `docs/backlog/legacy-gaps.md` written from the gap table below.
+- [x] 12. `CLAUDE.md` at repo root: stack, module layout, how to run migrations/codegen/tests/app locally, the tenant-context rule (`SET LOCAL app.clinic_id` — never skip it), and a pointer to `docs/roadmap.md` for status. Keep both current after every slice — see the update discipline in memory (`project-update-docs-after-slices`).
 
 
 
@@ -87,6 +87,10 @@ Work in this phase:
 This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed — git-tracked, not a session-local file, so any session cloning the repo sees current status. The status table below is the source of truth for "what's done"; a session picking up work reads it first.
 
 **Rule:** the commit that finishes a phase flips its row from `in progress` to `done` in the same commit — status and the work it describes never drift apart. A session starting work sets its phase to `in progress` before the first commit of that phase.
+
+**Step-level checkpoint rule:** After completing each numbered step or bullet item, update its checkbox from `- [ ]` to `- [x]` in this file. Do this _before_ moving to the next step. If the session is interrupted, the next session reads this file first and resumes at the first unchecked box.
+
+**Resume protocol:** On session start (new or resumed), read this file first. Find the current phase (the one marked `in progress`). Scan its steps for the first `- [ ]`. That is the resume point. Skip all `- [x]` steps — they are done.
 
 | Phase | Status | Notes |
 |---|---|---|
@@ -113,18 +117,18 @@ See *Phase 0 detail* above. Ends when `mvn verify` passes on an app that boots, 
 
 BR-G01, BR-G02, BR-G03.
 
-- **Done:** `V11__auth_username.sql` — `app_user.username citext unique` (email now nullable, reset/invites only), `grant select (username) on app_user to app_rw` (the column-level grant from V9 does not auto-cover new columns), `app_user_credentials_lookup_by_username` and `app_user_memberships_lookup` as `SECURITY DEFINER` siblings of the existing email-keyed lookup, hardened the same way (`search_path = pg_catalog, public, pg_temp`, schema-qualified relations). See roadmap.md:76 (step 7, corrected) for why this replaced the originally-planned second privileged `DataSource`.
-- **Done:** `TenantContext.enterAuthMode()`/`exitAuthMode()` + `TenantConnectionListener` bind the nil UUID in auth mode instead of throwing, so the two functions above can run before a clinic is selected while every other RLS-scoped table still matches zero rows. Covered by `AuthModeTenantEscapeIT`.
-- **Done, found during this work (not planned):** `TenantConnectionListener`'s "no tenant bound" check moved from `afterBegin` to `beforeBegin`. Throwing from `afterBegin` — the ORIGINAL Phase 0 behavior — leaks Spring's transaction-active state and the bound connection forever on the thread once a second IT class exercises it, silently breaking every later transaction (no exception, RLS-scoped queries just return empty). `beforeBegin` runs before `doBegin`, which Spring does guard with cleanup. Also fixed: `AbstractPostgresIntegrationTest`'s shared static Postgres container is now a true JVM-wide singleton (manual `.start()`, not `@Testcontainers`/`@Container`), since that annotation pair scopes stop/start per subclass and was killing the container between IT classes.
-- **Done:** `V12__seed_permissions.sql` — the `permission` table is empty as of V1 (which seeds only the four roles). Seeded both permission families and the legacy default `role_permission` sets:
+- [x] **Done:** `V11__auth_username.sql` — `app_user.username citext unique` (email now nullable, reset/invites only), `grant select (username) on app_user to app_rw` (the column-level grant from V9 does not auto-cover new columns), `app_user_credentials_lookup_by_username` and `app_user_memberships_lookup` as `SECURITY DEFINER` siblings of the existing email-keyed lookup, hardened the same way (`search_path = pg_catalog, public, pg_temp`, schema-qualified relations). See roadmap.md:76 (step 7, corrected) for why this replaced the originally-planned second privileged `DataSource`.
+- [x] **Done:** `TenantContext.enterAuthMode()`/`exitAuthMode()` + `TenantConnectionListener` bind the nil UUID in auth mode instead of throwing, so the two functions above can run before a clinic is selected while every other RLS-scoped table still matches zero rows. Covered by `AuthModeTenantEscapeIT`.
+- [x] **Done, found during this work (not planned):** `TenantConnectionListener`'s "no tenant bound" check moved from `afterBegin` to `beforeBegin`. Throwing from `afterBegin` — the ORIGINAL Phase 0 behavior — leaks Spring's transaction-active state and the bound connection forever on the thread once a second IT class exercises it, silently breaking every later transaction (no exception, RLS-scoped queries just return empty). `beforeBegin` runs before `doBegin`, which Spring does guard with cleanup. Also fixed: `AbstractPostgresIntegrationTest`'s shared static Postgres container is now a true JVM-wide singleton (manual `.start()`, not `@Testcontainers`/`@Container`), since that annotation pair scopes stop/start per subclass and was killing the container between IT classes.
+- [x] **Done:** `V12__seed_permissions.sql` — the `permission` table is empty as of V1 (which seeds only the four roles). Seeded both permission families and the legacy default `role_permission` sets:
   - Main-app codes (legacy `MAIN`, `index_original.html:3477`): `emp`, `quick`, `ceo`, `tasksTab`, `acadVerify`, `acadEdit`.
   - Inventory area codes (legacy `INV`, 19 of them): `tray, issue, procs, myprocs, manage, orders, receive, returns, suppliers, dash, profit, analytics, waste, doctors, supAnalysis, received, itemAnalysis, approvals, ledger` — seeded now even though Phase 7 consumes them, so the `الصلاحيات` matrix in Phase 2 has something to render.
   - Defaults (legacy `DEFA`/`DEFM`, L3479–3485): `assistant` → main `{emp}` + areas `{tray, issue, procs, myprocs, manage}`; `receptionist` → main `{emp}` + areas `{orders, receive, returns, suppliers, ledger}`; `manager` → main `{quick, ceo, tasksTab, acadVerify, acadEdit, emp}` + all areas; `owner` → everything (BR-G03).
-- **Remaining:** Login view (`/login`) reproducing `renderLogin()`: `اسم المستخدم`, `كلمة المرور`, `دخول`, error `❌ اسم المستخدم أو كلمة المرور غير صحيحة` (same message for unknown user, bad password, and inactive account — never disclose which). Argon2 verify against the V11 lookup. Inactive account rejected (BR-G01) on **both** `app_user.status` and `membership.status`.
-- **Remaining:** Clinic picker view when the user has >1 active membership; skipped for one. Tenant context bound on selection; login's `activity_log` row written only here (needs both `clinic_id` and `actor_membership_id`, neither of which exist before this point).
-- **Remaining:** App shell: the legacy right-side off-canvas drawer (`.side`, `transform:translateX(100%)`), sticky topbar with tab title + `عيادتي · إدارة الأداء` + Arabic long date, footer user block with `🚪` logout. Theme: port the legacy CSS custom properties verbatim — `--teal:#1f5a52`, `--teal2:#2e7d6f`, `--mint:#eaf5f1`, `--accent:#2e9e84`, `--bg:#f4f7f8`, `--line:#e1e8e6`, `--ink:#16201d`; Almarai + Tajawal from Google Fonts; 18px card radius; `dir="rtl"`.
-- **Remaining:** Navigation entries shown/hidden from `role_permission` + `membership_permission` (BR-G02); owner sees all (BR-G03).
-- **Remaining, added to scope during this review (not in the original plan):** UC-001 A3 — reopen the last-visited section on return, if still permitted for the (possibly changed) role. Persist as a browser cookie, not the Vaadin session (dies at logout, so it can't satisfy "on this device") and not a DB column (would wrongly follow the user across devices).
+- [ ] **Remaining:** Login view (`/login`) reproducing `renderLogin()`: `اسم المستخدم`, `كلمة المرور`, `دخول`, error `❌ اسم المستخدم أو كلمة المرور غير صحيحة` (same message for unknown user, bad password, and inactive account — never disclose which). Argon2 verify against the V11 lookup. Inactive account rejected (BR-G01) on **both** `app_user.status` and `membership.status`.
+- [ ] **Remaining:** Clinic picker view when the user has >1 active membership; skipped for one. Tenant context bound on selection; login's `activity_log` row written only here (needs both `clinic_id` and `actor_membership_id`, neither of which exist before this point).
+- [ ] **Remaining:** App shell: the legacy right-side off-canvas drawer (`.side`, `transform:translateX(100%)`), sticky topbar with tab title + `عيادتي · إدارة الأداء` + Arabic long date, footer user block with `🚪` logout. Theme: port the legacy CSS custom properties verbatim — `--teal:#1f5a52`, `--teal2:#2e7d6f`, `--mint:#eaf5f1`, `--accent:#2e9e84`, `--bg:#f4f7f8`, `--line:#e1e8e6`, `--ink:#16201d`; Almarai + Tajawal from Google Fonts; 18px card radius; `dir="rtl"`.
+- [ ] **Remaining:** Navigation entries shown/hidden from `role_permission` + `membership_permission` (BR-G02); owner sees all (BR-G03).
+- [ ] **Remaining, added to scope during this review (not in the original plan):** UC-001 A3 — reopen the last-visited section on return, if still permitted for the (possibly changed) role. Persist as a browser cookie, not the Vaadin session (dies at logout, so it can't satisfy "on this device") and not a DB column (would wrongly follow the user across devices).
 
 UC-001 A2 (offline) is out of scope by decision; record that in the UC doc. A3 and the login `activity_log` write are in scope (added above) — not deviations.
 
@@ -134,13 +138,19 @@ BR-G04, BR-G05 (unlock), BR-G06, BR-G07.
 
 Admin subtabs `الإعدادات` (employees, evaluation weights summing to 100, working days, attendance rules) and `المستخدمون` (accounts, password change, activate/suspend, link account↔employee). Tables: `employee`, `clinic_settings`, `evaluation_weight`, `incentive_tier`, `membership`, `membership_permission`, `performance_override`.
 
-Also the owner-only `الصلاحيات` matrix — the main-app permission keys map onto `permission` rows; the 19 inventory area keys arrive with Phase 7 but the grid is built here.
+- [ ] Admin subtabs `الإعدادات` and `المستخدمون` with all CRUD operations
+- [ ] Owner-only `الصلاحيات` matrix — main-app permission keys mapped onto `permission` rows; 19 inventory area keys arrive with Phase 7 but grid is built here
 
 ### Phase 3 — UC-003 Record daily work and attendance
 
 BR-G08, BR-G09, BR-G10, BR-G11.
 
 `تسجيل الموظف`: check-in/check-out (`الحضور` / `الانصراف`, statuses `في الميعاد` / `متأخّر` / `بعد الدوام` / `انصراف مبكّر`), grace-period logic, tasks grouped by dimension (فني / سلوكي / مبادرة) with frequency pills, photo-proof upload to object storage, tasks locked until check-in. Tables: `self_check`, `daily_record`, `daily_task_completion`, `task_definition`, `attachment`.
+
+- [ ] Check-in/check-out with status logic and grace periods
+- [ ] Tasks grouped by dimension with frequency pills
+- [ ] Photo-proof upload to object storage
+- [ ] Tasks locked until check-in
 
 Gamification hero (`#eHero` — level ring, streaks, badges, weekly goal) is backlog, not this phase.
 
@@ -150,24 +160,29 @@ BR-G05, BR-G12, BR-G13, BR-G14, BR-G15, BR-G16, BR-G17, and the admin-dashboard 
 
 The hardest phase — the scoring engine lives here.
 
-- `تقييم وتحقّق المدير`: date strip, employee chooser, per-day technical/behavioural rating, task approve/reject with reason, assigned tasks (`task_assignment`) approve/reject, auto-save.
-- Scoring service: weighted blend of six categories from `evaluation_weight`; a no-data category is *excluded*, not zeroed, and coverage is reported (BR-G15); manual override is a floor, never a ceiling (BR-G06); on-time > late > undone for assignments (BR-G13).
-- Freeze/unlock: past months read `evaluation_snapshot`; the V10 triggers already refuse writes to a frozen snapshot and its components — the service must surface that as a clean error, not a 500.
-- `تقييمي` (UC-005): read-only, own record only (BR-G16), closed months only; owner has no evaluation (BR-G17).
-
-**In-scope gap:** `daily_task_completion` has `done`, `completed_at`, `photo_id` — but nowhere to record the manager's per-task verdict. The legacy `daily:` record carries a `reviewed` map (✓ / ✗ plus a return reason), which is what UC-004 step 2 is describing and what feeds the dashboard's `تغطية المراجعة` supervision metric. Add `review_status` + `review_reason` + `reviewed_by` / `reviewed_at` to `daily_task_completion` in this phase's V-migration.
-
-Give this phase its own BR-by-BR test class before any UI work.
+- [ ] `تقييم وتحقّق المدير`: date strip, employee chooser, per-day technical/behavioural rating, task approve/reject with reason, assigned tasks (`task_assignment`) approve/reject, auto-save.
+- [ ] Scoring service: weighted blend of six categories from `evaluation_weight`; no-data category excluded, not zeroed; coverage reported (BR-G15); manual override is floor (BR-G06); on-time > late > undone for assignments (BR-G13).
+- [ ] Freeze/unlock: past months read `evaluation_snapshot`; service surfaces V10 trigger errors as clean user errors, not 500s.
+- [ ] `تقييمي` (UC-005): read-only, own record only (BR-G16), closed months only; owner has no evaluation (BR-G17).
+- [ ] V-migration: add `review_status` + `review_reason` + `reviewed_by` / `reviewed_at` to `daily_task_completion`.
+- [ ] BR-by-BR test class before any UI work.
 
 ### Phase 5 — UC-006 Prepare and run procedure checklists
 
 BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `prep_run` → `prep_run_item`. Approval gate before a checklist is usable; at least one section with one item; run progress tracked per day. The built-in template library (`📚 قوالب جاهزة`) is backlog.
 
+- [ ] Checklist CRUD with approval gate
+- [ ] Sections and items management
+- [ ] Run tracking per day
+
 ### Phase 6 — UC-007 Complete onboarding academy training
 
 BR-G21, BR-G22, BR-G23, BR-G24. `academy_unit`, `academy_question`, `academy_step_submission`, `academy_exam_attempt`. Curriculum = shared core + role units; practical steps need verifier-confirmed photos; exam pool drawn only from covered units; certificate derived from a passing attempt, printed via `window.print()` and the legacy `@media print` rules.
 
-**One in-scope gap here:** `academy_unit` has only `title`, `applies_to`, `display_order`, `requires_photo` — there is nowhere to store the unit's actual teaching content, which the legacy app renders as sections, bullet points, and image/video hints. UC-007 step 2 ("works through each curriculum unit") is unbuildable without it. Add it in this phase's V-migration, either as `academy_unit.content jsonb` or as `academy_section` + `academy_point` tables; decide when the screen is designed.
+- [ ] Curriculum units with teaching content (V-migration needed)
+- [ ] Practical steps with photo verification
+- [ ] Exam pool from covered units only
+- [ ] Certificate generation and print
 
 Legacy extras — quiz kinds (`فهم` / `قرار` / `اكتشف الغلط`), trainer daily rating, the `تقرير القرار` decision report — go to backlog.
 
@@ -175,10 +190,10 @@ Legacy extras — quiz kinds (`فهم` / `قرار` / `اكتشف الغلط`), 
 
 BR-G25, BR-G26, BR-G27, BR-G28. The largest phase; the legacy React module is ~4,900 lines across 19 views. Split it:
 
-- **7a Foundation** — `supplier`, `inventory_item`, `stock_movement` append-only ledger; on-hand is `sum(qty_delta)` per `(item_id, location)`, where `location` is the `location_kind` enum (`store` / `tray`), not a table. Views `جرد الأصناف`, `التراي`, `المخزن` (issue), `السجل`. `stock_movement` is revoked for UPDATE/DELETE by a V10 trigger — corrections are compensating rows, and the service layer must be written that way from the start.
-- **7b Purchasing** — `purchase_order` + lines, `النواقص والطلب`, `الاستلام` (with mandatory invoice photo), `المرتجعات` with the V10 return-ceiling trigger surfaced as a user error, `الموردين`.
-- **7c Procedures and costing** — `procedure`, `procedure_bom`, `procedure_case`, `procedure_case_item` with unit cost frozen at issue time (BR-G28); `قوائم الإجراءات`, `سجل إجراءاتي`.
-- **7d Approvals and analytics** — `inventory_change_request` queue (BR-G26), `الاعتمادات`, `الربحية`, `تحليل الأصناف`, `الهدر`, `الأطباء`, `تحليل الموردين`. Note the schema's queue is narrower than the legacy screen: `change_request_kind` is `edit | delete` against an `item_id`, while `الاعتمادات` groups six categories (new procedure-case records, case edits, new procedures, procedure edits, deletions, the item queue). BR-G26 names only stock-affecting item edits/deletes and supplier returns, so the schema satisfies the rule — widening the queue to the other four is a backlog item, decided when this sub-phase starts.
+- [ ] **7a Foundation** — `supplier`, `inventory_item`, `stock_movement` append-only ledger; on-hand is `sum(qty_delta)` per `(item_id, location)`, where `location` is the `location_kind` enum (`store` / `tray`), not a table. Views `جرد الأصناف`, `التراي`, `المخزن` (issue), `السجل`. `stock_movement` is revoked for UPDATE/DELETE by a V10 trigger — corrections are compensating rows, and the service layer must be written that way from the start.
+- [ ] **7b Purchasing** — `purchase_order` + lines, `النواقص والطلب`, `الاستلام` (with mandatory invoice photo), `المرتجعات` with the V10 return-ceiling trigger surfaced as a user error, `الموردين`.
+- [ ] **7c Procedures and costing** — `procedure`, `procedure_bom`, `procedure_case`, `procedure_case_item` with unit cost frozen at issue time (BR-G28); `قوائم الإجراءات`, `سجل إجراءاتي`.
+- [ ] **7d Approvals and analytics** — `inventory_change_request` queue (BR-G26), `الاعتمادات`, `الربحية`, `تحليل الأصناف`, `الهدر`, `الأطباء`, `تحليل الموردين`. Note the schema's queue is narrower than the legacy screen: `change_request_kind` is `edit | delete` against an `item_id`, while `الاعتمادات` groups six categories (new procedure-case records, case edits, new procedures, procedure edits, deletions, the item queue). BR-G26 names only stock-affecting item edits/deletes and supplier returns, so the schema satisfies the rule — widening the queue to the other four is a backlog item, decided when this sub-phase starts.
 
 Role scoping (BR-G25) rides on the permission model built in Phase 2.
 
@@ -186,9 +201,22 @@ Role scoping (BR-G25) rides on the permission model built in Phase 2.
 
 BR-G29, BR-G30. `نظرة عامة` (monthly invoice total against a pace-adjusted target — scaled to elapsed working days, not the full month), employee cards with score ring and tier, team summary, supervision metrics; `ملف الموظف` with component bars, trend chart and the print-to-PDF report; `سجل النشاط` from `activity_log`. Manager/owner only.
 
+- [ ] Dashboard overview with pace-adjusted targets
+- [ ] Employee cards with score ring and tier
+- [ ] Employee file with component bars and trend chart
+- [ ] Activity log view
+
 ### Phase 9 — Hardening and release
 
 OpenAPI surface reviewed via springdoc, Playwright smokes green, `schema_checks.sql` wired into `mvn verify`, RLS negative tests (a request without the GUC must fail loudly, not return an empty result), rate limiting on login, activity logging on every mutating action, deployment.
+
+- [ ] OpenAPI surface reviewed via springdoc
+- [ ] Playwright smokes green
+- [ ] `schema_checks.sql` wired into `mvn verify`
+- [ ] RLS negative tests (GUC unset must fail loudly)
+- [ ] Rate limiting on login
+- [ ] Activity logging on every mutating action
+- [ ] Deployment
 
 ## Appendix — the legacy scoring algorithm
 
