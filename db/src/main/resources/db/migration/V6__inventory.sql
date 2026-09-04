@@ -37,8 +37,6 @@ create index idx_inventory_item_clinic on inventory_item (clinic_id);
 -- Append-only ledger: on-hand quantity per (item, location) is sum(qty_delta).
 -- Locations are the fixed store/tray split the app has always had -- not an
 -- open table, since nothing needs a third pool.
--- ponytail: balance computed by aggregate; add a materialized stock_balance table
--- if the sum gets slow past ~1e6 movements per clinic.
 create table stock_movement (
     id          uuid primary key default gen_random_uuid(),
     clinic_id   uuid not null references clinic (id) on delete cascade,
