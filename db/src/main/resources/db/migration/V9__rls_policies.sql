@@ -6,11 +6,31 @@
 -- Platform tables (clinic, app_user, role, permission, role_permission) are
 -- deliberately NOT RLS-scoped -- they are reached only through service code
 -- that itself enforces cross-tenant rules (e.g. signup, membership creation).
+-- app_rw only gets read access to them; writes go through a privileged path,
+-- not the per-request tenant connection.
+--
+-- KNOWN GAP: membership is RLS-scoped by clinic_id like any tenant table, but
+-- looking up "which clinics does this user belong to" at login happens before
+-- app.clinic_id is known. That lookup needs its own path (e.g. a second policy
+-- keyed on an app.user_id GUC set at authentication, before clinic selection,
+-- or a separate privileged role) -- left for the application-tier auth design,
+-- not decided here.
 
-create role app_rw noinherit login password 'CHANGE_ME_IN_DEPLOYMENT';
+-- Role creation must be idempotent: roles are cluster-global, so a bare
+-- `create role` fails (and leaves Flyway's migration history stuck) the
+-- second time this runs against a cluster that already has app_rw -- a second
+-- database, a CI reset, a restore. Password is set out of band at deployment,
+-- never committed here.
+do $$
+begin
+    if not exists (select 1 from pg_roles where rolname = 'app_rw') then
+        create role app_rw noinherit login;
+    end if;
+end $$;
 
 grant usage on schema public to app_rw;
 grant select, insert, update, delete on all tables in schema public to app_rw;
+revoke insert, update, delete on clinic, app_user, role, permission, role_permission from app_rw;
 alter default privileges in schema public grant select, insert, update, delete on tables to app_rw;
 
 -- Tables carrying clinic_id directly: uniform policy.
@@ -31,8 +51,14 @@ declare
 begin
     foreach t in array direct_tables loop
         execute format('alter table %I enable row level security', t);
+        -- nullif(...,'') guards against the GUC having been SET LOCAL earlier
+        -- in the session and left as '' once that transaction ended --
+        -- current_setting(x, true) only returns NULL the first time, never
+        -- again, so a bare ''::uuid cast would raise on every later request
+        -- that hasn't set app.clinic_id yet in its own transaction. Dollar-
+        -- quoting the format string avoids nested single-quote escaping.
         execute format(
-            'create policy tenant_isolation on %I using (clinic_id = current_setting(''app.clinic_id'', true)::uuid) with check (clinic_id = current_setting(''app.clinic_id'', true)::uuid)',
+            $f$create policy tenant_isolation on %I using (clinic_id = nullif(current_setting('app.clinic_id', true), '')::uuid) with check (clinic_id = nullif(current_setting('app.clinic_id', true), '')::uuid)$f$,
             t
         );
     end loop;
@@ -65,7 +91,7 @@ begin
         parent_table := child_tables[i][3];
         execute format('alter table %I enable row level security', child_table);
         execute format(
-            'create policy tenant_isolation on %I using (exists (select 1 from %I p where p.id = %I.%I and p.clinic_id = current_setting(''app.clinic_id'', true)::uuid))',
+            $f$create policy tenant_isolation on %I using (exists (select 1 from %I p where p.id = %I.%I and p.clinic_id = nullif(current_setting('app.clinic_id', true), '')::uuid))$f$,
             child_table, parent_table, child_table, fk_column
         );
     end loop;
@@ -77,4 +103,4 @@ alter table prep_item enable row level security;
 create policy tenant_isolation on prep_item
     using (exists (select 1 from prep_section s join prep_checklist c on c.id = s.checklist_id
                     where s.id = prep_item.section_id
-                      and c.clinic_id = current_setting('app.clinic_id', true)::uuid));
+                      and c.clinic_id = nullif(current_setting('app.clinic_id', true), '')::uuid));

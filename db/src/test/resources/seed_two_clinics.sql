@@ -78,3 +78,37 @@ insert into evaluation_component (snapshot_id, category, raw_score, weight, incl
     ('40000000-0000-0000-0000-000000000001', 'solooki', 88, 20, true),
     ('40000000-0000-0000-0000-000000000001', 'ibda3', 92, 10, true),
     ('40000000-0000-0000-0000-000000000001', 'attendance', 95, 20, true);
+
+-- A two-hop prep checklist chain, to prove the prep_item RLS policy (the one
+-- that doesn't fit the single-parent loop) actually isolates by tenant.
+insert into prep_checklist (id, clinic_id, name, status) values
+    ('50000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Root Canal Setup', 'approved');
+insert into prep_section (id, checklist_id, title, display_order) values
+    ('60000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Instruments', 1);
+insert into prep_item (id, section_id, name, display_order) values
+    ('70000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', 'Files', 1);
+
+-- Clinic B's own inventory chain, disjoint from A's, so cross-tenant checks
+-- have real B-side rows to prove are invisible from A's session (and vice
+-- versa) -- not just an empty result that could mean "isolated" or "broken".
+insert into supplier (id, clinic_id, name) values
+    ('ffffffff-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Clinic B Supplies');
+
+insert into inventory_item (id, clinic_id, name, uom, unit_cost) values
+    ('eeeeeeee-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Gloves box', 'box', 55);
+
+insert into purchase_order (id, clinic_id, supplier_id, status, placed_at, received_at) values
+    ('10000000-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222',
+     'ffffffff-0000-0000-0000-000000000002', 'received', now(), now());
+
+insert into purchase_order_line (id, order_id, item_id, qty_ordered, unit_cost, qty_received) values
+    ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002',
+     'eeeeeeee-0000-0000-0000-000000000002', 50, 55, 50);
+
+insert into stock_movement (clinic_id, item_id, location, qty_delta, reason, ref_type, ref_id) values
+    ('22222222-2222-2222-2222-222222222222', 'eeeeeeee-0000-0000-0000-000000000002',
+     'store', 50, 'receipt', 'purchase_order', '10000000-0000-0000-0000-000000000002');
+
+-- An academy unit, for the correct_index-in-range check.
+insert into academy_unit (id, clinic_id, applies_to, title) values
+    ('80000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'core', 'Sterilization Basics');

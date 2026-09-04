@@ -18,7 +18,8 @@ create table employee (
     shift_end       time,
     custom_shift    boolean not null default false,
     hired_at        date not null default current_date,
-    archived_at     timestamptz
+    archived_at     timestamptz,
+    check (custom_shift = (shift_start is not null and shift_end is not null))
 );
 
 create index idx_employee_clinic on employee (clinic_id);
@@ -40,7 +41,10 @@ create table task_definition (
     display_order   integer not null default 0,
     archived_at     timestamptz,
     created_at      timestamptz not null default now(),
-    check ((frequency = 'custom') = (every_n is not null and interval_unit is not null))
+    check (
+        (frequency = 'custom' and every_n is not null and interval_unit is not null)
+        or (frequency <> 'custom' and every_n is null and interval_unit is null)
+    )
 );
 
 create index idx_task_definition_clinic on task_definition (clinic_id, staff_role);

@@ -28,5 +28,4 @@ create table incentive_tier (
     incentive_pct   numeric(5,2) not null check (incentive_pct between 0 and 100),
     unique (clinic_id, name)
 );
-
-create index idx_incentive_tier_clinic on incentive_tier (clinic_id);
+-- No separate clinic_id index: it's the leading column of the unique (clinic_id, name) index above.

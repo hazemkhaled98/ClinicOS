@@ -59,7 +59,7 @@ create table membership (
     unique (clinic_id, user_id)
 );
 
-create index idx_membership_clinic on membership (clinic_id);
+-- No separate clinic_id index: it's the leading column of the unique (clinic_id, user_id) index above.
 create index idx_membership_user on membership (user_id);
 
 -- Per-member grant/revoke override on top of the role's default permission set.
@@ -70,7 +70,7 @@ create table membership_permission (
     primary key (membership_id, permission_id)
 );
 
-create index idx_membership_permission_clinic on membership_permission (membership_id);
+-- No separate membership_id index: it's the leading column of the primary key above.
 
 -- Seed the fixed platform roles referenced throughout the business rules (BR-G03, BR-G04).
 insert into role (code, name) values

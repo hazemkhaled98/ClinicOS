@@ -22,7 +22,8 @@ create table academy_question (
     unit_id         uuid not null references academy_unit (id) on delete cascade,
     prompt          text not null,
     options         jsonb not null,
-    correct_index   integer not null check (correct_index >= 0)
+    correct_index   integer not null check (correct_index >= 0),
+    check (jsonb_typeof(options) = 'array' and correct_index < jsonb_array_length(options))
 );
 
 create index idx_academy_question_unit on academy_question (unit_id);
