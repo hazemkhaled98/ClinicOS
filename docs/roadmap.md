@@ -73,7 +73,7 @@ Work in this phase:
 4. Spring Modulith module layout, one module per schema area rather than per table: `identity`, `clinicconfig`, `staff`, `evaluation`, `academy`, `prep`, `inventory`, `procedures`, `shared`. Each exposes an `api` package and hides `internal`. The UI is a single `ui` module declaring `@ApplicationModule(allowedDependencies = {…api modules})`, so a view reaching into an internal fails the build. Generated jOOQ code sits in a technical package excluded from module verification — every module needs it and it has no business meaning.
 5. `ApplicationModules.of(Application.class).verify()` as a test.
 6. **Tenant context.** `clinic_id` lives in the Vaadin session, copied onto the Spring `SecurityContext` at clinic selection. A jOOQ `ExecuteListener` is the wrong place — it fires per query, not per transaction, and cannot guarantee ordering against the transaction's first statement. Use a `Connection`-level hook (a `DataSource` decorator issuing `SET LOCAL app.clinic_id` when the connection is enlisted, or a `TransactionSynchronization` on `beforeCommit`/begin) so the GUC is set exactly once, first, per transaction. **Its failure mode is the reason this matters: an unset GUC does not error — RLS simply matches nothing and every query returns empty.** So the decorator must throw when no tenant is bound, and Phase 9 must assert that behaviour.
-7. **The two RLS gaps.** Login happens before `clinic_id` exists, so it cannot run on the tenant connection. Use a second, privileged, non-tenant `DataSource` (a separate role) used *only* by the auth module for: credentials lookup, membership listing, and the clinic row for the picker. That is one boundary to audit, versus scattering `security definer` functions. Migration V11 adds the role, its narrow grants, `app_user.username citext unique`, and a username-keyed sibling of `app_user_credentials_lookup`.
+7. **The two RLS gaps.** Login happens before `clinic_id` exists, so it cannot run on the tenant connection. Corrected during Phase 1: rather than a second privileged `DataSource`/role, extend the `SECURITY DEFINER` function pattern V9 already established — `app_user_credentials_lookup` bypasses RLS safely today, so a username-keyed sibling plus `app_user_memberships_lookup` (for the clinic picker) are the sanctioned pre-tenant reads, reached through a narrow `TenantContext` auth-mode escape that binds the nil UUID instead of skipping tenant scoping entirely. One boundary to audit, no second role/pool/password to manage. Migration V11 adds `app_user.username citext unique` and both functions.
 8. `Argon2PasswordEncoder` — Spring Security's `defaultsForSpringSecurity_v5_8()` parameters (m=16384, t=2, p=1) unless you have a reason to raise them; benchmark on the target host and raise `m` until a hash costs ~0.5–1 s.
 9. `docker-compose.yml`: Postgres + MinIO. Note that V9 creates `app_rw` **without a password** — the compose file must `alter role app_rw password …` after migration, and prod does the same from a privileged connection. It does not belong in a migration.
 10. Testcontainers base class: migrate as the superuser, then reconnect as `app_rw` for assertions; a helper to set the tenant GUC; `schema_checks.sql` executed as part of `verify`.
@@ -90,8 +90,8 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 
 | Phase | Status | Notes |
 |---|---|---|
-| 0 — Scaffolding | in progress | |
-| 1 — UC-001 Login | not started | |
+| 0 — Scaffolding | done | |
+| 1 — UC-001 Login | in progress | |
 | 2 — UC-002 Employees/roles | not started | |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |
@@ -113,19 +113,20 @@ See *Phase 0 detail* above. Ends when `mvn verify` passes on an app that boots, 
 
 BR-G01, BR-G02, BR-G03.
 
-- Login view (`/login`) reproducing `renderLogin()`: `اسم المستخدم`, `كلمة المرور`, `دخول`, error `❌ اسم المستخدم أو كلمة المرور غير صحيحة`.
-- `app_user_credentials_lookup` + Argon2 verify. Inactive account rejected (BR-G01) — note this must be enforced on `app_user.status` *and* `membership.status`.
-- Clinic picker view when the user has >1 active membership; skipped for one.
-- Tenant context established; `SET LOCAL app.clinic_id` proven to run on every transaction.
-- App shell: the legacy right-side off-canvas drawer (`.side`, `transform:translateX(100%)`), sticky topbar with tab title + `عيادتي · إدارة الأداء` + Arabic long date, footer user block with `🚪` logout.
-- Navigation entries shown/hidden from `role_permission` + `membership_permission` (BR-G02); owner sees all (BR-G03).
-- Theme: port the legacy CSS custom properties verbatim into a Vaadin theme — `--teal:#1f5a52`, `--teal2:#2e7d6f`, `--mint:#eaf5f1`, `--accent:#2e9e84`, `--bg:#f4f7f8`, `--line:#e1e8e6`, `--ink:#16201d`; Almarai + Tajawal from Google Fonts; 18px card radius; `dir="rtl"`.
-- Seed data as a V-migration. The `permission` table is empty today — V1 seeds only the four roles. Seed both permission families and the legacy default `role_permission` sets:
+- **Done:** `V11__auth_username.sql` — `app_user.username citext unique` (email now nullable, reset/invites only), `grant select (username) on app_user to app_rw` (the column-level grant from V9 does not auto-cover new columns), `app_user_credentials_lookup_by_username` and `app_user_memberships_lookup` as `SECURITY DEFINER` siblings of the existing email-keyed lookup, hardened the same way (`search_path = pg_catalog, public, pg_temp`, schema-qualified relations). See roadmap.md:76 (step 7, corrected) for why this replaced the originally-planned second privileged `DataSource`.
+- **Done:** `TenantContext.enterAuthMode()`/`exitAuthMode()` + `TenantConnectionListener` bind the nil UUID in auth mode instead of throwing, so the two functions above can run before a clinic is selected while every other RLS-scoped table still matches zero rows. Covered by `AuthModeTenantEscapeIT`.
+- **Done, found during this work (not planned):** `TenantConnectionListener`'s "no tenant bound" check moved from `afterBegin` to `beforeBegin`. Throwing from `afterBegin` — the ORIGINAL Phase 0 behavior — leaks Spring's transaction-active state and the bound connection forever on the thread once a second IT class exercises it, silently breaking every later transaction (no exception, RLS-scoped queries just return empty). `beforeBegin` runs before `doBegin`, which Spring does guard with cleanup. Also fixed: `AbstractPostgresIntegrationTest`'s shared static Postgres container is now a true JVM-wide singleton (manual `.start()`, not `@Testcontainers`/`@Container`), since that annotation pair scopes stop/start per subclass and was killing the container between IT classes.
+- **Done:** `V12__seed_permissions.sql` — the `permission` table is empty as of V1 (which seeds only the four roles). Seeded both permission families and the legacy default `role_permission` sets:
   - Main-app codes (legacy `MAIN`, `index_original.html:3477`): `emp`, `quick`, `ceo`, `tasksTab`, `acadVerify`, `acadEdit`.
   - Inventory area codes (legacy `INV`, 19 of them): `tray, issue, procs, myprocs, manage, orders, receive, returns, suppliers, dash, profit, analytics, waste, doctors, supAnalysis, received, itemAnalysis, approvals, ledger` — seeded now even though Phase 7 consumes them, so the `الصلاحيات` matrix in Phase 2 has something to render.
   - Defaults (legacy `DEFA`/`DEFM`, L3479–3485): `assistant` → main `{emp}` + areas `{tray, issue, procs, myprocs, manage}`; `receptionist` → main `{emp}` + areas `{orders, receive, returns, suppliers, ledger}`; `manager` → main `{quick, ceo, tasksTab, acadVerify, acadEdit, emp}` + all areas; `owner` → everything (BR-G03).
+- **Remaining:** Login view (`/login`) reproducing `renderLogin()`: `اسم المستخدم`, `كلمة المرور`, `دخول`, error `❌ اسم المستخدم أو كلمة المرور غير صحيحة` (same message for unknown user, bad password, and inactive account — never disclose which). Argon2 verify against the V11 lookup. Inactive account rejected (BR-G01) on **both** `app_user.status` and `membership.status`.
+- **Remaining:** Clinic picker view when the user has >1 active membership; skipped for one. Tenant context bound on selection; login's `activity_log` row written only here (needs both `clinic_id` and `actor_membership_id`, neither of which exist before this point).
+- **Remaining:** App shell: the legacy right-side off-canvas drawer (`.side`, `transform:translateX(100%)`), sticky topbar with tab title + `عيادتي · إدارة الأداء` + Arabic long date, footer user block with `🚪` logout. Theme: port the legacy CSS custom properties verbatim — `--teal:#1f5a52`, `--teal2:#2e7d6f`, `--mint:#eaf5f1`, `--accent:#2e9e84`, `--bg:#f4f7f8`, `--line:#e1e8e6`, `--ink:#16201d`; Almarai + Tajawal from Google Fonts; 18px card radius; `dir="rtl"`.
+- **Remaining:** Navigation entries shown/hidden from `role_permission` + `membership_permission` (BR-G02); owner sees all (BR-G03).
+- **Remaining, added to scope during this review (not in the original plan):** UC-001 A3 — reopen the last-visited section on return, if still permitted for the (possibly changed) role. Persist as a browser cookie, not the Vaadin session (dies at logout, so it can't satisfy "on this device") and not a DB column (would wrongly follow the user across devices).
 
-UC-001 A2 (offline) is out of scope by decision; record that in the UC doc.
+UC-001 A2 (offline) is out of scope by decision; record that in the UC doc. A3 and the login `activity_log` write are in scope (added above) — not deviations.
 
 ### Phase 2 — UC-002 Manage employees and roles
 

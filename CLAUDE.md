@@ -130,8 +130,8 @@ mvn -pl apps/api spring-boot:run
 
 | Phase | Status |
 |-------|--------|
-| 0 — Scaffolding | in progress |
-| 1 — UC-001 Login | not started |
+| 0 — Scaffolding | done |
+| 1 — UC-001 Login | in progress |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | not started |
 | 4 — UC-004/005 Evaluation | not started |
