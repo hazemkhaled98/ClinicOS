@@ -25,11 +25,18 @@ public class TenantSessionBinder implements VaadinServiceInitListener {
     @Override
     public void serviceInit(ServiceInitEvent event) {
         event.addRequestHandler((session, request, response) -> {
-            Object clinicId = session.getAttribute(ClinicPickerView.SESSION_CLINIC_ID);
-            if (clinicId instanceof UUID id) {
-                TenantContext.set(id);
-            } else {
-                TenantContext.clear();
+            // VaadinSession.getAttribute asserts the session lock is held --
+            // RequestHandler.handleRequest does not hold it by default.
+            session.lock();
+            try {
+                Object clinicId = session.getAttribute(ClinicPickerView.SESSION_CLINIC_ID);
+                if (clinicId instanceof UUID id) {
+                    TenantContext.set(id);
+                } else {
+                    TenantContext.clear();
+                }
+            } finally {
+                session.unlock();
             }
             return false;
         });

@@ -135,6 +135,17 @@
             <version>${karibu-testing.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>dramafinder</artifactId>
+            <version>1.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
