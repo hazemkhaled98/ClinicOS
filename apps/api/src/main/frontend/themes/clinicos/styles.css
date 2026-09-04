@@ -1,0 +1,147 @@
+:root {
+  --teal: #1f5a52;
+  --teal2: #2e7d6f;
+  --tealdk: #163f39;
+  --mint: #eaf5f1;
+  --accent: #2e9e84;
+  --blue: #2e7d6f;
+  --blue2: #3fa890;
+  --lblue: #eef6f3;
+  --green: #1f7a4d;
+  --amber: #b87900;
+  --red: #b23b30;
+  --purple: #7a5bd0;
+  --bg: #f4f7f8;
+  --card: #ffffff;
+  --line: #e1e8e6;
+  --ink: #16201d;
+  --muted: #48564f;
+  --navy: #1f5a52;
+  --radius: 18px;
+}
+
+[theme~="light"] {
+  --lumo-primary-color: var(--teal);
+  --lumo-primary-color-50pct: color-mix(in srgb, var(--teal) 50%, transparent);
+  --lumo-primary-text-color: var(--teal);
+  --lumo-base-color: var(--card);
+  --lumo-body-text-color: var(--ink);
+  --lumo-secondary-text-color: var(--muted);
+  --lumo-tint-5pct: var(--mint);
+  --lumo-shade-5pct: var(--line);
+}
+
+html {
+  font-family: "Almarai", "Tajawal", sans-serif;
+  background-color: var(--bg);
+}
+
+body {
+  margin: 0;
+}
+
+vaadin-app-layout::part(navbar) {
+  background-color: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+
+.clinicos-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.clinicos-topbar-t2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal);
+}
+
+.clinicos-topbar-date {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.clinicos-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(180deg, var(--teal), var(--tealdk));
+  color: #fff;
+  padding: 18px 0;
+}
+
+.clinicos-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 6px 20px 18px;
+  color: #fff;
+}
+
+.clinicos-who {
+  margin-top: auto;
+  padding: 14px 18px 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #fff;
+}
+
+.clinicos-who-av {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex: none;
+}
+
+.clinicos-who-name {
+  font-weight: 700;
+}
+
+.clinicos-who-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.clinicos-who-role {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+.clinicos-logout {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff;
+  font-size: 15px;
+}
+
+.clinicos-logout:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.clinicos-content {
+  padding: 22px 26px 50px;
+  max-width: 1060px;
+  width: 100%;
+  margin: 0 auto;
+}
