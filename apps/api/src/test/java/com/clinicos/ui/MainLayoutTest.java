@@ -147,4 +147,26 @@ class MainLayoutTest {
                 "suppliers", "dash", "profit", "analytics", "waste", "doctors", "supAnalysis",
                 "received", "itemAnalysis", "approvals", "ledger");
     }
+
+    @Test
+    void postLogoutStateClearsNavigationAccess() {
+        sessionPermissions("manager", Set.of("emp", "quick"));
+        MainLayout before = new MainLayout();
+        assertThat(navLabels(before)).isNotEmpty();
+
+        VaadinSession session = VaadinSession.getCurrent();
+        session.setAttribute(ClinicPickerView.SESSION_CLINIC_ID, null);
+        session.setAttribute(ClinicPickerView.SESSION_MEMBERSHIP_ID, null);
+        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, null);
+        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, null);
+        SecurityContextHolder.clearContext();
+
+        MainLayout after = new MainLayout();
+        assertThat(navLabels(after)).isEmpty();
+    }
+
+    @Test
+    void sectionPlaceholderWritesCookie() {
+        SectionPlaceholderView.writeCookie("employees");
+    }
 }

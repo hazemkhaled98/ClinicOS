@@ -9,6 +9,9 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinServletResponse;
+
+import jakarta.servlet.http.Cookie;
 
 @Route(value = "employees", layout = MainLayout.class)
 @RouteAlias(value = "my-evaluation", layout = MainLayout.class)
@@ -29,7 +32,9 @@ public class SectionPlaceholderView extends VerticalLayout implements BeforeEnte
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        NavSection section = NavSectionResolver.sectionByRoute(event.getLocation().getPath());
+        String route = event.getLocation().getPath();
+        writeCookie(route);
+        NavSection section = NavSectionResolver.sectionByRoute(route);
 
         Paragraph headline = new Paragraph("عيادتي");
         headline.addClassName("clinicos-section-kicker");
@@ -44,5 +49,15 @@ public class SectionPlaceholderView extends VerticalLayout implements BeforeEnte
         soon.addClassName("clinicos-section-soon");
 
         add(headline, title, subtitle, soon);
+    }
+
+    static void writeCookie(String route) {
+        VaadinServletResponse response = VaadinServletResponse.getCurrent();
+        if (response != null) {
+            Cookie cookie = new Cookie("lastSection", route);
+            cookie.setPath("/");
+            cookie.setMaxAge(30 * 24 * 60 * 60);
+            response.addCookie(cookie);
+        }
     }
 }

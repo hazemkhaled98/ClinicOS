@@ -1,8 +1,11 @@
 package com.clinicos.ui;
 
+import static com.github.mvysny.kaributesting.v10.LocatorJ._find;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -36,7 +39,7 @@ class HelloViewTest {
     }
 
     @Test
-    void showsHeadingWhenClinicIsBound() {
+    void showsFallbackHeadingWhenClinicBoundButNoPermissions() {
         VaadinSession.getCurrent().setAttribute(ClinicPickerView.SESSION_CLINIC_ID, UUID.randomUUID());
 
         HelloView view = new HelloView();
@@ -50,5 +53,58 @@ class HelloViewTest {
         UI.getCurrent().navigate(HelloView.class);
 
         assertThat(_get(MainLayout.class)).isNotNull();
+    }
+
+    @Test
+    void resolveTargetReturnsFirstSectionWhenNoCookie() {
+        assertThat(HelloView.resolveTarget(null, List.of("emp", "quick"), "manager"))
+                .isEqualTo("employees");
+    }
+
+    @Test
+    void resolveTargetReturnsLastSectionIfStillPermitted() {
+        assertThat(HelloView.resolveTarget("quick-access", List.of("emp", "quick"), "manager"))
+                .isEqualTo("quick-access");
+    }
+
+    @Test
+    void resolveTargetFallsBackToFirstWhenLastSectionNotPermitted() {
+        assertThat(HelloView.resolveTarget("admin-dashboard", List.of("emp", "quick"), "manager"))
+                .isEqualTo("employees");
+    }
+
+    @Test
+    void resolveTargetReturnsNullWhenNoSessionState() {
+        assertThat(HelloView.resolveTarget(null, null, null)).isNull();
+    }
+
+    @Test
+    void resolveTargetLandsOnPrepWhenOnlyUnconditionalSectionVisible() {
+        assertThat(HelloView.resolveTarget(null, List.of(), "assistant")).isEqualTo("prep");
+    }
+
+    @Test
+    void resolveTargetHonoursLegacyRules() {
+        String target = HelloView.resolveTarget(null, List.of("emp", "quick"), "owner");
+        assertThat(target).isEqualTo("employees");
+
+        target = HelloView.resolveTarget(null, Set.of("emp", "quick", "ceo", "tray").stream().toList(), "manager");
+        assertThat(target).isEqualTo("employees");
+    }
+
+    @Test
+    void navigateToFirstSectionAfterLogin() {
+        sessionPermissions("manager", Set.of("emp", "quick"));
+
+        HelloView view = new HelloView();
+
+        assertThat(_find(view, H1.class)).isEmpty();
+    }
+
+    private static void sessionPermissions(String roleCode, Set<String> codes) {
+        VaadinSession session = VaadinSession.getCurrent();
+        session.setAttribute(ClinicPickerView.SESSION_CLINIC_ID, UUID.randomUUID());
+        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, roleCode);
+        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, List.copyOf(codes));
     }
 }
