@@ -212,11 +212,15 @@ declare
 begin
     perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
 
-    -- 4a. Remaining receivable is 90; returning 95 must raise.
+    -- 4a. Remaining receivable is 90; returning 95 must raise. The setup
+    -- insert (the return header itself) is deliberately OUTSIDE the guarded
+    -- block below -- only the statement actually under test (the line insert
+    -- that trips the ceiling trigger) is wrapped, so an unrelated setup
+    -- failure can't masquerade as this check passing.
+    insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
+    values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
+            'ffffffff-0000-0000-0000-000000000001', 'pending');
     begin
-        insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
-        values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
-                'ffffffff-0000-0000-0000-000000000001', 'pending');
         insert into supplier_return_line (supplier_return_id, purchase_order_line_id, qty)
         select id, '20000000-0000-0000-0000-000000000001', 95 from supplier_return
         where purchase_order_id = '10000000-0000-0000-0000-000000000001' and status = 'pending';
@@ -288,12 +292,14 @@ begin
     -- 4e. Cross-tenant reference: as clinic A, point a return line at clinic
     -- B's purchase_order_line. The FK itself doesn't stop this (FK checks
     -- bypass RLS), so this specifically exercises the ceiling trigger's
-    -- "not found" guard, which sees the line as absent under A's RLS.
+    -- "not found" guard, which sees the line as absent under A's RLS. Setup
+    -- (the return header) again sits outside the guarded block, same reason
+    -- as 4a.
     perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
+    insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
+    values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
+            'ffffffff-0000-0000-0000-000000000001', 'pending');
     begin
-        insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
-        values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
-                'ffffffff-0000-0000-0000-000000000001', 'pending');
         insert into supplier_return_line (supplier_return_id, purchase_order_line_id, qty)
         select id, '20000000-0000-0000-0000-000000000002', 1 from supplier_return
         where purchase_order_id = '10000000-0000-0000-0000-000000000001' and status = 'pending'
@@ -703,6 +709,26 @@ begin
     end if;
 end $$;
 
+do $$
+declare
+    v_hash text;
+begin
+    -- 9c. app_rw can create a temp table named app_user (it keeps the
+    -- default CREATE TEMP right) -- the lookup function's search_path must
+    -- still resolve to the real public.app_user, not this shadow, or an
+    -- attacker with just enough access to run arbitrary SQL on the app_rw
+    -- connection could hand the login path any password_hash they want.
+    create temp table app_user (id uuid, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), 'owner-a@example.com', 'attacker-controlled-hash', 'active');
+
+    select password_hash into v_hash from app_user_credentials_lookup('owner-a@example.com');
+    if v_hash is distinct from 'x' then
+        raise exception 'REGRESSION: app_user_credentials_lookup returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+    end if;
+
+    drop table app_user;
+end $$;
+
 -- ===========================================================================
 -- 10. Every table carrying its own clinic_id column must have row-level
 --     security actually enabled. V9's `alter default privileges` grants
@@ -729,5 +755,118 @@ begin
       );
     if v_unprotected is not null then
         raise exception 'REGRESSION: table(s) with a clinic_id column but RLS not enabled: %', v_unprotected;
+    end if;
+end $$;
+
+-- ===========================================================================
+-- 11. Regressions found in the round-2 review of the fixes above: a
+--     multi-line reinstate undercounting the ceiling, qty_received able to
+--     drop below what's already been returned against it, a cascade delete
+--     of a ledger-owning row, and the cross-tenant FK guard's NULL-skip path.
+-- ===========================================================================
+
+do $$
+declare
+    unexpected_success boolean := false;
+    v_rejected_id       uuid;
+begin
+    -- 11a. A return with TWO lines against the same purchase_order_line
+    -- (qty_received=10, lines of 5+5) must be reinstated as one 10-unit
+    -- total, not checked line-by-line against a baseline that excludes both
+    -- of its own lines each time -- that undercounting let a reinstate
+    -- through even when the combined total exceeded the ceiling.
+    perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
+
+    insert into purchase_order_line (id, order_id, item_id, qty_ordered, unit_cost, qty_received) values
+        ('20000000-0000-0000-0000-000000000099', '10000000-0000-0000-0000-000000000001',
+         'eeeeeeee-0000-0000-0000-000000000001', 20, 50, 10);
+
+    insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
+    values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
+            'ffffffff-0000-0000-0000-000000000001', 'rejected')
+    returning id into v_rejected_id;
+    insert into supplier_return_line (supplier_return_id, purchase_order_line_id, qty) values
+        (v_rejected_id, '20000000-0000-0000-0000-000000000099', 5),
+        (v_rejected_id, '20000000-0000-0000-0000-000000000099', 5);
+
+    insert into supplier_return (clinic_id, purchase_order_id, supplier_id, status)
+    values ('11111111-1111-1111-1111-111111111111', '10000000-0000-0000-0000-000000000001',
+            'ffffffff-0000-0000-0000-000000000001', 'approved');
+    insert into supplier_return_line (supplier_return_id, purchase_order_line_id, qty)
+    select id, '20000000-0000-0000-0000-000000000099', 5 from supplier_return
+    where purchase_order_id = '10000000-0000-0000-0000-000000000001' and status = 'approved'
+    order by requested_at desc limit 1;
+
+    -- Reinstating the two-line rejected return would push the line to
+    -- 5+5 (reinstated) + 5 (already approved) = 15 against its 10-unit
+    -- ceiling -- must raise.
+    begin
+        update supplier_return set status = 'pending' where id = v_rejected_id;
+        unexpected_success := true;
+    exception when others then null;
+    end;
+    if unexpected_success then
+        raise exception 'REGRESSION: reinstating a multi-line supplier_return past the ceiling succeeded (per-line undercounting)';
+    end if;
+end $$;
+
+do $$
+declare
+    unexpected_success boolean := false;
+begin
+    -- 11b. purchase_order_line.qty_received can't be lowered below what's
+    -- already been returned against it. Line ...0099 above has 10 received
+    -- and (from 11a) 5 already approved-returned.
+    perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
+    begin
+        update purchase_order_line set qty_received = 3 where id = '20000000-0000-0000-0000-000000000099';
+        unexpected_success := true;
+    exception when others then null;
+    end;
+    if unexpected_success then
+        raise exception 'REGRESSION: lowering qty_received below the already-returned qty succeeded';
+    end if;
+end $$;
+
+do $$
+declare
+    v_movement_count integer;
+begin
+    -- 11c. Deleting an inventory_item with stock_movement history must
+    -- cascade through the append-only ledger's own immutability trigger
+    -- (forbid_update_delete), not be permanently blocked by it -- only a
+    -- DIRECT delete/update on stock_movement should be forbidden.
+    perform set_config('app.clinic_id', '22222222-2222-2222-2222-222222222222', true);
+
+    insert into inventory_item (id, clinic_id, name, uom, unit_cost) values
+        ('99999999-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 'Disposable Test Item', 'unit', 1);
+    insert into stock_movement (clinic_id, item_id, location, qty_delta, reason) values
+        ('22222222-2222-2222-2222-222222222222', '99999999-0000-0000-0000-000000000001', 'store', 5, 'adjustment');
+
+    delete from inventory_item where id = '99999999-0000-0000-0000-000000000001';
+
+    select count(*) into v_movement_count from stock_movement where item_id = '99999999-0000-0000-0000-000000000001';
+    if v_movement_count <> 0 then
+        raise exception 'REGRESSION: inventory_item delete did not cascade to its stock_movement rows';
+    end if;
+end $$;
+
+do $$
+declare
+    unexpected_failure boolean := false;
+begin
+    -- 11d. assert_same_clinic's NULL-skip branch: an optional cross-tenant FK
+    -- column left NULL must not be blocked -- every nullable column in the
+    -- guarded spec list (rated_by, approved_by, frozen_by, photo ids, etc.)
+    -- depends on this.
+    perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
+    begin
+        insert into daily_record (clinic_id, employee_id, work_date, rated_by)
+        values ('11111111-1111-1111-1111-111111111111', 'bbbbbbbb-0000-0000-0000-000000000001', '2026-09-03', null);
+    exception when others then
+        unexpected_failure := true;
+    end;
+    if unexpected_failure then
+        raise exception 'REGRESSION: daily_record insert with rated_by left NULL was rejected by the cross-tenant FK guard';
     end if;
 end $$;

@@ -14,6 +14,13 @@ create or replace function evaluation_snapshot_block_frozen_write()
 returns trigger as $$
 begin
     if tg_op = 'DELETE' then
+        -- A DELETE cascaded in from clinic/employee removal must go through
+        -- even while frozen, same as the append-only ledger tables below --
+        -- otherwise a single frozen snapshot permanently blocks deleting the
+        -- employee or clinic it belongs to.
+        if pg_trigger_depth() > 1 then
+            return old;
+        end if;
         if old.unlocked_at is null then
             raise exception 'evaluation_snapshot % for period % is frozen; unlock it before deleting', old.id, old.period_month;
         end if;
@@ -24,16 +31,20 @@ begin
     if old.unlocked_at is null and new.unlocked_at is null then
         raise exception 'evaluation_snapshot % for period % is frozen; unlock it before editing', old.id, old.period_month;
     elsif old.unlocked_at is not null and new.unlocked_at is not null then
-        -- This edit spends the unlock: re-freeze immediately after it applies.
+        -- This edit spends the unlock: re-freeze immediately after it
+        -- applies, and clear unlocked_by with it -- a frozen row shouldn't
+        -- carry a stale "who last unlocked me" once it's frozen again.
         new.unlocked_at := null;
+        new.unlocked_by := null;
     elsif old.unlocked_at is null and new.unlocked_at is not null then
         -- The unlock action itself. Must be its own statement -- nothing
         -- else about the row may change alongside it, or the row comes out
-        -- of this trigger unlocked AND already edited in one shot.
-        if (new.clinic_id, new.employee_id, new.period_month, new.final_score, new.incentive_amount, new.frozen_at, new.frozen_by)
-           is distinct from
-           (old.clinic_id, old.employee_id, old.period_month, old.final_score, old.incentive_amount, old.frozen_at, old.frozen_by)
-        then
+        -- of this trigger unlocked AND already edited in one shot. Diffing
+        -- the two rows with unlocked_at/unlocked_by stripped out (rather
+        -- than a hand-maintained list of the OTHER columns) means a future
+        -- column added to this table is covered automatically instead of
+        -- silently slipping through this check unguarded.
+        if (to_jsonb(new) - 'unlocked_at' - 'unlocked_by') is distinct from (to_jsonb(old) - 'unlocked_at' - 'unlocked_by') then
             raise exception 'evaluation_snapshot % must be unlocked in its own statement, separate from any edit', old.id;
         end if;
     end if;
@@ -154,15 +165,25 @@ begin
         return new;
     end if;
 
+    -- Grouped by purchase_order_line_id, not one row per supplier_return_line:
+    -- a single return can carry more than one line against the same PO line
+    -- (no constraint stops it), and checking each one against the ceiling
+    -- independently -- adding only that one row's qty back in -- undercounts
+    -- whenever a return has two or more lines on the same PO line.
     for line in
-        select purchase_order_line_id, qty
+        select purchase_order_line_id, sum(qty) as qty
         from supplier_return_line
         where supplier_return_id = new.id
+        group by purchase_order_line_id
     loop
         select qty_received into received
         from purchase_order_line
         where id = line.purchase_order_line_id
         for update;
+
+        if not found then
+            raise exception 'purchase_order_line % not found', line.purchase_order_line_id;
+        end if;
 
         -- This row's own status is still its OLD value ('rejected') from
         -- this query's point of view -- a BEFORE trigger runs before the
@@ -176,8 +197,8 @@ begin
           and r.status <> 'rejected';
 
         if already_returned + line.qty > received then
-            raise exception 'reinstating supplier_return % exceeds remaining receivable qty % on purchase_order_line % (already returned %, reinstating %)',
-                new.id, received, line.purchase_order_line_id, already_returned, line.qty;
+            raise exception 'reinstating supplier_return % exceeds remaining receivable qty % on purchase_order_line % (received %, already returned %, reinstating %)',
+                new.id, received - already_returned, line.purchase_order_line_id, received, already_returned, line.qty;
         end if;
     end loop;
 
@@ -189,6 +210,35 @@ create trigger trg_supplier_return_reinstated_recheck
     before update of status on supplier_return
     for each row
     execute function supplier_return_reinstated_recheck_ceiling();
+
+-- The ceiling is `returns <= qty_received`, but nothing so far stops the
+-- OTHER side of that comparison from moving: qty_received can be freely
+-- lowered after returns have already been approved against it, breaking the
+-- invariant just as surely as raising the returns above it would.
+create or replace function purchase_order_line_check_ceiling_on_receipt_change()
+returns trigger as $$
+declare
+    already_returned numeric(12,2);
+begin
+    select coalesce(sum(rl.qty), 0) into already_returned
+    from supplier_return_line rl
+    join supplier_return r on r.id = rl.supplier_return_id
+    where rl.purchase_order_line_id = new.id
+      and r.status <> 'rejected';
+
+    if already_returned > new.qty_received then
+        raise exception 'purchase_order_line % qty_received (%) would fall below its already-returned qty (%)',
+            new.id, new.qty_received, already_returned;
+    end if;
+
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger trg_purchase_order_line_receipt_ceiling
+    before update of qty_received on purchase_order_line
+    for each row
+    execute function purchase_order_line_check_ceiling_on_receipt_change();
 
 -- Rows that are supposed to be append-only ledgers must actually be
 -- unappendable-to after the fact: nothing about their column grants or RLS
@@ -263,9 +313,19 @@ begin
     -- missing row is detected the other way: every referenced table here has
     -- clinic_id declared not null, so ref_clinic staying NULL only happens
     -- when the row itself doesn't exist.
+    --
+    -- ref_table is itself one of V9's RLS-protected tables, so this trigger
+    -- (running as app_rw, same as any other statement) can never actually
+    -- SEE a row belonging to a different clinic in the first place -- it
+    -- comes back as zero rows, same as if the id didn't exist at all. That
+    -- makes the "cross-tenant reference" branch below unreachable for a
+    -- normal app_rw session; the message below says so rather than claiming
+    -- a distinction this trigger can't actually observe. The branch stays as
+    -- defense in depth for any future caller that isn't RLS-scoped (a
+    -- privileged migration/backfill role, say).
     execute format('select clinic_id from %I where id = $1', ref_table) into ref_clinic using fk_value;
     if ref_clinic is null then
-        raise exception '% % referenced by %.% not found', ref_table, fk_value, tg_table_name, fk_column;
+        raise exception '% % referenced by %.% not found (or belongs to a different clinic, which looks identical under RLS)', ref_table, fk_value, tg_table_name, fk_column;
     end if;
 
     if ref_clinic is distinct from new.clinic_id then

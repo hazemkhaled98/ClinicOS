@@ -39,12 +39,34 @@ grant select, insert, update, delete on all tables in schema public to app_rw;
 revoke insert, update, delete on clinic, app_user, role, permission, role_permission from app_rw;
 alter default privileges in schema public grant select, insert, update, delete on tables to app_rw;
 
+-- supplier_return isn't itself append-only, but supplier_return_line (its
+-- child) is meant to be: trg_supplier_return_line_immutable (V10) only
+-- forbids a DIRECT delete on that table, and deliberately lets a delete
+-- CASCADED IN from its own parent through (so a clinic/inventory_item with
+-- ledger history can still be removed). supplier_return is an ordinary
+-- business row with no such exemption reason, so leaving DELETE granted on
+-- it would let app_rw erase a whole line of "immutable" history just by
+-- deleting the return that owns it. There's no legitimate flow that deletes
+-- a return outright anyway -- rejecting one is a status change, not removal.
+revoke delete on supplier_return from app_rw;
+
 -- app_user.password_hash must never be reachable by a blanket table SELECT --
 -- a single injection or logic bug on the tenant connection would otherwise
 -- dump every user's credential hash across every tenant. Column-level grant
 -- excludes it; the login path gets it only through this SECURITY DEFINER
 -- function (owned by the migration role, which does have full table access,
 -- so it can return the column app_rw itself cannot see directly).
+--
+-- search_path MUST list pg_temp last, explicitly, and every relation MUST be
+-- schema-qualified: app_rw keeps its default CREATE TEMP TABLE right, and
+-- without pg_temp pinned to the end, Postgres resolves an unqualified name
+-- against the session's temp schema BEFORE `public` -- app_rw could shadow
+-- app_user with `create temp table app_user (...)` and this SECURITY
+-- DEFINER function would read the attacker's row instead, handing back
+-- whatever password_hash the attacker put there. That defeats the whole
+-- point of the lockdown: the same "logic bug on the tenant connection" this
+-- function exists to contain is exactly what lets an attacker create that
+-- temp table in the first place.
 revoke select on app_user from app_rw;
 grant select (id, email, full_name, status, last_login_at, created_at) on app_user to app_rw;
 
@@ -52,9 +74,10 @@ create function app_user_credentials_lookup(p_email citext)
 returns table (id uuid, password_hash text, status text)
 language sql
 security definer
-set search_path = public
+stable
+set search_path = pg_catalog, public, pg_temp
 as $$
-    select id, password_hash, status from app_user where email = p_email;
+    select id, password_hash, status from public.app_user where email = p_email;
 $$;
 
 revoke all on function app_user_credentials_lookup(citext) from public;
