@@ -1,4 +1,4 @@
-# SaaS Database Redesign — عيادتي / 3yadty
+# SaaS Database Redesign — ClinicOS
 
 ## Context
 

@@ -1,4 +1,4 @@
-# Revamp عيادتي / 3yadty into a multi-tenant SaaS
+# ClinicOS — Multi-tenant SaaS dental clinic staff-management app
 
 ## Context
 

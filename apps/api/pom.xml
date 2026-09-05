@@ -15,7 +15,7 @@
     <artifactId>clinicos-api</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>ClinicOS API</name>
-    <description>Multi-tenant SaaS revamp of the 3yadty dental clinic staff-management app</description>
+    <description>Multi-tenant SaaS dental clinic staff-management app</description>
 
     <properties>
         <java.version>25</java.version>
