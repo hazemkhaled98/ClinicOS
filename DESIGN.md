@@ -30,7 +30,7 @@ colors:
   status-danger: "#b23b30"
   status-info-deep: "#1d4ed8"
   status-info-bg: "#e3edfb"
-  status-info: "#2e7d6f"
+  status-info: "#2563eb"
   
   # Dark Theme (Reserved, Not Implemented)
   dark-canvas: "#0e1613"
@@ -71,14 +71,26 @@ typography:
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: 0
-    note: "Use font-variant-numeric: tabular-nums when displaying money, scores, or counts"
+  card-title-numeric:
+    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: 0
+    fontFeature: "'tnum' 1"
   body:
     fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: 0
-    note: "Use font-variant-numeric: tabular-nums when displaying money, scores, or counts"
+  body-numeric:
+    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontSize: 14px
+    fontWeight: 400
+    lineHeight: 1.5
+    letterSpacing: 0
+    fontFeature: "'tnum' 1"
   body-sm:
     fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
     fontSize: 13px
@@ -91,6 +103,13 @@ typography:
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: 0
+  label-numeric:
+    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontSize: 12px
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: 0
+    fontFeature: "'tnum' 1"
   caption:
     fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
     fontSize: 11px
@@ -112,171 +131,154 @@ spacing:
   xl: 24px
   xxl: 32px
 
-elevation:
-  hairline: 1px solid {colors.hairline}
-  modal-shadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-
 components:
   app-drawer:
-    background: "linear-gradient(180deg, {colors.dark-drawer-start} 0%, {colors.dark-drawer-end} 100%)"
+    backgroundColor: "linear-gradient(180deg, {colors.dark-drawer-start}, {colors.dark-drawer-end})"
     textColor: "{colors.dark-ink}"
     width: "240px"
     padding: "{spacing.lg}"
   nav-item:
-    default:
-      backgroundColor: transparent
-      textColor: "{colors.dark-ink-muted}"
-      padding: "{spacing.sm} {spacing.md}"
-      rounded: "{rounded.sm}"
-      typography: "{typography.body-sm}"
-    hover:
-      backgroundColor: "rgba(255, 255, 255, 0.05)"
-      textColor: "{colors.dark-ink}"
-    active:
-      backgroundColor: "{colors.primary}"
-      textColor: "{colors.on-primary}"
-      borderInlineStart: 3px solid {colors.primary}
+    backgroundColor: transparent
+    textColor: "{colors.dark-ink-muted}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.sm} {spacing.md}"
+  nav-item-hover:
+    backgroundColor: "rgba(255, 255, 255, 0.05)"
+    textColor: "{colors.dark-ink}"
+  nav-item-active:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
   topbar:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    borderBottom: "{elevation.hairline}"
+    typography: "{typography.body}"
     padding: "{spacing.md} {spacing.lg}"
-    height: 56px
+    height: "56px"
   page-header:
-    paddingTop: "{spacing.lg}"
-    paddingInlineEnd: "{spacing.lg}"
-    paddingInlineStart: "{spacing.lg}"
-    paddingBottom: "{spacing.md}"
-  page-header-kicker:
-    typography: "{typography.label}"
-    textColor: "{colors.ink-muted}"
-    marginBlockEnd: "{spacing.xs}"
-  page-header-title:
-    typography: "{typography.page-title}"
+    backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    marginBlockEnd: "{spacing.sm}"
-  page-header-subtitle:
-    typography: "{typography.body-sm}"
-    textColor: "{colors.ink-muted}"
+    padding: "{spacing.lg} {spacing.lg} {spacing.md}"
   data-grid:
-    headerBackground: "{colors.table-header-bg}"
-    headerTypography: "{typography.label}"
-    bodyTypography: "{typography.body-sm}"
-    cellPaddingBlock: "{spacing.sm}"
-    cellPaddingInline: "{spacing.md}"
-    rowBorder: "{elevation.hairline}"
-    zebraBackground: "{colors.zebra-row}"
-    hoverBackground: "rgba({colors.primary}, 0.05)"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.sm} {spacing.md}"
+  data-grid-header:
+    backgroundColor: "{colors.table-header-bg}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.label}"
+    padding: "{spacing.sm} {spacing.md}"
   status-badge:
-    padding: "{spacing.xs} {spacing.sm}"
-    rounded: "{rounded.sm}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
     typography: "{typography.label}"
-    success:
-      backgroundColor: "{colors.status-success-bg}"
-      textColor: "{colors.status-success-deep}"
-    warning:
-      backgroundColor: "{colors.status-warning-bg}"
-      textColor: "{colors.status-warning-deep}"
-    danger:
-      backgroundColor: "{colors.status-danger-bg}"
-      textColor: "{colors.status-danger-deep}"
-    info:
-      backgroundColor: "{colors.status-info-bg}"
-      textColor: "{colors.status-info-deep}"
+    rounded: "{rounded.sm}"
+    padding: "{spacing.xs} {spacing.sm}"
+  status-badge-success:
+    backgroundColor: "{colors.status-success-bg}"
+    textColor: "{colors.status-success-deep}"
+  status-badge-warning:
+    backgroundColor: "{colors.status-warning-bg}"
+    textColor: "{colors.status-warning-deep}"
+  status-badge-danger:
+    backgroundColor: "{colors.status-danger-bg}"
+    textColor: "{colors.status-danger-deep}"
+  status-badge-info:
+    backgroundColor: "{colors.status-info-bg}"
+    textColor: "{colors.status-info-deep}"
+  status-dot-success:
+    backgroundColor: "{colors.status-success}"
+    rounded: "{rounded.pill}"
+    size: "8px"
+  status-dot-warning:
+    backgroundColor: "{colors.status-warning}"
+    rounded: "{rounded.pill}"
+    size: "8px"
+  status-dot-danger:
+    backgroundColor: "{colors.status-danger}"
+    rounded: "{rounded.pill}"
+    size: "8px"
+  status-dot-info:
+    backgroundColor: "{colors.status-info}"
+    rounded: "{rounded.pill}"
+    size: "8px"
   score-badge:
-    padding: "{spacing.xs} {spacing.sm}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    typography: "{typography.label-numeric}"
     rounded: "{rounded.sm}"
-    typography: "{typography.label}"
-    fontVariantNumeric: tabular-nums
-    score-85plus:
-      backgroundColor: "{colors.status-success-bg}"
-      textColor: "{colors.status-success-deep}"
-      description: "Score ≥85"
-    score-60to84:
-      backgroundColor: "{colors.status-warning-bg}"
-      textColor: "{colors.status-warning-deep}"
-      description: "Score 60–84"
-    score-below60:
-      backgroundColor: "{colors.status-danger-bg}"
-      textColor: "{colors.status-danger-deep}"
-      description: "Score <60"
+    padding: "{spacing.xs} {spacing.sm}"
   form-field:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    borderColor: "{colors.hairline}"
-    border: "{elevation.hairline}"
+    typography: "{typography.body}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm} {spacing.md}"
-    typography: "{typography.body}"
-    focus-borderColor: "{colors.primary}"
-    focus-shadow: "0 0 0 3px rgba({colors.primary}, 0.1)"
+  form-field-focus:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
   form-card:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    border: "{elevation.hairline}"
     rounded: "{rounded.md}"
     padding: "{spacing.lg}"
-    gap: "{spacing.md}"
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    border: none
+    typography: "{typography.body-sm}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm} {spacing.lg}"
-    typography: "{typography.body-sm}"
-    fontWeight: 600
-    cursor: pointer
   button-primary-hover:
-    backgroundColor: "darken({colors.primary}, 10%)"
+    backgroundColor: "#146c5f"
+    textColor: "{colors.on-primary}"
   button-primary-active:
-    backgroundColor: "darken({colors.primary}, 15%)"
+    backgroundColor: "#136659"
+    textColor: "{colors.on-primary}"
+  button-primary-disabled:
+    backgroundColor: "{colors.primary-50pct}"
+    textColor: "{colors.ink}"
   button-secondary:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    border: "{elevation.hairline}"
+    typography: "{typography.body-sm}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm} {spacing.lg}"
-    typography: "{typography.body-sm}"
-    fontWeight: 600
-    cursor: pointer
   button-secondary-hover:
     backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
   button-danger:
     backgroundColor: "{colors.status-danger}"
     textColor: "{colors.on-primary}"
-    border: none
+    typography: "{typography.body-sm}"
     rounded: "{rounded.sm}"
     padding: "{spacing.sm} {spacing.lg}"
-    typography: "{typography.body-sm}"
-    fontWeight: 600
-    cursor: pointer
   button-danger-hover:
-    backgroundColor: "darken({colors.status-danger}, 10%)"
+    backgroundColor: "#a03528"
+    textColor: "{colors.on-primary}"
   empty-state:
+    backgroundColor: transparent
     padding: "{spacing.xxl}"
-    textAlign: center
   empty-state-icon:
-    fontSize: 64px
-    color: "{colors.ink-muted}"
-    marginBlockEnd: "{spacing.lg}"
+    textColor: "{colors.ink-muted}"
+    size: "64px"
   empty-state-message:
+    textColor: "{colors.ink-muted}"
     typography: "{typography.body}"
-    color: "{colors.ink-muted}"
   dialog:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    border: "{elevation.hairline}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "{spacing.lg}"
-    shadow: "{elevation.modal-shadow}"
-    minWidth: "400px"
+    width: "400px"
   toast:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    border: "{elevation.hairline}"
+    typography: "{typography.body-sm}"
     rounded: "{rounded.md}"
     padding: "{spacing.md} {spacing.lg}"
-    shadow: "{elevation.modal-shadow}"
 
 ---
 
@@ -332,7 +334,7 @@ Each status has three values: `-deep` (text/icon on light backgrounds), `-bg` (t
 **Info** — Informational or neutral state (uses blue, NOT teal — teal is reserved for primary accent only).
 - Deep: `{colors.status-info-deep}` (#1d4ed8)
 - Background: `{colors.status-info-bg}` (#e3edfb)
-- Solid: `{colors.status-info}` (#2e7d6f)
+- Solid: `{colors.status-info}` (#2563eb)
 
 ### Dark Theme (Reserved, Not Implemented)
 The following dark tokens are documented for a future dark theme but are **not wired into any shipped theme** in this refactor. They are provided as reference values for when a dark mode is implemented.
@@ -369,14 +371,16 @@ The entire system is set in **Cairo** — a typeface that renders Arabic and Lat
 | `page-title` | 28px | 700 | 1.3 | Page headline, panel titles |
 | `section-title` | 20px | 700 | 1.4 | Section headers within a page |
 | `card-title` | 16px | 600 | 1.4 | Card headers, modal titles |
+| `card-title-numeric` | 16px | 600 | 1.4 | Same as `card-title`, tabular figures — use for money/score/count values |
 | `body` | 14px | 400 | 1.5 | Default body copy, dense descriptions |
+| `body-numeric` | 14px | 400 | 1.5 | Same as `body`, tabular figures — use for money/score/count values |
 | `body-sm` | 13px | 400 | 1.4 | Table rows, form labels, helper text |
 | `label` | 12px | 600 | 1.3 | Form labels, badge text, column headers |
 | `caption` | 11px | 400 | 1.3 | Metadata, timestamps, supplementary notes |
 
 ### Principles
 - **No negative letter-spacing:** Negative tracking degrades Arabic glyph joining and ligature rendering. All tokens are set at 0 letter-spacing.
-- **Tabular numerals on numbers:** The `body` and `card-title` roles require `font-variant-numeric: tabular-nums` when displaying money, scores, counts, or any numeric data so digits align in columns.
+- **Tabular numerals on numbers:** Use `body-numeric` / `card-title-numeric` (tabular figures via `font-feature-settings: 'tnum' 1`) instead of `body` / `card-title` when displaying money, scores, counts, or any numeric data, so digits align in columns.
 - **Arabic-first hierarchy:** The type scale is conservative and data-oriented, not marketing-oriented. The largest size (28px) is sufficient for page titles in a dense back-office; there is no 64px display tier.
 - **Latin text inside Arabic:** When Latin words or numbers appear inline within an Arabic paragraph, they naturally remain left-to-right; do **not** force-flip them to match the surrounding text direction.
 
@@ -475,7 +479,7 @@ Each component is defined with its default state and typical variants. All use l
 **`topbar`** — Top navigation bar
 - Background: `{colors.surface}` (white)
 - Text: `{colors.ink}` (dark)
-- Border bottom: `{elevation.hairline}` (1px light line)
+- Border bottom: 1px solid `{colors.hairline}`
 - Padding: `{spacing.md}` (12px) vertical × `{spacing.lg}` (16px) horizontal (using block/inline logical properties)
 - Height: 56px (fixed, for consistent icon/avatar sizing)
 - Typical content: clinic name, user menu, breadcrumbs (if needed)
@@ -507,7 +511,7 @@ Each component is defined with its default state and typical variants. All use l
 - Header typography: `{typography.label}` (12px / 600)
 - Body row typography: `{typography.body-sm}` (13px / 400)
 - Cell padding: `{spacing.sm}` (8px) block × `{spacing.md}` (12px) inline (using logical properties)
-- Row divider: `{elevation.hairline}` (1px hairline between rows)
+- Row divider: 1px solid `{colors.hairline}` between rows
 - Zebra background: alternate rows at `{colors.zebra-row}` (#f8faf9) for readability
 - Hover state: subtle teal overlay at ~5% opacity of `{colors.primary}`
 - Note: Use logical properties (`padding-inline-start`, `margin-block-end`) for RTL safety
@@ -528,7 +532,7 @@ Each component is defined with its default state and typical variants. All use l
 - Padding: `{spacing.xs}` (4px) × `{spacing.sm}` (8px)
 - Rounded: `{rounded.sm}` (6px)
 - Typography: `{typography.label}` (12px / 600)
-- **Font variant:** `font-variant-numeric: tabular-nums` so numeric scores align consistently
+- Typography: `{typography.label-numeric}` (12px / 600, tabular figures) so numeric scores align consistently
 - **Score mapping** (uses semantic ramp, not a separate color family):
   - Score ≥85: Success styling (bg `{colors.status-success-bg}`, text `{colors.status-success-deep}`)
   - Score 60–84: Warning styling (bg `{colors.status-warning-bg}`, text `{colors.status-warning-deep}`)
@@ -539,7 +543,7 @@ Each component is defined with its default state and typical variants. All use l
 **`form-field`** — Text input, number field, dropdown, textarea, etc.
 - Background: `{colors.surface}` (white)
 - Text: `{colors.ink}` (dark)
-- Border: `{elevation.hairline}` (1px light border)
+- Border: 1px solid `{colors.hairline}`
 - Rounded: `{rounded.sm}` (6px)
 - Padding: `{spacing.sm}` (8px) (using logical padding-inline/padding-block)
 - Typography: `{typography.body}` (14px / 400)
@@ -549,7 +553,7 @@ Each component is defined with its default state and typical variants. All use l
 
 **`form-card`** — Container for a form (sign-in, settings, etc.)
 - Background: `{colors.surface}` (white)
-- Border: `{elevation.hairline}` (1px hairline)
+- Border: 1px solid `{colors.hairline}`
 - Rounded: `{rounded.md}` (8px)
 - Padding: `{spacing.lg}` (16px)
 - Gap between form fields: `{spacing.md}` (12px) (using gap property if Flexbox/Grid)
@@ -564,14 +568,14 @@ Each component is defined with its default state and typical variants. All use l
 - Typography: `{typography.body-sm}` (13px / 600)
 - Border: none
 - Cursor: pointer
-- **Hover:** darken background by ~10%
-- **Active/Pressed:** darken background by ~15%
-- **Disabled:** background `{colors.primary-50pct}`, cursor not-allowed
+- **Hover:** background `#146c5f` (~10% darker)
+- **Active/Pressed:** background `#136659` (~15% darker)
+- **Disabled:** background `{colors.primary-50pct}`, text `{colors.ink}` (not white — fails contrast on the muted fill), cursor not-allowed
 
 **`button-secondary`** — Secondary action (cancel, close, reset)
 - Background: `{colors.surface}` (white)
 - Text: `{colors.ink}` (dark)
-- Border: `{elevation.hairline}` (1px light border)
+- Border: 1px solid `{colors.hairline}`
 - Rounded: `{rounded.sm}` (6px)
 - Padding: same as primary
 - Typography: same as primary
@@ -587,18 +591,18 @@ Each component is defined with its default state and typical variants. All use l
 - Typography: same as primary
 - Border: none
 - Cursor: pointer
-- **Hover:** darken background by ~10%
-- **Disabled:** background `{colors.primary-50pct}`, cursor not-allowed
+- **Hover:** background `#a03528` (~10% darker)
+- **Disabled:** background `{colors.primary-50pct}`, text `{colors.ink}` (not white — fails contrast on the muted fill), cursor not-allowed
 
 ### Dialogs & Modals
 
 **`dialog`** — Confirmation, form, or content modal
 - Background: `{colors.surface}` (white)
 - Text: `{colors.ink}`
-- Border: `{elevation.hairline}` (1px hairline)
+- Border: 1px solid `{colors.hairline}`
 - Rounded: `{rounded.md}` (8px)
 - Padding: `{spacing.lg}` (16px)
-- Shadow: `{elevation.modal-shadow}` (barely-there modal shadow; the ONLY shadow in the system)
+- Shadow: `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)` (barely-there modal shadow; the ONLY shadow in the system)
 - Minimum width: 400px (on desktop; reflow to 100% on mobile minus padding)
 - Title typography: `{typography.card-title}` (16px / 600)
 - Body typography: `{typography.body}` (14px / 400)
@@ -607,10 +611,10 @@ Each component is defined with its default state and typical variants. All use l
 **`toast`** — Transient notification (success, error, info)
 - Background: `{colors.surface}` (white)
 - Text: `{colors.ink}`
-- Border: `{elevation.hairline}` (1px hairline)
+- Border: 1px solid `{colors.hairline}`
 - Rounded: `{rounded.md}` (8px)
 - Padding: `{spacing.md}` (12px) block × `{spacing.lg}` (16px) inline
-- Shadow: `{elevation.modal-shadow}`
+- Shadow: `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`
 - Typography: `{typography.body-sm}` (13px / 400)
 - Position: typically bottom-right (LTR) / bottom-left (RTL) with safe margins from viewport edge
 - Auto-dismiss after 4–5 seconds unless user interacts
@@ -633,7 +637,7 @@ Each component is defined with its default state and typical variants. All use l
 
 - **Colour:** Reserve `{colors.primary}` (teal) exclusively for primary actions, active states, and focus signals. Use the semantic ramp (success, warning, danger, info) for all status and feedback — never invent a new colour outside this token set for any future view or feature.
 - **Elevation:** Use 1px hairlines as the default elevation cue. Reserve the modal shadow for dialogs and popovers only; never shadow a card, button, or regular container.
-- **Typography:** Always use Cairo at weights 400, 600, or 700. Apply `font-variant-numeric: tabular-nums` to body and card-title when displaying money, scores, or counts so numbers align vertically.
+- **Typography:** Always use Cairo at weights 400, 600, or 700. Use `body-numeric` / `card-title-numeric` for money, scores, or counts so numbers align vertically.
 - **RTL:** Use only logical CSS properties (`padding-inline-start`, `margin-block-end`, `border-inline-start`, etc.). Test every layout with `dir="rtl"` to verify correctness.
 - **Icons:** Ensure direction-implying icons (arrows, chevrons, back/forward) flip automatically in RTL. Validate in both LTR and RTL rendering.
 - **Arabic + Latin:** When Latin words or numbers appear inline in Arabic text, allow them to render left-to-right naturally; do not force-flip them.
