@@ -21,41 +21,86 @@
 }
 
 :root {
-  --teal: #1f5a52;
-  --teal2: #2e7d6f;
-  --tealdk: #163f39;
-  --mint: #eaf5f1;
-  --accent: #2e9e84;
-  --blue: #2e7d6f;
-  --blue2: #3fa890;
-  --lblue: #eef6f3;
-  --green: #1f7a4d;
-  --amber: #b87900;
-  --red: #b23b30;
-  --purple: #7a5bd0;
-  --bg: #f4f7f8;
-  --card: #ffffff;
-  --line: #e1e8e6;
-  --ink: #16201d;
-  --muted: #48564f;
-  --navy: #1f5a52;
-  --radius: 18px;
+  /* Light Theme — Primary & Brand */
+  --c-primary: #17786a;
+  --c-primary-50pct: #abb0ad;
+  --c-on-primary: #ffffff;
+
+  /* Light Theme — Neutrals */
+  --c-canvas: #f4f7f6;
+  --c-surface: #ffffff;
+  --c-hairline: #e1e8e5;
+  --c-ink: #16201d;
+  --c-ink-muted: #5c6b66;
+  --c-table-header-bg: #eef3f1;
+  --c-zebra-row: #f8faf9;
+
+  /* Light Theme — Semantic Status */
+  --c-status-success-deep: #166534;
+  --c-status-success-bg: #e3f6ea;
+  --c-status-success: #1f7a4d;
+  --c-status-warning-deep: #8a5a00;
+  --c-status-warning-bg: #fef3d6;
+  --c-status-warning: #b87900;
+  --c-status-danger-deep: #9d2b1f;
+  --c-status-danger-bg: #fce4e1;
+  --c-status-danger: #b23b30;
+  --c-status-info-deep: #1d4ed8;
+  --c-status-info-bg: #e3edfb;
+  --c-status-info: #2563eb;
+
+  /* Rounded Radius Scale */
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-pill: 9999px;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+
+  /* Dark Theme Tokens — Reserved, NOT wired into any selector below */
+  --c-dark-canvas: #0e1613;
+  --c-dark-surface: #182420;
+  --c-dark-ink: #eaf1ee;
+  --c-dark-hairline: #28362f;
+  --c-dark-ink-muted: #93a49b;
+  --c-dark-table-header-bg: #1f2b26;
+  --c-dark-zebra-row: #141d1a;
+  --c-dark-primary: #2dd4bf;
+  --c-dark-drawer-start: #0a2e29;
+  --c-dark-drawer-end: #051917;
+  --c-dark-status-success-deep: #4ade80;
+  --c-dark-status-success-bg: #0f2b1b;
+  --c-dark-status-warning-deep: #fbbf24;
+  --c-dark-status-warning-bg: #332a10;
+  --c-dark-status-danger-deep: #fb7185;
+  --c-dark-status-danger-bg: #331613;
+  --c-dark-status-info-deep: #60a5fa;
+  --c-dark-status-info-bg: #12233a;
 }
 
 [theme~="light"] {
-  --lumo-primary-color: var(--teal);
-  --lumo-primary-color-50pct: color-mix(in srgb, var(--teal) 50%, transparent);
-  --lumo-primary-text-color: var(--teal);
-  --lumo-base-color: var(--card);
-  --lumo-body-text-color: var(--ink);
-  --lumo-secondary-text-color: var(--muted);
-  --lumo-tint-5pct: var(--mint);
-  --lumo-shade-5pct: var(--line);
+  --lumo-primary-color: var(--c-primary);
+  --lumo-primary-color-50pct: var(--c-primary-50pct);
+  --lumo-primary-text-color: var(--c-primary);
+  --lumo-base-color: var(--c-surface);
+  --lumo-body-text-color: var(--c-ink);
+  --lumo-secondary-text-color: var(--c-ink-muted);
+  --lumo-tint-5pct: var(--c-canvas);
+  --lumo-shade-5pct: var(--c-hairline);
+  --lumo-success-color-50pct: var(--c-status-success-deep);
+  --lumo-warning-color-50pct: var(--c-status-warning-deep);
+  --lumo-error-color-50pct: var(--c-status-danger-deep);
 }
 
 html {
-  font-family: "Almarai", "Tajawal", sans-serif;
-  background-color: var(--bg);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  background-color: var(--c-canvas);
 }
 
 body {
@@ -63,103 +108,136 @@ body {
 }
 
 vaadin-app-layout::part(navbar) {
-  background-color: var(--card);
-  border-bottom: 1px solid var(--line);
+  background-color: var(--c-surface);
+  border-block-end: 1px solid var(--c-hairline);
 }
 
+/* Topbar — Top navigation bar (56px height, light surface) */
 .clinicos-topbar {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-md);
   width: 100%;
+  height: 56px;
+  padding-block: var(--space-md);
+  padding-inline: var(--space-lg);
+  background-color: var(--c-surface);
+  border-block-end: 1px solid var(--c-hairline);
+  color: var(--c-ink);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .clinicos-topbar-t2 {
   font-size: 16px;
-  font-weight: 700;
-  color: var(--teal);
+  font-weight: 600;
+  color: var(--c-ink);
 }
 
 .clinicos-topbar-date {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--c-ink-muted);
   white-space: nowrap;
 }
 
+/* App Drawer — Dark sidebar navigation */
 .clinicos-drawer {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: linear-gradient(180deg, var(--teal), var(--tealdk));
-  color: #fff;
-  padding: 18px 0;
+  background: linear-gradient(180deg, var(--c-dark-drawer-start), var(--c-dark-drawer-end));
+  color: var(--c-dark-ink);
+  padding-block: 0;
+  padding-inline: 0;
+  width: 240px;
 }
 
 .clinicos-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-md);
   font-weight: 700;
-  font-size: 18px;
-  padding: 6px 20px 18px;
-  color: #fff;
+  font-size: 16px;
+  padding: var(--space-lg);
+  color: var(--c-dark-ink);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
+/* Nav container */
 .clinicos-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 12px;
+  gap: var(--space-xs);
+  padding-inline: var(--space-md);
+  padding-block: var(--space-md);
   flex: 1;
   overflow-y: auto;
 }
 
+/* Nav item — default state (light text, transparent bg) */
 .clinicos-nav-item {
   display: flex;
   align-items: center;
-  padding: 13px 15px;
-  border-radius: 12px;
-  background: none;
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+  border-radius: var(--radius-sm);
+  background: transparent;
   border: none;
-  color: #e6eefb;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
+  color: var(--c-dark-ink-muted);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
   text-align: start;
   cursor: pointer;
   transition: background-color 0.12s, color 0.12s;
 }
 
+/* Nav item — hover state (subtle white overlay) */
 .clinicos-nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--c-dark-ink);
 }
 
+/* Nav item — active state (teal bg, white text, semantic indicator) */
+.clinicos-nav-item[aria-current="page"] {
+  background-color: var(--c-primary);
+  color: var(--c-on-primary);
+  font-weight: 400;
+}
+
+/* User widget — bottom of drawer */
 .clinicos-who {
-  margin-top: auto;
-  padding: 14px 18px 4px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  margin-block-start: auto;
+  padding: var(--space-md) var(--space-lg) var(--space-sm);
+  border-block-start: 1px solid rgba(255, 255, 255, 0.14);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-md);
   font-size: 13px;
-  color: #fff;
+  font-weight: 400;
+  color: var(--c-dark-ink);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
 .clinicos-who-av {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   flex: none;
+  font-size: 12px;
 }
 
 .clinicos-who-name {
   font-weight: 700;
+  line-height: 1.4;
 }
 
 .clinicos-who-meta {
@@ -170,64 +248,191 @@ vaadin-app-layout::part(navbar) {
 .clinicos-who-role {
   opacity: 0.7;
   font-size: 11px;
+  line-height: 1.3;
 }
 
+/* Logout button — icon-button style */
 .clinicos-logout {
   background: rgba(255, 255, 255, 0.12);
   border: none;
   width: 34px;
   height: 34px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  color: #fff;
-  font-size: 15px;
+  color: var(--c-dark-ink);
+  font-size: 16px;
+  transition: background-color 0.12s;
 }
 
 .clinicos-logout:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Content — page wrapper */
 .clinicos-content {
-  padding: 22px 26px 50px;
+  padding-block: var(--space-lg);
+  padding-inline: var(--space-lg);
   max-width: 1060px;
   width: 100%;
   margin: 0 auto;
 }
 
+/* Section — page content area */
 .clinicos-section {
-  padding: 22px 26px 50px;
+  padding-block-start: var(--space-lg);
+  padding-block-end: var(--space-md);
+  padding-inline: var(--space-lg);
   max-width: 1060px;
   width: 100%;
   margin: 0 auto;
 }
 
+/* Page header — kicker (eyebrow label) */
 .clinicos-section-kicker {
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 13px;
-  margin: 0 0 6px;
+  color: var(--c-ink-muted);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0;
+  margin-block: 0;
+  margin-block-end: var(--space-xs);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
+/* Page header — title (capped at 28px per brief) */
 .clinicos-section-title {
-  font-size: 32px;
-  color: var(--ink);
-  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--c-ink);
+  margin-block: 0;
+  margin-block-end: var(--space-sm);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
+/* Page header — subtitle */
 .clinicos-section-sub {
-  color: var(--muted);
-  margin: 0 0 18px;
+  color: var(--c-ink-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  margin-block: 0;
+  margin-block-end: var(--space-md);
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
+/* Empty state placeholder */
 .clinicos-section-soon {
-  color: var(--muted);
-  background: var(--mint);
-  border: 1px dashed var(--teal);
-  border-radius: var(--radius);
-  padding: 16px 18px;
+  color: var(--c-ink-muted);
+  background: var(--c-surface);
+  border: 1px solid var(--c-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-xxl);
   margin: 0;
+  text-align: center;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Form card — login/signup screen container */
+.clinicos-auth-card {
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 360px;
+  width: 100%;
+}
+
+/* Empty state container */
+.clinicos-empty-state {
+  padding: var(--space-xxl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+}
+
+/* Empty state icon */
+.clinicos-empty-state-icon {
+  font-size: 64px;
+  color: var(--c-ink-muted);
+  line-height: 1;
+}
+
+/* Empty state message */
+.clinicos-empty-state-message {
+  color: var(--c-ink-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  max-width: 300px;
+}
+
+/* Status badge — base styles */
+.clinicos-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  background-color: var(--c-surface);
+  color: var(--c-ink);
+}
+
+/* Status badge — success */
+.clinicos-status-badge--success {
+  background-color: var(--c-status-success-bg);
+  color: var(--c-status-success-deep);
+}
+
+/* Status badge — warning */
+.clinicos-status-badge--warning {
+  background-color: var(--c-status-warning-bg);
+  color: var(--c-status-warning-deep);
+}
+
+/* Status badge — danger */
+.clinicos-status-badge--danger {
+  background-color: var(--c-status-danger-bg);
+  color: var(--c-status-danger-deep);
+}
+
+/* Status badge — info */
+.clinicos-status-badge--info {
+  background-color: var(--c-status-info-bg);
+  color: var(--c-status-info-deep);
+}
+
+/* Success banner — post-signup notification */
+.clinicos-banner-success {
+  background-color: var(--c-status-success-bg);
+  color: var(--c-status-success-deep);
+  border: 1px solid var(--c-status-success);
+  border-radius: var(--radius-sm);
+  padding-block: var(--space-md);
+  padding-inline: var(--space-lg);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
