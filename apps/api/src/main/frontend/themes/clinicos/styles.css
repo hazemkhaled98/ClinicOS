@@ -422,6 +422,13 @@ vaadin-app-layout::part(navbar) {
   color: var(--c-status-info-deep);
 }
 
+/* Auth hint — signup link on login form */
+.clinicos-auth-hint {
+  color: var(--c-ink-muted);
+  margin: 0;
+  margin-block-start: var(--space-md);
+}
+
 /* Success banner — post-signup notification */
 .clinicos-banner-success {
   background-color: var(--c-status-success-bg);

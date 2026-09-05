@@ -129,7 +129,7 @@ public class SignupView extends VerticalLayout {
 
         VerticalLayout card = new VerticalLayout(heading, clinicNameField, fullNameField,
                 usernameField, passwordField, confirmPasswordField, emailField, submitButton);
-        card.setWidth("360px");
+        card.addClassName("clinicos-auth-card");
         card.setPadding(true);
         card.setSpacing(true);
         clinicNameField.setWidthFull();
