@@ -33,6 +33,16 @@ com.clinicos
 
 Each business module exposes `api` and hides `internal`. The `ui` module is verified by `ModularityTests` to only reach published APIs.
 
+## UI & Design
+
+`DESIGN.md` (repo root) is binding for every new or modified UI component from this point forward. It defines the color tokens, typography scale, spacing, and component specs for ClinicOS's Vaadin Flow UI.
+
+Two rules apply without exception:
+- **No new color outside DESIGN.md's token set.** If a new UI need isn't covered by an existing token, extend DESIGN.md first, then use it — never hardcode a one-off hex value in a view or CSS file.
+- **RTL logical properties only.** Every CSS rule uses logical properties (`padding-inline-start/end`, `margin-inline`, `border-inline-start`, `inset-inline`) — never `left`/`right`/`padding-left`/etc. The whole UI is Arabic RTL; physical properties silently break on any LTR exception and vice versa.
+
+Theme implementation lives in `apps/api/src/main/frontend/themes/clinicos/styles.css`.
+
 ## Tenant Context — Critical Rule
 
 **Every transaction must have `app.clinic_id` set before any business query runs.**
