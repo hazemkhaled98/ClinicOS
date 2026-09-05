@@ -84,7 +84,11 @@
   --c-dark-status-info-bg: #12233a;
 }
 
-[theme~="light"] {
+:root {
+  /* Lumo overrides live on :root, not [theme~="light"] -- nothing in this
+     app ever sets a theme="light" attribute, so that selector never
+     matched and every Vaadin built-in component (login/signup submit
+     buttons, focus rings) silently fell back to Lumo's stock blue. */
   --lumo-primary-color: var(--c-primary);
   --lumo-primary-color-50pct: var(--c-primary-50pct);
   --lumo-primary-text-color: var(--c-primary);

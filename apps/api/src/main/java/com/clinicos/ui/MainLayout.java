@@ -58,6 +58,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     @Autowired
     public MainLayout(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
+        getElement().setAttribute("dir", "rtl");
         addToNavbar(createTopbar());
         addToDrawer(createDrawer());
     }
