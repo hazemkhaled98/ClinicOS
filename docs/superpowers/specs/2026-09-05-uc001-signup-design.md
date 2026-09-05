@@ -49,10 +49,10 @@ Model it on the existing functions in `apps/api/src/main/resources/db/migration/
 
 ### 2. `identity` module
 
-Follow the existing api/internal split and the `CredentialsLookupService` shape (auth-mode + `TransactionTemplate` + `JdbcTemplate`).
+Follow the existing api/internal split and the `CredentialsLookupService` shape (auth-mode + `TransactionTemplate` + `DSLContext`).
 
 - `identity/api/SignupService.java` — interface: `SignupResult signUp(SignupRequest request)` where `record SignupResult(UUID userId, UUID clinicId, UUID membershipId)`; `record SignupRequest(String clinicName, String fullName, String username, String email, String rawPassword)`; `SignupConflictException(Field field)` with `enum Field { USERNAME, EMAIL, CLINIC_SLUG }`.
-- `identity/internal/JdbcSignupService.java` — encodes the password with the existing `PasswordEncoder` bean (`ClinicOSSecurityConfig:36`, Argon2), derives the slug, wraps the call in `TenantContext.enterAuthMode()` / `exitAuthMode()` in try/finally (same as `ClinicOSUserDetailsService:34-53`), calls the V13 function, maps `DuplicateKeyException` → `SignupConflictException` by constraint name.
+- `identity/internal/DefaultSignupService.java` — encodes the password with the existing `PasswordEncoder` bean (`ClinicOSSecurityConfig:36`, Argon2), derives the slug, wraps the call in `TenantContext.enterAuthMode()` / `exitAuthMode()` in try/finally (same as `ClinicOSUserDetailsService:34-53`), calls the V13 function, maps `DuplicateKeyException` → `SignupConflictException` by constraint name.
 - Slug derivation stays in Java, not SQL: lowercase, non-alphanumeric → `-`, collapse repeats, trim. Arabic clinic names reduce to empty → fall back to a short random suffix. On a slug collision, retry once with a random suffix before surfacing the conflict.
 
 ### 3. `ui` module
@@ -80,7 +80,7 @@ Email verification, CAPTCHA/rate limiting, terms-acceptance record, trial expiry
 
 ## Tests
 
-- `identity/internal/JdbcSignupServiceIT` — happy path asserts one `clinic` (status `trial`), one `app_user` (status `active`, Argon2 hash verifies), one `membership` (role `owner`, status `active`); duplicate username → `SignupConflictException(USERNAME)`; slug collision retries then conflicts; direct `insert into clinic` as `app_rw` without a tenant still fails (proves the function is the only door).
+- `identity/internal/SignupServiceIT` — happy path asserts one `clinic` (status `trial`), one `app_user` (status `active`, Argon2 hash verifies), one `membership` (role `owner`, status `active`); duplicate username → `SignupConflictException(USERNAME)`; slug collision retries then conflicts; direct `insert into clinic` as `app_rw` without a tenant still fails (proves the function is the only door).
 - `identity/internal/SignupThenLoginIT` — sign up, then `ClinicOSUserDetailsService.loadUserByUsername` returns an `AuthenticatedUser` whose hash matches the raw password.
 - `ui/SignupViewTest` (Karibu) — required-field validation, password mismatch, conflict message rendering, success navigation.
 - Extend `ui/UC001LogInAndAccessTheSystemIT` (Playwright) with the sign-up → auto-login → landing-section path.
