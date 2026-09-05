@@ -42,7 +42,7 @@ public class CredentialsLookupService {
                         record.getId(), record.getPasswordHash(), record.getStatus())));
     }
 
-    private static Field<String> citext(String value) {
+    static Field<String> citext(String value) {
         return DSL.field("?::citext", String.class, value);
     }
 

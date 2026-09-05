@@ -67,9 +67,6 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
         SignupResult result = signupService.signUp(new SignupRequest(
                 clinicName, "Dr Ahmed", username, "owner@sunrise.example", rawPassword));
 
-        assertThat(result.userId()).isNotNull();
-        assertThat(result.clinicId()).isNotNull();
-        assertThat(result.membershipId()).isNotNull();
         assertThat(result).satisfies(SignupResult::userId, SignupResult::clinicId, SignupResult::membershipId)
                 .isNotNull();
 

@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.impl.DSL;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,17 +75,14 @@ public class DefaultSignupService implements SignupService {
         return transactionTemplate.execute(status -> {
             var record = dsl.selectFrom(SIGNUP_CLINIC_WITH_OWNER.call(
                     DSL.val(request.clinicName()), DSL.val(slug), DSL.val(request.fullName()),
-                    citext(request.username()), citext(request.email()), DSL.val(passwordHash)))
+                    CredentialsLookupService.citext(request.username()),
+                    CredentialsLookupService.citext(request.email()), DSL.val(passwordHash)))
                     .fetchOne();
             if (record == null) {
                 throw new IllegalStateException("signup_clinic_with_owner returned no row");
             }
             return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId());
         });
-    }
-
-    private Field<String> citext(String value) {
-        return DSL.field("?::citext", String.class, value);
     }
 
     private SignupConflictException mapConflict(DuplicateKeyException e) {
