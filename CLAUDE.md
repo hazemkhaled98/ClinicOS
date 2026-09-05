@@ -91,6 +91,14 @@ mvn -pl apps/api test -Dtest=ModularityTests
 
 ## Run Application Locally
 
+One-shot script (docker up + healthy wait + `app_rw` password + app run):
+
+```bash
+./dev-up.ps1
+```
+
+Manual equivalent:
+
 ```bash
 docker compose up -d postgres minio
 # Wait for postgres healthy, then:
