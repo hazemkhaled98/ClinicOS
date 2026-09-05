@@ -42,34 +42,45 @@ public final class TestFixtures {
         return id;
     }
 
-    public static UUID insertUser(Connection connection) throws Exception {
-        return insertUser(connection, "user-" + UUID.randomUUID(), "hash", "active", "Test User");
+    public static UUID insertUser(Connection connection, UUID clinicId) throws Exception {
+        return insertUser(connection, clinicId, "user-" + UUID.randomUUID(), "hash", "active", "Test User");
     }
 
-    public static UUID insertUser(Connection connection, String username, String passwordHash, String status) throws Exception {
-        return insertUser(connection, username, passwordHash, status, "Test User");
+    public static UUID insertUser(Connection connection, UUID clinicId, String username,
+            String passwordHash, String status) throws Exception {
+        return insertUser(connection, clinicId, username, passwordHash, status, "Test User");
     }
 
-    public static UUID insertUser(Connection connection, String username, String passwordHash, String status, String fullName)
-            throws Exception {
+    public static UUID insertUser(Connection connection, UUID clinicId, String username,
+            String passwordHash, String status, String fullName) throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
-                .insertInto(APP_USER, APP_USER.USERNAME, APP_USER.PASSWORD_HASH, APP_USER.STATUS, APP_USER.FULL_NAME)
-                .values(username, passwordHash, status, fullName)
+                .insertInto(APP_USER, APP_USER.CLINIC_ID, APP_USER.USERNAME, APP_USER.PASSWORD_HASH,
+                        APP_USER.STATUS, APP_USER.FULL_NAME)
+                .values(clinicId, username, passwordHash, status, fullName)
                 .returningResult(APP_USER.ID)
                 .fetchOne(APP_USER.ID);
     }
 
-    public static UUID insertUserWithEmail(Connection connection, String username, String email, String passwordHash, String fullName)
-            throws Exception {
+    public static UUID insertUserWithEmail(Connection connection, UUID clinicId, String username, String email,
+            String passwordHash, String fullName) throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
-                .insertInto(APP_USER, APP_USER.USERNAME, APP_USER.EMAIL, APP_USER.PASSWORD_HASH, APP_USER.FULL_NAME, APP_USER.STATUS)
-                .values(username, email, passwordHash, fullName, "active")
+                .insertInto(APP_USER, APP_USER.CLINIC_ID, APP_USER.USERNAME, APP_USER.EMAIL, APP_USER.PASSWORD_HASH,
+                        APP_USER.FULL_NAME, APP_USER.STATUS)
+                .values(clinicId, username, email, passwordHash, fullName, "active")
                 .returningResult(APP_USER.ID)
                 .fetchOne(APP_USER.ID);
     }
 
     public static UUID insertMembership(Connection connection, UUID clinicId, UUID userId) throws Exception {
         return insertMembership(connection, clinicId, userId, "owner");
+    }
+
+    public static UUID lookupUserId(Connection connection, UUID clinicId, String username) {
+        return DSL.using(connection, SQLDialect.POSTGRES)
+                .select(APP_USER.ID)
+                .from(APP_USER)
+                .where(APP_USER.CLINIC_ID.eq(clinicId), APP_USER.USERNAME.eq(username))
+                .fetchOne(APP_USER.ID);
     }
 
     public static UUID insertMembership(Connection connection, UUID clinicId, UUID userId, String roleCode) throws Exception {

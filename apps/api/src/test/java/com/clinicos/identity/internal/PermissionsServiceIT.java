@@ -49,9 +49,9 @@ class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
             clinicA = TestFixtures.insertClinic(connection);
             clinicB = TestFixtures.insertClinic(connection);
-            managerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection), "manager");
-            ownerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection), "owner");
-            receptionistMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection), "receptionist");
+            managerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "manager");
+            ownerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "owner");
+            receptionistMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "receptionist");
         }
     }
 
@@ -113,7 +113,7 @@ class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
     void membershipFromAnotherClinicIsInvisibleToBoundTenant() throws Exception {
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
-            UUID otherMembership = TestFixtures.insertMembership(connection, clinicB, TestFixtures.insertUser(connection), "owner");
+            UUID otherMembership = TestFixtures.insertMembership(connection, clinicB, TestFixtures.insertUser(connection, clinicB), "owner");
             TenantContext.set(clinicA);
 
             try {

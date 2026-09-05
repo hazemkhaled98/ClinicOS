@@ -81,13 +81,13 @@ public class DefaultSignupService implements SignupService {
             if (record == null) {
                 throw new IllegalStateException("signup_clinic_with_owner returned no row");
             }
-            return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId());
+            return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId(), record.getSlug());
         });
     }
 
     private SignupConflictException mapConflict(DuplicateKeyException e) {
         String message = e.getMostSpecificCause().getMessage();
-        if (message.contains("app_user_username_key")) {
+        if (message.contains("app_user_clinic_username_key")) {
             return new SignupConflictException(SignupConflictException.Field.USERNAME, message);
         }
         if (message.contains("idx_app_user_email_when_not_null")) {

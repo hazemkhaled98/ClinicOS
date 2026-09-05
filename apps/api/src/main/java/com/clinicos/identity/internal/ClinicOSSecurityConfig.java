@@ -22,16 +22,25 @@ import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
  * disabling CSRF here would be both redundant and less correct: Vaadin's
  * configurer already knows every internal endpoint it needs permitted, and
  * still protects the login POST with CSRF.
+ *
+ * <p>Login is clinic-scoped: the form-login filter uses a clinic-code
+ * {@link ClinicAuthenticationDetailsSource} so the provider can see the third
+ * form field, and authentication runs through
+ * {@link ClinicScopedAuthenticationProvider}.
  */
 @Configuration
 @EnableWebSecurity
 public class ClinicOSSecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+            ClinicAuthenticationDetailsSource clinicAuthenticationDetailsSource,
+            ClinicScopedAuthenticationProvider clinicScopedAuthenticationProvider) throws Exception {
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer
                 .loginView("/login", "/login")
                 .addLogoutHandler(new CookieClearingLogoutHandler("lastSection")));
+        http.formLogin(f -> f.authenticationDetailsSource(clinicAuthenticationDetailsSource));
+        http.authenticationProvider(clinicScopedAuthenticationProvider);
         return http.build();
     }
 

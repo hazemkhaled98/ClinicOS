@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -67,8 +68,9 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
         SignupResult result = signupService.signUp(new SignupRequest(
                 clinicName, "Dr Ahmed", username, "owner@sunrise.example", rawPassword));
 
-        assertThat(result).satisfies(SignupResult::userId, SignupResult::clinicId, SignupResult::membershipId)
-                .isNotNull();
+        assertThat(result).satisfies(SignupResult::userId, SignupResult::clinicId, SignupResult::membershipId,
+                SignupResult::clinicSlug).isNotNull();
+        assertThat(result.clinicSlug()).isEqualTo("sunrise-dental-" + suffix);
 
         try (Connection connection = superuserConnection()) {
             DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
@@ -94,30 +96,59 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void duplicateUsernameSurfacesSignupConflictOnUsername() {
-        String username = "duplicate-" + uniqueSuffix();
+    void sameUsernameInTwoDifferentClinicsSucceeds() {
+        String username = "shared-" + uniqueSuffix();
         String rawPassword = "correct-horse-battery-staple";
 
-        signupService.signUp(new SignupRequest(
+        SignupResult first = signupService.signUp(new SignupRequest(
                 "First Clinic " + uniqueSuffix(), "A", username, null, rawPassword));
+        SignupResult second = signupService.signUp(new SignupRequest(
+                "Second Clinic " + uniqueSuffix(), "B", username, null, rawPassword));
 
-        assertThatThrownBy(() -> signupService.signUp(new SignupRequest(
-                "Second Clinic " + uniqueSuffix(), "B", username, null, rawPassword)))
-                .isInstanceOfSatisfying(SignupConflictException.class,
-                        conflict -> assertThat(conflict.getField()).isEqualTo(Field.USERNAME));
+        assertThat(first.clinicId()).isNotNull();
+        assertThat(second.clinicId()).isNotNull();
+        assertThat(first.clinicId()).isNotEqualTo(second.clinicId());
+        assertThat(first.clinicSlug()).isNotEqualTo(second.clinicSlug());
     }
 
     @Test
-    void duplicateEmailSurfacesSignupConflictOnEmail() {
-        String email = "owner-" + uniqueSuffix() + "@duplicate.example";
+    void duplicateUsernameWithinOneClinicIsRejectedByTheDatabase() throws Exception {
+        String suffix = uniqueSuffix();
+        String clinicName = "Duplicate Clinic " + suffix;
+        SignupResult first = signupService.signUp(new SignupRequest(
+                clinicName, "A", "duplicate-" + suffix, null, "password-12345"));
 
-        signupService.signUp(new SignupRequest(
-                "First Clinic " + uniqueSuffix(), "A", "user-a-" + uniqueSuffix(), email, "password-12345"));
+try (Connection connection = superuserConnection()) {
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            assertThatThrownBy(() -> superuserDsl.insertInto(APP_USER,
+                    APP_USER.CLINIC_ID, APP_USER.USERNAME, APP_USER.PASSWORD_HASH, APP_USER.STATUS,
+                    APP_USER.FULL_NAME)
+                    .values(first.clinicId(), "duplicate-" + suffix, "hash", "active", "Direct Insert")
+                    .execute())
+                    .isInstanceOfSatisfying(IntegrityConstraintViolationException.class,
+                            e -> assertThat(e.getMessage())
+                                    .contains("app_user_clinic_username_key"));
+        }
+    }
 
-        assertThatThrownBy(() -> signupService.signUp(new SignupRequest(
-                "Second Clinic " + uniqueSuffix(), "B", "user-b-" + uniqueSuffix(), email, "password-12345")))
-                .isInstanceOfSatisfying(SignupConflictException.class,
-                        conflict -> assertThat(conflict.getField()).isEqualTo(Field.EMAIL));
+    @Test
+    void duplicateEmailWithinOneClinicIsRejectedByTheDatabase() throws Exception {
+        String suffix = uniqueSuffix();
+        String email = "owner-" + suffix + "@duplicate.example";
+        SignupResult first = signupService.signUp(new SignupRequest(
+                "Duplicate Clinic " + suffix, "A", "user-a-" + suffix, email, "password-12345"));
+
+        try (Connection connection = superuserConnection()) {
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            assertThatThrownBy(() -> superuserDsl.insertInto(APP_USER,
+                    APP_USER.CLINIC_ID, APP_USER.USERNAME, APP_USER.PASSWORD_HASH, APP_USER.STATUS,
+                    APP_USER.FULL_NAME, APP_USER.EMAIL)
+                    .values(first.clinicId(), "user-b-" + suffix, "hash", "active", "Direct Insert", email)
+                    .execute())
+                    .isInstanceOfSatisfying(IntegrityConstraintViolationException.class,
+                            e -> assertThat(e.getMessage())
+                                    .contains("idx_app_user_email_when_not_null"));
+        }
     }
 
     @Test

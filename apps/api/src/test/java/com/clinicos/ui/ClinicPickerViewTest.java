@@ -57,7 +57,7 @@ class ClinicPickerViewTest {
     @BeforeEach
     void setup() {
         MockVaadin.setup(routes);
-        testUser = new AuthenticatedUser(UUID.randomUUID(), "testuser", "hash");
+        testUser = new AuthenticatedUser(UUID.randomUUID(), UUID.randomUUID(), "testuser", "hash");
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(testUser, null, List.of()));
     }

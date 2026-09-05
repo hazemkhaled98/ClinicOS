@@ -117,10 +117,42 @@ class SignupViewTest {
     }
 
     @Test
+    void serverEmailConflictRendersInlineOnEmailField() {
+        when(signupService.signUp(org.mockito.ArgumentMatchers.any(SignupRequest.class)))
+                .thenThrow(new SignupConflictException(
+                        SignupConflictException.Field.EMAIL, "duplicate key value violates unique constraint"));
+
+        SignupView view = new SignupView(signupService, activityLogService);
+        fillRequiredFields(view, "العيادة", "أحمد", "taken-user", "secret-password", "secret-password");
+
+        _click(submitButton(view));
+
+        TextField email = emailField(view);
+        assertThat(email.isInvalid()).isTrue();
+        assertThat(email.getErrorMessage()).isEqualTo("البريد الإلكتروني مستخدم بالفعل");
+    }
+
+    @Test
+    void serverSlugConflictRendersInlineOnClinicNameField() {
+        when(signupService.signUp(org.mockito.ArgumentMatchers.any(SignupRequest.class)))
+                .thenThrow(new SignupConflictException(
+                        SignupConflictException.Field.CLINIC_SLUG, "duplicate key value violates unique constraint"));
+
+        SignupView view = new SignupView(signupService, activityLogService);
+        fillRequiredFields(view, "العيادة", "أحمد", "taken-user", "secret-password", "secret-password");
+
+        _click(submitButton(view));
+
+        TextField clinicName = clinicNameField(view);
+        assertThat(clinicName.isInvalid()).isTrue();
+        assertThat(clinicName.getErrorMessage()).isEqualTo("اسم العيادة مستخدم بالفعل");
+    }
+
+    @Test
     void successfulSignupWritesActivityLogAndNavigatesToLogin() {
         UUID clinicId = UUID.randomUUID();
         UUID membershipId = UUID.randomUUID();
-        SignupResult result = new SignupResult(UUID.randomUUID(), clinicId, membershipId);
+        SignupResult result = new SignupResult(UUID.randomUUID(), clinicId, membershipId, "nour-clinic");
         when(signupService.signUp(org.mockito.ArgumentMatchers.any(SignupRequest.class))).thenReturn(result);
 
         SignupView view = new SignupView(signupService, activityLogService);

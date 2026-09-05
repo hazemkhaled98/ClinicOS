@@ -11,9 +11,12 @@ insert into clinic_settings (clinic_id) values
     ('11111111-1111-1111-1111-111111111111'),
     ('22222222-2222-2222-2222-222222222222');
 
-insert into app_user (id, email, password_hash, full_name, username) values
-    ('aaaaaaaa-0000-0000-0000-000000000001', 'owner-a@example.com', 'x', 'Owner A', 'owner-a'),
-    ('aaaaaaaa-0000-0000-0000-000000000002', 'owner-b@example.com', 'x', 'Owner B', 'owner-b');
+-- Both clinics share the username 'owner' to prove the new per-clinic
+-- (clinic_id, username) uniqueness lets the same login name live in isolation
+-- on each tenant; the distinct emails stay on separate rows.
+insert into app_user (id, clinic_id, email, password_hash, full_name, username) values
+    ('aaaaaaaa-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'owner-a@example.com', 'x', 'Owner A', 'owner'),
+    ('aaaaaaaa-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'owner-b@example.com', 'x', 'Owner B', 'owner');
 
 insert into membership (clinic_id, user_id, role_id)
 select '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-0000-0000-0000-000000000001', id from role where code = 'owner';

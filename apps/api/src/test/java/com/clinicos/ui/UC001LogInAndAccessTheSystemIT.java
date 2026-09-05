@@ -69,7 +69,8 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         return String.format("http://localhost:%d/", port);
     }
 
-    private void login(String username, String password) {
+    private void login(String username, String password, String clinicCode) {
+        TextFieldElement.getByLabel(page, "كود العيادة").setValue(clinicCode);
         TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
         PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(password);
         ButtonElement.getByText(page, "دخول").click();
@@ -79,17 +80,19 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         return UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private void seedUserWithClinic(String username, String rawPassword) throws Exception {
+    private String seedUserWithClinic(String username, String rawPassword) throws Exception {
+        String slug = "clinic-" + uniqueSuffix();
         try (Connection connection = DriverManager.getConnection(
                 PostgresTestSupport.POSTGRES.getJdbcUrl(),
                 PostgresTestSupport.POSTGRES.getUsername(),
                 PostgresTestSupport.POSTGRES.getPassword())) {
             UUID clinicId = TestFixtures.insertClinic(
-                    connection, "Test Clinic " + username, "clinic-" + username);
+                    connection, "Test Clinic " + username, slug);
             UUID userId = TestFixtures.insertUser(
-                    connection, username, passwordEncoder.encode(rawPassword), "active");
+                    connection, clinicId, username, passwordEncoder.encode(rawPassword), "active");
             TestFixtures.insertMembership(connection, clinicId, userId);
         }
+        return slug;
     }
 
     @Nested
@@ -113,9 +116,9 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         @DisplayName("Invalid credentials redirect to /login?error and keep the user out")
         void failedLoginStaysOut() throws Exception {
             String username = "badlogin-" + uniqueSuffix();
-            seedUserWithClinic(username, "the-real-password");
+            String clinicSlug = seedUserWithClinic(username, "the-real-password");
 
-            login(username, "wrong-password");
+            login(username, "wrong-password", clinicSlug);
 
             page.waitForURL(url -> url.contains("/login?error"));
             com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
@@ -131,15 +134,51 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         void successfulLoginInitializesSecurityContext() throws Exception {
             String username = "sessionuser-" + uniqueSuffix();
             String rawPassword = "correct-horse-battery-staple";
-            seedUserWithClinic(username, rawPassword);
+            String clinicSlug = seedUserWithClinic(username, rawPassword);
 
-            login(username, rawPassword);
+            login(username, rawPassword, clinicSlug);
 
             page.waitForURL(url -> !url.contains("/login"));
             assertThat(page.url()).doesNotContain("/login");
         }
 
-        private void login(String username, String password) {
+        @Test
+        @DisplayName("The same username in two clinics logs in with either clinic code")
+        void sameUsernameAcrossClinicsLogsInWithOwnClinicCode() throws Exception {
+            String username = "shared-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String slugA = "shared-clinic-a-" + uniqueSuffix();
+            String slugB = "shared-clinic-b-" + uniqueSuffix();
+            try (Connection connection = DriverManager.getConnection(
+                    PostgresTestSupport.POSTGRES.getJdbcUrl(),
+                    PostgresTestSupport.POSTGRES.getUsername(),
+                    PostgresTestSupport.POSTGRES.getPassword())) {
+                UUID clinicA = TestFixtures.insertClinic(connection, "Shared A " + uniqueSuffix(), slugA);
+                UUID userA = TestFixtures.insertUser(connection, clinicA, username,
+                        passwordEncoder.encode(rawPassword), "active");
+                TestFixtures.insertMembership(connection, clinicA, userA);
+                UUID clinicB = TestFixtures.insertClinic(connection, "Shared B " + uniqueSuffix(), slugB);
+                UUID userB = TestFixtures.insertUser(connection, clinicB, username,
+                        passwordEncoder.encode(rawPassword), "active");
+                TestFixtures.insertMembership(connection, clinicB, userB);
+            }
+
+            login(username, rawPassword, slugA);
+
+            page.waitForURL(url -> !url.contains("/login"));
+            assertThat(page.url()).doesNotContain("/login");
+
+            page.locator(".clinicos-logout").click();
+            page.waitForURL(url -> url.contains("/login"));
+
+            login(username, rawPassword, slugB);
+
+            page.waitForURL(url -> !url.contains("/login"));
+            assertThat(page.url()).doesNotContain("/login");
+        }
+
+        private void login(String username, String password, String clinicCode) {
+            TextFieldElement.getByLabel(page, "كود العيادة").setValue(clinicCode);
             TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
             PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(password);
             ButtonElement.getByText(page, "دخول").click();
@@ -149,17 +188,19 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             return UUID.randomUUID().toString().substring(0, 8);
         }
 
-        private void seedUserWithClinic(String username, String rawPassword) throws Exception {
+        private String seedUserWithClinic(String username, String rawPassword) throws Exception {
+            String slug = "clinic-" + uniqueSuffix();
             try (Connection connection = DriverManager.getConnection(
                     PostgresTestSupport.POSTGRES.getJdbcUrl(),
                     PostgresTestSupport.POSTGRES.getUsername(),
                     PostgresTestSupport.POSTGRES.getPassword())) {
                 UUID clinicId = TestFixtures.insertClinic(
-                        connection, "Test Clinic " + username, "clinic-" + username);
+                        connection, "Test Clinic " + username, slug);
                 UUID userId = TestFixtures.insertUser(
-                        connection, username, passwordEncoder.encode(rawPassword), "active");
+                        connection, clinicId, username, passwordEncoder.encode(rawPassword), "active");
                 TestFixtures.insertMembership(connection, clinicId, userId);
             }
+            return slug;
         }
     }
 
@@ -186,10 +227,15 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
 
             page.waitForURL(url -> url.contains("/login"));
             assertThat(page.url()).contains("signup=success");
+            assertThat(page.url()).contains("clinic=");
             com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
                     page.getByText("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل")).isVisible();
 
-            login(username, rawPassword);
+            TextFieldElement clinicCode = TextFieldElement.getByLabel(page, "كود العيادة");
+            String prefilledClinicCode = clinicCode.getValue();
+            assertThat(prefilledClinicCode).isNotBlank();
+
+            login(username, rawPassword, prefilledClinicCode);
 
             page.waitForURL(url -> !url.contains("/login"));
             assertThat(page.url()).doesNotContain("/login");
@@ -205,9 +251,9 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         void logoutEndsSessionAndClearsCookie() throws Exception {
             String username = "logoutuser-" + uniqueSuffix();
             String rawPassword = "correct-horse-battery-staple";
-            seedUserWithClinic(username, rawPassword);
+            String clinicSlug = seedUserWithClinic(username, rawPassword);
 
-            login(username, rawPassword);
+            login(username, rawPassword, clinicSlug);
             page.waitForURL(url -> !url.contains("/login"));
 
             page.locator(".clinicos-logout").click();

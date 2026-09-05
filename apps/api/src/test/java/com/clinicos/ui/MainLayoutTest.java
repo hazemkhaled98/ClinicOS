@@ -47,7 +47,7 @@ class MainLayoutTest {
         authenticationContext = mock(AuthenticationContext.class);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(
-                        new AuthenticatedUser(UUID.randomUUID(), "ahmed", "hash"), null, List.of()));
+                        new AuthenticatedUser(UUID.randomUUID(), UUID.randomUUID(), "ahmed", "hash"), null, List.of()));
     }
 
     @AfterEach

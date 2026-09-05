@@ -16,8 +16,8 @@ import java.util.UUID;
  * clinic bound. In auth mode, {@link TenantConnectionListener} binds the nil
  * UUID (00000000-0000-0000-0000-000000000000) to {@code app.clinic_id},
  * guaranteeing any RLS-scoped table matches zero rows. The only paths to
- * read data in auth mode are the {@code SECURITY DEFINER} functions in V11
- * ({@code app_user_credentials_lookup_by_username},
+ * read data in auth mode are the {@code SECURITY DEFINER} functions in V14
+ * ({@code app_user_credentials_lookup_by_clinic_username},
  * {@code app_user_memberships_lookup}), which bypass RLS entirely — there is
  * no way to leak another tenant's data through this mechanism.
  *

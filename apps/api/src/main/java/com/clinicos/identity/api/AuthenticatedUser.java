@@ -13,17 +13,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class AuthenticatedUser implements UserDetails {
 
     private final UUID id;
+    private final UUID clinicId;
     private final String username;
     private final String passwordHash;
 
-    public AuthenticatedUser(UUID id, String username, String passwordHash) {
+    public AuthenticatedUser(UUID id, UUID clinicId, String username, String passwordHash) {
         this.id = id;
+        this.clinicId = clinicId;
         this.username = username;
         this.passwordHash = passwordHash;
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getClinicId() {
+        return clinicId;
     }
 
     @Override

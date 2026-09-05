@@ -703,9 +703,9 @@ declare
 begin
     -- 9b. The lookup function (owned by the migration role, so it can see
     -- the column app_rw's own grant excludes) must still work for app_rw.
-    select password_hash into v_hash from app_user_credentials_lookup('owner-a@example.com');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup did not return the expected password_hash, got %', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username did not return the expected password_hash, got %', v_hash;
     end if;
 end $$;
 
@@ -718,12 +718,12 @@ begin
     -- still resolve to the real public.app_user, not this shadow, or an
     -- attacker with just enough access to run arbitrary SQL on the app_rw
     -- connection could hand the login path any password_hash they want.
-    create temp table app_user (id uuid, email citext, password_hash text, status text);
-    insert into app_user values (gen_random_uuid(), 'owner-a@example.com', 'attacker-controlled-hash', 'active');
+    create temp table app_user (id uuid, clinic_id uuid, username citext, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'owner', 'attacker@example.com', 'attacker-controlled-hash', 'active');
 
-    select password_hash into v_hash from app_user_credentials_lookup('owner-a@example.com');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
     end if;
 
     drop table app_user;
@@ -872,20 +872,24 @@ begin
 end $$;
 
 -- ===========================================================================
--- 12. V11 auth-mode functions: app_user_credentials_lookup_by_username and
---     app_user_memberships_lookup. Both are SECURITY DEFINER so they bypass
---     RLS and serve the login flow before app.clinic_id is known.
+-- 12. Per-clinic auth-mode functions (V14): app_user_credentials_lookup_by_
+--     clinic_username (now backstopped by app_user.clinic_id, so app_clinic_id
+--     is no longer needed to disambiguate) and app_user_memberships_lookup.
+--     Both are SECURITY DEFINER so they bypass RLS and serve the login flow
+--     before app.clinic_id is known.
 -- ===========================================================================
 
 do $$
 declare
     v_hash text;
 begin
-    -- 12a. The username-keyed lookup function must work for app_rw and return
-    -- the expected password_hash for a seeded username.
-    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    -- 12a. The (clinic_slug, username)-keyed lookup function must work for
+    -- app_rw and return the expected password_hash for a seeded user. Both
+    -- seeded clinics share the username 'owner' yet the query must hit only
+    -- Clinic A's row.
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup_by_username did not return the expected password_hash, got %', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username did not return the expected password_hash, got %', v_hash;
     end if;
 end $$;
 
@@ -894,17 +898,17 @@ declare
     v_hash text;
 begin
     -- 12b. app_rw can create a temp table named app_user (it keeps the
-    -- default CREATE TEMP right) -- the username-keyed lookup function's
+    -- default CREATE TEMP right) -- the clinic-keyed lookup function's
     -- search_path must still resolve to the real public.app_user, not this
     -- shadow, or an attacker with just enough access to run arbitrary SQL on
     -- the app_rw connection could hand the login path any password_hash they
     -- want.
-    create temp table app_user (id uuid, username citext, email citext, password_hash text, status text);
-    insert into app_user values (gen_random_uuid(), 'owner-a', 'attacker@example.com', 'attacker-controlled-hash', 'active');
+    create temp table app_user (id uuid, clinic_id uuid, username citext, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'owner', 'attacker@example.com', 'attacker-controlled-hash', 'active');
 
-    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup_by_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
     end if;
 
     drop table app_user;
