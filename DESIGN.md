@@ -428,7 +428,7 @@ This app's `theme.json` imports `typography, color, spacing, badge, utility` fro
 |---|---|---|
 | `primary` (#17786a) | `--lumo-primary-color` | Primary accent for buttons, active states, focus rings |
 | `primary` at 50% (#abb0ad) | `--lumo-primary-color-50pct` | Used for disabled/secondary contexts |
-| `on-primary` (#ffffff) | `--lumo-primary-text-color` | Text on primary backgrounds |
+| `primary` (#17786a) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
 | `canvas` (#f4f7f6) | `--lumo-tint-5pct` | Page/container background context |
 | `surface` (#ffffff) | `--lumo-base-color` | Card and input surfaces |
 | `hairline` (#e1e8e5) | `--lumo-shade-5pct` | Border and divider color |
@@ -437,7 +437,8 @@ This app's `theme.json` imports `typography, color, spacing, badge, utility` fro
 | `status-success-deep` | `--lumo-success-color-50pct` | Success text on light backgrounds |
 | `status-warning-deep` | `--lumo-warning-color-50pct` | Warning text on light backgrounds |
 | `status-danger-deep` | `--lumo-error-color-50pct` | Danger text on light backgrounds |
-| `status-info-deep` | `--lumo-error-color-10pct` | Info text (blue, not teal) |
+
+Lumo has no built-in "info" custom property — `status-info-*` tokens are used directly in ClinicOS's own `.clinicos-status-badge--info` class, not mapped onto Lumo. Do not repurpose a Lumo `error`/`warning`/`success` slot for info; that corrupts the component that actually owns it (e.g. a Vaadin error-state field background).
 
 **Critical note:** Every Vaadin component (Button, TextField, Grid, Dialog, etc.) consumes these Lumo properties at render time. If a property is missing or mismatched, components fall back to Lumo defaults. The theme must be validated after every change to ensure no component is left using a hard-coded fallback.
 
