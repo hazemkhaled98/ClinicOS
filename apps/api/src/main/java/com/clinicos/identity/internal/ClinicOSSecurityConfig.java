@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 
@@ -28,7 +29,9 @@ public class ClinicOSSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer.loginView("/login"));
+        http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer
+                .loginView("/login", "/login")
+                .addLogoutHandler(new CookieClearingLogoutHandler("lastSection")));
         return http.build();
     }
 
