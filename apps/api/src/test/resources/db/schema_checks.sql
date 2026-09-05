@@ -703,9 +703,9 @@ declare
 begin
     -- 9b. The lookup function (owned by the migration role, so it can see
     -- the column app_rw's own grant excludes) must still work for app_rw.
-    select password_hash into v_hash from app_user_credentials_lookup('owner-a@example.com');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup did not return the expected password_hash, got %', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username did not return the expected password_hash, got %', v_hash;
     end if;
 end $$;
 
@@ -718,12 +718,12 @@ begin
     -- still resolve to the real public.app_user, not this shadow, or an
     -- attacker with just enough access to run arbitrary SQL on the app_rw
     -- connection could hand the login path any password_hash they want.
-    create temp table app_user (id uuid, email citext, password_hash text, status text);
-    insert into app_user values (gen_random_uuid(), 'owner-a@example.com', 'attacker-controlled-hash', 'active');
+    create temp table app_user (id uuid, clinic_id uuid, username citext, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'owner', 'attacker@example.com', 'attacker-controlled-hash', 'active');
 
-    select password_hash into v_hash from app_user_credentials_lookup('owner-a@example.com');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
     end if;
 
     drop table app_user;
@@ -737,6 +737,14 @@ end $$;
 --     adds a new clinic_id table and forgets `enable row level security`
 --     would otherwise be silently wide open to every tenant, with nothing
 --     else in this suite able to catch it.
+--
+--     app_user is the one deliberate exception: V14 gave it a clinic_id
+--     column (one account belongs to exactly one clinic), but it stays a
+--     platform table like V9 always intended -- reached only through the
+--     SECURITY DEFINER pre-auth functions and app_rw's column-level grants,
+--     not RLS. Excluded by name, not by "no clinic_id", so a future table
+--     that legitimately needs RLS can't hide behind this exclusion by
+--     accident.
 -- ===========================================================================
 
 do $$
@@ -749,6 +757,7 @@ begin
     where n.nspname = 'public'
       and c.relkind = 'r'
       and not c.relrowsecurity
+      and c.relname <> 'app_user'
       and exists (
           select 1 from pg_attribute a
           where a.attrelid = c.oid and a.attname = 'clinic_id' and not a.attisdropped
@@ -872,20 +881,24 @@ begin
 end $$;
 
 -- ===========================================================================
--- 12. V11 auth-mode functions: app_user_credentials_lookup_by_username and
---     app_user_memberships_lookup. Both are SECURITY DEFINER so they bypass
---     RLS and serve the login flow before app.clinic_id is known.
+-- 12. Per-clinic auth-mode functions (V14): app_user_credentials_lookup_by_
+--     clinic_username (now backstopped by app_user.clinic_id, so app_clinic_id
+--     is no longer needed to disambiguate) and app_user_memberships_lookup.
+--     Both are SECURITY DEFINER so they bypass RLS and serve the login flow
+--     before app.clinic_id is known.
 -- ===========================================================================
 
 do $$
 declare
     v_hash text;
 begin
-    -- 12a. The username-keyed lookup function must work for app_rw and return
-    -- the expected password_hash for a seeded username.
-    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    -- 12a. The (clinic_slug, username)-keyed lookup function must work for
+    -- app_rw and return the expected password_hash for a seeded user. Both
+    -- seeded clinics share the username 'owner' yet the query must hit only
+    -- Clinic A's row.
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup_by_username did not return the expected password_hash, got %', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username did not return the expected password_hash, got %', v_hash;
     end if;
 end $$;
 
@@ -894,17 +907,17 @@ declare
     v_hash text;
 begin
     -- 12b. app_rw can create a temp table named app_user (it keeps the
-    -- default CREATE TEMP right) -- the username-keyed lookup function's
+    -- default CREATE TEMP right) -- the clinic-keyed lookup function's
     -- search_path must still resolve to the real public.app_user, not this
     -- shadow, or an attacker with just enough access to run arbitrary SQL on
     -- the app_rw connection could hand the login path any password_hash they
     -- want.
-    create temp table app_user (id uuid, username citext, email citext, password_hash text, status text);
-    insert into app_user values (gen_random_uuid(), 'owner-a', 'attacker@example.com', 'attacker-controlled-hash', 'active');
+    create temp table app_user (id uuid, clinic_id uuid, username citext, email citext, password_hash text, status text);
+    insert into app_user values (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'owner', 'attacker@example.com', 'attacker-controlled-hash', 'active');
 
-    select password_hash into v_hash from app_user_credentials_lookup_by_username('owner-a');
+    select password_hash into v_hash from app_user_credentials_lookup_by_clinic_username('clinic-a', 'owner');
     if v_hash is distinct from 'x' then
-        raise exception 'REGRESSION: app_user_credentials_lookup_by_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
+        raise exception 'REGRESSION: app_user_credentials_lookup_by_clinic_username returned % instead of the real app_user.password_hash -- a temp table shadowed it', v_hash;
     end if;
 
     drop table app_user;
@@ -928,5 +941,66 @@ begin
     end if;
     if v_role_code is distinct from 'owner' then
         raise exception 'REGRESSION: app_user_memberships_lookup returned wrong role_code: %', v_role_code;
+    end if;
+end $$;
+
+-- ===========================================================================
+-- 13. Two invariants of the per-clinic account model (V14):
+--
+--     (a) The same owner email may be reused across different clinics --
+--         email uniqueness is scoped by (clinic_id, email), not global, and
+--         self-service sign-up is the only path that creates an app_user row
+--         (DML on app_user is revoked for app_rw, V9__rls_policies.sql), so
+--         this is exercised through signup_clinic_with_owner directly rather
+--         than a raw INSERT.
+--
+--     (b) An account can never hold a membership in a clinic other than its
+--         own app_user.clinic_id -- trg_membership_clinic_matches_user must
+--         reject it, so the same person working at two clinics is forced
+--         into two separate accounts, never one login spanning both.
+-- ===========================================================================
+
+do $$
+declare
+    r1 record;
+    r2 record;
+begin
+    -- 13a. Same email, two brand-new clinics: both sign-ups must succeed and
+    -- land on two distinct clinics with two distinct accounts.
+    select * into r1 from signup_clinic_with_owner(
+        'Multi Clinic Check A', 'multi-clinic-check-a', 'Shared Owner', 'shared-owner-a', 'shared-owner@example.com', 'x');
+    select * into r2 from signup_clinic_with_owner(
+        'Multi Clinic Check B', 'multi-clinic-check-b', 'Shared Owner', 'shared-owner-b', 'shared-owner@example.com', 'x');
+
+    if r1.clinic_id = r2.clinic_id then
+        raise exception 'REGRESSION: signup_clinic_with_owner reused a clinic_id across two sign-ups sharing one email';
+    end if;
+    if r1.user_id = r2.user_id then
+        raise exception 'REGRESSION: signup_clinic_with_owner reused a user_id across two sign-ups sharing one email';
+    end if;
+end $$;
+
+do $$
+declare
+    unexpected_success boolean := false;
+    v_owner_role_id uuid;
+begin
+    -- 13b. Clinic A's seeded owner (app_user.clinic_id = clinic A) must not be
+    -- insertable as a membership of clinic B -- the guard trigger, not just
+    -- application code, is what makes "new account per clinic" true.
+    select id into v_owner_role_id from role where code = 'owner';
+
+    -- Scoped to clinic B so the RLS WITH CHECK on membership.clinic_id passes
+    -- and the guard trigger is what actually stops the insert, not RLS.
+    perform set_config('app.clinic_id', '22222222-2222-2222-2222-222222222222', true);
+
+    begin
+        insert into membership (clinic_id, user_id, role_id)
+        values ('22222222-2222-2222-2222-222222222222', 'aaaaaaaa-0000-0000-0000-000000000001', v_owner_role_id);
+        unexpected_success := true;
+    exception when others then null;
+    end;
+    if unexpected_success then
+        raise exception 'REGRESSION: a membership row was accepted for a clinic that does not match its user''s app_user.clinic_id';
     end if;
 end $$;

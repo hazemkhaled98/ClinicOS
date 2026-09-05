@@ -23,7 +23,7 @@ public interface SignupService {
         }
     }
 
-    record SignupResult(UUID userId, UUID clinicId, UUID membershipId) {
+    record SignupResult(UUID userId, UUID clinicId, UUID membershipId, String clinicSlug) {
     }
 
     /**

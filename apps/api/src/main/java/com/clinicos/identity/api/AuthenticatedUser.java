@@ -1,5 +1,6 @@
 package com.clinicos.identity.api;
 
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,17 +14,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class AuthenticatedUser implements UserDetails {
 
     private final UUID id;
+    private final UUID clinicId;
     private final String username;
     private final String passwordHash;
 
-    public AuthenticatedUser(UUID id, String username, String passwordHash) {
-        this.id = id;
-        this.username = username;
-        this.passwordHash = passwordHash;
+    public AuthenticatedUser(UUID id, UUID clinicId, String username, String passwordHash) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.clinicId = Objects.requireNonNull(clinicId, "clinicId");
+        this.username = Objects.requireNonNull(username, "username");
+        this.passwordHash = Objects.requireNonNull(passwordHash, "passwordHash");
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getClinicId() {
+        return clinicId;
     }
 
     @Override

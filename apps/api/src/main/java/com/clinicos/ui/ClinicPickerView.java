@@ -13,8 +13,6 @@ import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.TenantContext;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -65,19 +63,7 @@ public class ClinicPickerView extends VerticalLayout {
             return;
         }
 
-        if (memberships.size() == 1) {
-            selectAndRedirect(memberships.getFirst());
-            return;
-        }
-
-        add(new H2("اختر العيادة"), new Paragraph("لديك أكثر من عيادة مسجلة. اختر العيادة التي تريد الدخول إليها:"));
-
-        for (Membership membership : memberships) {
-            Button button = new Button(membership.clinicName(), e -> selectAndRedirect(membership));
-            button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            button.setWidthFull();
-            add(button);
-        }
+        selectAndRedirect(memberships.getFirst());
     }
 
     private void selectAndRedirect(Membership membership) {

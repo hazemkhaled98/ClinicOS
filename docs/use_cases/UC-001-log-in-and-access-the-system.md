@@ -16,9 +16,9 @@
 ## Main Success Scenario
 
 1. The staff member opens the application and is shown the login screen.
-2. The staff member enters their username and password.
-3. The system verifies the credentials against the active accounts.
-4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session.
+2. The staff member enters their clinic code (the clinic's slug, shown after sign-up), username, and password.
+3. The system verifies the credentials against the active accounts for that clinic.
+4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session. Under the current per-clinic-account schema (BR-005) an account belongs to exactly one clinic, so this step always auto-selects that single clinic today — the picker's multi-clinic branch is kept for a future use case that lets one person hold memberships across clinics.
 5. The system starts a session for the staff member and remembers it on the device.
 6. The system determines which sections of the application the staff member's role is allowed to see.
 7. The system opens the first section the staff member is permitted to use and shows the navigation menu for their role.
@@ -28,10 +28,10 @@
 
 ### A1: Invalid Credentials
 
-**Trigger:** The username is not found, the account is inactive, or the password does not match (step 3)
+**Trigger:** The clinic code is unknown, the username is not found in that clinic, the account is inactive, the account has no active membership, or the password does not match (step 3)
 **Flow:**
 
-1. The system shows an error message and keeps the staff member on the login screen.
+1. The system shows a single generic error message and keeps the staff member on the login screen.
 2. Use case ends.
 
 ### A2: No Confirmed Connection to the Shared Data — Not Applicable
@@ -57,7 +57,7 @@
 2. The prospective owner enters clinic name, full name, username, password, and (optionally) email.
 3. The system provisions the clinic (status `trial`), the owner account (status `active`, Argon2-hashed password), and one owner membership, atomically in a single transaction.
 4. The system records the sign-up event in the clinic's activity log.
-5. The system sends the prospective owner to the login screen with a success banner.
+5. The system sends the prospective owner to the login screen with a success banner and the new clinic's code prefilled.
 6. Use case continues at step 2 (normal login as the new owner).
 
 ## Postconditions
@@ -89,6 +89,6 @@ An account flagged as the owner is automatically granted every section of the ap
 
 Sign-up creates a clinic in status `trial`, the owner account in status `active`, and one `owner` membership in status `active`, all in a single transaction — a failed step rolls back the whole clinic.
 
-### BR-005: Username Is Globally Unique
+### BR-005: Username Is Unique Within a Clinic
 
-A username is unique across all clinics. Sign-up names the conflicting field (username, email, or the derived clinic slug) on the offending input. This is a pre-auth form, not a credential check, so the generic-error rule of A1 does not apply.
+A username is unique within a single clinic (enforced by `(clinic_id, username)`), so the same username can exist in different clinics. Authentication is keyed by `(clinic_slug, username)`, both matched case-insensitively — the clinic code is lowercased before the lookup, since `clinic.slug` is always stored lowercase. Sign-up names the conflicting field (email or the derived clinic slug) on the offending input; a username conflict can't occur through self-service sign-up itself, since each sign-up provisions a brand-new clinic, but the same check will matter once a later use case adds members to an existing clinic.

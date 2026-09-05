@@ -1,11 +1,12 @@
 package com.clinicos.ui;
 
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
@@ -13,47 +14,60 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
- * Login screen for ClinicOS, using Vaadin's built-in {@link LoginForm}
- * component. The form posts to {@code /login} ({@link LoginForm#setAction}),
- * which Spring Security's form-login processes. RTL layout for Arabic UI.
+ * Login screen for ClinicOS, using Vaadin's built-in {@link LoginOverlay}
+ * component. The form posts to {@code /login} ({@link LoginOverlay#setAction}),
+ * which Spring Security's form-login processes. A clinic-code field sits in the
+ * overlay's custom form area; its {@code name="clinic"} attribute is what makes
+ * it submit with the POST, and it feeds the clinic-scoped authenticator. RTL
+ * layout for Arabic UI.
  */
 @Route(value = "login", autoLayout = false)
 @AnonymousAllowed
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final LoginForm form;
+    private final LoginOverlay overlay;
+    private final TextField clinicField;
 
     public LoginView() {
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
         setAlignItems(Alignment.CENTER);
 
-        form = new LoginForm();
-        form.setAction("login");
-        form.setI18n(createArabicLabels());
-        form.setForgotPasswordButtonVisible(false);
-        add(form);
+        overlay = new LoginOverlay();
+        overlay.setAction("login");
+        overlay.setTitle("ClinicOS");
+        overlay.setI18n(createArabicLabels());
+        overlay.setForgotPasswordButtonVisible(false);
+
+        clinicField = new TextField("كود العيادة");
+        clinicField.getElement().setAttribute("name", "clinic");
+        clinicField.setRequiredIndicatorVisible(true);
+        overlay.getCustomFormArea().add(clinicField);
 
         Paragraph signupHint = new Paragraph(new RouterLink("ليس لديك حساب؟ أنشئ عيادة جديدة", SignupView.class));
         signupHint.getStyle().set("margin-top", "1rem");
         signupHint.getStyle().set("color", "var(--ink)");
-        add(signupHint);
+        overlay.getFooter().add(signupHint);
+
+        add(overlay);
+        overlay.setOpened(true);
 
         getElement().setAttribute("dir", "rtl");
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
-            form.setError(true);
+        var params = event.getLocation().getQueryParameters();
+        if (params.getParameters().containsKey("error")) {
+            overlay.setError(true);
         }
-        if (event.getLocation().getQueryParameters().getSingleParameter("signup")
-                .map("success"::equals).orElse(false)) {
+        params.getSingleParameter("clinic").ifPresent(clinicField::setValue);
+        if (params.getSingleParameter("signup").map("success"::equals).orElse(false)) {
             Paragraph banner = new Paragraph("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل");
             banner.getStyle().set("margin-bottom", "1rem");
             banner.getStyle().set("color", "var(--teal)");
             banner.getStyle().set("font-weight", "600");
-            addComponentAtIndex(0, banner);
+            overlay.getCustomFormArea().add(banner);
         }
     }
 
@@ -64,12 +78,12 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         form.setUsername("اسم المستخدم");
         form.setPassword("كلمة المرور");
         form.setSubmit("دخول");
-        form.setTitle("ClinicOS");
+        form.setTitle("تسجيل الدخول");
         i18n.setForm(form);
 
         LoginI18n.ErrorMessage errorMessage = new LoginI18n.ErrorMessage();
         errorMessage.setTitle("❌");
-        errorMessage.setMessage("اسم المستخدم أو كلمة المرور غير صحيحة");
+        errorMessage.setMessage("بيانات الدخول غير صحيحة");
         i18n.setErrorMessage(errorMessage);
 
         return i18n;

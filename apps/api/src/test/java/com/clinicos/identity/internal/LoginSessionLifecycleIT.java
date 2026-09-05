@@ -1,7 +1,6 @@
 package com.clinicos.identity.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -66,9 +65,13 @@ class LoginSessionLifecycleIT extends AbstractPostgresIntegrationTest {
     void successfulLoginStartsASession() throws Exception {
         String username = "sessionuser-" + uniqueSuffix;
         String rawPassword = "correct-horse-battery-staple";
-        insertActiveUserWithClinic(username, rawPassword);
+        String clinicSlug = insertActiveUserWithClinic(username, rawPassword);
 
-        MvcResult result = mockMvc.perform(formLogin().user(username).password(rawPassword))
+        MvcResult result = mockMvc.perform(post("/login")
+                .param("username", username)
+                .param("password", rawPassword)
+                .param("clinic", clinicSlug)
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
 
@@ -80,9 +83,13 @@ class LoginSessionLifecycleIT extends AbstractPostgresIntegrationTest {
     @Test
     void failedLoginStartsNoSessionAndStaysOnLoginScreen() throws Exception {
         String username = "badlogin-" + uniqueSuffix;
-        insertActiveUserWithClinic(username, "the-real-password");
+        String clinicSlug = insertActiveUserWithClinic(username, "the-real-password");
 
-        MvcResult result = mockMvc.perform(formLogin().user(username).password("wrong-password"))
+        MvcResult result = mockMvc.perform(post("/login")
+                .param("username", username)
+                .param("password", "wrong-password")
+                .param("clinic", clinicSlug)
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/login*"))
                 .andReturn();
@@ -97,9 +104,13 @@ class LoginSessionLifecycleIT extends AbstractPostgresIntegrationTest {
     void logoutEndsTheSession() throws Exception {
         String username = "logoutuser-" + uniqueSuffix;
         String rawPassword = "correct-horse-battery-staple";
-        insertActiveUserWithClinic(username, rawPassword);
+        String clinicSlug = insertActiveUserWithClinic(username, rawPassword);
 
-        MvcResult loginResult = mockMvc.perform(formLogin().user(username).password(rawPassword))
+        MvcResult loginResult = mockMvc.perform(post("/login")
+                .param("username", username)
+                .param("password", rawPassword)
+                .param("clinic", clinicSlug)
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
         MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
@@ -112,12 +123,15 @@ class LoginSessionLifecycleIT extends AbstractPostgresIntegrationTest {
         assertThat(session.isInvalid()).isTrue();
     }
 
-    private void insertActiveUserWithClinic(String username, String rawPassword) throws Exception {
+    private String insertActiveUserWithClinic(String username, String rawPassword) throws Exception {
+        String slug = "test-clinic-" + uniqueSuffix;
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
-            UUID clinicId = TestFixtures.insertClinic(connection, "Test Clinic " + uniqueSuffix, "test-clinic-" + uniqueSuffix);
-            UUID userId = TestFixtures.insertUser(connection, username, passwordEncoder.encode(rawPassword), "active");
+            UUID clinicId = TestFixtures.insertClinic(connection, "Test Clinic " + uniqueSuffix, slug);
+            UUID userId = TestFixtures.insertUser(connection, clinicId, username,
+                    passwordEncoder.encode(rawPassword), "active");
             TestFixtures.insertMembership(connection, clinicId, userId);
         }
+        return slug;
     }
 }

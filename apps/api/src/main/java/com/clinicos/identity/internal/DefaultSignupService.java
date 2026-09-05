@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import com.clinicos.shared.TenantContext;
  */
 @Service
 public class DefaultSignupService implements SignupService {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultSignupService.class);
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
@@ -81,26 +85,34 @@ public class DefaultSignupService implements SignupService {
             if (record == null) {
                 throw new IllegalStateException("signup_clinic_with_owner returned no row");
             }
-            return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId());
+            return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId(), record.getSlug());
         });
     }
 
-    private SignupConflictException mapConflict(DuplicateKeyException e) {
+    SignupConflictException mapConflict(DuplicateKeyException e) {
         String message = e.getMostSpecificCause().getMessage();
-        if (message.contains("app_user_username_key")) {
+        if (message == null) {
+            message = "";
+        }
+        if (message.contains("app_user_clinic_username_key")) {
+            log.debug("signup conflict: username already taken");
             return new SignupConflictException(SignupConflictException.Field.USERNAME, message);
         }
         if (message.contains("idx_app_user_email_when_not_null")) {
+            log.debug("signup conflict: email already taken");
             return new SignupConflictException(SignupConflictException.Field.EMAIL, message);
         }
         if (message.contains("clinic_slug_key")) {
+            log.debug("signup conflict: clinic slug already taken");
             return new SignupConflictException(SignupConflictException.Field.CLINIC_SLUG, message);
         }
+        log.error("unmapped duplicate-key violation during signup, constraint not recognized: {}", message, e);
         throw e;
     }
 
     private boolean isSlugConflict(DuplicateKeyException e) {
-        return e.getMostSpecificCause().getMessage().contains("clinic_slug_key");
+        String message = e.getMostSpecificCause().getMessage();
+        return message != null && message.contains("clinic_slug_key");
     }
 
     /**

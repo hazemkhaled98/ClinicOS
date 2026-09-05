@@ -51,8 +51,9 @@ class AuthModeTenantEscapeIT extends AbstractPostgresIntegrationTest {
         uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
-            testUserId = TestFixtures.insertUserWithEmail(connection, "testuser-" + uniqueSuffix, "test-" + uniqueSuffix + "@example.com", "hashed-password-123", "Test User");
             testClinicId = TestFixtures.insertClinic(connection, "Test Clinic " + uniqueSuffix, "test-clinic-" + uniqueSuffix);
+            testUserId = TestFixtures.insertUserWithEmail(connection, testClinicId, "testuser-" + uniqueSuffix,
+                    "test-" + uniqueSuffix + "@example.com", "hashed-password-123", "Test User");
             TestFixtures.insertMembership(connection, testClinicId, testUserId, "owner");
         }
     }
@@ -64,22 +65,25 @@ class AuthModeTenantEscapeIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void credentialsLookupByUsernameSucceedsInAuthMode() {
+    void credentialsLookupByClinicAndUsernameSucceedsInAuthMode() {
         TenantContext.enterAuthMode();
 
-        CredentialsRow credentials = credentialsLookupService.credentialsLookupByUsername("testuser-" + uniqueSuffix);
+        CredentialsRow credentials = credentialsLookupService.credentialsLookupByClinicAndUsername(
+                "test-clinic-" + uniqueSuffix, "testuser-" + uniqueSuffix);
 
         assertThat(credentials.passwordHash()).isEqualTo("hashed-password-123");
     }
 
     @Test
-    void credentialsLookupByUsernameReturnsUserIdAndStatus() {
+    void credentialsLookupByClinicAndUsernameReturnsUserIdClinicAndStatus() {
         TenantContext.enterAuthMode();
 
-        CredentialsRow credentials = credentialsLookupService.credentialsLookupByUsername("testuser-" + uniqueSuffix);
+        CredentialsRow credentials = credentialsLookupService.credentialsLookupByClinicAndUsername(
+                "test-clinic-" + uniqueSuffix, "testuser-" + uniqueSuffix);
 
         assertThat(credentials).isNotNull();
         assertThat(credentials.id()).isEqualTo(testUserId);
+        assertThat(credentials.clinicId()).isEqualTo(testClinicId);
         assertThat(credentials.passwordHash()).isEqualTo("hashed-password-123");
         assertThat(credentials.status()).isEqualTo("active");
     }

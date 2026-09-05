@@ -1,5 +1,7 @@
 package com.clinicos.ui;
 
+import java.util.Map;
+
 import com.clinicos.identity.api.SignupService;
 import com.clinicos.identity.api.SignupService.SignupConflictException;
 import com.clinicos.identity.api.SignupService.SignupRequest;
@@ -219,7 +221,7 @@ public class SignupView extends VerticalLayout {
         }
         UI.getCurrent().navigate(
                 "login",
-                QueryParameters.of("signup", "success"));
+                QueryParameters.simple(Map.of("signup", "success", "clinic", result.clinicSlug())));
     }
 
     private void renderConflict(SignupConflictException conflict) {

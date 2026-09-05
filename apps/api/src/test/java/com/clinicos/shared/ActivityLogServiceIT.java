@@ -34,7 +34,7 @@ class ActivityLogServiceIT extends AbstractPostgresIntegrationTest {
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
             clinicId = TestFixtures.insertClinic(connection);
-            userId = TestFixtures.insertUser(connection);
+            userId = TestFixtures.insertUser(connection, clinicId);
             membershipId = TestFixtures.insertMembership(connection, clinicId, userId);
         }
     }
