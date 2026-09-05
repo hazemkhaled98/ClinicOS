@@ -1,7 +1,19 @@
 # ClinicOS dev: docker up (postgres+minio) -> ensure app_rw role -> run app.
 # Idempotent; safe on fresh volumes and fresh clusters alike.
-$ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
+
+docker info > $null 2>&1
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "==> Docker engine down; starting Docker Desktop" -ForegroundColor Cyan
+    Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    $ready = $false
+    for ($i = 0; $i -lt 60; $i++) {
+        Start-Sleep -Seconds 2
+        docker info > $null 2>&1
+        if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+    }
+    if (-not $ready) { throw "Docker engine did not start within 120s" }
+}
 
 Write-Host "==> Starting postgres + minio" -ForegroundColor Cyan
 docker compose up -d postgres minio 2>$null
