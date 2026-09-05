@@ -27,6 +27,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
@@ -84,7 +85,7 @@ class MainLayoutTest {
         Span logout = _get(layout, Span.class, spec -> spec.withClasses("clinicos-logout"));
 
         assertThat(name.getText()).isEqualTo("ahmed");
-        assertThat(logout.getText()).isEqualTo("🚪");
+        assertThat(logout.getChildren()).anyMatch(Icon.class::isInstance);
     }
 
     @Test
