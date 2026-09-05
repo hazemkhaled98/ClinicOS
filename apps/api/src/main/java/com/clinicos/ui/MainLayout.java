@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.clinicos.identity.api.AuthenticatedUser;
@@ -39,13 +40,17 @@ public class MainLayout extends AppLayout {
      * No-arg overload so Vaadin test tooling that instantiates layouts by
      * reflection (no Spring container, e.g. Karibu navigating to a view whose
      * {@code @Route} names this as its layout) has a constructor to call.
-     * Spring's real container always resolves the greedier constructor below
-     * instead, since {@link AuthenticationContext} is a bean it can satisfy.
+     * With two unannotated public constructors, Spring's autowiring
+     * post-processor cannot pick one to favor and falls back to this one --
+     * handing production code an unwired {@link AuthenticationContext} whose
+     * {@code logout()} throws {@link NullPointerException}. {@link Autowired}
+     * on the constructor below is what forces Spring to use it instead.
      */
     public MainLayout() {
         this(new AuthenticationContext());
     }
 
+    @Autowired
     public MainLayout(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
         addToNavbar(createTopbar());

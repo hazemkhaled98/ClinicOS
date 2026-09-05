@@ -195,4 +195,32 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             assertThat(page.url()).doesNotContain("/login");
         }
     }
+
+    @Nested
+    @DisplayName("Step 4: Logout")
+    class Logout {
+
+        @Test
+        @DisplayName("Clicking the drawer logout control ends the session and returns to /login")
+        void logoutEndsSessionAndClearsCookie() throws Exception {
+            String username = "logoutuser-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            seedUserWithClinic(username, rawPassword);
+
+            login(username, rawPassword);
+            page.waitForURL(url -> !url.contains("/login"));
+
+            page.locator(".clinicos-logout").click();
+
+            page.waitForURL(url -> url.contains("/login"));
+            assertThat(page.url()).contains("/login");
+
+            page.navigate(rootUrl());
+            page.waitForURL(url -> url.contains("/login"));
+            assertThat(page.url()).contains("/login");
+
+            assertThat(page.context().cookies().stream()
+                    .noneMatch(cookie -> "lastSection".equals(cookie.name))).isTrue();
+        }
+    }
 }
