@@ -1,24 +1,27 @@
 package com.clinicos.identity.internal;
 
+import static com.clinicos.shared.jooq.tables.AppUser.APP_USER;
+import static com.clinicos.shared.jooq.tables.Clinic.CLINIC;
+import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
+import static com.clinicos.shared.jooq.tables.Role.ROLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mockStatic;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.List;
 import java.util.UUID;
 
-import javax.sql.DataSource;
-
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.clinicos.AbstractPostgresIntegrationTest;
@@ -28,6 +31,8 @@ import com.clinicos.identity.api.SignupService.SignupConflictException.Field;
 import com.clinicos.identity.api.SignupService.SignupRequest;
 import com.clinicos.identity.api.SignupService.SignupResult;
 import com.clinicos.shared.TenantContext;
+import com.clinicos.shared.jooq.enums.ClinicStatus;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 
 /**
  * UC-001 self-service sign-up, against the real V13 migration. Blackbox-only
@@ -35,16 +40,16 @@ import com.clinicos.shared.TenantContext;
  * migration superuser, never through the app's tenant connection.
  */
 @SpringBootTest(classes = Application.class)
-class JdbcSignupServiceIT extends AbstractPostgresIntegrationTest {
+class SignupServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
-    private JdbcSignupService signupService;
+    private DefaultSignupService signupService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private DataSource dataSource;
+    private DSLContext dsl;
 
     @AfterEach
     void cleanup() {
@@ -69,20 +74,25 @@ class JdbcSignupServiceIT extends AbstractPostgresIntegrationTest {
                 .isNotNull();
 
         try (Connection connection = superuserConnection()) {
-            assertThat(count(connection, "clinic", "where name = ? and slug = ?",
-                    clinicName, "sunrise-dental-" + suffix)).isEqualTo(1);
-            assertThat(queryString(connection, "select status from clinic where name = ?", clinicName))
-                    .isEqualTo("trial");
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            assertThat(superuserDsl.fetchCount(CLINIC,
+                    CLINIC.NAME.eq(clinicName).and(CLINIC.SLUG.eq("sunrise-dental-" + suffix)))).isEqualTo(1);
+            assertThat(superuserDsl.select(CLINIC.STATUS).from(CLINIC).where(CLINIC.NAME.eq(clinicName))
+                    .fetchOne(CLINIC.STATUS)).isEqualTo(ClinicStatus.trial);
 
-            assertThat(count(connection, "app_user", "where username = ? and status = 'active'", username))
-                    .isEqualTo(1);
-            String hash = queryString(connection, "select password_hash from app_user where username = ?", username);
+            assertThat(superuserDsl.fetchCount(APP_USER,
+                    APP_USER.USERNAME.eq(username).and(APP_USER.STATUS.eq("active")))).isEqualTo(1);
+            String hash = superuserDsl.select(APP_USER.PASSWORD_HASH).from(APP_USER)
+                    .where(APP_USER.USERNAME.eq(username)).fetchOne(APP_USER.PASSWORD_HASH);
             assertThat(passwordEncoder.matches(rawPassword, hash)).isTrue();
 
-            assertThat(count(connection, "membership",
-                    "where user_id = (select id from app_user where username = ?) "
-                            + "and status = 'active' and role_id = (select id from role where code = 'owner')",
-                    username)).isEqualTo(1);
+            assertThat(superuserDsl.fetchCount(MEMBERSHIP,
+                    MEMBERSHIP.USER_ID.eq(superuserDsl.select(APP_USER.ID).from(APP_USER)
+                            .where(APP_USER.USERNAME.eq(username)))
+                            .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                            .and(MEMBERSHIP.ROLE_ID.eq(
+                                    superuserDsl.select(ROLE.ID).from(ROLE).where(ROLE.CODE.eq("owner"))))))
+                    .isEqualTo(1);
         }
     }
 
@@ -126,20 +136,15 @@ class JdbcSignupServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(first.clinicId()).isNotEqualTo(second.clinicId());
         try (Connection connection = superuserConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "select slug from clinic where id in (?, ?) order by created_at")) {
-                statement.setObject(1, first.clinicId());
-                statement.setObject(2, second.clinicId());
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    resultSet.next();
-                    String firstSlug = resultSet.getString(1);
-                    resultSet.next();
-                    String secondSlug = resultSet.getString(1);
-                    assertThat(firstSlug).isEqualTo("same-name-" + suffix);
-                    assertThat(secondSlug).startsWith("same-name-" + suffix + "-");
-                    assertThat(secondSlug).hasSizeGreaterThan(firstSlug.length());
-                }
-            }
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            List<String> slugs = superuserDsl.select(CLINIC.SLUG).from(CLINIC)
+                    .where(CLINIC.ID.in(first.clinicId(), second.clinicId()))
+                    .orderBy(CLINIC.CREATED_AT)
+                    .fetch(CLINIC.SLUG);
+            assertThat(slugs).hasSize(2);
+            assertThat(slugs.get(0)).isEqualTo("same-name-" + suffix);
+            assertThat(slugs.get(1)).startsWith("same-name-" + suffix + "-");
+            assertThat(slugs.get(1)).hasSizeGreaterThan(slugs.get(0).length());
         }
     }
 
@@ -156,10 +161,10 @@ class JdbcSignupServiceIT extends AbstractPostgresIntegrationTest {
             insertClinicRow(connection, clinicName, retriedSlug);
         }
 
-        try (MockedStatic<JdbcSignupService> mockedStatic = mockStatic(JdbcSignupService.class)) {
-            mockedStatic.when(() -> JdbcSignupService.deriveSlug(org.mockito.ArgumentMatchers.anyString()))
+        try (MockedStatic<DefaultSignupService> mockedStatic = mockStatic(DefaultSignupService.class)) {
+            mockedStatic.when(() -> DefaultSignupService.deriveSlug(org.mockito.ArgumentMatchers.anyString()))
                     .thenCallRealMethod();
-            mockedStatic.when(JdbcSignupService::randomSuffix).thenReturn("cafebabe");
+            mockedStatic.when(DefaultSignupService::randomSuffix).thenReturn("cafebabe");
 
             assertThatThrownBy(() -> signupService.signUp(new SignupRequest(
                     clinicName, "A", "user-" + suffix, null, rawPassword)))
@@ -170,46 +175,21 @@ class JdbcSignupServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void directClinicInsertStillFailsForAppRwWithoutTenant() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         String suffix = uniqueSuffix();
 
-        assertThatThrownBy(() -> jdbcTemplate.update(
-                "insert into clinic (name, slug) values (?, ?)", "Direct Insert", "direct-" + suffix))
+        assertThatThrownBy(() -> dsl.insertInto(CLINIC, CLINIC.NAME, CLINIC.SLUG)
+                .values("Direct Insert", "direct-" + suffix)
+                .execute())
                 .isInstanceOfSatisfying(DataAccessException.class,
                         e -> assertThat(e.getMostSpecificCause().getMessage())
                                 .contains("permission denied for table clinic"));
     }
 
-    private void insertClinicRow(Connection connection, String name, String slug) throws Exception {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "insert into clinic (name, slug) values (?, ?)")) {
-            statement.setString(1, name);
-            statement.setString(2, slug);
-            statement.executeUpdate();
-        }
-    }
-
-    private long count(Connection connection, String table, String whereClause, String... params) throws Exception {
-        StringBuilder sql = new StringBuilder("select count(*) from ").append(table).append(' ').append(whereClause);
-        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.length; i++) {
-                statement.setString(i + 1, params[i]);
-            }
-            try (ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-                return resultSet.getLong(1);
-            }
-        }
-    }
-
-    private String queryString(Connection connection, String sql, String param) throws Exception {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, param);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-                return resultSet.getString(1);
-            }
-        }
+    private void insertClinicRow(Connection connection, String name, String slug) {
+        DSL.using(connection, SQLDialect.POSTGRES)
+                .insertInto(CLINIC, CLINIC.NAME, CLINIC.SLUG)
+                .values(name, slug)
+                .execute();
     }
 
     private Connection superuserConnection() throws Exception {
