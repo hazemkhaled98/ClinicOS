@@ -35,6 +35,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         overlay = new LoginOverlay();
         overlay.setAction("login");
+        overlay.setTitle("ClinicOS");
         overlay.setI18n(createArabicLabels());
         overlay.setForgotPasswordButtonVisible(false);
 
@@ -66,7 +67,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
             banner.getStyle().set("margin-bottom", "1rem");
             banner.getStyle().set("color", "var(--teal)");
             banner.getStyle().set("font-weight", "600");
-            addComponentAtIndex(0, banner);
+            overlay.getCustomFormArea().add(banner);
         }
     }
 
@@ -77,12 +78,12 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         form.setUsername("اسم المستخدم");
         form.setPassword("كلمة المرور");
         form.setSubmit("دخول");
-        form.setTitle("ClinicOS");
+        form.setTitle("تسجيل الدخول");
         i18n.setForm(form);
 
         LoginI18n.ErrorMessage errorMessage = new LoginI18n.ErrorMessage();
         errorMessage.setTitle("❌");
-        errorMessage.setMessage("اسم المستخدم أو كلمة المرور غير صحيحة");
+        errorMessage.setMessage("بيانات الدخول غير صحيحة");
         i18n.setErrorMessage(errorMessage);
 
         return i18n;

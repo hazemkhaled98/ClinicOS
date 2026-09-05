@@ -122,7 +122,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
 
             page.waitForURL(url -> url.contains("/login?error"));
             com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
-                    page.getByText("اسم المستخدم أو كلمة المرور غير صحيحة")).isVisible();
+                    page.getByText("بيانات الدخول غير صحيحة")).isVisible();
 
             page.navigate(rootUrl());
             page.waitForURL(url -> url.contains("/login"));

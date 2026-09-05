@@ -1,7 +1,5 @@
 package com.clinicos.ui;
 
-import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
-import static com.github.mvysny.kaributesting.v10.LocatorJ._find;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -29,7 +27,6 @@ import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -69,22 +66,6 @@ class ClinicPickerViewTest {
     }
 
     @Test
-    void showsClinicSelectionWhenMultipleMemberships() {
-        UUID userId = testUser.getId();
-        when(membershipLookupService.findByUserId(userId)).thenReturn(List.of(
-                new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الأمل", "owner"),
-                new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الشفاء", "manager")));
-
-        ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
-
-        H2 heading = _get(view, H2.class);
-        assertThat(heading.getText()).isEqualTo("اختر العيادة");
-
-        List<Button> buttons = _find(view, Button.class);
-        assertThat(buttons).hasSize(2);
-    }
-
-    @Test
     void showsEmptyMessageWhenNoMemberships() {
         when(membershipLookupService.findByUserId(testUser.getId())).thenReturn(List.of());
 
@@ -118,27 +99,24 @@ class ClinicPickerViewTest {
     }
 
     @Test
-    void selectingClinicFromMultipleRedirectsAndLogsActivity() {
+    void multipleMembershipsAutoSelectsTheFirstWithoutAnyChoice() {
+        // Can't happen through real signup/membership data post-V14 (one
+        // account belongs to exactly one clinic), but membershipLookupService
+        // is mocked here, so this locks in that the view no longer offers a
+        // choice even if it somehow did receive more than one membership.
         UUID membershipId = UUID.randomUUID();
         UUID clinicId = UUID.randomUUID();
         when(membershipLookupService.findByUserId(testUser.getId())).thenReturn(List.of(
-                new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الأمل", "owner"),
-                new Membership(membershipId, clinicId, "عيادة الشفاء", "manager")));
+                new Membership(membershipId, clinicId, "عيادة الأمل", "owner"),
+                new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الشفاء", "manager")));
         when(permissionsService.accessFor(membershipId)).thenReturn(
-                new MembershipAccess(membershipId, "manager", Set.of("emp", "quick")));
+                new MembershipAccess(membershipId, "owner", Set.of("emp", "quick")));
 
-        ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
-
-        Button button = _get(view, Button.class, spec -> spec.withText("عيادة الشفاء"));
-        _click(button);
+        new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
         VaadinSession session = VaadinSession.getCurrent();
         assertThat(session.getAttribute(ClinicPickerView.SESSION_CLINIC_ID)).isEqualTo(clinicId);
         assertThat(session.getAttribute(ClinicPickerView.SESSION_MEMBERSHIP_ID)).isEqualTo(membershipId);
-        assertThat(session.getAttribute(ClinicPickerView.SESSION_ROLE_CODE)).isEqualTo("manager");
-        @SuppressWarnings("unchecked")
-        List<String> permissions = (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
-        assertThat(permissions).containsExactlyInAnyOrder("emp", "quick");
 
         verify(activityLogService).log(clinicId, membershipId, "login", "session");
     }

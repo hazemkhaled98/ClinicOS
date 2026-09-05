@@ -31,16 +31,52 @@ from (
 ) m
 where u.id = m.user_id;
 
+-- Loud, not silent: a genuinely empty/greenfield database deletes zero rows
+-- here, so this never fires there. If it ever does fire against a database
+-- that already had users, that's exactly the case this migration's
+-- "unreachable; greenfield" assumption doesn't hold for, and it should stop
+-- the migration rather than quietly delete accounts.
+do $$
+declare
+    v_orphaned int;
+begin
+    select count(*) into v_orphaned from app_user where clinic_id is null;
+    if v_orphaned > 0 then
+        raise exception 'V14: % app_user row(s) have no membership and would be deleted -- refusing to run against a non-greenfield database', v_orphaned;
+    end if;
+end $$;
+
 delete from app_user where clinic_id is null;
 
 alter table app_user alter column clinic_id set not null;
+
+-- The "oldest membership wins" backfill above only sets app_user.clinic_id;
+-- it doesn't touch any OTHER membership row a user might already have in a
+-- different clinic. The guard trigger created below only checks future
+-- inserts/updates, so pre-existing multi-clinic memberships would otherwise
+-- sit silently in violation of the very invariant this migration introduces.
+-- Fail loudly now instead of surfacing as a confusing trigger error later on
+-- an unrelated update to one of these rows.
+do $$
+declare
+    v_mismatched int;
+begin
+    select count(*) into v_mismatched
+    from membership m
+    join app_user u on u.id = m.user_id
+    where m.clinic_id is distinct from u.clinic_id;
+    if v_mismatched > 0 then
+        raise exception 'V14: % membership row(s) disagree with their user''s backfilled clinic_id -- this user has memberships in more than one clinic, which the new one-account-per-clinic model cannot represent', v_mismatched;
+    end if;
+end $$;
 
 -- 3. Per-clinic username uniqueness replaces the global one.
 alter table app_user drop constraint app_user_username_key;
 create unique index app_user_clinic_username_key on app_user (clinic_id, username);
 
--- 4. Email follows the same scope: the same person may not own two clinics
---    with one address.
+-- 4. Email follows the same scope: uniqueness is now per clinic, so the same
+--    address can be reused across two different clinics (only a duplicate
+--    within one clinic is rejected).
 drop index idx_app_user_email_when_not_null;
 create unique index idx_app_user_email_when_not_null on app_user (clinic_id, email) where email is not null;
 
