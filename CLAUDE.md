@@ -100,6 +100,10 @@ mvn -pl apps/api spring-boot:run
 # OpenAPI at http://localhost:8080/api-docs/ui
 ```
 
+## Exploring the Codebase
+
+To explore this codebase or any subset of it with minimal token consumption, query the pre-built dependency graph in `graphify-out/` instead of scanning source files (see `docs/../graphify-out/GRAPH_REPORT.md` for the human-readable view, `graphify-out/graph.json` for the machine-readable graph). It's auto-rebuilt on code changes; doc/paper/image changes flag `graphify-out/needs_update` for a manual `/graphify --update`. Treat any codebase question as a graphify query first.
+
 ## Key Files
 
 | File | Purpose |
