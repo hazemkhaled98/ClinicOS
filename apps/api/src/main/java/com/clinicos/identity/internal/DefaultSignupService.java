@@ -111,7 +111,6 @@ public class DefaultSignupService implements SignupService {
     static String deriveSlug(String clinicName) {
         return clinicName.toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("-{2,}", "-")
                 .replaceAll("(^-|-$)", "");
     }
 

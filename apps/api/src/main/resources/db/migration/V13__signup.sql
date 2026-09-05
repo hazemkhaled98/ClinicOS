@@ -51,6 +51,10 @@ begin
     where code = 'owner'
     returning id into v_membership_id;
 
+    if v_membership_id is null then
+        raise exception 'owner role missing from public.role';
+    end if;
+
     return query select v_user_id, v_clinic_id, v_membership_id;
 end;
 $$;

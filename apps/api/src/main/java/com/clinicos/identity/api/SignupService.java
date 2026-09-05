@@ -1,5 +1,6 @@
 package com.clinicos.identity.api;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -15,6 +16,11 @@ public interface SignupService {
     SignupResult signUp(SignupRequest request);
 
     record SignupRequest(String clinicName, String fullName, String username, String email, String rawPassword) {
+        @Override
+        public String toString() {
+            return "SignupRequest[clinicName=%s, fullName=%s, username=%s, email=%s, rawPassword=REDACTED]"
+                    .formatted(clinicName, fullName, username, email);
+        }
     }
 
     record SignupResult(UUID userId, UUID clinicId, UUID membershipId) {
@@ -31,7 +37,7 @@ public interface SignupService {
 
         public SignupConflictException(Field field, String message) {
             super(message);
-            this.field = field;
+            this.field = Objects.requireNonNull(field, "field");
         }
 
         public Field getField() {

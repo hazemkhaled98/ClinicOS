@@ -23,6 +23,8 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Self-service clinic sign-up (UC-001, Phase 1b): a public form that provisions
@@ -39,6 +41,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "signup", autoLayout = false)
 @AnonymousAllowed
 public class SignupView extends VerticalLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(SignupView.class);
 
     public static class SignupForm {
         private String clinicName;
@@ -177,28 +181,33 @@ public class SignupView extends VerticalLayout {
     }
 
     private void onSubmit() {
+        if (!binder.validate().isOk()) {
+            submitButton.setEnabled(true);
+            return;
+        }
+        SignupForm form = binder.getBean();
+        SignupRequest request = new SignupRequest(
+                form.getClinicName().trim(),
+                form.getFullName().trim(),
+                form.getUsername().trim(),
+                blankToNull(form.getEmail()),
+                form.getPassword());
+
+        SignupResult result;
         try {
-            if (!binder.validate().isOk()) {
-                submitButton.setEnabled(true);
-                return;
-            }
-            SignupForm form = binder.getBean();
-            SignupRequest request = new SignupRequest(
-                    form.getClinicName(),
-                    form.getFullName(),
-                    form.getUsername(),
-                    blankToNull(form.getEmail()),
-                    form.getPassword());
-            SignupResult result = signupService.signUp(request);
-            afterSignup(result);
+            result = signupService.signUp(request);
         } catch (SignupConflictException conflict) {
             renderConflict(conflict);
             submitButton.setEnabled(true);
+            return;
         } catch (Exception e) {
+            log.error("Signup failed for clinic='{}' username='{}'", request.clinicName(), request.username(), e);
             submitButton.setEnabled(true);
             new Notification("حدث خطأ أثناء إنشاء العيادة، حاول مرة أخرى", 4000, Notification.Position.BOTTOM_CENTER)
                     .open();
+            return;
         }
+        afterSignup(result);
     }
 
     private void afterSignup(SignupResult result) {
