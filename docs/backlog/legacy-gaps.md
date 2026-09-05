@@ -34,3 +34,14 @@ These are referenced inside UC steps, so they cannot be fully deferred to backlo
 ## Login Identifier (V11)
 
 V11 adds `app_user.username citext unique`. The login field stays `اسم المستخدم` as in the legacy screen. `email` becomes nullable (password reset + invites only). Done: `app_user_credentials_lookup_by_username` and `app_user_memberships_lookup`, both `SECURITY DEFINER` functions reached through a `TenantContext` auth-mode escape — no separate privileged DataSource/role, per the correction in roadmap.md step 7.
+
+---
+
+## Self-Service Sign-Up (V13, Phase 1b) — Deliberate Deferrals
+
+Built as `signup_clinic_with_owner` (a `SECURITY DEFINER` function, the only door for `app_rw` to create a clinic before a tenant exists). Two hardening items were deliberately deferred to Phase 9 — the app must not be publicly reachable before both are added:
+
+| # | Deferred Item | Why It Matters | Notes |
+|---|---------------|----------------|-------|
+| 13 | **Email verification** on sign-up | Without it, sign-up does not prove ownership of the email address; typos silently orphan an account and the email cannot be used for password reset later. | Needs SMTP + a token table (`signup_verification` or reuse), both far beyond Phase 1b's "zero DDL" scope. |
+| 14 | **Sign-up rate limiting / abuse throttling** | A public pre-auth form with instant activation invites mass tenant creation and credential stuffing — each sign-up is also an Argon2 hash for the server to burn. | Needs CAPTCHA and/or per-IP/per-session throttling; also out of the zero-DDL scope. Keyed by both IP and fresh Vaadin session. |

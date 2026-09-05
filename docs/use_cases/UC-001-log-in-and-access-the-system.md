@@ -4,13 +4,13 @@
 
 **Use Case ID:** UC-001
 **Use Case Name:** Log In and Access the System
-**Primary Actor:** Any Staff Member (Owner/Manager, Assistant, Receptionist)
+**Primary Actor:** Any Staff Member (Owner/Manager, Assistant, Receptionist); Prospective Clinic Owner (A4)
 **Goal:** A staff member authenticates with their credentials and reaches the part of the system their role is permitted to use.
 **Status:** Implemented
 
 ## Preconditions
 
-- The staff member has an active account created by the owner or manager.
+- The staff member has an active account created by the owner or manager — or created via sign-up (A4).
 - ~~The clinic's shared data has finished loading from the cloud (or the device falls back to offline queuing).~~ Not applicable — see A2.
 
 ## Main Success Scenario
@@ -46,6 +46,20 @@
 1. The system reopens the section the staff member last used, if their role still permits it.
 2. Use case continues at step 8.
 
+### A4: New Clinic Sign-Up
+
+**Actor:** Prospective Clinic Owner
+
+**Trigger:** No account exists yet; the clinic itself does not exist as a tenant (step 1)
+**Flow:**
+
+1. The prospective owner opens the sign-up form (`/signup`) from the login screen.
+2. The prospective owner enters clinic name, full name, username, password, and (optionally) email.
+3. The system provisions the clinic (status `trial`), the owner account (status `active`, Argon2-hashed password), and one owner membership, atomically in a single transaction.
+4. The system records the sign-up event in the clinic's activity log.
+5. The system sends the prospective owner to the login screen with a success banner.
+6. Use case continues at step 2 (normal login as the new owner).
+
 ## Postconditions
 
 ### Success Postconditions
@@ -70,3 +84,11 @@ Every section of the application (employee records, evaluation, tasks, procedure
 ### BR-003: The Owner Account Has Full Access
 
 An account flagged as the owner is automatically granted every section of the application, regardless of any other role setting.
+
+### BR-004: Sign-Up Provisions a Trial Clinic and Owner Membership Atomically
+
+Sign-up creates a clinic in status `trial`, the owner account in status `active`, and one `owner` membership in status `active`, all in a single transaction — a failed step rolls back the whole clinic.
+
+### BR-005: Username Is Globally Unique
+
+A username is unique across all clinics. Sign-up names the conflicting field (username, email, or the derived clinic slug) on the offending input. This is a pre-auth form, not a credential check, so the generic-error rule of A1 does not apply.

@@ -34,6 +34,7 @@ Single source of truth for business rules across all use cases. Global IDs assig
 | BR-G28 | Procedure total cost = issued items (bill of materials) + labor cost + doctor fee (if applicable). | UC-008 BR-004 |
 | BR-G29 | Dashboard operating volume compared against target scaled to elapsed working days in month, not full monthly target. | UC-009 BR-001 |
 | BR-G30 | Only manager or owner sees the admin dashboard. | UC-009 BR-002 |
+| BR-G31 | Sign-up provisions a new clinic (status `trial`) plus its first owner account and owner membership atomically, in one transaction. | UC-001 BR-004 |
 
 ## Cross-cutting themes
 

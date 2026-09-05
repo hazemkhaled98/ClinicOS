@@ -1,11 +1,15 @@
 package com.clinicos.ui;
 
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
@@ -30,6 +34,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         form.setForgotPasswordButtonVisible(false);
         add(form);
 
+        Paragraph signupHint = new Paragraph(new RouterLink("ليس لديك حساب؟ أنشئ عيادة جديدة", SignupView.class));
+        signupHint.getStyle().set("margin-top", "1rem");
+        signupHint.getStyle().set("color", "var(--ink)");
+        add(signupHint);
+
         getElement().setAttribute("dir", "rtl");
     }
 
@@ -37,6 +46,14 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
             form.setError(true);
+        }
+        if (event.getLocation().getQueryParameters().getSingleParameter("signup")
+                .map("success"::equals).orElse(false)) {
+            Paragraph banner = new Paragraph("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل");
+            banner.getStyle().set("margin-bottom", "1rem");
+            banner.getStyle().set("color", "var(--teal)");
+            banner.getStyle().set("font-weight", "600");
+            addComponentAtIndex(0, banner);
         }
     }
 

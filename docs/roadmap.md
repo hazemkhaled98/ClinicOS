@@ -95,7 +95,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | Phase | Status | Notes |
 |---|---|---|
 | 0 — Scaffolding | done | |
-| 1 — UC-001 Login | done | |
+| 1 — UC-001 Login + Phase 1b sign-up | in progress | 1b reopened Phase 1 (self-service sign-up) |
 | 2 — UC-002 Employees/roles | not started | |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |
@@ -133,6 +133,17 @@ BR-G01, BR-G02, BR-G03.
 - [x] **Done:** `SectionPlaceholderView` writes a `lastSection` cookie (30-day, path `/`) on every section open; `HelloView` reads it and reopens that route when the role still permits it (A3), else lands on the first permitted section of the (possibly changed) role (step 6). Fallback heading when a session has no permissions. Logout cuts access to nav and sections: session attrs + Spring Security context cleared, drawer renders empty. Covered by `HelloViewTest` (6: `resolveTarget` no-cookie/permitted-cookie/denied-cookie/empty-role/legacy-owner, first-section navigation, fallback heading), `MainLayoutTest` post-logout nav test. `mvn verify`: 36 unit + 19 IT green.
 
 UC-001 A2 (offline) is out of scope by decision; record that in the UC doc. A3 and the login `activity_log` write are in scope (added above) — not deviations.
+
+### Phase 1b — self-service sign-up
+
+Reopens Phase 1. Spec: `docs/superpowers/specs/2026-09-05-uc001-signup-design.md` (Approved). Zero DDL — the schema already supports it (`clinic.status` defaults `trial`, owner role seeded, V12 grants owner everything); the only blocker was `app_rw`'s missing INSERT rights, solved with one `SECURITY DEFINER` function (V9 explicitly anticipated it).
+
+- [x] **V13:** `signup_clinic_with_owner(...)` — one volatile `SECURITY DEFINER` function hardened like the V11 pair (`search_path = pg_catalog, public, pg_temp`, schema-qualified, `revoke all from public`, `grant execute to app_rw`). Inserts clinic → app_user → owner membership atomically, returns all three ids. Unique violations surface as SQLSTATE 23505 for Java mapping.
+- [x] **identity :: api:** `SignupService` — `SignupResult signUp(SignupRequest)`, records `SignupResult`/`SignupRequest`, `SignupConflictException(Field { USERNAME, EMAIL, CLINIC_SLUG })`.
+- [x] **identity :: internal:** `JdbcSignupService` — Argon2 encode, Java-derived slug (Arabic names fall back to a random suffix), slug-collision retry once, `DuplicateKeyException` → `SignupConflictException`, wrapped in `TenantContext.enterAuthMode()`/`exitAuthMode()` try/finally.
+- [x] **ui:** `SignupView` (`@Route("signup")`, `@AnonymousAllowed`, RTL, Binder validation, inline server conflict messages) + `LoginView` `RouterLink` → `/signup`. Success writes the `signup`/`clinic` `activity_log` row under the new tenant, then redirects to `/login?signup=success`. Note: the spec's `AuthenticationContext.login(...)` does not exist in Vaadin 25.2.6 — the specified fallback (redirect + success banner) is what landed.
+- [x] **Docs (same commit):** UC-001 actor + precondition + A4 + BR-004/BR-005; `business_rules.md` BR-G31; `roadmap.md` (this file); `CLAUDE.md` (Phase 1 in progress, V13 listed); `legacy-gaps.md` (email verification + signup throttling deferrals).
+- [x] **Tests:** `JdbcSignupServiceIT` (provisions trial/active/owner; username, email, slug conflicts; direct `insert into clinic` as `app_rw` without tenant fails), `SignupThenLoginIT` (sign-up → credential lookup), `SignupViewTest` (Karibu: required, mismatch, conflict inline, success navigation), Playwright sign-up → login path in `UC001LogInAndAccessTheSystemIT`. `ModularityTests` stays green.
 
 ### Phase 2 — UC-002 Manage employees and roles
 

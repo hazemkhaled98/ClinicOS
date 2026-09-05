@@ -69,6 +69,29 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         return String.format("http://localhost:%d/", port);
     }
 
+    private void login(String username, String password) {
+        TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
+        PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(password);
+        ButtonElement.getByText(page, "دخول").click();
+    }
+
+    private String uniqueSuffix() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private void seedUserWithClinic(String username, String rawPassword) throws Exception {
+        try (Connection connection = DriverManager.getConnection(
+                PostgresTestSupport.POSTGRES.getJdbcUrl(),
+                PostgresTestSupport.POSTGRES.getUsername(),
+                PostgresTestSupport.POSTGRES.getPassword())) {
+            UUID clinicId = TestFixtures.insertClinic(
+                    connection, "Test Clinic " + username, "clinic-" + username);
+            UUID userId = TestFixtures.insertUser(
+                    connection, username, passwordEncoder.encode(rawPassword), "active");
+            TestFixtures.insertMembership(connection, clinicId, userId);
+        }
+    }
+
     @Nested
     @DisplayName("Step 1: Login screen")
     class LoginScreen {
@@ -137,6 +160,39 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
                         connection, username, passwordEncoder.encode(rawPassword), "active");
                 TestFixtures.insertMembership(connection, clinicId, userId);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Step 3: Self-service sign-up")
+    class SignUp {
+
+        @Test
+        @DisplayName("Creating a clinic lands on login with a success banner, then the new owner logs into the app")
+        void signUpThenLogIn() {
+            String username = "newowner-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+
+            page.navigate(rootUrl() + "signup");
+            page.waitForURL(url -> url.contains("/signup"));
+
+            TextFieldElement.getByLabel(page, "اسم العيادة").setValue("عيادة الاختبار " + username);
+            TextFieldElement.getByLabel(page, "الاسم الكامل").setValue("المالك الجديد");
+            TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
+            PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(rawPassword);
+            PasswordFieldElement.getByLabel(page, "تأكيد كلمة المرور").setValue(rawPassword);
+
+            ButtonElement.getByText(page, "إنشاء العيادة").click();
+
+            page.waitForURL(url -> url.contains("/login"));
+            assertThat(page.url()).contains("signup=success");
+            com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+                    page.getByText("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل")).isVisible();
+
+            login(username, rawPassword);
+
+            page.waitForURL(url -> !url.contains("/login"));
+            assertThat(page.url()).doesNotContain("/login");
         }
     }
 }
