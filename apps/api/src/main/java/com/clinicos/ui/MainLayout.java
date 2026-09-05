@@ -25,7 +25,10 @@ import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
+import jakarta.annotation.security.PermitAll;
+
 @Layout
+@PermitAll
 public class MainLayout extends AppLayout {
 
     private static final Locale ARABIC = Locale.of("ar");
