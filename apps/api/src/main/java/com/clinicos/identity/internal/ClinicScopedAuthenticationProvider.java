@@ -1,5 +1,7 @@
 package com.clinicos.identity.internal;
 
+import java.util.Locale;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,6 +87,6 @@ public class ClinicScopedAuthenticationProvider implements AuthenticationProvide
     }
 
     private static String normalize(String slug) {
-        return slug == null ? "" : slug.trim();
+        return slug == null ? "" : slug.trim().toLowerCase(Locale.ROOT);
     }
 }

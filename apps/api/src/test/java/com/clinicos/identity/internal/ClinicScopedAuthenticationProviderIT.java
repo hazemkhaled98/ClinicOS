@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
@@ -104,6 +105,19 @@ class ClinicScopedAuthenticationProviderIT extends AbstractPostgresIntegrationTe
 
         assertThat(((AuthenticatedUser) asA.getPrincipal()).getClinicId()).isEqualTo(clinicAId);
         assertThat(((AuthenticatedUser) asB.getPrincipal()).getClinicId()).isEqualTo(clinicBId);
+    }
+
+    @Test
+    void clinicCodeMatchIsCaseInsensitive() throws Exception {
+        String rawPassword = "correct-horse-battery-staple";
+        String username = "mixedcase-" + uniqueSuffix;
+        insertUserInClinicA(username, rawPassword);
+
+        String shoutedSlug = clinicASlug().toUpperCase(Locale.ROOT);
+        Authentication authentication = authenticationManager.authenticate(
+                authenticate(shoutedSlug, username, rawPassword));
+
+        assertThat(((AuthenticatedUser) authentication.getPrincipal()).getClinicId()).isEqualTo(clinicAId);
     }
 
     @Test

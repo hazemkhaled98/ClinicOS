@@ -18,7 +18,7 @@
 1. The staff member opens the application and is shown the login screen.
 2. The staff member enters their clinic code (the clinic's slug, shown after sign-up), username, and password.
 3. The system verifies the credentials against the active accounts for that clinic.
-4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session.
+4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session. Under the current per-clinic-account schema (BR-005) an account belongs to exactly one clinic, so this step always auto-selects that single clinic today — the picker's multi-clinic branch is kept for a future use case that lets one person hold memberships across clinics.
 5. The system starts a session for the staff member and remembers it on the device.
 6. The system determines which sections of the application the staff member's role is allowed to see.
 7. The system opens the first section the staff member is permitted to use and shows the navigation menu for their role.
@@ -91,4 +91,4 @@ Sign-up creates a clinic in status `trial`, the owner account in status `active`
 
 ### BR-005: Username Is Unique Within a Clinic
 
-A username is unique within a single clinic (enforced by `(clinic_id, username)`), so the same username can exist in different clinics. Authentication is keyed by `(clinic_slug, username)`. Sign-up names the conflicting field (username, email, or the derived clinic slug) on the offending input. This is a pre-auth form, not a credential check, so the generic-error rule of A1 does not apply.
+A username is unique within a single clinic (enforced by `(clinic_id, username)`), so the same username can exist in different clinics. Authentication is keyed by `(clinic_slug, username)`, both matched case-insensitively — the clinic code is lowercased before the lookup, since `clinic.slug` is always stored lowercase. Sign-up names the conflicting field (email or the derived clinic slug) on the offending input; a username conflict can't occur through self-service sign-up itself, since each sign-up provisions a brand-new clinic, but the same check will matter once a later use case adds members to an existing clinic.
