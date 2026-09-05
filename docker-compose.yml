@@ -38,23 +38,6 @@ services:
       timeout: 20s
       retries: 3
 
-  migrate:
-    image: flyway/flyway:13.5-alpine
-    container_name: clinicos-flyway
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5432/clinicos
-      FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: local-dev-only
-      FLYWAY_LOCATIONS: filesystem:/flyway/sql
-    volumes:
-      - ./apps/api/src/main/resources/db/migration:/flyway/sql
-    command: migrate
-    profiles:
-      - migrate
-
 volumes:
   postgres_data:
   minio_data:
