@@ -45,14 +45,17 @@ Each business module exposes `api` and hides `internal`. The `ui` module is veri
 
 **Never bypass this.** Any code that runs DB work outside a Spring-managed transaction (e.g., `@Transactional` on a service method) must ensure `TenantContext` is set first.
 
+All business queries go through the generated jOOQ metamodel (`DSLContext`); `TenantConnectionListener` deliberately stays on raw JDBC because it must run `SET LOCAL` on the transaction-bound connection before jOOQ issues anything.
+
 ## Database & Migrations
 
-- Migrations: `apps/api/src/main/resources/db/migration/V1__...V12__.sql`
+- Migrations: `apps/api/src/main/resources/db/migration/V1__...V13__.sql`
 - V1–V8: schema, tables, triggers
 - V9: RLS policies + `app_rw` role (created **without password**)
 - V10: cross-cutting triggers (frozen snapshot, return ceiling, append-only ledger, cross-tenant FK guard)
 - V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for the clinic picker (replaced the originally-planned privileged auth role)
 - V12: seeds `permission` codes and legacy default `role_permission` sets
+- V13: `signup_clinic_with_owner` — `SECURITY DEFINER` self-service sign-up (clinic + owner atomically, before a tenant exists; the only door for `app_rw` to create a clinic)
 
 **Local dev**: `docker compose up -d postgres minio`
 - Postgres: `localhost:5432`, db `clinicos`, user `postgres` / `local-dev-only`
@@ -68,17 +71,14 @@ Each business module exposes `api` and hides `internal`. The `ui` module is veri
 ## Build & Test
 
 ```bash
-# Generate jOOQ sources (requires Docker for Testcontainers Postgres)
-mvn -pl apps/api generate-sources -Pcodegen
-
-# Compile + run unit tests (no Docker needed)
+# Compile + run unit tests (jOOQ codegen in generate-sources requires Docker)
 mvn -pl apps/api test
 
 # Run only integration tests (Testcontainers spins up Postgres)
 mvn -pl apps/api verify -Dtest=*IT -DfailIfNoTests=false
 
-# Full build with codegen (requires Docker)
-mvn -pl apps/api verify -Pcodegen
+# Full build
+mvn -pl apps/api verify
 
 # Production build (minified frontend)
 mvn -pl apps/api -Pproduction package
@@ -87,7 +87,7 @@ mvn -pl apps/api -Pproduction package
 mvn -pl apps/api test -Dtest=ModularityTests
 ```
 
-**jOOQ codegen** runs in `generate-sources` phase via `testcontainers-jooq-codegen-maven-plugin` — spins up throwaway Postgres, runs Flyway, generates sources to `target/generated-sources/jooq`. Not committed.
+**jOOQ codegen** runs unconditionally in the `generate-sources` phase via `testcontainers-jooq-codegen-maven-plugin` — every build spins up a throwaway Postgres, runs Flyway, and generates sources to `target/generated-sources/jooq`. Not committed. A `citext` forced type maps `citext` columns to `String`.
 
 ## Run Application Locally
 
@@ -114,6 +114,7 @@ To explore this codebase or any subset of it with minimal token consumption, que
 | `docs/backlog/legacy-gaps.md` | Legacy features not in UCs/schema — schema deltas sketched |
 | `apps/api/src/main/resources/application.yml` | Datasource, Flyway, Vaadin, springdoc config |
 | `apps/api/pom.xml` | Full dependency + plugin config |
+| `apps/api/src/main/java/com/clinicos/shared/TenantConnectionListener.java` | `SET LOCAL app.clinic_id` on transaction begin |
 
 ## Session Workflow
 
@@ -140,7 +141,7 @@ To explore this codebase or any subset of it with minimal token consumption, que
 | Phase | Status |
 |-------|--------|
 | 0 — Scaffolding | done |
-| 1 — UC-001 Login | done |
+| 1 — UC-001 Login + Phase 1b sign-up | in progress |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | not started |
 | 4 — UC-004/005 Evaluation | not started |

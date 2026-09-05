@@ -1,16 +1,17 @@
 package com.clinicos.shared;
 
+import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.UUID;
 import javax.sql.DataSource;
 
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,13 +103,7 @@ class AuthModeTenantEscapeIT extends AbstractPostgresIntegrationTest {
 
         long count = transactionTemplate.execute(status -> {
             Connection connection = org.springframework.jdbc.datasource.DataSourceUtils.getConnection(dataSource);
-            try (PreparedStatement statement = connection.prepareStatement("select count(*) from clinic_settings");
-                    ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-                return resultSet.getLong(1);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return DSL.using(connection, SQLDialect.POSTGRES).fetchCount(CLINIC_SETTINGS);
         });
 
         assertThat(count).isEqualTo(0);
@@ -121,12 +116,7 @@ class AuthModeTenantEscapeIT extends AbstractPostgresIntegrationTest {
 
         assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
             Connection connection = org.springframework.jdbc.datasource.DataSourceUtils.getConnection(dataSource);
-            try (PreparedStatement statement = connection.prepareStatement("select count(*) from clinic_settings");
-                    ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            DSL.using(connection, SQLDialect.POSTGRES).fetchCount(CLINIC_SETTINGS);
         }))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("No tenant bound");

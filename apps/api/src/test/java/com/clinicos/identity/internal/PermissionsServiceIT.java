@@ -1,13 +1,18 @@
 package com.clinicos.identity.internal;
 
+import static com.clinicos.shared.jooq.tables.MembershipPermission.MEMBERSHIP_PERMISSION;
+import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jooq.impl.DSL.val;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +26,7 @@ import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
-class JdbcPermissionsServiceIT extends AbstractPostgresIntegrationTest {
+class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
 
     private static final Set<String> FULL_CATALOG = Set.of(
             "emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit",
@@ -30,7 +35,7 @@ class JdbcPermissionsServiceIT extends AbstractPostgresIntegrationTest {
             "received", "itemAnalysis", "approvals", "ledger");
 
     @Autowired
-    private JdbcPermissionsService permissionsService;
+    private DefaultPermissionsService permissionsService;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -120,19 +125,16 @@ class JdbcPermissionsServiceIT extends AbstractPostgresIntegrationTest {
         }
     }
 
-
-
-
     private void grantPermission(UUID membershipId, String code, boolean granted) throws Exception {
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "insert into membership_permission (membership_id, permission_id, granted) select ?, id, ? from permission where code = ?")) {
-                statement.setObject(1, membershipId);
-                statement.setBoolean(2, granted);
-                statement.setString(3, code);
-                statement.execute();
-            }
+            DSL.using(connection, SQLDialect.POSTGRES)
+                    .insertInto(MEMBERSHIP_PERMISSION, MEMBERSHIP_PERMISSION.MEMBERSHIP_ID,
+                            MEMBERSHIP_PERMISSION.PERMISSION_ID, MEMBERSHIP_PERMISSION.GRANTED)
+                    .select(DSL.select(val(membershipId), PERMISSION.ID, val(granted))
+                            .from(PERMISSION)
+                            .where(PERMISSION.CODE.eq(code)))
+                    .execute();
         }
     }
 }

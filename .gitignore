@@ -25,6 +25,8 @@ replay_pid*
 
 # Claude Code local session state
 .claude/
+.opencode/
+docs/plans/
 
 # Maven
 target/

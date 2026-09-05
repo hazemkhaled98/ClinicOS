@@ -1,14 +1,14 @@
 package com.clinicos.shared;
 
+import static com.clinicos.shared.jooq.tables.ActivityLog.ACTIVITY_LOG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.UUID;
 
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,16 +81,8 @@ class ActivityLogServiceIT extends AbstractPostgresIntegrationTest {
         }
     }
 
-    private long countActivityRowsForClinic(Connection connection, UUID clinic) throws Exception {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "select count(*) from activity_log where clinic_id = ?")) {
-            statement.setObject(1, clinic);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-                return resultSet.getLong(1);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private long countActivityRowsForClinic(Connection connection, UUID clinic) {
+        return DSL.using(connection, SQLDialect.POSTGRES)
+                .fetchCount(ACTIVITY_LOG, ACTIVITY_LOG.CLINIC_ID.eq(clinic));
     }
 }

@@ -1,15 +1,18 @@
 package com.clinicos.shared;
 
+import static com.clinicos.shared.jooq.tables.Clinic.CLINIC;
+import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.UUID;
 import javax.sql.DataSource;
 
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,31 +72,18 @@ class TenantConnectionListenerIT extends AbstractPostgresIntegrationTest {
 
     private long countClinicSettingsRows() {
         Connection connection = org.springframework.jdbc.datasource.DataSourceUtils.getConnection(dataSource);
-        try (PreparedStatement statement = connection.prepareStatement("select count(*) from clinic_settings");
-                ResultSet resultSet = statement.executeQuery()) {
-            resultSet.next();
-            return resultSet.getLong(1);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return DSL.using(connection, SQLDialect.POSTGRES).fetchCount(CLINIC_SETTINGS);
     }
 
-    private UUID insertClinic(Connection connection, String name, String slug) throws Exception {
-        UUID clinicId;
-        try (PreparedStatement statement = connection.prepareStatement(
-                "insert into clinic (name, slug) values (?, ?) returning id")) {
-            statement.setString(1, name);
-            statement.setString(2, slug);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                resultSet.next();
-                clinicId = (UUID) resultSet.getObject(1);
-            }
-        }
-        try (PreparedStatement statement = connection.prepareStatement(
-                "insert into clinic_settings (clinic_id) values (?)")) {
-            statement.setObject(1, clinicId);
-            statement.execute();
-        }
+    private UUID insertClinic(Connection connection, String name, String slug) {
+        DSLContext dsl = DSL.using(connection, SQLDialect.POSTGRES);
+        UUID clinicId = dsl.insertInto(CLINIC, CLINIC.NAME, CLINIC.SLUG)
+                .values(name, slug)
+                .returningResult(CLINIC.ID)
+                .fetchOne(CLINIC.ID);
+        dsl.insertInto(CLINIC_SETTINGS, CLINIC_SETTINGS.CLINIC_ID)
+                .values(clinicId)
+                .execute();
         return clinicId;
     }
 }
