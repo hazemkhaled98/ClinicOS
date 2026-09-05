@@ -95,7 +95,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | Phase | Status | Notes |
 |---|---|---|
 | 0 — Scaffolding | done | |
-| 1 — UC-001 Login + Phase 1b sign-up | in progress | 1b reopened Phase 1 (self-service sign-up) |
+| 1 — UC-001 Login + Phase 1b sign-up | done | PR #5 merged; `mvn verify` green (46 unit + 34 IT) |
 | 2 — UC-002 Employees/roles | not started | |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |

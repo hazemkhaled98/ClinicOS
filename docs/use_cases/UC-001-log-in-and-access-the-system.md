@@ -6,7 +6,7 @@
 **Use Case Name:** Log In and Access the System
 **Primary Actor:** Any Staff Member (Owner/Manager, Assistant, Receptionist); Prospective Clinic Owner (A4)
 **Goal:** A staff member authenticates with their credentials and reaches the part of the system their role is permitted to use.
-**Status:** Implemented
+**Status:** Tested
 
 ## Preconditions
 

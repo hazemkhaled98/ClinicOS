@@ -141,7 +141,7 @@ To explore this codebase or any subset of it with minimal token consumption, que
 | Phase | Status |
 |-------|--------|
 | 0 — Scaffolding | done |
-| 1 — UC-001 Login + Phase 1b sign-up | in progress |
+| 1 — UC-001 Login + Phase 1b sign-up | done |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | not started |
 | 4 — UC-004/005 Evaluation | not started |
