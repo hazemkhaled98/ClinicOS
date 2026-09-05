@@ -1,10 +1,12 @@
 package com.clinicos.identity.internal;
 
+import static com.clinicos.shared.jooq.tables.SignupClinicWithOwner.SIGNUP_CLINIC_WITH_OWNER;
+
 import java.util.Locale;
 import java.util.UUID;
 
+import org.jooq.DSLContext;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -30,15 +32,15 @@ import com.clinicos.shared.TenantContext;
  * email verification and signup throttling first.
  */
 @Service
-public class JdbcSignupService implements SignupService {
+public class DefaultSignupService implements SignupService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
     private final PasswordEncoder passwordEncoder;
 
-    public JdbcSignupService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate,
+    public DefaultSignupService(DSLContext dsl, TransactionTemplate transactionTemplate,
             PasswordEncoder passwordEncoder) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
         this.passwordEncoder = passwordEncoder;
     }
@@ -69,22 +71,16 @@ public class JdbcSignupService implements SignupService {
     }
 
     private SignupResult attempt(String slug, SignupRequest request, String passwordHash) {
-        return transactionTemplate.execute(status -> jdbcTemplate.query(
-                """
-                select user_id, clinic_id, membership_id
-                from signup_clinic_with_owner(?::text, ?::text, ?::text, ?::citext, ?::citext, ?::text)
-                """,
-                resultSet -> {
-                    if (!resultSet.next()) {
-                        throw new IllegalStateException("signup_clinic_with_owner returned no row");
-                    }
-                    return new SignupResult(
-                            resultSet.getObject("user_id", UUID.class),
-                            resultSet.getObject("clinic_id", UUID.class),
-                            resultSet.getObject("membership_id", UUID.class));
-                },
-                request.clinicName(), slug, request.fullName(),
-                request.username(), request.email(), passwordHash));
+        return transactionTemplate.execute(status -> {
+            var record = dsl.selectFrom(SIGNUP_CLINIC_WITH_OWNER.call(
+                    request.clinicName(), slug, request.fullName(),
+                    request.username(), request.email(), passwordHash))
+                    .fetchOne();
+            if (record == null) {
+                throw new IllegalStateException("signup_clinic_with_owner returned no row");
+            }
+            return new SignupResult(record.getUserId(), record.getClinicId(), record.getMembershipId());
+        });
     }
 
     private SignupConflictException mapConflict(DuplicateKeyException e) {

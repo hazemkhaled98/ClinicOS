@@ -1,9 +1,11 @@
 package com.clinicos.identity.internal;
 
+import static com.clinicos.shared.jooq.tables.AppUserCredentialsLookupByUsername.APP_USER_CREDENTIALS_LOOKUP_BY_USERNAME;
+import static com.clinicos.shared.jooq.tables.AppUserMembershipsLookup.APP_USER_MEMBERSHIPS_LOOKUP;
+
 import java.util.UUID;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -19,11 +21,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class CredentialsLookupService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
 
-    public CredentialsLookupService(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public CredentialsLookupService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+        this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
     }
 
@@ -32,19 +34,10 @@ public class CredentialsLookupService {
      * not exist.
      */
     public CredentialsRow credentialsLookupByUsername(String username) {
-        return transactionTemplate.execute(status -> {
-            try {
-                return jdbcTemplate.queryForObject(
-                        "select id, password_hash, status from app_user_credentials_lookup_by_username(?::citext)",
-                        (resultSet, rowNum) -> new CredentialsRow(
-                                (UUID) resultSet.getObject(1),
-                                resultSet.getString(2),
-                                resultSet.getString(3)),
-                        username);
-            } catch (EmptyResultDataAccessException e) {
-                return null;
-            }
-        });
+        return transactionTemplate.execute(status -> dsl.selectFrom(
+                APP_USER_CREDENTIALS_LOOKUP_BY_USERNAME.call(username))
+                .fetchOne(record -> new CredentialsRow(
+                        record.getId(), record.getPasswordHash(), record.getStatus())));
     }
 
     /**
@@ -54,10 +47,8 @@ public class CredentialsLookupService {
      * Returns false if the user has no active memberships.
      */
     public boolean hasActiveMembership(UUID userId) {
-        return transactionTemplate.execute(status -> jdbcTemplate.queryForObject(
-                "select count(*) > 0 from app_user_memberships_lookup(?)",
-                Boolean.class,
-                userId));
+        return transactionTemplate.execute(status -> dsl.fetchExists(
+                APP_USER_MEMBERSHIPS_LOOKUP.call(userId)));
     }
 
     public record CredentialsRow(UUID id, String passwordHash, String status) {
