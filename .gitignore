@@ -43,3 +43,6 @@ apps/api/.vaadin/
 .settings/
 .classpath
 .project
+
+# graphify knowledge graph output
+graphify-out/

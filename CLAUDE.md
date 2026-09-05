@@ -114,10 +114,11 @@ mvn -pl apps/api spring-boot:run
 ## Session Workflow
 
 1. **At the start of every session — new or resumed — run `git fetch origin`** before any work (or first read), so local refs/tracking match the remote. Applies even when resuming a previous session/branch.
-2. **Read `docs/roadmap.md` first.** Find the phase marked `in progress`, scan for the first `- [ ]` step — resume there. All `- [x]` steps are done.
-3. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
-4. **Open a PR after the phase is finished**, as specified by the plan (`docs/roadmap.md`), not before. Base the PR on `main`; push the phase branch and open the PR.
-5. Keep `main` clean — land phase work only via its PR.
+2. **Start the graphify watch process in the background** (`"$(cat graphify-out/.graphify_python)" -m graphify.watch . --debounce 3`, run_in_background) if `graphify-out/graph.json` exists and no watch is already running — announce it in chat. It auto-rebuilds `graph.json`/`GRAPH_REPORT.md` on code changes for free (no LLM); doc/paper/image changes instead flag `graphify-out/needs_update` for a manual `/graphify --update`.
+3. **Read `docs/roadmap.md` first.** Find the phase marked `in progress`, scan for the first `- [ ]` step — resume there. All `- [x]` steps are done.
+4. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
+5. **Open a PR after the phase is finished**, as specified by the plan (`docs/roadmap.md`), not before. Base the PR on `main`; push the phase branch and open the PR.
+6. Keep `main` clean — land phase work only via its PR.
 
 ## After Every Slice / Phase
 
