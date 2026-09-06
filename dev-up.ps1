@@ -54,4 +54,4 @@ if ($stale) { Start-Sleep -Seconds 2 }
 
 Write-Host "==> Starting application (http://localhost:8080)" -ForegroundColor Cyan
 Set-Location "$PSScriptRoot\apps\api"
-mvn spring-boot:run
+mvn clean spring-boot:run
