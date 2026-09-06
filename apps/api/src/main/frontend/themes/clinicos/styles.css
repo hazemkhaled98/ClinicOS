@@ -715,6 +715,25 @@ vaadin-drawer-toggle {
   object-fit: contain;
 }
 
+.clinicos-signup-field {
+  width: 100%;
+}
+
+.clinicos-signup-field vaadin-text-field::part(input-field),
+.clinicos-signup-field vaadin-password-field::part(input-field) {
+  background: var(--c-input-bg);
+  border: 1px solid var(--c-hairline);
+  border-radius: var(--radius-md);
+  min-height: 52px;
+}
+
+.clinicos-signup-field vaadin-text-field::part(label),
+.clinicos-signup-field vaadin-password-field::part(label) {
+  color: var(--c-ink);
+  font-weight: 600;
+  font-size: 12px;
+}
+
 @media (max-width: 1024px) {
   .clinicos-auth-page {
     flex-direction: column;
