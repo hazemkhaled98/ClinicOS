@@ -1,7 +1,8 @@
 -- Row-Level Security. The app connects as app_rw (non-superuser, non-owner of
 -- these tables) so RLS cannot be silently bypassed. Every request sets
--- `app.clinic_id` via `SET LOCAL` at the start of its transaction (see jOOQ
--- ExecuteListener in the application tier); every tenant table is scoped to it.
+-- `app.clinic_id` via `SET LOCAL` at the start of its transaction (see
+-- TenantConnectionListener, a Spring TransactionExecutionListener, in the
+-- application tier); every tenant table is scoped to it.
 --
 -- Platform tables (clinic, app_user, role, permission, role_permission) are
 -- deliberately NOT RLS-scoped -- they are reached only through service code
