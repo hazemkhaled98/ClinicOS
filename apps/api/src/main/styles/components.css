@@ -111,6 +111,11 @@
     color: var(--color-danger-600);
   }
 
+  .clinicos-btn--danger:hover {
+    background-color: var(--color-danger-600);
+    color: #ffffff;
+  }
+
   .clinicos-input {
     display: block;
     width: 100%;
@@ -128,6 +133,10 @@
   }
 
   .clinicos-input--error {
+    border-color: var(--color-danger-600);
+  }
+
+  .clinicos-input--error:focus-visible {
     border-color: var(--color-danger-600);
   }
 
