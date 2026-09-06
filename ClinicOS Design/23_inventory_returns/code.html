@@ -1,0 +1,207 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي - إدارة الأداء | المخزن - المرتجعات</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with forms and container queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              deep: '#0a2e29',
+              dark: '#0e3a34',
+              teal: '#0d6559',
+              light: '#14b8a6',
+              mint: '#10b981',
+              surface: '#f4fbf8',
+              'surface-dim': '#eef5f2'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif']
+          },
+          borderRadius: {
+            'custom': '1rem'
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-layout">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4fbf8] text-slate-800">
+<!-- BEGIN: TopNavigationBar -->
+<header class="w-full bg-white border-b border-slate-200/80 px-4 sm:px-8 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm" data-purpose="top-header">
+<!-- Left Area: Date Display & Mobile Hamburger -->
+<div class="flex items-center gap-4 text-sm text-slate-600">
+<button aria-label="القائمة الرئيسية" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2 font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200/60">
+<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+<!-- Right Area: System and Module Breadcrumb -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 animate-pulse"></span>
+<span class="text-sm font-semibold text-emerald-800">المخزن</span>
+</div>
+<span class="text-slate-300">•</span>
+<h1 class="text-base font-bold text-slate-800 tracking-tight">عيادتي <span class="font-normal text-slate-400">• إدارة الأداء</span></h1>
+</div>
+</header>
+<!-- END: TopNavigationBar -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
+<!-- BEGIN: BranchHeaderCard -->
+<section class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4" data-purpose="branch-header">
+<!-- Right Side: Branch Title, Version & Status Badge -->
+<div class="flex items-center gap-4">
+<!-- Clinic OS Icon Badge -->
+<div class="w-14 h-14 rounded-2xl bg-[#0a2e29] text-emerald-300 flex items-center justify-center shadow-inner flex-shrink-0">
+<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h2 class="text-xl font-bold text-slate-900">DentSpaces • المخزن</h2>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              متصل
+            </span>
+</div>
+<p class="text-xs sm:text-sm text-slate-500 mt-1">جرد لحظي — مخزن + تراي v97</p>
+</div>
+</div>
+<!-- Left Side: User Profile / Role -->
+<div class="flex items-center gap-3 self-end md:self-center">
+<div class="flex items-center gap-2.5 px-4 py-2 border border-slate-200 bg-slate-50/80 hover:bg-slate-100 rounded-xl transition-all cursor-pointer">
+<svg class="w-4 h-4 text-[#0d6559]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-xs sm:text-sm font-semibold text-slate-700">المدير العام</span>
+</div>
+</div>
+</section>
+<!-- END: BranchHeaderCard -->
+<!-- BEGIN: SubNavigationTabs -->
+<nav aria-label="تبويبات المستودع" class="flex flex-wrap items-center justify-between gap-3 pt-1" data-purpose="sub-navigation">
+<!-- Primary Operational Tabs Row -->
+<div class="flex flex-wrap items-center gap-2 w-full lg:w-auto overflow-x-auto pb-1">
+<!-- Tab: التراي (Tray) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<span>التراي</span>
+<span class="px-1.5 py-0.5 text-[11px] font-bold bg-slate-100 text-slate-700 rounded-md border border-slate-200">20</span>
+</a>
+<!-- Tab: المخزن (Main Inventory) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المخزن</span>
+</a>
+<!-- Tab: النواقص والطلب (Restock & Shortages) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>النواقص والطلب</span>
+<span class="px-1.5 py-0.5 text-[11px] font-bold bg-rose-50 text-rose-600 rounded-md border border-rose-200">28</span>
+</a>
+<!-- Tab: الاستلام (Receiving) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاستلام</span>
+</a>
+<!-- Tab: المرتجعات (Returns) - ACTIVE TAB -->
+<a class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[#0a2e29] text-white shadow-sm ring-2 ring-[#0a2e29]/20 transition-all" href="#">
+<svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 10h10a5 5 0 015 5v2m0 0l-4-4m4 4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" transform="matrix(-1 0 0 1 24 0)"></path>
+</svg>
+<span>المرتجعات</span>
+</a>
+<!-- Tab: الموردين (Suppliers) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الموردين</span>
+</a>
+<!-- Tab: الاعتمادات (Approvals) -->
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 transition-all shadow-sm" href="#">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاعتمادات</span>
+</a>
+</div>
+<!-- Left Dropdown: الأقسام -->
+<div>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:border-slate-300 transition-all shadow-sm" type="button">
+<span>الأقسام</span>
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</nav>
+<!-- END: SubNavigationTabs -->
+<!-- BEGIN: PageHeader -->
+<section class="pt-2" data-purpose="section-header">
+<h3 class="text-2xl font-extrabold text-[#0a2e29] tracking-tight">المرتجعات</h3>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: EmptyStateContainer -->
+<section class="bg-white border border-slate-200/90 rounded-2xl min-h-[460px] flex flex-col items-center justify-center p-8 sm:p-12 text-center shadow-sm" data-purpose="returns-empty-state">
+<!-- Icon Indicator (Subtle animated/soft circular frame) -->
+<div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-400 mb-5 shadow-inner">
+<!-- Return / Refresh Icon matching reference image -->
+<svg class="w-8 h-8 sm:w-9 sm:h-9 text-slate-400 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Informative Empty State Text -->
+<p class="text-sm sm:text-base text-slate-500 font-medium max-w-xl leading-relaxed">
+        مفيش طلبيات مستلمة ترجّع منها. أول ما تستلم طلبية من تاب «الاستلام» تقدر ترجّع منها هنا.
+      </p>
+<!-- Contextual Quick Action Link -->
+<div class="mt-6">
+<a class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#0d6559] bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-100 hover:border-emerald-300 transition-all" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الانتقال إلى سجل الاستلام</span>
+</a>
+</div>
+</section>
+<!-- END: EmptyStateContainer -->
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: PageFooter -->
+<footer class="w-full bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400 mt-auto" data-purpose="site-footer">
+<span>نظام إدارة العيادات والمخزن السريري — ClinicOS 2026 • جميع الحقوق محفوظة</span>
+</footer>
+<!-- END: PageFooter -->
+</body></html>

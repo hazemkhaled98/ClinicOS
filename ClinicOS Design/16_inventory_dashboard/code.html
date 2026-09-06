@@ -1,0 +1,322 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي - إدارة المخزن والقيادة</title>
+<!-- Google Fonts: Cairo & Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#061d1a',
+              850: '#0a2e29',
+              800: '#0d3b35',
+              700: '#0d6559',
+              600: '#117a6c',
+              500: '#149180',
+              100: '#e1f4f0',
+              50: '#f0faf8',
+            },
+            mint: {
+              500: '#10b981',
+              100: '#e6f4ea',
+              50: '#f2faf5',
+            },
+            surface: {
+              DEFAULT: '#f4fbf8',
+              dim: '#e7f0ec',
+              card: '#ffffff'
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'Noto Sans Arabic', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles: Typography & UI Accents -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style data-purpose="custom-decorations">
+    .status-pulse {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulseGreen 2s infinite;
+    }
+    @keyframes pulseGreen {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      }
+      70% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4fbf8] text-slate-800 selection:bg-brand-100 selection:text-brand-900">
+<!-- BEGIN: TopNavigationBar -->
+<header class="w-full bg-white border-b border-slate-200/90 shadow-sm sticky top-0 z-30">
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- System Identity / ClinicOS Logo -->
+<div class="flex items-center gap-3">
+<!-- Hamburger Menu Button -->
+<button aria-label="القائمة الرئيسية" class="p-2 text-slate-600 hover:text-brand-850 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2 pr-1 border-r border-slate-200">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<div class="flex items-baseline gap-1.5">
+<span class="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">عيادتي</span>
+<span class="text-xs sm:text-sm text-slate-400 font-medium">• إدارة الأداء</span>
+</div>
+</div>
+</div>
+<!-- Current Date & Status Indicator -->
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200/70">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الأحد 6 سبتمبر</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">المخزن</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopNavigationBar -->
+<!-- BEGIN: MainContentContainer -->
+<main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+<!-- BEGIN: BranchAndBranchActionsHeader -->
+<section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5" data-purpose="branch-header-card">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<!-- Left: User/Role Indicator & General Manager Action -->
+<div class="flex items-center gap-3 order-2 md:order-1">
+<button class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-3.5 py-2 rounded-xl border border-slate-300 shadow-xs transition-colors" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المدير العام</span>
+</button>
+</div>
+<!-- Right: Branch & Live Inventory Information -->
+<div class="flex items-center gap-3.5 order-1 md:order-2 justify-end">
+<div class="text-right">
+<h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">DentSpaces • المخزن</h1>
+<p class="text-xs sm:text-sm text-slate-500 flex items-center justify-end gap-1.5 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+<span>جرد لحظي — مخزن + تراي v97</span>
+</p>
+</div>
+<!-- Clinic Branch Emblem -->
+<div class="w-11 h-11 rounded-xl bg-brand-850 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+<span>ع</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: BranchAndBranchActionsHeader -->
+<!-- BEGIN: NavigationTabsStrip -->
+<nav aria-label="أقسام المخزن والتشغيل" class="flex flex-wrap items-center justify-between gap-2 bg-white/90 backdrop-blur-sm p-2 rounded-2xl border border-slate-200/90 shadow-sm">
+<!-- Operations Dropdown Button (القيادة) -->
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-2 bg-brand-850 hover:bg-brand-800 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-xs transition-all" type="button">
+<span>القيادة</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</button>
+<button class="text-slate-600 hover:text-brand-850 hover:bg-slate-100 text-sm font-semibold px-3 py-2 rounded-lg transition-colors" type="button">
+          الاعتمادات
+        </button>
+</div>
+<!-- Navigation Category Buttons -->
+<div class="flex flex-wrap items-center gap-1 sm:gap-1.5">
+<!-- التراي 20 -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 transition-colors" type="button">
+<span>التراي</span>
+<span class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">20</span>
+</button>
+<!-- المخزن -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المخزن</span>
+</button>
+<!-- النواقص والطلب -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/70 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>النواقص والطلب</span>
+<span class="bg-amber-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">28</span>
+</button>
+<!-- الاستلام -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاستلام</span>
+</button>
+<!-- المرتجعات -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المرتجعات</span>
+</button>
+<!-- الموردين -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الموردين</span>
+</button>
+</div>
+</nav>
+<!-- END: NavigationTabsStrip -->
+<!-- Section Title: القيادة -->
+<div class="pt-1">
+<h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">القيادة</h2>
+</div>
+<!-- BEGIN: ExecutiveSummaryCard -->
+<section class="bg-gradient-to-r from-emerald-50/80 via-white to-emerald-50/50 rounded-2xl border border-emerald-200/90 shadow-xs p-4 sm:p-5" data-purpose="executive-summary">
+<div class="flex items-center justify-between gap-2 mb-2">
+<span class="text-xs font-bold text-emerald-800 tracking-wide uppercase">الخلاصة التنفيذية</span>
+<div class="flex items-center gap-1.5 bg-white border border-emerald-200 px-2.5 py-0.5 rounded-full shadow-2xs">
+<span class="w-2 h-2 rounded-full bg-emerald-500 status-pulse"></span>
+<span class="text-xs font-semibold text-emerald-700">لحظي</span>
+</div>
+</div>
+<p class="text-sm sm:text-base font-bold text-slate-800 leading-relaxed">
+        البيزنس متوازن — مفيش فرص تحسين كبيرة ظاهرة من البيانات الحالية. 🔥
+      </p>
+</section>
+<!-- END: ExecutiveSummaryCard -->
+<!-- BEGIN: KPIMetricsGrid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-purpose="kpi-metrics-grid">
+<!-- Card 1: رأس المال المجمد بالمخزون -->
+<article class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-brand-600/40 transition-all">
+<div>
+<span class="block text-xs font-bold text-slate-500 leading-tight">رأس المال المجمّد</span>
+<span class="block text-xs font-bold text-slate-400">بالمخزون</span>
+</div>
+<div class="my-4 text-center">
+<div class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            0 <span class="text-xl sm:text-2xl font-bold text-slate-600">ج.م</span>
+</div>
+</div>
+<footer class="pt-2 border-t border-slate-100">
+<p class="text-[11px] font-semibold text-slate-500 text-center">
+            قيمة البضاعة الموجودة دلوقتي
+          </p>
+</footer>
+</article>
+<!-- Card 2: إجمالي الإنفاق على التوريد (Active/Highlighted card in UI) -->
+<article class="bg-white rounded-2xl border-2 border-brand-700 shadow-sm p-5 flex flex-col justify-between relative ring-2 ring-brand-700/10">
+<div>
+<span class="block text-xs font-bold text-slate-700 leading-tight">إجمالي الإنفاق على التوريد</span>
+</div>
+<div class="my-4 text-center">
+<div class="text-3xl sm:text-4xl font-black text-brand-850 tracking-tight">
+            0 <span class="text-xl sm:text-2xl font-bold text-brand-700">ج.م</span>
+</div>
+</div>
+<footer class="pt-2 border-t border-slate-100">
+<p class="text-[11px] font-semibold text-slate-500 text-center">
+            لسه مفيش طلبيات مستلمة
+          </p>
+</footer>
+</article>
+<!-- Card 3: وفر شراء متاح -->
+<article class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-brand-600/40 transition-all opacity-85 hover:opacity-100">
+<div>
+<span class="block text-xs font-bold text-slate-500 leading-tight">وفر شراء متاح</span>
+</div>
+<div class="my-4 text-center">
+<div class="text-3xl sm:text-4xl font-black text-slate-300 tracking-tight">
+            0 <span class="text-xl sm:text-2xl font-bold text-slate-300">ج.م</span>
+</div>
+</div>
+<footer class="pt-2 border-t border-slate-100">
+<p class="text-[11px] font-semibold text-slate-400 text-center">
+            مفيش بدائل أرخص
+          </p>
+</footer>
+</article>
+<!-- Card 4: فلوس راكدة -->
+<article class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-brand-600/40 transition-all opacity-85 hover:opacity-100">
+<div>
+<span class="block text-xs font-bold text-slate-500 leading-tight">فلوس راكدة</span>
+</div>
+<div class="my-4 text-center">
+<div class="text-3xl sm:text-4xl font-black text-slate-300 tracking-tight">
+            0 <span class="text-xl sm:text-2xl font-bold text-slate-300">ج.م</span>
+</div>
+</div>
+<footer class="pt-2 border-t border-slate-100">
+<p class="text-[11px] font-semibold text-slate-400 text-center">
+            مفيش رصيد راكد
+          </p>
+</footer>
+</article>
+</section>
+<!-- END: KPIMetricsGrid -->
+<!-- BEGIN: ExpenditureDistributionSection -->
+<section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6" data-purpose="cash-flow-breakdown">
+<!-- Section Header -->
+<div class="space-y-1 mb-6">
+<h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-1.5">
+<span>فين بتروح الفلوس</span>
+<span class="text-rose-500 text-sm">📉</span>
+</h3>
+<p class="text-xs sm:text-sm text-slate-500">
+          أعلى الخامات استهلاكاً بالقيمة — اضغط أي صنف لمعرفة بيتصرف فين
+        </p>
+</div>
+<!-- Empty State Container -->
+<div class="bg-slate-50/70 border border-dashed border-slate-200 rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center max-w-2xl mx-auto my-2">
+<div class="w-10 h-10 rounded-full bg-emerald-50 text-brand-700 flex items-center justify-center mb-3">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"></path>
+</svg>
+</div>
+<p class="text-xs sm:text-sm font-semibold text-slate-600 max-w-lg leading-relaxed">
+          لسه مفيش إجراءات مسجلة كفاية — كل ما تسجلوا إجراءات، رؤى الإجراءات والأطباء والتكلفة تبان أوضح وأعمق.
+        </p>
+</div>
+</section>
+<!-- END: ExpenditureDistributionSection -->
+</main>
+<!-- END: MainContentContainer -->
+<!-- BEGIN: MainFooter -->
+<footer class="w-full bg-white border-t border-slate-200/90 py-4 mt-8" data-purpose="site-footer">
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<p class="text-xs text-slate-500 font-medium">
+        نظام إدارة العيادات والمخزن السريري ClinicOS 2026 — جميع الحقوق محفوظة
+      </p>
+</div>
+</footer>
+<!-- END: MainFooter -->
+</body></html>

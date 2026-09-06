@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>أكاديمية التأهيل - عيادتي • إدارة الأداء</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#0d9488',
+              tealDark: '#0f766e',
+              tealLight: '#f0fdfa',
+              amber: '#f59e0b',
+              amberBorder: '#fcd34d',
+              slateBg: '#f8fafc',
+              borderMuted: '#e2e8f0',
+              textDark: '#1e293b',
+              textMuted: '#64748b'
+            }
+          },
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Cairo -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Custom Styles: Typography & iOS Tweaks -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Cairo', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12 antialiased selection:bg-teal-100 selection:text-teal-800">
+<!-- BEGIN: MobileAppContainer -->
+<div class="max-w-[420px] mx-auto min-h-screen bg-slate-50 flex flex-col shadow-sm">
+<!-- BEGIN: TopBar -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/80 px-4 py-3">
+<div class="flex items-center justify-between">
+<!-- Date indicator -->
+<div class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<!-- System Branding & Menu Button -->
+<div class="flex items-center gap-2">
+<div class="text-left">
+<span class="text-[11px] block text-slate-400 font-medium leading-none mb-0.5">أكاديمية التأهيل</span>
+<span class="text-xs font-bold text-slate-800 tracking-tight leading-tight">عيادتي <span class="text-teal-600">•</span> إدارة الأداء</span>
+</div>
+<!-- Menu Toggle Button -->
+<button aria-label="القائمة الرئيسية" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-3.5 py-4 space-y-4">
+<!-- BEGIN: AcademyHeaderSection -->
+<section class="text-center pt-1 pb-1" data-purpose="academy-page-title">
+<h1 class="text-xl font-black text-slate-900 tracking-tight">أكاديمية التأهيل</h1>
+<p class="text-xs text-slate-500 mt-1 font-medium leading-relaxed">
+          منهج تعليمي متدرّج للموظف الجديد — يتعلم، يتدرب، ويتقيّم خطوة بخطوة
+        </p>
+</section>
+<!-- END: AcademyHeaderSection -->
+<!-- BEGIN: LearnerTrackProgressCard -->
+<section class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-xs" data-purpose="trainee-status">
+<div class="flex items-center justify-between gap-2 mb-3">
+<!-- Back button -->
+<a class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all" href="#">
+<svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>رجوع</span>
+</a>
+<!-- Trainee Info -->
+<div class="text-right">
+<div class="flex items-center justify-end gap-1.5">
+<span class="text-sm font-bold text-slate-800">منهج ندى</span>
+<span class="text-sm">🎓</span>
+</div>
+<div class="text-[11px] text-slate-400 font-medium">إتقان المنهج</div>
+</div>
+</div>
+<!-- Progress Metrics & Refresh Photos Action -->
+<div class="flex items-center justify-between pt-2 border-t border-slate-100">
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-200 bg-sky-50/70 text-sky-700 text-xs font-semibold hover:bg-sky-100 transition-colors" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تحديث الصور</span>
+</button>
+<!-- Units count indicator -->
+<div class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+            0/8 وحدة • <span class="text-teal-600 font-black">%0</span>
+</div>
+</div>
+</section>
+<!-- END: LearnerTrackProgressCard -->
+<!-- BEGIN: DailyEvaluationSection -->
+<section class="bg-white rounded-2xl border-t-4 border-t-amber-400 border-x border-b border-slate-200 p-4 shadow-sm" data-purpose="trainer-evaluation-card">
+<div class="text-right pb-3 border-b border-slate-100">
+<div class="flex items-center justify-start gap-1.5">
+<span class="text-base text-amber-500">⭐</span>
+<h2 class="text-sm font-bold text-slate-900">تقييم المدوّن اليوم (06-09-2026)</h2>
+</div>
+<p class="text-[11px] text-slate-400 mt-0.5">دوس على النجوم لكل بند — بيندمج في تقرير القرار</p>
+</div>
+<!-- Rating Rows Form -->
+<div class="divide-y divide-slate-100 mt-2">
+<!-- Rating: Initiative -->
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1" data-rating-group="initiative">
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="1" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="2" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="3" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="4" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="5" type="button">★</button>
+</div>
+<span class="text-xs font-semibold text-slate-700">المبادرة</span>
+</div>
+<!-- Rating: Cleanliness -->
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1" data-rating-group="cleanliness">
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="1" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="2" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="3" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="4" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="5" type="button">★</button>
+</div>
+<span class="text-xs font-semibold text-slate-700">النظافة</span>
+</div>
+<!-- Rating: Interaction -->
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1" data-rating-group="interaction">
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="1" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="2" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="3" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="4" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="5" type="button">★</button>
+</div>
+<span class="text-xs font-semibold text-slate-700">التعامل</span>
+</div>
+<!-- Rating: Speed -->
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-1" data-rating-group="speed">
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="1" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="2" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="3" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="4" type="button">★</button>
+<button class="rating-star text-slate-300 hover:text-amber-400 text-lg transition-colors p-0.5" data-val="5" type="button">★</button>
+</div>
+<span class="text-xs font-semibold text-slate-700">السرعة</span>
+</div>
+</div>
+</section>
+<!-- END: DailyEvaluationSection -->
+<!-- BEGIN: TrainerNotesSection -->
+<section class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm" data-purpose="trainer-notes-card">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] text-slate-400">مفيش ملاحظات</span>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-slate-800">ملاحظات المدوّن</span>
+<span class="text-sm">📝</span>
+</div>
+</div>
+<!-- Note Submission Input Form -->
+<div class="flex items-center gap-2 mt-3">
+<button class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition-all shadow-xs shrink-0 active:scale-95" type="button">
+            إضافة
+          </button>
+<input class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 text-right" placeholder="اكتب توجيه للموظف..." type="text"/>
+</div>
+</section>
+<!-- END: TrainerNotesSection -->
+<!-- BEGIN: ModuleContentCard -->
+<section class="bg-white rounded-2xl border-t-4 border-t-teal-600 border-x border-b border-slate-200 p-4 shadow-sm space-y-4" data-purpose="current-module-lesson">
+<!-- Module Header Title -->
+<div class="flex items-center justify-end gap-1.5 border-b border-slate-100 pb-2.5">
+<h2 class="text-sm font-black text-slate-900">عقلية النجاح والمبادرة</h2>
+<span class="text-sm">🎯</span>
+</div>
+<!-- Target / Goal Sub-card -->
+<div class="bg-slate-50 rounded-xl p-3 border border-slate-150">
+<div class="flex items-start gap-2 text-right">
+<span class="text-sm shrink-0 mt-0.5">🎯</span>
+<p class="text-xs text-slate-700 font-medium leading-relaxed">
+<span class="font-bold text-slate-900">الهدف:</span> نطلع من الوحدة دي وانت فاهم إزاي تتعلّم بسرعة، تبادر، وتكون قيمة حقيقية للفريق من أول يوم.
+            </p>
+</div>
+</div>
+<!-- Golden Rule Section -->
+<div class="border-r-2 border-teal-600 pr-3 space-y-2">
+<h3 class="text-xs font-black text-teal-800">القاعدة الذهبية</h3>
+<ul class="text-xs text-slate-600 space-y-2 leading-relaxed">
+<li class="flex items-start gap-1.5">
+<span class="text-teal-600 font-bold">•</span>
+<span>اسأل بدل ما تخمّن — الغلط في التعلّم عادي، الغلط من غير سؤال لأ.</span>
+</li>
+<li class="flex items-start gap-1.5">
+<span class="text-teal-600 font-bold">•</span>
+<span>لو نسيت خطوة، ارجع للمنهج أو اسأل، متقفلش على شك.</span>
+</li>
+</ul>
+</div>
+<!-- Initiative Section -->
+<div class="border-r-2 border-teal-600 pr-3 space-y-2 pt-1">
+<h3 class="text-xs font-black text-teal-800">المبادرة بتفرق</h3>
+<p class="text-xs text-slate-600 leading-relaxed">
+            المساعد الشاطر مش بيستنى لما يتقال له «اعمل كذا»؛ بيبص على العيادة، بيجهز الحاجة قبل ما تتطلب، وبيسبق بخطوة دايماً.
+          </p>
+</div>
+</section>
+<!-- END: ModuleContentCard -->
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: MobileAppContainer -->
+<!-- Interactive Rating Script -->
+<script data-purpose="rating-interaction">
+    document.addEventListener('DOMContentLoaded', () => {
+      const starGroups = document.querySelectorAll('[data-rating-group]');
+      
+      starGroups.forEach(group => {
+        const stars = group.querySelectorAll('.rating-star');
+        stars.forEach(star => {
+          star.addEventListener('click', () => {
+            const selectedVal = parseInt(star.getAttribute('data-val'), 10);
+            stars.forEach(s => {
+              const currentVal = parseInt(s.getAttribute('data-val'), 10);
+              if (currentVal <= selectedVal) {
+                s.classList.remove('text-slate-300');
+                s.classList.add('text-amber-400');
+              } else {
+                s.classList.remove('text-amber-400');
+                s.classList.add('text-slate-300');
+              }
+            });
+          });
+        });
+      });
+    });
+  </script>
+</body></html>

@@ -1,0 +1,79 @@
+@layer components {
+  .custom-gradient-bg {
+    background-image: linear-gradient(
+      135deg,
+      #071f1c 0%,
+      #0a2e29 35%,
+      #114a42 70%,
+      #17655a 100%
+    );
+  }
+
+  .subtle-mesh {
+    background-image: radial-gradient(
+        rgba(52, 211, 153, 0.12) 1px,
+        transparent 1px
+      ),
+      radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: 0 0, 14px 14px;
+  }
+
+  .glass-feature-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.35) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(16, 185, 129, 0.35);
+    border-radius: 9999px;
+  }
+
+  .clinicos-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.75rem;
+    color: rgba(246, 250, 248, 0.72);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .clinicos-nav-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .clinicos-nav-item--active {
+    color: #ffffff;
+    background: rgba(16, 185, 129, 0.16);
+    border-inline-start: 3px solid rgba(16, 185, 129, 0.9);
+    padding-inline-start: calc(0.875rem - 3px);
+  }
+
+  .clinicos-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.75rem;
+    color: rgba(246, 250, 248, 0.72);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+}

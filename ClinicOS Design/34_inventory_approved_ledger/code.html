@@ -1,0 +1,223 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DentSpaces • المخزن - السجل</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              pine: '#0a2e29',
+              teal: '#0e4a42',
+              mint: '#10b981',
+              emerald: '#059669',
+              lightMint: '#e8f5f1',
+              softBg: '#f8faf9',
+              border: '#e2e8f0',
+              textDark: '#1e293b',
+              textMuted: '#64748b'
+            }
+          },
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif']
+          },
+          boxShadow: {
+            'card': '0 4px 20px -2px rgba(10, 46, 41, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03)',
+            'subtle': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)'
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f6f9f8;
+      color: #1e293b;
+    }
+    input::placeholder {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+<!-- BEGIN: TopHeader -->
+<header class="w-full bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm" data-purpose="top-navigation-bar">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+<!-- Right Side: Date Display -->
+<div class="flex items-center gap-2 text-sm text-slate-500 font-medium" data-purpose="date-indicator">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<!-- Left Side: Breadcrumb & Menu Icon -->
+<div class="flex items-center gap-3" data-purpose="section-breadcrumb">
+<div class="flex items-center gap-2 text-sm text-slate-600">
+<span class="inline-flex items-center gap-1.5 font-medium text-slate-400">
+<span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span>
+            المخزن
+          </span>
+<span class="text-slate-300">/</span>
+<span class="font-semibold text-slate-700">عيادتي • إدارة الأداء</span>
+</div>
+<button aria-label="القائمة الرئيسية" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-grow py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full" data-purpose="page-wrapper">
+<div class="bg-white rounded-2xl border border-slate-100 shadow-card p-6 sm:p-8 space-y-6">
+<!-- BEGIN: StoreSelectorAndUser -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5" data-purpose="clinic-store-header">
+<!-- Store Name & Version Pill -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-teal-900 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+<svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-base font-bold text-slate-800">DentSpaces • المخزن</h1>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+<span>جرد لحظي — مخزن + تراي <span class="font-sans font-medium text-slate-600">v97</span></span>
+</div>
+</div>
+</div>
+<!-- User Role Pill -->
+<div class="flex items-center gap-2 self-start sm:self-auto" data-purpose="user-badge">
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50/70 text-slate-700 text-xs font-semibold shadow-2xs hover:bg-slate-100 transition-colors">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>المدير العام</span>
+</div>
+</div>
+</div>
+<!-- END: StoreSelectorAndUser -->
+<!-- BEGIN: NavigationTabs -->
+<nav aria-label="تبويبات المخزن" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs sm:text-sm font-medium border-b border-slate-100" data-purpose="store-navigation-tabs">
+<!-- Active Dropdown Tab: السجل -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-pine text-white shadow-sm font-medium hover:bg-opacity-95 transition-all" type="button">
+<svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>السجل</span>
+<svg class="w-3.5 h-3.5 text-emerald-200 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+<!-- Other Tabs -->
+<button class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الاعتمادات</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>التراي</span>
+<span class="inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[11px] font-semibold bg-red-100 text-red-600">20</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>المخزن</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>النواقص والطلب</span>
+<span class="inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[11px] font-semibold bg-red-100 text-red-600">28</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الاستلام</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>المرتجعات</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors whitespace-nowrap" type="button">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الموردين</span>
+</button>
+</nav>
+<!-- END: NavigationTabs -->
+<!-- BEGIN: SectionTitleAndFilters -->
+<div class="space-y-4 pt-1" data-purpose="filters-and-heading">
+<!-- Section Title & Filter Toggle Buttons -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<h2 class="text-xl font-bold text-slate-900 tracking-tight">السجل</h2>
+<!-- Filter Buttons -->
+<div aria-label="نوع السجل" class="inline-flex p-1 bg-slate-100 rounded-xl gap-1 self-start sm:self-auto" role="group">
+<button class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-brand-pine text-white shadow-sm transition-all" type="button">
+              الإجراءات المسجلة (0)
+            </button>
+<button class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors" type="button">
+              كل الحركات
+            </button>
+</div>
+</div>
+<!-- Search Input Bar -->
+<div class="relative" data-purpose="search-box">
+<div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<input class="w-full pl-4 pr-10 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 transition-all" placeholder="دور باسم الإجراء أو الطبيب أو الأسيستنت..." type="text">
+</div>
+</div>
+<!-- END: SectionTitleAndFilters -->
+<!-- BEGIN: EmptyStateCard -->
+<section aria-live="polite" class="min-h-[320px] rounded-xl border border-dashed border-slate-200 bg-slate-50/40 flex flex-col items-center justify-center p-8 text-center" data-purpose="empty-ledger-state">
+<div class="w-14 h-14 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-4 text-slate-400">
+<!-- Clipboard / Document Ledger Icon -->
+<svg class="w-7 h-7 text-slate-400 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M9 12h6m-6 4h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<p class="text-sm sm:text-base font-normal text-slate-500 max-w-md leading-relaxed">
+          مفيش إجراءات معتمدة لسه. أول ما المدير يعتمد إجراء بيظهر هنا بكل تفاصيله.
+        </p>
+</section>
+<!-- END: EmptyStateCard -->
+</div>
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: PageFooter -->
+<footer class="py-5 border-t border-slate-200 bg-white" data-purpose="app-footer">
+<div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 leading-relaxed font-light">
+      نظام إدارة العيادات والمخزن السريري — <span class="font-sans font-medium text-slate-500">ClinicOS 2026</span> • جميع الحقوق محفوظة
+    </div>
+</footer>
+<!-- END: PageFooter -->
+</body></html>

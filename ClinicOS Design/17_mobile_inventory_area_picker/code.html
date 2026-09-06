@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>نافذة أقسام المخزن والعمليات - عيادتي</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf9',
+              100: '#ccfbef',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e48',
+            },
+            clinic: {
+              surface: '#f8fafc',
+              dark: '#0f172a',
+              muted: '#64748b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbar">
+    /* إخفاء شريط التمرير الافتراضي لشاشات اللمس مع الحفاظ على التمرير السلس */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-900/60 font-sans antialiased text-slate-800 min-h-screen flex items-end sm:items-center justify-center p-0 sm:p-4">
+<!-- BEGIN: MobileFrameContainer -->
+<!-- الحاوية المخصصة لمحاكاة عرض شاشة الموبايل iOS القياسية (~390px) -->
+<div class="w-full max-w-[390px] h-[844px] bg-white sm:rounded-[44px] shadow-2xl overflow-hidden flex flex-col relative border border-slate-200" data-purpose="mobile-viewport">
+<!-- BEGIN: iOSStatusBar -->
+<!-- شريط حالة iOS العلوي (ساعة، نوتش، شحن وشبكة) -->
+<header class="w-full pt-3 pb-1 px-7 flex items-center justify-between bg-slate-50 border-b border-slate-100 shrink-0 select-none">
+<div class="text-[14px] font-bold tracking-tight text-slate-800">9:41</div>
+<!-- المستشعر العلوي الديناميكي -->
+<div class="w-24 h-4 bg-slate-200/80 rounded-full mx-auto"></div>
+<div class="flex items-center space-x-1.5 space-x-reverse text-slate-800">
+<!-- أيقونة إشارة الشبكة -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25c-.2.2-.2.51 0 .71.2.2.51.2.71 0l.64-.64C7.24 19.34 9.49 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path>
+</svg>
+<!-- أيقونة الواي فاي -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A17.92 17.92 0 0012 4z"></path>
+</svg>
+<!-- أيقونة البطارية -->
+<div class="w-5 h-2.5 border border-slate-800 rounded-sm p-0.5 flex items-center">
+<div class="w-3/4 h-full bg-slate-800 rounded-xs"></div>
+</div>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: ModalHeader -->
+<!-- رأس المودال المحتوي على العنوان وزر الإغلاق -->
+<div class="px-5 py-4 flex items-center justify-between border-b border-slate-100 bg-white sticky top-0 z-20 shadow-xs">
+<div class="flex items-center space-x-2 space-x-reverse">
+<span class="w-2.5 h-2.5 rounded-full bg-teal-600 animate-pulse"></span>
+<h1 class="text-lg font-bold text-slate-900 tracking-tight">أقسام المخزن والعمليات</h1>
+</div>
+<button aria-label="إغلاق النافذة" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+</div>
+<!-- END: ModalHeader -->
+<!-- BEGIN: ScrollableContent -->
+<!-- قائمة الأقسام والبطاقات قابلة للتمرير -->
+<main class="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar bg-slate-50/60">
+<!-- BEGIN: SectionOverview -->
+<!-- قسم نظرة عامة -->
+<section>
+<div class="flex items-center justify-between mb-2.5 px-1">
+<span class="text-xs font-semibold text-slate-400 tracking-wide">نظرة عامة</span>
+<span class="text-[11px] bg-teal-50 text-teal-700 font-medium px-2 py-0.5 rounded-full border border-teal-100">نشط حالياً</span>
+</div>
+<!-- بطاقة القيادة المحددة -->
+<a class="block bg-white border-2 border-teal-600 rounded-2xl p-3.5 shadow-sm hover:shadow-md transition relative group overflow-hidden" href="#">
+<div class="absolute top-0 right-0 w-1.5 h-full bg-teal-600"></div>
+<div class="flex items-center space-x-3.5 space-x-reverse">
+<div class="w-12 h-12 rounded-xl bg-teal-700 text-white flex items-center justify-center shrink-0 shadow-inner">
+<svg class="w-6 h-6" fill="currentColor" viewbox="0 0 24 24">
+<path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="text-base font-bold text-slate-900">القيادة</h2>
+<span class="text-teal-600">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</span>
+</div>
+<p class="text-xs text-slate-500 mt-0.5 truncate">الرئيسية والإحصاء ومؤشرات الأداء اللحظية</p>
+</div>
+</div>
+</a>
+</section>
+<!-- END: SectionOverview -->
+<!-- BEGIN: SectionOperations -->
+<!-- قسم العمليات -->
+<section>
+<div class="mb-2 px-1">
+<span class="text-xs font-semibold text-slate-400 tracking-wide">العمليات</span>
+</div>
+<!-- بطاقة سجل إجراءاتي -->
+<a class="block bg-white border border-slate-200/90 rounded-2xl p-3.5 hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="flex items-center space-x-3.5 space-x-reverse">
+<div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 border border-slate-200">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<h2 class="text-sm font-bold text-slate-800">سجل إجراءاتي</h2>
+<p class="text-xs text-slate-500 mt-0.5">متابعة الاستهلاك الطبي وخروج المواد للعيادات</p>
+</div>
+</div>
+</a>
+</section>
+<!-- END: SectionOperations -->
+<!-- BEGIN: SectionItemsProtocols -->
+<!-- قسم الأصناف والإجراءات -->
+<section>
+<div class="mb-2 px-1">
+<span class="text-xs font-semibold text-slate-400 tracking-wide">الأصناف والإجراءات</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- بطاقة جرد الأصناف -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-2.5 border border-slate-200">
+<!-- أيقونة باركود / جرد -->
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h2v12H4zm4 0h1v12H8zm3 0h2v12h-2zm4 0h1v12h-1zm3 0h2v12h-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">جرد الأصناف</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">الرصيد الحي والمخزون</p>
+</div>
+</a>
+<!-- بطاقة قوائم الإجراءات -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-2.5 border border-slate-200">
+<!-- أيقونة مربعات وقوائم -->
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">قوائم الإجراءات</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">البروتوكولات والمكونات</p>
+</div>
+</a>
+</div>
+</section>
+<!-- END: SectionItemsProtocols -->
+<!-- BEGIN: SectionSuppliers -->
+<!-- قسم الموردين -->
+<section>
+<div class="mb-2 px-1">
+<span class="text-xs font-semibold text-slate-400 tracking-wide">الموردين</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- تحليل الموردين -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-2.5 border border-slate-200">
+<!-- أيقونة نبض بياني -->
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">تحليل الموردين</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">مقارنة الأسعار والعروض</p>
+</div>
+</a>
+<!-- الطلبيات المستلمة -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-2.5 border border-slate-200">
+<!-- أيقونة طرد واستلام -->
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">الطلبيات المستلمة</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">أذونات الاستلام والمطابقة</p>
+</div>
+</a>
+</div>
+</section>
+<!-- END: SectionSuppliers -->
+<!-- BEGIN: SectionFinanceAnalytics -->
+<!-- قسم المال والتحليلات -->
+<section class="pb-2">
+<div class="mb-2 px-1">
+<span class="text-xs font-semibold text-slate-400 tracking-wide">المال والتحليلات</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- بطاقة الربحية -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2.5 border border-emerald-100">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">الربحية</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">هامش ربح الخامات</p>
+</div>
+</a>
+<!-- بطاقة الهدر -->
+<a class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col justify-between hover:border-teal-500 hover:shadow-sm transition" href="#">
+<div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-2.5 border border-rose-100">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">الهدر</h3>
+<p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">التوالف وفروق الجرد</p>
+</div>
+</a>
+</div>
+</section>
+<!-- END: SectionFinanceAnalytics -->
+</main>
+<!-- END: ScrollableContent -->
+<!-- BEGIN: ModalFooter -->
+<!-- تذييل الشاشة وزر إغلاق سريع مع مؤشر سحب iOS -->
+<footer class="bg-white border-t border-slate-100 p-4 pt-3 flex flex-col items-center shrink-0">
+<div class="w-full flex items-center justify-between mb-3 text-xs text-slate-400 px-1">
+<span>ClinicOS v2.4 • نظام المخزن الذكي</span>
+<span class="inline-flex items-center text-teal-600 font-medium cursor-pointer">
+          إخفاء النافذة
+        </span>
+</div>
+<!-- شريط إغلاق الشاشة باللمس لأجهزة الآيفون (Home Indicator) -->
+<div class="w-32 h-1 bg-slate-300 rounded-full"></div>
+</footer>
+<!-- END: ModalFooter -->
+</div>
+<!-- END: MobileFrameContainer -->
+</body></html>

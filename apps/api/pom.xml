@@ -19,13 +19,11 @@
 
     <properties>
         <java.version>25</java.version>
-        <vaadin.version>25.2.6</vaadin.version>
         <spring-modulith.version>2.1.1</spring-modulith.version>
         <jooq.version>3.21.7</jooq.version>
         <flyway.version>13.5.0</flyway.version>
         <springdoc.version>3.1.0</springdoc.version>
         <testcontainers.version>1.21.4</testcontainers.version>
-        <karibu-testing.version>2.7.2</karibu-testing.version>
         <postgresql.version>42.7.4</postgresql.version>
         <bouncycastle.version>1.80</bouncycastle.version>
         <jooq.codegen.package>com.clinicos.shared.jooq</jooq.codegen.package>
@@ -34,13 +32,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-bom</artifactId>
-                <version>${vaadin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.springframework.modulith</groupId>
                 <artifactId>spring-modulith-bom</artifactId>
@@ -53,8 +44,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
         <dependency>
@@ -134,20 +129,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.mvysny.kaributesting</groupId>
-            <artifactId>karibu-testing-v10</artifactId>
-            <version>${karibu-testing.version}</version>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.56.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>dramafinder</artifactId>
-            <version>1.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev</artifactId>
         </dependency>
     </dependencies>
 
@@ -239,6 +224,42 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>npm-install</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="npm.cmd" osfamily="windows" dir="${project.basedir}" failonerror="true">
+                                    <arg value="ci" />
+                                </exec>
+                                <exec executable="npm" osfamily="unix" dir="${project.basedir}" failonerror="true">
+                                    <arg value="ci" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-tailwind-css</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="npm.cmd" osfamily="windows" dir="${project.basedir}" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="build:css" />
+                                </exec>
+                                <exec executable="npm" osfamily="unix" dir="${project.basedir}" failonerror="true">
+                                    <arg value="run" />
+                                    <arg value="build:css" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>install-playwright-browsers</id>
                         <phase>pre-integration-test</phase>
                         <goals>
@@ -258,45 +279,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-maven-plugin</artifactId>
-                <version>${vaadin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-frontend</goal>
-                            <goal>build-frontend</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>production</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.vaadin</groupId>
-                        <artifactId>vaadin-maven-plugin</artifactId>
-                        <version>${vaadin.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>build-frontend</goal>
-                                </goals>
-                                <configuration>
-                                    <productionMode>true</productionMode>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

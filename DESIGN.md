@@ -1,662 +1,218 @@
 ---
-version: 1.0
-name: ClinicOS Design System
-description: A data-dense clinic back-office design system for Arabic RTL environments. Built on IBM Carbon discipline — light canvas, near-square corners, hairline borders (1px), flat tiles, single teal accent, and explicit Arabic/Latin typography with no negative tracking. Vaadin Flow theme mapping included.
-
+name: ClinicOS
 colors:
-  # Primary & Brand
-  primary: "#0a2e29"
-  primary-50pct: "#859794"
-  on-primary: "#ffffff"
-  
-  # Neutrals (Light)
-  canvas: "#f4f7f6"
-  surface: "#ffffff"
-  hairline: "#e1e8e5"
-  ink: "#16201d"
-  ink-muted: "#5c6b66"
-  table-header-bg: "#eef3f1"
-  zebra-row: "#f8faf9"
-  
-  # Semantic Status
-  status-success-deep: "#166534"
-  status-success-bg: "#e3f6ea"
-  status-success: "#1f7a4d"
-  status-warning-deep: "#8a5a00"
-  status-warning-bg: "#fef3d6"
-  status-warning: "#b87900"
-  status-danger-deep: "#9d2b1f"
-  status-danger-bg: "#fce4e1"
-  status-danger: "#b23b30"
-  status-info-deep: "#1d4ed8"
-  status-info-bg: "#e3edfb"
-  status-info: "#2563eb"
-  
-  # Dark Theme (Reserved, Not Implemented)
-  dark-canvas: "#0e1613"
-  dark-surface: "#182420"
-  dark-ink: "#eaf1ee"
-  dark-hairline: "#28362f"
-  dark-ink-muted: "#93a49b"
-  dark-table-header-bg: "#1f2b26"
-  dark-zebra-row: "#141d1a"
-  dark-primary: "#2dd4bf"
-  dark-drawer-start: "#0a2e29"
-  dark-drawer-end: "#051917"
-  dark-status-success-deep: "#4ade80"
-  dark-status-success-bg: "#0f2b1b"
-  dark-status-warning-deep: "#fbbf24"
-  dark-status-warning-bg: "#332a10"
-  dark-status-danger-deep: "#fb7185"
-  dark-status-danger-bg: "#331613"
-  dark-status-info-deep: "#60a5fa"
-  dark-status-info-bg: "#12233a"
-
+  surface: '#f6faf8'
+  surface-dim: '#d5dcd9'
+  surface-bright: '#f6faf8'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#eef5f2'
+  surface-container: '#e8efec'
+  surface-container-high: '#e3eae7'
+  surface-container-highest: '#dde4e1'
+  on-surface: '#161d1b'
+  on-surface-variant: '#414846'
+  inverse-surface: '#2b3230'
+  inverse-on-surface: '#ebf2ef'
+  outline: '#717976'
+  outline-variant: '#c1c8c5'
+  surface-tint: '#43655e'
+  primary: '#001814'
+  on-primary: '#ffffff'
+  primary-container: '#0a2e29'
+  on-primary-container: '#749790'
+  inverse-primary: '#aacec6'
+  secondary: '#076c41'
+  on-secondary: '#ffffff'
+  secondary-container: '#9bf2bb'
+  on-secondary-container: '#117145'
+  tertiary: '#201100'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#37250c'
+  on-tertiary-container: '#a68b6a'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#c5eae2'
+  primary-fixed-dim: '#aacec6'
+  on-primary-fixed: '#00201c'
+  on-primary-fixed-variant: '#2b4d47'
+  secondary-fixed: '#9ef5be'
+  secondary-fixed-dim: '#82d8a3'
+  on-secondary-fixed: '#002110'
+  on-secondary-fixed-variant: '#005230'
+  tertiary-fixed: '#feddb8'
+  tertiary-fixed-dim: '#e0c19d'
+  on-tertiary-fixed: '#281803'
+  on-tertiary-fixed-variant: '#584327'
+  background: '#f6faf8'
+  on-background: '#161d1b'
+  surface-variant: '#dde4e1'
 typography:
-  page-title:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 28px
-    fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: 0
-  section-title:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 20px
-    fontWeight: 700
-    lineHeight: 1.4
-    letterSpacing: 0
-  card-title:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+  display-lg:
+    fontFamily: Noto Sans Arabic
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.02em
+  headline-lg:
+    fontFamily: Noto Sans Arabic
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  headline-sm:
+    fontFamily: Noto Sans Arabic
+    fontSize: 18px
+    fontWeight: '600'
+    lineHeight: 26px
+  title-md:
+    fontFamily: Noto Sans Arabic
     fontSize: 16px
-    fontWeight: 600
-    lineHeight: 1.4
-    letterSpacing: 0
-  card-title-numeric:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 16px
-    fontWeight: 600
-    lineHeight: 1.4
-    letterSpacing: 0
-    fontFeature: "'tnum' 1"
-  body:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  body-numeric:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-    fontFeature: "'tnum' 1"
-  body-sm:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontWeight: '600'
+    lineHeight: 24px
+  body-lg:
+    fontFamily: Noto Sans Arabic
+    fontSize: 15px
+    fontWeight: '400'
+    lineHeight: 22px
+  body-md:
+    fontFamily: Noto Sans Arabic
     fontSize: 13px
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: 0
-  label:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontWeight: '400'
+    lineHeight: 18px
+  label-md:
+    fontFamily: Noto Sans Arabic
     fontSize: 12px
-    fontWeight: 600
-    lineHeight: 1.3
-    letterSpacing: 0
-  label-numeric:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
-    fontSize: 12px
-    fontWeight: 600
-    lineHeight: 1.3
-    letterSpacing: 0
-    fontFeature: "'tnum' 1"
-  caption:
-    fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif"
+    fontWeight: '600'
+    lineHeight: 16px
+  label-xs:
+    fontFamily: Noto Sans Arabic
     fontSize: 11px
-    fontWeight: 400
-    lineHeight: 1.3
-    letterSpacing: 0
-
+    fontWeight: '500'
+    lineHeight: 14px
+  numeric-metric:
+    fontFamily: Noto Sans Arabic
+    fontSize: 28px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.02em
 rounded:
-  xs: 2px
-  sm: 6px
-  md: 8px
-  pill: 9999px
-
-spacing:
-  xs: 4px
   sm: 8px
   md: 12px
   lg: 16px
   xl: 24px
-  xxl: 32px
-
-components:
-  app-drawer:
-    backgroundColor: "linear-gradient(180deg, {colors.dark-drawer-start}, {colors.dark-drawer-end})"
-    textColor: "{colors.dark-ink}"
-    width: "240px"
-    padding: "{spacing.lg}"
-  nav-item:
-    backgroundColor: transparent
-    textColor: "{colors.dark-ink-muted}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.md}"
-  nav-item-hover:
-    backgroundColor: "rgba(255, 255, 255, 0.05)"
-    textColor: "{colors.dark-ink}"
-  nav-item-active:
-    backgroundColor: "{colors.dark-primary}"
-    textColor: "{colors.ink}"
-  topbar:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    padding: "{spacing.md} {spacing.lg}"
-    height: "56px"
-  page-header:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    padding: "{spacing.lg} {spacing.lg} {spacing.md}"
-  data-grid:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.md}"
-  data-grid-header:
-    backgroundColor: "{colors.table-header-bg}"
-    textColor: "{colors.ink-muted}"
-    typography: "{typography.label}"
-    padding: "{spacing.sm} {spacing.md}"
-  status-badge:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.xs} {spacing.sm}"
-  status-badge-success:
-    backgroundColor: "{colors.status-success-bg}"
-    textColor: "{colors.status-success-deep}"
-  status-badge-warning:
-    backgroundColor: "{colors.status-warning-bg}"
-    textColor: "{colors.status-warning-deep}"
-  status-badge-danger:
-    backgroundColor: "{colors.status-danger-bg}"
-    textColor: "{colors.status-danger-deep}"
-  status-badge-info:
-    backgroundColor: "{colors.status-info-bg}"
-    textColor: "{colors.status-info-deep}"
-  status-dot-success:
-    backgroundColor: "{colors.status-success}"
-    rounded: "{rounded.pill}"
-    size: "8px"
-  status-dot-warning:
-    backgroundColor: "{colors.status-warning}"
-    rounded: "{rounded.pill}"
-    size: "8px"
-  status-dot-danger:
-    backgroundColor: "{colors.status-danger}"
-    rounded: "{rounded.pill}"
-    size: "8px"
-  status-dot-info:
-    backgroundColor: "{colors.status-info}"
-    rounded: "{rounded.pill}"
-    size: "8px"
-  score-badge:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label-numeric}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.xs} {spacing.sm}"
-  form-field:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.md}"
-  form-field-focus:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-  form-card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.lg}"
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.lg}"
-  button-primary-hover:
-    backgroundColor: "#1e3f3a"
-    textColor: "{colors.on-primary}"
-  button-primary-active:
-    backgroundColor: "#2c4b47"
-    textColor: "{colors.on-primary}"
-  button-primary-disabled:
-    backgroundColor: "{colors.primary-50pct}"
-    textColor: "{colors.ink}"
-  button-secondary:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.lg}"
-  button-secondary-hover:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-  button-danger:
-    backgroundColor: "{colors.status-danger}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.sm}"
-    padding: "{spacing.sm} {spacing.lg}"
-  button-danger-hover:
-    backgroundColor: "#a03528"
-    textColor: "{colors.on-primary}"
-  empty-state:
-    backgroundColor: transparent
-    padding: "{spacing.xxl}"
-  empty-state-icon:
-    textColor: "{colors.ink-muted}"
-    size: "64px"
-  empty-state-message:
-    textColor: "{colors.ink-muted}"
-    typography: "{typography.body}"
-  dialog:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.lg}"
-    width: "400px"
-  toast:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.md} {spacing.lg}"
-
+  full: 9999px
 ---
 
-## Overview
+## Brand & Style
 
-ClinicOS is a data-dense clinic back-office built on Vaadin Flow and Spring Boot, designed for Arabic RTL environments. The design system follows IBM Carbon discipline: a light canvas, near-square corners, hairline borders as the primary elevation cue, a flat tile-based layout, and a single structural deep-teal accent (`#0a2e29`, the same color as the app-drawer's own background). There are no decorative drop shadows — depth is signalled by a 1px border and, sparingly, by a barely-there modal shadow for dialogs. Type is set in **Cairo** (a typeface that supports Arabic and Latin seamlessly) with no negative tracking, which would degrade Arabic glyph joining. All logical CSS properties (padding-inline, margin-block, border-inline-start, etc.) are used throughout; `left` and `right` are never used, ensuring correct RTL layout.
+The design system serves as an operational cockpit for clinical directors, clinic receptionists, and medical practitioners. It balances two fundamental psychological needs: the clinical precision required for back-office records, invoicing, and patient treatment logs, alongside motivational momentum required to retain and drive clinical staff performance. 
 
-**Key Characteristics:**
-- Light neutral canvas `{colors.canvas}` with white surfaces `{colors.surface}` for contrast
-- Single teal structural accent `{colors.primary}` reserved for primary actions and active states
-- Arabic-first typeface (`Cairo`) with no negative letter-spacing; Latin text and numbers inside Arabic paragraphs remain LTR-embedded
-- Carbon-style flat design: 1px hairline borders as the only elevation cue, no decorative shadows
-- Explicit semantic color ramp for status (success, warning, danger, info), each with `-deep` (text), `-bg` (tinted background), and base value
-- Score-badge component maps performance bands (≥85, 60–84, <60) to the semantic ramp
-- All CSS uses logical properties (`padding-inline-start`, `border-inline-end`, etc.) — never `left`/`right`
-- Icons that imply direction (arrows, chevrons) mirror automatically in RTL
-- Dark theme tokens documented for future use; not implemented in this refactor
+The aesthetic is grounded in **Precision Modernism with Micro-Gamification**:
+- **Demeanor**: Authoritative, calm, hygienic, and rewarding. The environment feels clinical without feeling sterile or punitive.
+- **RTL-Native Architecture**: Built from the ground up for Arabic-first clinic operations, maintaining semantic visual balance in Right-to-Left while gracefully inverting for Left-to-Right users.
+- **Dual Visual Personality**: Data-dense grids, exact financial ledgers, and tabular control planes interface seamlessly with vibrant, low-friction visual tokens (streak counters, clinical velocity rings, achievement tiers, and performance pacing meters).
 
 ## Colors
 
-### Primary & Brand
-- **Deep Teal Primary** (`{colors.primary}` — #0a2e29): the single structural accent, reserved for primary CTAs and active states. It doubles as `{colors.dark-drawer-start}` — the drawer's own background gradient now sets the site's accent color. Because it sits visually at the same weight as body ink (#16201d), it is never used for primary-colored text or focus signals.
-- **Primary Text** (`{colors.primary-text}` — #17786a): the teal used when primary appears as text, links, accent labels, or focus-ring colour — a step lighter than the deep drawer-teal so it stays legible against body ink.
-- **Primary at 50%** (`{colors.primary-50pct}` — #859794): used for disabled states or secondary visual hierarchy within a primary context.
-- **On Primary** (`{colors.on-primary}` — #ffffff): white text/icons on the teal primary.
+The palette establishes an environment of surgical cleanliness and grounded permanence through deep botanical teals, cool canvas whites, and high-legibility semantic cues.
 
-### Neutrals (Light)
-- **Canvas** (`{colors.canvas}` — #f4f7f6): the page background; a subtle off-white that gives the interface calm and reduces clinical harshness.
-- **Surface** (`{colors.surface}` — #ffffff): card backgrounds, input fields, and modal surfaces — pure white to create gentle figure/ground separation from the canvas.
-- **Hairline** (`{colors.hairline}` — #e1e8e5): 1px borders on cards, form fields, table rows. The primary elevation cue in this flat system.
-- **Ink** (`{colors.ink}` — #16201d): primary text, headings, and high-emphasis copy.
-- **Ink Muted** (`{colors.ink-muted}` — #5c6b66): secondary body copy, labels, helper text, disabled states.
-- **Table Header Background** (`{colors.table-header-bg}` — #eef3f1): header row background in data grids, distinct from body rows.
-- **Zebra Row** (`{colors.zebra-row}` — #f8faf9): alternate row background in data tables to aid readability.
+### Structural Foundations
+- **Canvas Base (`#f6faf8`)**: A cool, low-strain backdrop that cuts the harsh glare of pure white monitor screens during long administrative shifts.
+- **Surface (`#ffffff`)**: Pure white reserved for actionable surfaces, records, drawers, and modal sheets.
+- **Structural Hairlines (`#e2e8f0`)**: 1px perimeter outlines establishing boundaries without heavy cognitive load.
+- **Primary Ink (`#0a2e29`)**: A near-black, deep surgical teal used for primary brand elements, dominant headings, and high-impact navigational anchors.
 
-### Semantic Status (Light)
-Each status has three values: `-deep` (text/icon on light backgrounds), `-bg` (tinted background for light badges/panels), and base (solid fills, dots, status indicators).
-
-**Success** — Completion, approval, or affirmative state.
-- Deep: `{colors.status-success-deep}` (#166534)
-- Background: `{colors.status-success-bg}` (#e3f6ea)
-- Solid: `{colors.status-success}` (#1f7a4d)
-
-**Warning** — Caution, pending, or attention-required state.
-- Deep: `{colors.status-warning-deep}` (#8a5a00)
-- Background: `{colors.status-warning-bg}` (#fef3d6)
-- Solid: `{colors.status-warning}` (#b87900)
-
-**Danger** — Error, critical, or destruction-related state.
-- Deep: `{colors.status-danger-deep}` (#9d2b1f)
-- Background: `{colors.status-danger-bg}` (#fce4e1)
-- Solid: `{colors.status-danger}` (#b23b30)
-
-**Info** — Informational or neutral state (uses blue, NOT teal — teal is reserved for primary accent only).
-- Deep: `{colors.status-info-deep}` (#1d4ed8)
-- Background: `{colors.status-info-bg}` (#e3edfb)
-- Solid: `{colors.status-info}` (#2563eb)
-
-### Dark Theme (Reserved, Not Implemented)
-The following dark tokens are documented for a future dark theme but are **not wired into any shipped theme** in this refactor. They are provided as reference values for when a dark mode is implemented.
-
-**Dark Neutrals:**
-- Canvas: `{colors.dark-canvas}` (#0e1613)
-- Surface: `{colors.dark-surface}` (#182420)
-- Ink: `{colors.dark-ink}` (#eaf1ee)
-- Hairline: `{colors.dark-hairline}` (#28362f)
-- Ink Muted: `{colors.dark-ink-muted}` (#93a49b)
-- Table Header Background: `{colors.dark-table-header-bg}` (#1f2b26)
-- Zebra Row: `{colors.dark-zebra-row}` (#141d1a)
-
-**Dark Brand:**
-- Primary: `{colors.dark-primary}` (#2dd4bf)
-- App Drawer Gradient Start: `{colors.dark-drawer-start}` (#0a2e29)
-- App Drawer Gradient End: `{colors.dark-drawer-end}` (#051917)
-
-**Dark Semantic Status:**
-- Success (deep/bg): `{colors.dark-status-success-deep}` (#4ade80) / `{colors.dark-status-success-bg}` (#0f2b1b)
-- Warning (deep/bg): `{colors.dark-status-warning-deep}` (#fbbf24) / `{colors.dark-status-warning-bg}` (#332a10)
-- Danger (deep/bg): `{colors.dark-status-danger-deep}` (#fb7185) / `{colors.dark-status-danger-bg}` (#331613)
-- Info (deep/bg): `{colors.dark-status-info-deep}` (#60a5fa) / `{colors.dark-status-info-bg}` (#12233a)
+### Semantic Tiers
+- **Success & Goal Completion**: Base `#1f7a4d` on soft tint `#e8f5ed`. Applied to treatment completions, collected receivables, and performance badges.
+- **Warning & Pending Status**: Base `#b87900` on soft tint `#fef7e6`. Applied to overdue recalls, expiring insurance pre-authorizations, and inventory low-stock limits.
+- **Critical & Emergency**: Base `#b23b30` on soft tint `#fdf2f2`. Reserved strictly for medical alerts, severe billing disputes, system errors, and canceled procedures.
+- **Informational & Scheduling**: Base `#2563eb` on soft tint `#eff6ff`. Denotes upcoming appointments, doctor reassignments, and system audit trails.
 
 ## Typography
 
-### Font Family
-The entire system is set in **Cairo** — a typeface that renders Arabic and Latin seamlessly in both directions. Fallback stack: `"Cairo", "Segoe UI", Tahoma, sans-serif`. Cairo is self-hosted at weights **400**, **600**, and **700**.
+Typography prioritizes Arabic-first visual balance and compact operational density. Headings and operational body copy maintain strict optical alignments with baseline metrics.
 
-### Hierarchy
+- **Font Stack**: **Noto Sans Arabic** carries all text (weights 300–800), with **Inter** (weights 400–700) as the Latin companion glyph set. Configure via Tailwind `fontFamily.sans = ['Noto Sans Arabic', 'Inter', 'sans-serif']`; both fonts are self-hosted.
+- **Numerics**: Monospaced tabular figures (`font-variant-numeric: tabular-nums`) must be active for all tables, price fields, dental tooth notations, patient IDs, and KPI counters.
+- **RTL Fluidity**: When switching from Arabic to English, line heights remain strictly fixed at their defined pixel values to eliminate horizontal row jumping or baseline shifting across bilingual inputs.
+- **Weight Pairing**: Restrict weights to 400 (Regular), 500 (Medium), 600 (SemiBold), and 700 (Bold). Avoid extra-thin or ultra-heavy weights that render inconsistently on clinical monitors.
 
-| Token | Size | Weight | Line Height | Use |
-|---|---|---|---|---|
-| `page-title` | 28px | 700 | 1.3 | Page headline, panel titles |
-| `section-title` | 20px | 700 | 1.4 | Section headers within a page |
-| `card-title` | 16px | 600 | 1.4 | Card headers, modal titles |
-| `card-title-numeric` | 16px | 600 | 1.4 | Same as `card-title`, tabular figures — use for money/score/count values |
-| `body` | 14px | 400 | 1.5 | Default body copy, dense descriptions |
-| `body-numeric` | 14px | 400 | 1.5 | Same as `body`, tabular figures — use for money/score/count values |
-| `body-sm` | 13px | 400 | 1.4 | Table rows, form labels, helper text |
-| `label` | 12px | 600 | 1.3 | Form labels, badge text, column headers |
-| `caption` | 11px | 400 | 1.3 | Metadata, timestamps, supplementary notes |
+## Layout & Spacing
 
-### Principles
-- **No negative letter-spacing:** Negative tracking degrades Arabic glyph joining and ligature rendering. All tokens are set at 0 letter-spacing.
-- **Tabular numerals on numbers:** Use `body-numeric` / `card-title-numeric` (tabular figures via `font-feature-settings: 'tnum' 1`) instead of `body` / `card-title` when displaying money, scores, counts, or any numeric data, so digits align in columns.
-- **Arabic-first hierarchy:** The type scale is conservative and data-oriented, not marketing-oriented. The largest size (28px) is sufficient for page titles in a dense back-office; there is no 64px display tier.
-- **Latin text inside Arabic:** When Latin words or numbers appear inline within an Arabic paragraph, they naturally remain left-to-right; do **not** force-flip them to match the surrounding text direction.
+The layout is built around a rigorous 4px baseline grid tailored for high-density administrative software.
 
-## Layout
-
-### Spacing System
-- **Base unit**: 4px. All spacing tokens are multiples of 4.
-- **Tokens**: `xs` 4px · `sm` 8px · `md` 12px · `lg` 16px · `xl` 24px · `xxl` 32px.
-- Typical application:
-  - Card interior padding: `lg` (16px)
-  - Cell padding (data tables): `sm` block (8px) × `md` inline (12px)
-  - Form field padding: `sm` (8px)
-  - Gap between sections: `xl` (24px) or `xxl` (32px)
-
-### Grid & Container
-Content is arranged in a main container with consistent padding. The app drawer sits on the left (in LTR) or right (in RTL) as a fixed sidebar; the main content area expands to fill available width. Grids adapt to available space: data tables, form layouts, and card grids reflow logically using CSS Grid or Flexbox with logical properties.
-
-### Whitespace Philosophy
-Whitespace is the primary grouping device. Sections are separated by vertical gaps, and cards sit on the canvas with quiet hairlines instead of heavy frames. The flat, quiet aesthetic relies on clear breathing room rather than dividing lines or shadows.
+### Canvas Grid & Breakpoints
+- **Master Shell**: Fixed vertical navigation on the functional start edge (Right in RTL, Left in LTR) with a width of `260px`. The main workspace flows dynamically into the remaining viewport.
+- **Container Structure**: Fluid horizontal presentation with a minimum width cutoff at `1024px`. Sub-screens reflow linearly below `768px` for tablet-based dental chairside assistance.
+- **Density Controls**:
+  - **Dense (Back-Office/Ledger)**: Compact padding (`8px` horizontal, `4px` vertical) and row heights locked at `36px` to maximize data visibility without paging.
+  - **Comfortable (Clinical Overview/Staff Arena)**: Cell padding (`12px` horizontal, `8px` vertical) and row heights of `44px`.
 
 ## Elevation & Depth
 
-Elevation in ClinicOS is **strictly hierarchical and minimal**.
+The system layers surfaces with a combination of crisp structural borders, layered shadow depths, decorative ambient glow, and glass-morphism accents:
 
-- **Level 0 — Flat (Default):** 1px hairline border `{colors.hairline}` with no shadow. Used for all cards, form fields, and containers on the main canvas.
-- **Level 1 — Modal Shadow (Reserved):** A barely-there shadow (`0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`) applied only to modals, dialogs, and popover surfaces to lift them slightly off the background. No other component gets a shadow.
-
-**Principle:** The hairline is the ONLY elevation cue for 99% of the interface. Shadow is reserved exclusively for modal/dialog scenarios to distinguish them as overlay surfaces. No floating cards, no layered micro-shadows, no decorative depth.
+- **Layered Shadow System**: Subtle shadows on data tables and cards (Level 1–2), heavier `shadow-2xl` on auth/modal surfaces (Level 3) for visual dominance and focus.
+- **Decorative Ambient Glow**: Purely decorative, non-interactive blurred orbs (`blur-3xl`, low-opacity brand-color circles, positioned `absolute`) sit behind hero panels on dark backgrounds, adding visual warmth without cognitive load.
+- **Glass-Morphism Cards**: Feature highlight tiles on light backgrounds use a layered glass effect — semi-transparent white background (`rgba(255, 255, 255, 0.7–0.85)`), thin brand-tinted border, and `backdrop-filter: blur(12px)` for subtle depth.
+- **Z-Index Layering**:
+  - `Level 0 (Canvas)`: Background canvas `#f6faf8`.
+  - `Level 1 (Card/Table Surface)`: Background `#ffffff`, border 1px solid `#e2e8f0`, no drop shadow.
+  - `Level 2 (Popovers & Quick Lookups)`: Background `#ffffff`, border 1px solid `#e2e8f0`, shadow `0 4px 12px rgba(10, 46, 41, 0.06)`.
+  - `Level 3 (Modals, Auth Cards & Flyout Drawers)`: Background `#ffffff` (or glass), border 1px, shadow `0 12px 32px rgba(10, 46, 41, 0.12)` (or heavier `shadow-2xl` for auth prominence).
+- **Active Focus & Row Highlighting**: Instead of elevating hover items with shadows, rows and actionable cards highlight via an internal tint fill (`#0a2e29` at 3% opacity) combined with an edge accent line.
 
 ## Shapes
 
-### Border Radius Scale
-- **`xs` (2px):** Form fields, small inline elements.
-- **`sm` (6px):** Nav items, status badges, small containers.
-- **`md` (8px):** Card containers, buttons, modal dialogs.
-- **`pill` (9999px):** Circular icon buttons (if needed for legacy icon-only controls); avoid for text buttons or modern UI.
+The design uses moderate corner radii to project approachability and visual refinement while maintaining structural clarity:
 
-All radii favour near-square corners per Carbon discipline. The maximum typical radius is `md` (8px) for card interiors.
-
-## Lumo Mapping
-
-This app's `theme.json` imports `typography, color, spacing, badge, utility` from Vaadin Lumo. Every token in this design system must resolve through the following mapping or Vaadin components will fight the theme.
-
-| ClinicOS Token | Lumo Custom Property | Notes |
-|---|---|---|
-| `primary` (#0a2e29) | `--lumo-primary-color` | Primary accent for buttons, active states, focus rings |
-| `primary` at 50% (#859794) | `--lumo-primary-color-50pct` | Used for disabled/secondary contexts |
-| `primary-text` (#17786a) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels, focus rings) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
-| `canvas` (#f4f7f6) | `--lumo-tint-5pct` | Page/container background context |
-| `surface` (#ffffff) | `--lumo-base-color` | Card and input surfaces |
-| `hairline` (#e1e8e5) | `--lumo-shade-5pct` | Border and divider color |
-| `ink` (#16201d) | `--lumo-body-text-color` | Primary text |
-| `ink-muted` (#5c6b66) | `--lumo-secondary-text-color` | Secondary/muted text |
-| `status-success-deep` | `--lumo-success-color-50pct` | Success text on light backgrounds |
-| `status-warning-deep` | `--lumo-warning-color-50pct` | Warning text on light backgrounds |
-| `status-danger-deep` | `--lumo-error-color-50pct` | Danger text on light backgrounds |
-
-Lumo has no built-in "info" custom property — `status-info-*` tokens are used directly in ClinicOS's own `.clinicos-status-badge--info` class, not mapped onto Lumo. Do not repurpose a Lumo `error`/`warning`/`success` slot for info; that corrupts the component that actually owns it (e.g. a Vaadin error-state field background).
-
-**Critical note:** Every Vaadin component (Button, TextField, Grid, Dialog, etc.) consumes these Lumo properties at render time. If a property is missing or mismatched, components fall back to Lumo defaults. The theme must be validated after every change to ensure no component is left using a hard-coded fallback.
-
-## RTL (Right-to-Left)
-
-ClinicOS is built for Arabic RTL environments. The design system enforces RTL correctness through CSS and React/Vaadin patterns.
-
-### Rules (Non-Negotiable)
-1. **Never use `left`, `right`, `margin-left`, `margin-right`, `padding-left`, `padding-right`** — always use logical properties:
-   - `inset-inline-start` / `inset-inline-end` (for absolute positioning)
-   - `padding-inline-start` / `padding-inline-end`
-   - `margin-inline-start` / `margin-inline-end`
-   - `border-inline-start` / `border-inline-end`
-   - `margin-block-start` / `margin-block-end`
-   - `padding-block-start` / `padding-block-end`
-2. **Icons that imply direction must flip in RTL:** Arrows, chevrons, back/forward buttons, and any glyph that reads directionally must mirror automatically. Most icon libraries (Vaadin Icons, Material Icons) support RTL flipping via the `dir="rtl"` attribute on the `<html>` element.
-3. **Latin text and numbers inside Arabic paragraphs remain LTR-embedded:** Do not force-flip or override the natural bidirectional text algorithm. If a price, date, or name appears mid-sentence in Arabic, it will naturally read left-to-right; this is correct and expected.
-4. **Test all layouts with a `dir="rtl"` document root:** Every component and layout must be visually verified with `<html dir="rtl">` to catch logical-property mistakes, margin/padding errors, and icon-flip failures.
+- **Small Radius (8px, `rounded-sm`)**: Applied to icon containers and micro-elements.
+- **Standard Radius (12px, `rounded-md`)**: Applied to text input fields, operational buttons, card shells, navigation items, form controls, and dropdowns.
+- **Large Radius (16px, `rounded-lg`)**: Applied to feature highlight tiles and grouped card sections.
+- **Extra-Large Radius (24px, `rounded-xl`)**: Applied to the primary auth card and drawer feature sections for visual prominence.
+- **Pill Exception (9999px)**: Strictly reserved for status badges, gamified performance streak bubbles, motivational metric pills, and active user avatars. Never apply pill radii to structural containers, inputs, or operational buttons.
 
 ## Components
 
-Each component is defined with its default state and typical variants. All use logical CSS properties; no `left`/`right` anywhere.
-
-### App Shell
-
-**`app-drawer`** — Dark sidebar navigation
-- Background: dark teal gradient (`{colors.dark-drawer-start}` to `{colors.dark-drawer-end}`)
-- Text: `{colors.dark-ink}` (light text on dark background)
-- Width: 240px (fixed sidebar)
-- Padding: `{spacing.lg}` (16px)
-- Content: stacked `nav-item` elements; typically includes clinic/user menu at the top, nav items in the middle, and sign-out at the bottom
-
-**`nav-item`** — Sidebar navigation row (default / hover / active)
-- **Default:** Transparent background, muted text `{colors.dark-ink-muted}`, padding `{spacing.sm} {spacing.md}`, rounded `{rounded.sm}`
-- **Hover:** Subtle white overlay at 5% opacity, text brightens to `{colors.dark-ink}`
-- **Active:** Since the drawer background now equals `{colors.primary}`, the active row instead uses `{colors.dark-primary}` (#2dd4bf, a brighter accent) as its background, with `{colors.ink}` text for contrast
-- Typography: `{typography.body-sm}` (13px)
-
-**`topbar`** — Top navigation bar
-- Background: `{colors.surface}` (white)
-- Text: `{colors.ink}` (dark)
-- Border bottom: 1px solid `{colors.hairline}`
-- Padding: `{spacing.md}` (12px) vertical × `{spacing.lg}` (16px) horizontal (using block/inline logical properties)
-- Height: 56px (fixed, for consistent icon/avatar sizing)
-- Typical content: clinic name, user menu, breadcrumbs (if needed)
-- Drawer-toggle icon: `{colors.primary}` — the topbar's hamburger icon that opens/closes the drawer
-
-### Page Layout
-
-**`page-header`** — Section header container (kicker + title + optional subtitle)
-- Padding: top `{spacing.lg}`, bottom `{spacing.md}`, sides `{spacing.lg}` (using logical properties)
-- No border or background; sits directly on canvas
-
-**`page-header-kicker`** — Optional eyebrow label above the title
-- Typography: `{typography.label}` (12px / 600)
-- Color: `{colors.ink-muted}`
-- Margin below: `{spacing.xs}` (4px)
-
-**`page-header-title`** — Main section headline
-- Typography: `{typography.page-title}` (28px / 700)
-- Color: `{colors.ink}`
-- Margin below: `{spacing.sm}` (8px)
-
-**`page-header-subtitle`** — Optional description under the title
-- Typography: `{typography.body-sm}` (13px / 400)
-- Color: `{colors.ink-muted}`
-
-### Data Grid
-
-**`data-grid`** — Table-like layout for lists and records
-- Header row background: `{colors.table-header-bg}` (#eef3f1)
-- Header typography: `{typography.label}` (12px / 600)
-- Body row typography: `{typography.body-sm}` (13px / 400)
-- Cell padding: `{spacing.sm}` (8px) block × `{spacing.md}` (12px) inline (using logical properties)
-- Row divider: 1px solid `{colors.hairline}` between rows
-- Zebra background: alternate rows at `{colors.zebra-row}` (#f8faf9) for readability
-- Hover state: subtle teal overlay at ~5% opacity of `{colors.primary}`
-- Note: Use logical properties (`padding-inline-start`, `margin-block-end`) for RTL safety
-
-### Status & Scoring
-
-**`status-badge`** — Status indicator (attendance, PO state, exam result, etc.)
-- Padding: `{spacing.xs}` (4px) × `{spacing.sm}` (8px)
-- Rounded: `{rounded.sm}` (6px)
-- Typography: `{typography.label}` (12px / 600)
-- Uses the semantic ramp; each status gets a `-bg` (light tinted background) and `-deep` (dark text) pair:
-  - Success: bg `{colors.status-success-bg}`, text `{colors.status-success-deep}`
-  - Warning: bg `{colors.status-warning-bg}`, text `{colors.status-warning-deep}`
-  - Danger: bg `{colors.status-danger-bg}`, text `{colors.status-danger-deep}`
-  - Info: bg `{colors.status-info-bg}`, text `{colors.status-info-deep}`
-
-**`score-badge`** — Performance or evaluation score display (UC-004/UC-005)
-- Padding: `{spacing.xs}` (4px) × `{spacing.sm}` (8px)
-- Rounded: `{rounded.sm}` (6px)
-- Typography: `{typography.label}` (12px / 600)
-- Typography: `{typography.label-numeric}` (12px / 600, tabular figures) so numeric scores align consistently
-- **Score mapping** (uses semantic ramp, not a separate color family):
-  - Score ≥85: Success styling (bg `{colors.status-success-bg}`, text `{colors.status-success-deep}`)
-  - Score 60–84: Warning styling (bg `{colors.status-warning-bg}`, text `{colors.status-warning-deep}`)
-  - Score <60: Danger styling (bg `{colors.status-danger-bg}`, text `{colors.status-danger-deep}`)
-
-### Forms
-
-**`form-field`** — Text input, number field, dropdown, textarea, etc.
-- Background: `{colors.surface}` (white)
-- Text: `{colors.ink}` (dark)
-- Border: 1px solid `{colors.hairline}`
-- Rounded: `{rounded.sm}` (6px)
-- Padding: `{spacing.sm}` (8px) (using logical padding-inline/padding-block)
-- Typography: `{typography.body}` (14px / 400)
-- **Focus state:** 3px teal outline (0 0 0 3px rgba of `{colors.primary}` at 10% opacity)
-- **Placeholder text:** `{colors.ink-muted}`
-- **Disabled state:** bg `{colors.canvas}`, text `{colors.ink-muted}`, cursor not-allowed
-
-**`form-card`** — Container for a form (sign-in, settings, etc.)
-- Background: `{colors.surface}` (white)
-- Border: 1px solid `{colors.hairline}`
-- Rounded: `{rounded.md}` (8px)
-- Padding: `{spacing.lg}` (16px)
-- Gap between form fields: `{spacing.md}` (12px) (using gap property if Flexbox/Grid)
-
 ### Buttons
+- **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `12px`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring.
+- **Secondary Action**: Background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29`. Hover applies background `#f6faf8`.
+- **Destructive Action**: Background `#fdf2f2`, border 1px solid `#b23b30`, text `#b23b30`.
 
-**`button-primary`** — Primary action (submit, create, save, etc.)
-- Background: `{colors.primary}` (#0a2e29, deep teal)
-- Text: `{colors.on-primary}` (white)
-- Rounded: `{rounded.sm}` (6px)
-- Padding: `{spacing.sm}` (8px) block × `{spacing.lg}` (16px) inline
-- Typography: `{typography.body-sm}` (13px / 600)
-- Border: none
-- Cursor: pointer
-- **Hover:** background `#1e3f3a` (lightens, since the base color is already near-black)
-- **Active/Pressed:** background `#2c4b47` (lightens further, for a clearer pressed state)
-- **Disabled:** background `{colors.primary-50pct}`, text `{colors.ink}` (not white — fails contrast on the muted fill), cursor not-allowed
+### Data Grids & Tabular Views
+- **Header**: Background `#f4f7f6`, text color `#0a2e29` (70% opacity), font size `11px`, font weight `600`, border-bottom 1px solid `#e1e8e5`.
+- **Rows**: Alternating row hover fill (`#f9fbfb`). Row-level action buttons remain visible on hover or persistent via three-dot context triggers.
+- **Cell Alignment**: Text content follows layout alignment (right-aligned for Arabic). Numerical metrics, monetary values, and phone numbers are strictly left-aligned or positioned with fixed-width tabular formatting.
 
-**`button-secondary`** — Secondary action (cancel, close, reset)
-- Background: `{colors.surface}` (white)
-- Text: `{colors.ink}` (dark)
-- Border: 1px solid `{colors.hairline}`
-- Rounded: `{rounded.sm}` (6px)
-- Padding: same as primary
-- Typography: same as primary
-- Cursor: pointer
-- **Hover:** background tints to `{colors.canvas}`
-- **Disabled:** text `{colors.ink-muted}`, cursor not-allowed
+### Input Fields & Controls
+- **Input Housing**: Background `#ffffff`, border 1px solid `#e2e8f0`, radius `12px`. Auth/marketing screens: height `52px` (py-3.5 + sm text), font size `14px`; in-app dense inputs may use smaller heights.
+- **State Behavior**: Focus state applies an active border of `1.5px solid #0a2e29` with zero ambient outer glow. Error state switches the border to `#b23b30`.
+- **Labels**: Positioned persistently above inputs (`font-size: 12px`, weight `600`, color `#0a2e29`).
 
-**`button-danger`** — Destructive action (delete, remove, abandon)
-- Background: `{colors.status-danger}` (#b23b30, red)
-- Text: `{colors.on-primary}` (white)
-- Rounded: `{rounded.sm}` (6px)
-- Padding: same as primary
-- Typography: same as primary
-- Border: none
-- Cursor: pointer
-- **Hover:** background `#a03528` (~10% darker)
-- **Disabled:** background `{colors.primary-50pct}`, text `{colors.ink}` (not white — fails contrast on the muted fill), cursor not-allowed
+### Gamification & Staff Performance Modules
+- **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `#e1e8e5`, active stroke `#1f7a4d` (or `#b87900` when behind schedule).
+- **Streak Badges**: Pill-shaped container (`border-radius: 9999px`), background `#fef7e6`, border 1px solid `#b87900`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
+- **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`#eff6ff`), subtle 1px border (`#2563eb`), and 12px typography to build positive momentum.
 
-### Dialogs & Modals
+### Chips & Semantic Status Badges
+- **Dimensions**: Height `22px`, horizontal padding `8px`, corner radius `9999px`, font size `11px`, weight `600`.
+- **Semantic Pairing**:
+  - Confirmed / Paid: Background `#e8f5ed`, text `#1f7a4d`.
+  - Pending / In-Chair: Background `#fef7e6`, text `#b87900`.
+  - Cancelled / Overdue: Background `#fdf2f2`, text `#b23b30`.
+  - Scheduled: Background `#eff6ff`, text `#2563eb`.
 
-**`dialog`** — Confirmation, form, or content modal
-- Background: `{colors.surface}` (white)
-- Text: `{colors.ink}`
-- Border: 1px solid `{colors.hairline}`
-- Rounded: `{rounded.md}` (8px)
-- Padding: `{spacing.lg}` (16px)
-- Shadow: `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)` (barely-there modal shadow; the ONLY shadow in the system)
-- Minimum width: 400px (on desktop; reflow to 100% on mobile minus padding)
-- Title typography: `{typography.card-title}` (16px / 600)
-- Body typography: `{typography.body}` (14px / 400)
-- **Always sits on top** using a backdrop layer (typically with a semi-transparent background `rgba(0,0,0,0.3)`)
+### Brand Color Palette (Tailwind Utilities)
 
-**`toast`** — Transient notification (success, error, info)
-- Background: `{colors.surface}` (white)
-- Text: `{colors.ink}`
-- Border: 1px solid `{colors.hairline}`
-- Rounded: `{rounded.md}` (8px)
-- Padding: `{spacing.md}` (12px) block × `{spacing.lg}` (16px) inline
-- Shadow: `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`
-- Typography: `{typography.body-sm}` (13px / 400)
-- Position: typically bottom-right (LTR) / bottom-left (RTL) with safe margins from viewport edge
-- Auto-dismiss after 4–5 seconds unless user interacts
+The following brand colors are configured as Tailwind utilities in `apps/api/src/main/styles/tokens.css` via a `@theme` block. Use these utility names (`bg-teal-900`, `text-emerald-500`, `border-teal-850`) rather than raw hex or arbitrary values (`bg-[#...]`):
 
-### Empty States
+- **Teal Scale**: teal-950 `#071f1c`, teal-900 `#0a2e29`, teal-850 `#0d3832`, teal-800 `#114a42`, teal-700 `#17655a`, teal-600 `#1f8375`, teal-500 `#2a9d8f`, teal-300 `#5eead4`, teal-100 `#ccfbf1`
+- **Emerald Scale** (full, stock Tailwind emerald adopted as brand): emerald-800 `#065f46`, emerald-700 `#047857`, emerald-600 `#059669`, emerald-500 `#10b981`, emerald-400 `#34d399`, emerald-300 `#6ee7b7`, emerald-200 `#a7f3d0`, emerald-100 `#d1fae5`, emerald-50 `#ecfdf5`
+- **Neutral Scale** (stock Tailwind slate adopted as the named neutral ramp; matches the Structural Hairlines anchor `#e2e8f0` at step 200): neutral-900 `#0f172a`, neutral-800 `#1e293b`, neutral-700 `#334155`, neutral-600 `#475569`, neutral-500 `#64748b`, neutral-400 `#94a3b8`, neutral-300 `#cbd5e1`, neutral-200 `#e2e8f0`, neutral-100 `#f1f5f9`, neutral-50 `#f8fafc`
+- **Danger Scale** (the Critical & Emergency tier's own two-tone system — base + tint, not a full ramp): danger-600 `#b23b30`, danger-50 `#fdf2f2`
 
-**`empty-state`** — No data / no results view
-- Container padding: `{spacing.xxl}` (32px) on all sides
-- Text alignment: center
-- Composed of three children:
-  1. Icon (64px, color `{colors.ink-muted}`)
-  2. Heading (optional, typography `{typography.card-title}`, color `{colors.ink}`)
-  3. Message (typography `{typography.body}`, color `{colors.ink-muted}`)
+Error text and error-state borders use the `danger-600` base, with soft tint surfaces (alerts, destructive-action chips) on `danger-50`. Do not use Tailwind's stock `red-*` steps; reach for `danger-*` instead. Same rule for gray: `neutral-*`, never `slate-*`.
 
----
-
-## Do's and Don'ts
-
-### Do
-
-- **Colour:** Reserve `{colors.primary}` (teal) exclusively for primary actions, active states, and focus signals. Use the semantic ramp (success, warning, danger, info) for all status and feedback — never invent a new colour outside this token set for any future view or feature.
-- **Elevation:** Use 1px hairlines as the default elevation cue. Reserve the modal shadow for dialogs and popovers only; never shadow a card, button, or regular container.
-- **Typography:** Always use Cairo at weights 400, 600, or 700. Use `body-numeric` / `card-title-numeric` for money, scores, or counts so numbers align vertically.
-- **RTL:** Use only logical CSS properties (`padding-inline-start`, `margin-block-end`, `border-inline-start`, etc.). Test every layout with `dir="rtl"` to verify correctness.
-- **Icons:** Ensure direction-implying icons (arrows, chevrons, back/forward) flip automatically in RTL. Validate in both LTR and RTL rendering.
-- **Arabic + Latin:** When Latin words or numbers appear inline in Arabic text, allow them to render left-to-right naturally; do not force-flip them.
-- **Form fields:** Use `{rounded.sm}` (6px) for inputs and form fields. On focus, apply a teal outline shadow, not a thick border.
-- **Buttons:** Use `{rounded.sm}` for all buttons. Pair `button-primary` (teal) with `button-secondary` (white border) for binary choices; use `button-danger` only for destructive actions.
-- **Data tables:** Alternate row backgrounds with `{colors.zebra-row}` to improve readability. Add a subtle teal hover overlay to each row for interactive feedback.
-- **Empty states:** Always include an icon, optional heading, and explanatory message. Never leave a user staring at blank space without context.
-
-### Don't
-
-- **Don't introduce a new colour outside the token set.** Every colour in the system is defined in the front-matter. If a new status or semantic meaning is needed, reuse existing tokens or request a new addition to this design system (do not invent ad-hoc colours in component code).
-- **Don't use `left`, `right`, `margin-left`, `margin-right`, `padding-left`, or `padding-right` anywhere in the codebase.** Always use logical properties. Violations break RTL layouts.
-- **Don't use negative letter-spacing on type.** Negative tracking breaks Arabic glyph joining and ligatures. All typography is set at `letter-spacing: 0`.
-- **Don't shadow non-modal containers.** Shadows are reserved exclusively for dialogs, popovers, and overlay surfaces. Cards, buttons, and regular UI elements use hairlines only.
-- **Don't force-flip Latin numbers or names inside Arabic text.** The bidirectional algorithm handles this correctly; overriding it breaks readability.
-- **Don't round buttons more than `{rounded.sm}` (6px).** Pill-shaped buttons (9999px) are not used in this operate-mode design; buttons stay near-square per Carbon discipline.
-- **Don't mix rounded values arbitrarily.** Use only `xs` (2px), `sm` (6px), `md` (8px), or `pill` (9999px). Inventing intermediate values like 10px or 14px breaks visual consistency.
-- **Don't use the dark theme tokens in shipped UI.** They are reserved for a future dark mode and documented only for reference. The current system is light-mode only.
-- **Don't put decorative illustrations or sticker palettes in the UI.** This is a data-dense clinic tool, not a marketing site. All graphics serve functional purposes: icons, avatars, charts, and instructional diagrams only.
+These are the canonical colors for all UI elements; hex values used in Stitch comps must be translated to their utility equivalents before implementation.

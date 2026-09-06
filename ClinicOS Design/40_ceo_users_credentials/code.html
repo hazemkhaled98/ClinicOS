@@ -1,0 +1,439 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي - المستخدمون والصلاحيات وكلمة المرور</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Cairo & Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              850: '#072420',
+              900: '#0a2e29',
+              950: '#041714'
+            },
+            mint: {
+              50: '#f2fbf7',
+              100: '#e3f7ee',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'Noto Sans Arabic', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Layout Adjustments -->
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+      background-color: #f6faf8;
+    }
+    input::placeholder {
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen antialiased selection:bg-mint-100 selection:text-pine-900">
+<!-- BEGIN: TopNotificationBar -->
+<header class="w-full bg-white/80 backdrop-blur border-b border-slate-200/70 px-6 py-2.5">
+<div class="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm text-slate-500 font-medium">
+<!-- Date Display -->
+<div class="flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<!-- Breadcrumb and Top Nav Icons -->
+<div class="flex items-center gap-4">
+<nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-slate-600">
+<span class="hover:text-pine-900 cursor-pointer">لوحة التحليلات</span>
+<span class="text-slate-300">/</span>
+<span class="text-pine-900 font-semibold">عيادتي • إدارة الأداء</span>
+</nav>
+<div class="h-4 w-px bg-slate-200"></div>
+<button aria-label="Menu" class="p-1 rounded text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopNotificationBar -->
+<!-- BEGIN: MainContentContainer -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- BEGIN: DashboardHeader -->
+<section class="mb-8" data-purpose="dashboard-heading">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<div>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-pine-900 tracking-tight">Admin dashboard</h1>
+<p class="text-sm sm:text-base text-slate-500 mt-1 font-medium">نظرة شاملة على الأداء والمرتبات والحوافز</p>
+</div>
+<!-- Quick Status Indicator -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-xs self-start text-xs font-semibold text-pine-900">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+          النظام متصل • صلاحية كاملة
+        </div>
+</div>
+<!-- Navigation Tabs Capsule Row -->
+<div class="mt-6 flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200/60 text-sm font-semibold">
+<!-- Overview Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#overview">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>نظرة عامة</span>
+</a>
+<!-- Employee File Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#employee-profile">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>ملف الموظف</span>
+</a>
+<!-- Tasks Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#tasks">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المهام</span>
+</a>
+<!-- Settings Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#settings">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الإعدادات</span>
+</a>
+<!-- Active Tab: Users & Passwords -->
+<a aria-current="page" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-pine-900 text-white shadow-sm transition-all whitespace-nowrap" href="#users">
+<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المستخدمون</span>
+</a>
+<!-- Goals Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#goals">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأهداف والتحفيز</span>
+</a>
+<!-- Activity Log Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#activity">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>سجل النشاط</span>
+</a>
+<!-- Permissions Tab -->
+<a class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-600 hover:text-pine-900 hover:bg-slate-100/70 transition-all whitespace-nowrap" href="#permissions">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الصلاحيات</span>
+</a>
+</div>
+</section>
+<!-- END: DashboardHeader -->
+<!-- BEGIN: UserPasswordSection -->
+<section class="bg-white rounded-2xl p-6 mb-8 border border-slate-200/80 shadow-xs" data-purpose="current-user-password-box">
+<!-- Section Title & Current User Info -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+<div class="flex items-center gap-2 text-pine-900 font-bold text-lg">
+<span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<h2>كلمة المرور بتاعتك</h2>
+</div>
+<div class="text-xs sm:text-sm font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+          حسابك: <span class="text-pine-900 font-bold">المدير العام (admin@)</span>
+</div>
+</div>
+<!-- Password Inputs Form Row -->
+<form class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end" onsubmit="event.preventDefault();">
+<!-- Current Password -->
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">كلمة المرور الحالية</label>
+<input class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:border-emerald-500 focus:ring focus:ring-emerald-200/50 py-2 px-3 transition-colors" placeholder="الحالية" type="password">
+</div>
+<!-- New Password -->
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">كلمة المرور الجديدة</label>
+<input class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:border-emerald-500 focus:ring focus:ring-emerald-200/50 py-2 px-3 transition-colors" placeholder="الجديدة" type="password">
+</div>
+<!-- Confirm New Password -->
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">تأكيد الجديدة</label>
+<input class="w-full text-sm rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:border-emerald-500 focus:ring focus:ring-emerald-200/50 py-2 px-3 transition-colors" placeholder="أعد كتابتها" type="password">
+</div>
+<!-- Submit Button -->
+<div>
+<button class="w-full bg-pine-900 hover:bg-pine-850 text-white font-semibold text-sm py-2.5 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center justify-center gap-2" type="submit">
+<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تغيير كلمة المرور</span>
+</button>
+</div>
+</form>
+</section>
+<!-- END: UserPasswordSection -->
+<!-- BEGIN: UsersAndPermissionsSection -->
+<section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs" data-purpose="users-permissions-list">
+<!-- Section Header -->
+<div class="mb-6">
+<div class="flex items-center gap-2 text-pine-900 font-bold text-lg">
+<span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<h2>المستخدمون والصلاحيات</h2>
+</div>
+<p class="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
+          كل حساب له اسم مستخدم وكلمة مرور وصلاحيات (التابات المسموحة). اربطه ببياناته من «الموظفون» في الإعدادات. لو الحساب موظف، اربطه بموظف (مالوش مرتب/تقييم).
+        </p>
+</div>
+<!-- User Rows Wrapper -->
+<div class="space-y-4">
+<!-- User Row 1: المدير العام -->
+<article class="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-gradient-to-r from-slate-50/50 to-white hover:border-emerald-200 transition-colors" data-purpose="user-row-admin">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<!-- Left Info (RTL right) -->
+<div class="flex items-center gap-3.5">
+<!-- Avatar Circle -->
+<div class="w-11 h-11 rounded-full bg-pine-900 text-emerald-400 flex items-center justify-center font-bold text-lg shadow-inner ring-2 ring-emerald-500/20">
+                أ
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-base text-slate-800">المدير العام</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-pine-900 text-white">مدير عام</span>
+</div>
+<div class="text-xs text-slate-400 font-mono mt-0.5">admin@</div>
+</div>
+</div>
+<!-- Center Info -->
+<div class="text-xs sm:text-sm font-semibold text-slate-600 bg-slate-100/80 px-3.5 py-1.5 rounded-lg border border-slate-200/60 self-start md:self-auto">
+              صلاحيات كاملة - لا تُحذف
+            </div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2 self-end md:self-auto">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs transition-colors" type="button">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+</div>
+</div>
+</article>
+<!-- User Row 2: ندى -->
+<article class="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-white hover:border-emerald-200 transition-colors" data-purpose="user-row-nada">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+<!-- User Identity -->
+<div class="flex items-center gap-3.5 min-w-[180px]">
+<div class="w-11 h-11 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                ن
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-base text-slate-800">ندى</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60">موظف استقبال</span>
+</div>
+<div class="text-xs text-slate-400 font-mono mt-0.5">emp1@</div>
+</div>
+</div>
+<!-- Permission Specs & Selectors -->
+<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 flex-1">
+<span class="text-slate-500 font-medium">الصلاحيات: حسب الدور — من Admin dashboard</span>
+<!-- Linked Employee Name Box -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">ندى</option>
+<option>سارة</option>
+<option>مريم</option>
+</select>
+</div>
+<!-- Role Selector -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">🛎️ موظف الاستقبال</option>
+<option>🦷 مساعد طبيب</option>
+<option>💼 محاسب</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Bottom Action Buttons Sub-Row -->
+<div class="mt-3 flex flex-wrap items-center justify-end gap-2 text-xs font-medium">
+<!-- Training / Onboarding Action -->
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors" type="button">
+<span>🪄</span>
+<span>إنهاء التأهيل (يمسح الصور)</span>
+</button>
+<!-- Delete Button -->
+<button class="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-slate-500 transition-colors" title="حذف المستخدم" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Suspend Button -->
+<button class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 text-slate-700 transition-colors" type="button">
+<span>إيقاف</span>
+</button>
+<!-- Password Button -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors" type="button">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+</div>
+</article>
+<!-- User Row 3: نورهان -->
+<article class="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-white hover:border-emerald-200 transition-colors" data-purpose="user-row-nourhan">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+<!-- User Identity -->
+<div class="flex items-center gap-3.5 min-w-[180px]">
+<div class="w-11 h-11 rounded-full bg-teal-700 text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                ن
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-base text-slate-800">نورهان</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">مساعد طبيب</span>
+</div>
+<div class="text-xs text-slate-400 font-mono mt-0.5">emp2@</div>
+</div>
+</div>
+<!-- Permission Specs & Selectors -->
+<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 flex-1">
+<span class="text-slate-500 font-medium">الصلاحيات: حسب الدور — من Admin dashboard</span>
+<!-- Linked Employee Name Box -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">نورهان</option>
+<option>فاطمة</option>
+</select>
+</div>
+<!-- Role Selector -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">🦷 مساعد طبيب</option>
+<option>🛎️ موظف الاستقبال</option>
+<option>💼 محاسب</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Bottom Action Buttons Sub-Row -->
+<div class="mt-3 flex flex-wrap items-center justify-end gap-2 text-xs font-medium">
+<!-- Training Start Action -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pine-900 text-white hover:bg-pine-850 shadow-2xs transition-colors" type="button">
+<span>🎓</span>
+<span>بدء التأهيل</span>
+</button>
+<!-- Delete Button -->
+<button class="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-slate-500 transition-colors" title="حذف المستخدم" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Suspend Button -->
+<button class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 text-slate-700 transition-colors" type="button">
+<span>إيقاف</span>
+</button>
+<!-- Password Button -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors" type="button">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+</div>
+</article>
+<!-- User Row 4: شهد -->
+<article class="p-4 sm:p-5 rounded-xl border border-slate-200/80 bg-white hover:border-emerald-200 transition-colors" data-purpose="user-row-shahd">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+<!-- User Identity -->
+<div class="flex items-center gap-3.5 min-w-[180px]">
+<div class="w-11 h-11 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-lg shadow-xs">
+                ش
+              </div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-base text-slate-800">شهد</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">مساعد طبيب</span>
+</div>
+<div class="text-xs text-slate-400 font-mono mt-0.5">emp3@</div>
+</div>
+</div>
+<!-- Permission Specs & Selectors -->
+<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-600 flex-1">
+<span class="text-slate-500 font-medium">الصلاحيات: حسب الدور — من Admin dashboard</span>
+<!-- Linked Employee Name Box -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">شهد</option>
+<option>رنا</option>
+</select>
+</div>
+<!-- Role Selector -->
+<div class="relative">
+<select class="rounded-lg border-slate-200 text-xs font-semibold py-1.5 pr-3 pl-7 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+<option selected="">🦷 مساعد طبيب</option>
+<option>🛎️ موظف الاستقبال</option>
+<option>💼 محاسب</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Bottom Action Buttons Sub-Row -->
+<div class="mt-3 flex flex-wrap items-center justify-end gap-2 text-xs font-medium">
+<!-- Delete Button -->
+<button class="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 text-slate-500 transition-colors" title="حذف المستخدم" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Suspend Button -->
+<button class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 text-slate-700 transition-colors" type="button">
+<span>إيقاف</span>
+</button>
+<!-- Password Button -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors" type="button">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+</div>
+</article>
+</div>
+<!-- Add New User Trigger Footer -->
+<div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
+<p class="text-xs text-slate-400">إجمالي الحسابات المسجلة: <span class="font-bold text-slate-700">4 مستخدمين</span></p>
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إضافة مستخدم جديد</span>
+</button>
+</div>
+</section>
+<!-- END: UsersAndPermissionsSection -->
+</main>
+<!-- END: MainContentContainer -->
+</body></html>

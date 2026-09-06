@@ -1,0 +1,250 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>24 - الموردين - عيادتي (Suppliers Management)</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 CDN with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            pine: {
+              900: '#061d1a',
+              800: '#0a2e29',
+              700: '#0d433b',
+              600: '#0d6559',
+              500: '#148071',
+              100: '#e6f3f0',
+              50: '#f0f9f6',
+            },
+            surface: {
+              DEFAULT: '#f4fbf8',
+              muted: '#f8fafc',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Typography and Global Elements -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<!-- Custom Styles for Interactive Elements -->
+<style data-purpose="interactive-states">
+    .nav-tab-transition {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4fbf8] text-slate-800">
+<!-- BEGIN: TopNavigationBar -->
+<header class="w-full bg-white border-b border-slate-200/80 px-4 lg:px-8 py-3 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<!-- Right Side: System & Module Identity -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+<span class="text-slate-900 font-bold text-base">عيادتي</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-600">إدارة الأداء</span>
+<span class="text-slate-300">•</span>
+<div class="flex items-center gap-1.5 text-emerald-700 font-medium">
+<span>المخزن</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+</div>
+</div>
+</div>
+<!-- Left Side: Date and Quick Menu -->
+<div class="flex items-center gap-4 text-xs lg:text-sm text-slate-500">
+<div class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200/70 px-3 py-1.5 rounded-lg text-slate-600 font-medium">
+<svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<button aria-label="القائمة الرئيسية" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopNavigationBar -->
+<!-- Main Container -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+<!-- BEGIN: BranchHeaderCard -->
+<section class="bg-white border border-slate-200/80 rounded-2xl p-4 lg:p-5 shadow-sm" data-purpose="branch-overview">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<!-- Right side: Clinic info -->
+<div class="flex items-center gap-4 order-2 sm:order-1">
+<!-- Logo Mark Icon -->
+<div class="w-12 h-12 rounded-xl bg-[#0a2e29] flex items-center justify-center text-white shadow-inner flex-shrink-0">
+<svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-lg font-bold text-slate-900 tracking-tight">DentSpaces • المخزن</h1>
+<span class="inline-flex items-center gap-1 text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                متصل
+              </span>
+</div>
+<p class="text-xs text-slate-500 mt-0.5 font-normal">جرد لحظي — مخزن + تراي v97</p>
+</div>
+</div>
+<!-- Left side: User profile role indicator -->
+<div class="order-1 sm:order-2 self-end sm:self-center">
+<div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors cursor-pointer">
+<svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المدير العام</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: BranchHeaderCard -->
+<!-- BEGIN: SubNavigationTabs -->
+<nav aria-label="أقسام المخزن" class="flex flex-wrap items-center justify-between gap-3" data-purpose="module-tabs">
+<!-- Right: Sections Dropdown -->
+<div>
+<button class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium px-4 py-2 rounded-xl border border-slate-200/90 shadow-sm transition-colors" type="button">
+<span>الأقسام</span>
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Inventory Sub-Tabs Navigation (RTL Ordered) -->
+<div class="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 custom-scroll">
+<!-- Tab 1: الاعتمادات -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاعتمادات</span>
+</a>
+<!-- Tab 2: الموردين (ACTIVE TAB) -->
+<a aria-current="page" class="nav-tab-transition inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0a2e29] border border-[#0a2e29] rounded-xl shadow-sm" href="#">
+<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الموردين</span>
+</a>
+<!-- Tab 3: المرتجعات -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المرتجعات</span>
+</a>
+<!-- Tab 4: الاستلام -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاستلام</span>
+</a>
+<!-- Tab 5: النواقص والطلب -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<span class="bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-bold px-1.5 py-0.2 rounded-md">28</span>
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>النواقص والطلب</span>
+</a>
+<!-- Tab 6: المخزن -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المخزن</span>
+</a>
+<!-- Tab 7: التراي -->
+<a class="nav-tab-transition inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900 border border-slate-200 rounded-xl shadow-xs" href="#">
+<span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-1.5 py-0.2 rounded-md">20</span>
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>التراي</span>
+</a>
+</div>
+</nav>
+<!-- END: SubNavigationTabs -->
+<!-- BEGIN: PageHeader & ActionSection -->
+<section class="flex flex-col md:flex-row md:items-start justify-between gap-4 pt-2" data-purpose="section-header">
+<!-- Titles & Instructions -->
+<div class="space-y-1">
+<h2 class="text-2xl font-black text-[#0a2e29] tracking-tight">الموردين</h2>
+<p class="text-xs lg:text-sm text-slate-500 font-normal leading-relaxed max-w-3xl">
+          تقييم وتفضيل الموردين حسب السعر والتوفر والسرعة. وآخر توريد — مرتبين بالأفضل، كلّم المورّد على واتساب على طول.
+        </p>
+</div>
+<!-- Add Supplier Action Button -->
+<div class="flex-shrink-0">
+<button class="inline-flex items-center gap-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-600/40 hover:border-emerald-600 font-bold text-xs lg:text-sm px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-95" type="button">
+<svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>إضافة مورّد</span>
+</button>
+</div>
+</section>
+<!-- END: PageHeader & ActionSection -->
+<!-- BEGIN: MainContentArea -->
+<!-- Card showing empty supplier records state consistent with 24-inv-suppliers.jpg -->
+<section class="bg-white border border-slate-200/80 rounded-2xl p-10 lg:p-16 shadow-xs min-h-[380px] flex flex-col items-center justify-center text-center" data-purpose="suppliers-empty-state">
+<div class="w-16 h-16 rounded-2xl bg-[#f0f9f6] text-[#0d6559] flex items-center justify-center mb-4 ring-8 ring-[#f0f9f6]/50">
+<!-- Supplier / Storefront Icon -->
+<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"></path>
+</svg>
+</div>
+<h3 class="text-base font-bold text-slate-800 mb-1">دليل الموردين وشركات التوريد الطبية</h3>
+<p class="text-xs lg:text-sm text-slate-500 max-w-md leading-relaxed mb-6">
+        لسه مفيش موردين مضافين. اضغط على «+ إضافة مورّد» لتسجيل أول مورد وتثبيت أرقام الواتساب وسرعة التوصيل.
+      </p>
+<button class="inline-flex items-center gap-2 bg-[#0a2e29] hover:bg-[#0d6559] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-sm" type="button">
+<svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إضافة أول مورّد الآن</span>
+</button>
+</section>
+<!-- END: MainContentArea -->
+</main>
+<!-- BEGIN: Footer -->
+<footer class="w-full bg-white border-t border-slate-200/80 py-4 mt-auto">
+<div class="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+<p class="text-xs text-slate-500">
+        نظام إدارة العيادات والمخزن السريري — <span class="font-semibold text-slate-700">ClinicOS 2026</span> • جميع الحقوق محفوظة
+      </p>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

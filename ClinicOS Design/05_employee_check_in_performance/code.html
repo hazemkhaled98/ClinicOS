@@ -1,0 +1,373 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تسجيل الموظف وإدارة الأداء | عيادتي ClinicOS</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#07201c',
+              850: '#0a2e29',
+              800: '#0e3d37',
+              700: '#11534b',
+              600: '#0d9488',
+              500: '#14b8a6',
+              400: '#2dd4bf',
+              100: '#ccfbf1',
+              50: '#f0fdfa',
+            },
+            mint: {
+              50: '#f2fbf7',
+              100: '#e1f7ee',
+              500: '#10b981',
+            }
+          },
+          fontFamily: {
+            sans: ['Tajawal', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow': '0 10px 30px -10px rgba(13, 148, 136, 0.3)',
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Font: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+  </style>
+<style data-purpose="custom-effects">
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .custom-radial-ring {
+      background: conic-gradient(#10b981 0% 92%, rgba(255,255,255,0.15) 92% 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased flex flex-col justify-between selection:bg-teal-500 selection:text-white">
+<!-- BEGIN: MainHeader -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm" data-purpose="app-topbar">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Right Side: Date & Calendar Pill -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 text-slate-500 text-sm font-medium bg-slate-100/80 px-3.5 py-1.5 rounded-full border border-slate-200/60">
+<svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="tracking-wide">الأحد، 6 سبتمبر</span>
+</div>
+</div>
+<!-- Left Side: Section Context & Profile Menu -->
+<div class="flex items-center gap-4">
+<div class="text-left hidden sm:block">
+<div class="flex items-center justify-end gap-1.5 text-xs text-brand-600 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>تسجيل الموظف</span>
+</div>
+<div class="text-sm font-bold text-slate-800">
+            عيادتي <span class="text-slate-300 font-normal">·</span> إدارة الأداء
+          </div>
+</div>
+<div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+<!-- Clinical Profile / Actions -->
+<div class="flex items-center gap-2">
+<!-- Notification Icon Badge -->
+<button class="relative p-2 text-slate-500 hover:text-brand-700 hover:bg-slate-100 rounded-xl transition" title="الإشعارات">
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white"></span>
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Drawer Hamburger / Menu Button -->
+<button aria-label="القائمة" class="p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-brand-800 transition">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+<!-- BEGIN: HeroPerformanceCard -->
+<section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-900 via-brand-850 to-brand-800 text-white shadow-xl shadow-brand-900/10 border border-brand-700/50" data-purpose="employee-performance-card">
+<!-- Subtle Decorative Background Circles -->
+<div class="absolute -top-24 -left-24 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="p-6 sm:p-8 lg:p-10 relative z-10">
+<!-- Top Row: Welcome & Radial Gauge -->
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-white/10">
+<!-- Employee Welcome & Daily Quote -->
+<div class="space-y-2.5 max-w-2xl">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center justify-center p-1.5 rounded-xl bg-teal-500/20 text-teal-300">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2">
+<span>أهلاً ندى</span>
+<span class="inline-block hover:rotate-12 transition-transform origin-bottom-right">👋</span>
+</h1>
+</div>
+<p class="text-teal-100/90 text-base sm:text-lg font-medium leading-relaxed flex items-center gap-2">
+<span class="text-amber-300 text-lg">✨</span>
+              نظافتك ودقتك في شغلك بتتكلم عنك أكتر من أي كلام
+            </p>
+</div>
+<!-- Gauge and interactive category pills -->
+<div class="flex items-center gap-5 w-full md:w-auto justify-start md:justify-end">
+<!-- Category Mini Badges Stack -->
+<div class="flex flex-col items-end gap-2">
+<div class="flex items-center gap-1.5">
+<!-- Cleanliness / Order Icon -->
+<button class="w-9 h-9 rounded-full bg-teal-800/80 border border-teal-400/40 text-teal-200 flex items-center justify-center shadow hover:scale-105 hover:bg-teal-700 transition" title="النظافة والتعقيم">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<!-- Speed / Reception Icon -->
+<button class="w-9 h-9 rounded-full bg-amber-500/30 border border-amber-400/40 text-amber-200 flex items-center justify-center shadow hover:scale-105 hover:bg-amber-600/40 transition" title="سرعة الاستجابة">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<!-- Punctuality Icon -->
+<button class="w-9 h-9 rounded-full bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 flex items-center justify-center shadow hover:scale-105 hover:bg-emerald-600/40 transition" title="الالتزام بالمواعيد">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<!-- Quality Icon -->
+<button class="w-9 h-9 rounded-full bg-cyan-500/30 border border-cyan-400/40 text-cyan-200 flex items-center justify-center shadow hover:scale-105 hover:bg-cyan-600/40 transition" title="رضا المرضى">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<span class="text-[11px] text-teal-200/70 font-medium flex items-center gap-1">
+<span>اضغط على أي أيقونة لتفاصيلها</span>
+<span>👆</span>
+</span>
+</div>
+<!-- Modern Circular Progress Hub -->
+<div class="relative w-20 h-20 rounded-full p-1 custom-radial-ring flex items-center justify-center shadow-lg shadow-teal-950/40">
+<div class="w-full h-full rounded-full bg-brand-900 flex flex-col items-center justify-center text-center p-1">
+<span class="text-[11px] text-slate-300 leading-tight">التقييم</span>
+<span class="text-xs font-bold text-emerald-400 leading-none">بيتكوّن</span>
+<span class="text-[9px] text-teal-200/60 leading-tight mt-0.5">من 4 محاور</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Row: Attendance Counter Bar -->
+<div class="mt-6">
+<div class="glass-pill rounded-2xl p-3 sm:px-5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm font-medium">
+<div class="flex items-center gap-2 text-teal-100 font-bold">
+<svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الحضور والمواعيد:</span>
+</div>
+<div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+<span class="inline-flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<strong class="text-white">4</strong> حضور
+              </span>
+<span class="inline-flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+<strong class="text-white">1</strong> تأخير
+              </span>
+<span class="inline-flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-rose-400"></span>
+<strong class="text-white">0</strong> غياب
+              </span>
+<span class="inline-flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-teal-300"></span>
+<strong class="text-white">1</strong> مواظبة
+              </span>
+</div>
+</div>
+</div>
+<!-- Bottom Goal Bar: Operation Progress -->
+<div class="mt-5 bg-white/5 rounded-2xl p-4 sm:p-5 border border-white/10" data-purpose="goal-progress-section">
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-2">
+<span class="p-1 rounded-lg bg-teal-500/20 text-teal-300">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<span class="text-sm sm:text-base font-bold text-white flex items-center gap-1.5">
+<span>مواكبة هدفنا للتشغيل</span>
+<span class="text-xs font-normal text-teal-200">(عيادة الأسنان الذكية)</span>
+</span>
+</div>
+<div class="flex items-baseline gap-1 text-emerald-300 font-extrabold text-base">
+<span>100%</span>
+<span class="text-xs font-normal text-teal-300">مكتمل</span>
+</div>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-3 rounded-full bg-white/10 p-0.5 overflow-hidden">
+<div class="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-300 shadow-sm w-full transition-all duration-500"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HeroPerformanceCard -->
+<!-- BEGIN: ManagerFeedbackCard -->
+<section class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-card" data-purpose="manager-feedback">
+<!-- Section Title -->
+<div class="flex items-center justify-between pb-4 border-b border-slate-100">
+<div class="flex items-center gap-2.5 text-slate-800 font-bold text-base sm:text-lg">
+<div class="p-2 rounded-xl bg-teal-50 text-teal-700">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h2>ملاحظات المدير ليك</h2>
+</div>
+<span class="text-xs text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+          تم التحديث اليوم
+        </span>
+</div>
+<!-- Feedback Content Box -->
+<div class="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-50/70 via-emerald-50/40 to-slate-50 border-r-4 border-r-brand-600 border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3 text-slate-700 text-sm sm:text-base font-semibold">
+<span class="text-xl">👏</span>
+<span>شغلك في الاستقبال النهاردة كان منظم وسريع جداً</span>
+</div>
+<div class="text-xs font-medium text-slate-500 flex items-center gap-1.5 self-end sm:self-center">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد 2026-09-06</span>
+</div>
+</div>
+</section>
+<!-- END: ManagerFeedbackCard -->
+<!-- BEGIN: DetailedAttendanceSection -->
+<section class="space-y-4" data-purpose="attendance-details">
+<!-- Subsection Title -->
+<div class="flex items-center justify-between">
+<h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+<span>تفاصيل أكثر — اللي يرفع تقييمك</span>
+<span class="text-amber-500">✨</span>
+</h3>
+<span class="text-xs font-semibold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg">
+          سجل اليوم
+        </span>
+</div>
+<!-- Attendance Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Card 1: Check-in Time -->
+<div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:border-teal-400 hover:shadow-md transition">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">الحضور</span>
+<div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<div class="text-2xl font-black text-slate-800">9:05</div>
+<span class="text-xs font-bold text-slate-500">ص</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50/80 w-fit px-2.5 py-1 rounded-md">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>في الميعاد (ضمن السماح)</span>
+</div>
+</div>
+<!-- Card 2: Check-out Time -->
+<div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:border-teal-400 hover:shadow-md transition">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">الانصراف</span>
+<div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<div class="text-2xl font-black text-slate-800">5:00</div>
+<span class="text-xs font-bold text-slate-500">م</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 text-xs font-bold text-teal-700 bg-teal-50/80 w-fit px-2.5 py-1 rounded-md">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>ميعاد كامل ومطابق</span>
+</div>
+</div>
+<!-- Card 3: Scheduled Shift Slot -->
+<div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:border-teal-400 hover:shadow-md transition">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">الوردية المقررة</span>
+<div class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<div class="text-base font-bold text-slate-800 flex items-center gap-1.5">
+<span>9:00 ص</span>
+<span class="text-slate-400 font-normal">إلى</span>
+<span>5:00 م</span>
+</div>
+<div class="mt-2 text-xs font-medium text-slate-500 flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>فترة سماح الحضور: <strong>15 دقيقة</strong></span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: DetailedAttendanceSection -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomStickyToastNotification -->
+<aside class="sticky bottom-4 z-30 max-w-6xl w-full mx-auto px-4 pointer-events-none mt-4 pb-2" data-purpose="bottom-alert-toast">
+<div class="pointer-events-auto bg-slate-900/95 text-white backdrop-blur-md rounded-2xl p-3 sm:px-5 sm:py-3.5 shadow-2xl border border-slate-800 flex items-center justify-between gap-4">
+<!-- Toast Message -->
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex-shrink-0 flex items-center justify-center border border-teal-500/30">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<p class="text-xs sm:text-sm font-medium text-slate-200 truncate">
+<span class="font-bold text-teal-300">ملاحظة من المدير:</span>
+<span>شغلك في الاستقبال النهاردة كان منظم 👏</span>
+</p>
+</div>
+<!-- Toast Interactive Buttons -->
+<div class="flex items-center gap-2 flex-shrink-0">
+<button class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white transition flex items-center gap-1 shadow-sm">
+<span>ملاحظة</span>
+<span>💬</span>
+</button>
+<button aria-label="إغلاق التنبيه" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</aside>
+<!-- END: BottomStickyToastNotification -->
+<!-- Optional Clinic Footer -->
+<footer class="text-center py-4 text-xs text-slate-400">
+    نظام عيادتي ClinicOS · منصة الإدارة السريرية والأداء الذكي © 2026
+  </footer>
+</body></html>

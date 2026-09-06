@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Admin Dashboard - المستخدمون وإدارة الحسابات</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0a2e29',
+              emerald: '#0f766e',
+              teal: '#14b8a6',
+              light: '#f0fdf4',
+              surface: '#f8fafc',
+              border: '#e2e8f0'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Stylesheet for mobile scrollbar & native iOS view tuning -->
+<style data-purpose="custom-layout">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f1f5f9;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-teal-500 selection:text-white pb-24">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="max-w-[430px] mx-auto min-h-screen bg-[#f8fafc] flex flex-col shadow-2xl relative border-x border-slate-200">
+<!-- BEGIN: iOSStatusBar -->
+<header class="bg-[#0a2e29] text-white pt-2.5 px-6 pb-2 flex justify-between items-center text-xs font-semibold select-none sticky top-0 z-50">
+<span class="tracking-tight text-slate-100">9:41</span>
+<!-- Dynamic Island / Speaker Pill Mock -->
+<div class="w-20 h-3.5 bg-black/40 rounded-full mx-auto hidden sm:block"></div>
+<!-- Battery and Signal Indicators -->
+<div class="flex items-center gap-1.5 text-slate-200">
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"></path></svg>
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.66-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"></path></svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 border border-slate-300 rounded-sm p-0.5 flex items-center">
+<div class="w-full h-full bg-emerald-400 rounded-2xs"></div>
+</div>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: ClinicHeaderBar -->
+<section class="bg-[#0a2e29] text-white px-4 pt-2 pb-4 shadow-md">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300 font-bold text-base">
+            ع
+          </div>
+<div>
+<h1 class="text-xs font-bold tracking-tight text-white flex items-center gap-1.5">
+<span>عيادتي</span>
+<span class="text-teal-300/80">•</span>
+<span class="text-teal-200 text-[11px] font-medium">إدارة الأداء</span>
+</h1>
+<p class="text-[10px] text-slate-300 font-normal">الأحد، 6 سبتمبر</p>
+</div>
+</div>
+<!-- Role Badge -->
+<div class="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[11px] text-white font-medium">المدير العام</span>
+</div>
+</div>
+<!-- Quick Status Strip -->
+<div class="flex items-center justify-between bg-black/20 px-3 py-1.5 rounded-lg text-[11px] border border-white/5">
+<span class="text-slate-300 flex items-center gap-1">
+<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          النظام متصل • صلاحية كاملة
+        </span>
+<span class="text-teal-300 font-semibold">4 مستخدمين</span>
+</div>
+</section>
+<!-- END: ClinicHeaderBar -->
+<!-- BEGIN: DashboardHeader -->
+<section class="px-4 pt-4 pb-2">
+<div class="flex items-baseline justify-between">
+<div>
+<h2 class="text-xl font-extrabold text-[#0a2e29] tracking-tight">Admin dashboard</h2>
+<p class="text-xs text-slate-500 font-normal mt-0.5">نظرة شاملة على الأداء والمرتبات والحوافز</p>
+</div>
+</div>
+</section>
+<!-- END: DashboardHeader -->
+<!-- BEGIN: HorizontalScrollableTabs -->
+<!-- Tab Navigation bar replicating the exact Admin tabs -->
+<nav class="w-full overflow-x-auto no-scrollbar py-2.5 px-4 border-b border-slate-200/80 bg-white/70 backdrop-blur-md sticky top-[41px] z-40">
+<div class="flex items-center gap-1.5 whitespace-nowrap min-w-max">
+<!-- Tab 1 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          نظرة عامة
+        </button>
+<!-- Tab 2 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          ملف الموظف
+        </button>
+<!-- Tab 3 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          المهام
+        </button>
+<!-- Tab 4 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          الإعدادات
+        </button>
+<!-- Tab 5: Active Tab "المستخدمون" -->
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0a2e29] text-white shadow-sm flex items-center gap-1.5 border border-[#0a2e29]">
+<svg class="w-3.5 h-3.5 text-teal-300" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          المستخدمون
+        </button>
+<!-- Tab 6 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          الأهداف والتحفيز
+        </button>
+<!-- Tab 7 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          سجل النشاط
+        </button>
+<!-- Tab 8 -->
+<button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          الصلاحيات
+        </button>
+</div>
+</nav>
+<!-- END: HorizontalScrollableTabs -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 px-4 py-4 space-y-4">
+<!-- BEGIN: PasswordChangeCard -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90" data-purpose="password-reset-box">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800">كلمة المرور بتاعتك</h3>
+<p class="text-[11px] text-slate-500 font-medium">حسابك: <span class="text-teal-700 font-bold">المدير العام (@admin)</span></p>
+</div>
+</div>
+</div>
+<!-- Form Fields Stacked for Mobile UX -->
+<form class="space-y-3" onsubmit="event.preventDefault();">
+<div>
+<label class="block text-[11px] font-semibold text-slate-600 mb-1">كلمة المرور الحالية</label>
+<input class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-600 focus:bg-white focus:border-transparent outline-none transition placeholder-slate-400" placeholder="••••••••" type="password"/>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<label class="block text-[11px] font-semibold text-slate-600 mb-1">كلمة المرور الجديدة</label>
+<input class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-600 focus:bg-white focus:border-transparent outline-none transition placeholder-slate-400" placeholder="الجديدة" type="password"/>
+</div>
+<div>
+<label class="block text-[11px] font-semibold text-slate-600 mb-1">تأكيد الجديدة</label>
+<input class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-600 focus:bg-white focus:border-transparent outline-none transition placeholder-slate-400" placeholder="أعد كتابتها" type="password"/>
+</div>
+</div>
+<button class="w-full py-2.5 px-4 bg-[#0a2e29] hover:bg-[#0f4039] active:scale-[0.99] text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm shadow-[#0a2e29]/20" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            تغيير كلمة المرور
+          </button>
+</form>
+</section>
+<!-- END: PasswordChangeCard -->
+<!-- BEGIN: UsersManagementSection -->
+<section class="space-y-3" data-purpose="users-management-list">
+<!-- Section Header -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-sm font-bold text-slate-800">المستخدمون والصلاحيات</h3>
+</div>
+<span class="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">4 مستخدمين</span>
+</div>
+<p class="text-[11px] text-slate-500 mt-2 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            كل حساب له اسم مستخدم وكلمة مرور وصلاحيات (التابات المسموحة). لو الحساب موظف، اربطه ببياناته من «الموظفون» في الإعدادات. المدير لا يُربط بموظف (مالوش مرتب/تقييم).
+          </p>
+</div>
+<!-- USER CARD 1: Admin -->
+<article class="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-1.5 h-full bg-[#0a2e29]"></div>
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#0a2e29] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                ا
+              </div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-bold text-sm text-slate-900">المدير العام</span>
+<span class="bg-[#0a2e29] text-white text-[10px] px-2 py-0.5 rounded-md font-semibold tracking-wide">مدير عام</span>
+</div>
+<div class="text-[11px] text-slate-500 font-mono mt-0.5">admin@</div>
+</div>
+</div>
+</div>
+<!-- Permissions Badge & Password Button -->
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+<span class="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              صلاحيات كاملة - لا تُحذف
+            </span>
+<button class="text-[11px] font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg border border-slate-200 transition flex items-center gap-1">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+</div>
+</article>
+<!-- USER CARD 2: Nada (Reception) -->
+<article class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                ن
+              </div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-bold text-sm text-slate-900">ندى</span>
+<span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-md font-medium">موظف استقبال</span>
+</div>
+<div class="text-[11px] text-slate-500 font-mono mt-0.5">emp1@</div>
+</div>
+</div>
+<!-- Link employee select -->
+<div class="text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200/70 px-2 py-0.5 rounded-md flex items-center gap-1">
+<span>📂 موظف الاستقبال</span>
+</div>
+</div>
+<!-- Permission Info -->
+<div class="mt-2 text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center justify-between">
+<span>الصلاحيات حسب الدور — من Admin dashboard</span>
+<span class="text-slate-400 font-mono">المرتبطة: ندى</span>
+</div>
+<!-- Action Buttons Bar for Mobile -->
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+<div class="flex items-center gap-1.5">
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition flex items-center gap-1">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
+                إيقاف
+              </button>
+<button class="text-rose-500 hover:text-rose-700 bg-rose-50 p-1.5 rounded-lg border border-rose-100 transition" title="حذف">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<button class="text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-200/80 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+<span>إنهاء التأهيل (يمسح الصور)</span>
+<span>🎓</span>
+</button>
+</div>
+</article>
+<!-- USER CARD 3: Nourhan (Dental Assistant) -->
+<article class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                ن
+              </div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-bold text-sm text-slate-900">نورهان</span>
+<span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-md font-medium">مساعد طبيب</span>
+</div>
+<div class="text-[11px] text-slate-500 font-mono mt-0.5">emp2@</div>
+</div>
+</div>
+<div class="text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+<span>🦷 مساعد طبيب</span>
+</div>
+</div>
+<!-- Permission Info -->
+<div class="mt-2 text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center justify-between">
+<span>الصلاحيات حسب الدور — من Admin dashboard</span>
+<span class="text-slate-400 font-mono">المرتبطة: نورهان</span>
+</div>
+<!-- Action Buttons Bar for Mobile -->
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+<div class="flex items-center gap-1.5">
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition flex items-center gap-1">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
+                إيقاف
+              </button>
+<button class="text-rose-500 hover:text-rose-700 bg-rose-50 p-1.5 rounded-lg border border-rose-100 transition" title="حذف">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<button class="text-[11px] font-bold text-white bg-[#0f766e] hover:bg-[#0c5c56] px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm">
+<span>بدء التأهيل</span>
+<span>🎓</span>
+</button>
+</div>
+</article>
+<!-- USER CARD 4: Shahd (Dental Assistant) -->
+<article class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                ش
+              </div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-bold text-sm text-slate-900">شهد</span>
+<span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-md font-medium">مساعد طبيب</span>
+</div>
+<div class="text-[11px] text-slate-500 font-mono mt-0.5">emp3@</div>
+</div>
+</div>
+<div class="text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+<span>🦷 مساعد طبيب</span>
+</div>
+</div>
+<!-- Permission Info -->
+<div class="mt-2 text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 flex items-center justify-between">
+<span>الصلاحيات حسب الدور — من Admin dashboard</span>
+<span class="text-slate-400 font-mono">المرتبطة: شهد</span>
+</div>
+<!-- Action Buttons Bar for Mobile -->
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-1.5">
+<div class="flex items-center gap-1.5">
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition flex items-center gap-1">
+<span>🔑</span>
+<span>كلمة المرور</span>
+</button>
+<button class="text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-200 transition">
+                إيقاف
+              </button>
+<button class="text-rose-500 hover:text-rose-700 bg-rose-50 p-1.5 rounded-lg border border-rose-100 transition" title="حذف">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<button class="text-[11px] font-bold text-white bg-[#0f766e] hover:bg-[#0c5c56] px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm">
+<span>بدء التأهيل</span>
+<span>🎓</span>
+</button>
+</div>
+</article>
+<!-- Add User Action Button -->
+<button class="w-full py-3 px-4 bg-[#0a2e29] hover:bg-[#08221e] active:scale-[0.99] text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shadow-[#0a2e29]/15 mt-2">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          إضافة مستخدم جديد
+        </button>
+</section>
+<!-- END: UsersManagementSection -->
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: MobileBottomNavigation -->
+<!-- Native-like fixed mobile navigation bar with active state for Admin -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 flex items-center justify-around z-50">
+<!-- Nav Item 1 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-[10px] font-medium">الأكاديمية</span>
+</a>
+<!-- Nav Item 2: Active (الإدارة) -->
+<a class="flex flex-col items-center gap-1 text-[#0a2e29] font-bold relative" href="#">
+<div class="relative">
+<svg class="w-5 h-5 text-[#0a2e29]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="w-1.5 h-1.5 rounded-full bg-teal-500 absolute -top-0.5 -right-0.5"></span>
+</div>
+<span class="text-[10px]">الإدارة</span>
+</a>
+<!-- Nav Item 3 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-[10px] font-medium">المهام</span>
+</a>
+<!-- Nav Item 4 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-[10px] font-medium">المخزن</span>
+</a>
+</nav>
+<!-- END: MobileBottomNavigation -->
+</div>
+<!-- END: MobileDeviceFrame -->
+</body></html>

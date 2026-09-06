@@ -1,0 +1,261 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تحليل الموردين | DentSpaces المخزن - عيادتي</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config based on DESIGN_SYSTEM_2 -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#0a2e29',
+              dark: '#061e1b',
+              light: '#134740',
+              subtle: '#eaf3f1'
+            },
+            clinical: {
+              mint: '#10b981',
+              surface: '#f4fbf8',
+              'surface-dim': '#d4dcd9',
+              'surface-lowest': '#ffffff',
+              'surface-low': '#eef5f2',
+              border: '#dbe7e2',
+              text: '#132824',
+              muted: '#637e78'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif']
+          },
+          boxShadow: {
+            'card': '0 2px 10px rgba(10, 46, 41, 0.04), 0 1px 3px rgba(10, 46, 41, 0.02)',
+            'subtle': '0 1px 4px rgba(10, 46, 41, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+<!-- Typography and Base Styles -->
+<style data-purpose="base-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #132824;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<!-- Component Accent Styles -->
+<style data-purpose="custom-utilities">
+    .badge-rose {
+      background-color: #fee2e2;
+      color: #ef4444;
+    }
+    .badge-gray {
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c5d7d2;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-clinical-surface text-clinical-text selection:bg-emerald-100 selection:text-primary">
+<div>
+<!-- BEGIN: TopHeader -->
+<!-- Top thin status bar with clinic info and date -->
+<header class="border-b border-clinical-border/70 bg-clinical-surface-lowest px-4 md:px-8 py-2.5 flex items-center justify-between text-xs text-clinical-muted">
+<!-- Date stamp -->
+<div class="flex items-center gap-2 font-medium" data-purpose="current-date">
+<svg class="w-3.5 h-3.5 text-clinical-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<!-- Main brand status -->
+<div class="flex items-center gap-3" data-purpose="app-branding">
+<div class="flex items-center gap-1.5 font-medium">
+<span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+<span class="text-clinical-text font-semibold">المخزن</span>
+<span class="text-clinical-border">•</span>
+<span>إدارة الأداء</span>
+<span class="font-bold text-primary mr-1">عيادتي</span>
+</div>
+<button aria-label="القائمة الرئيسية" class="p-1 rounded text-clinical-muted hover:text-clinical-text hover:bg-clinical-surface-low transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: ModuleSubHeader -->
+<!-- Sub-header bar displaying DentSpaces details, version, and user role -->
+<div class="px-4 md:px-8 py-3.5 max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3" data-purpose="module-meta">
+<!-- Role and User Switcher Button -->
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-clinical-border bg-white text-xs font-semibold text-clinical-text hover:bg-clinical-surface-low hover:border-clinical-muted/40 transition-all shadow-subtle" data-purpose="role-badge">
+<svg class="w-3.5 h-3.5 text-clinical-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+<span>المدير العام</span>
+</button>
+<!-- Inventory Scope Badge -->
+<div class="flex items-center gap-2.5 text-right" data-purpose="inventory-scope">
+<div class="text-right">
+<div class="text-sm font-bold text-primary flex items-center gap-1.5 justify-end">
+<span>DentSpaces • المخزن</span>
+<span class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-mono font-bold">DS</span>
+</div>
+<p class="text-[11px] text-clinical-muted flex items-center gap-1.5 justify-end">
+<span>جرد لحظي — مخزن + تراي v97</span>
+<span class="w-1.5 h-1.5 rounded-full bg-clinical-mint inline-block"></span>
+</p>
+</div>
+</div>
+</div>
+<!-- END: ModuleSubHeader -->
+<!-- BEGIN: NavigationTabs -->
+<!-- Secondary navigation tabs with dynamic badges & active dropdown -->
+<div class="px-4 md:px-8 max-w-7xl mx-auto mt-1 mb-6">
+<nav aria-label="أقسام المخزن" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-2 pt-1 border-b border-clinical-border/60 text-xs font-medium">
+<!-- Active Tab: تحليل الموردين -->
+<div class="relative group shrink-0">
+<button aria-expanded="false" aria-haspopup="true" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white font-medium shadow-sm transition-all hover:bg-primary-light">
+<svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تحليل الموردين</span>
+</button>
+</div>
+<!-- Secondary Tab: الاعتمادات -->
+<button class="shrink-0 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+          الاعتمادات
+        </button>
+<!-- Secondary Tab: الموردين -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span>الموردين</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Secondary Tab: المرتجعات -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span>المرتجعات</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Secondary Tab: الاستلام -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span>الاستلام</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Secondary Tab: النواقص والطلب (مع شارة) -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span class="badge-rose text-[10px] font-bold px-1.5 py-0.5 rounded-full">28</span>
+<span>النواقص والطلب</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Secondary Tab: المخزن -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span>المخزن</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Secondary Tab: التراي (مع شارة) -->
+<button class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-clinical-muted hover:text-clinical-text hover:bg-white transition-all">
+<span class="badge-rose text-[10px] font-bold px-1.5 py-0.5 rounded-full">20</span>
+<span>التراي</span>
+<svg class="w-3 h-3 text-clinical-muted/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</nav>
+</div>
+<!-- END: NavigationTabs -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 md:px-8 max-w-7xl mx-auto space-y-5" data-purpose="supplier-analysis-view">
+<!-- Section: Heading and Description -->
+<section class="space-y-1.5" data-purpose="page-intro">
+<h1 class="text-xl md:text-2xl font-bold text-primary tracking-tight">تحليل الموردين</h1>
+<p class="text-xs md:text-sm text-clinical-muted leading-relaxed max-w-4xl">
+          مقارنة مباشرة بين الموردين: مين بنصرف عليه أكثر، مين بيورّد أصناف أكثر، ومين أرخص فعليًا — عشان قرار شراء أوضح، مرتّبين بالأهم.
+        </p>
+</section>
+<!-- Section: Search & Quick Filters -->
+<section class="w-full" data-purpose="search-toolbar">
+<div class="relative w-full max-w-xl">
+<input class="w-full text-xs md:text-sm pr-9 pl-4 py-2.5 rounded-xl border border-clinical-border bg-white text-clinical-text placeholder:text-clinical-muted/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow shadow-sm" dir="rtl" placeholder="دور باسم المورّد..." type="text">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-clinical-muted/70">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</section>
+<!-- Section: Analytics Main Container (Empty/Waiting State Card) -->
+<section class="bg-clinical-surface-lowest border border-clinical-border/80 rounded-2xl p-6 md:p-12 shadow-card min-h-[380px] flex flex-col items-center justify-center text-center transition-all" data-purpose="analytics-canvas">
+<!-- Graphical Empty State Illustration -->
+<div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-clinical-surface-low border border-clinical-border flex items-center justify-center mb-5 text-primary">
+<svg class="w-10 h-10 md:w-12 md:h-12 text-primary/80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Explanatory Information -->
+<h2 class="text-base md:text-lg font-bold text-primary mb-2">لوحة المقارنة السريرية للموردين</h2>
+<p class="text-xs md:text-sm text-clinical-muted max-w-lg leading-normal mb-6">
+          سيتم توليد مؤشرات الإنفاق التراكمي، تباين أسعار المواد السريرية، ونسب الالتزام بمواعيد التوريد تلقائيًا عند اعتماد فواتير الشراء وأوامر الاستلام في هذا القسم.
+        </p>
+<!-- KPI Preview Pills -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl pt-2">
+<div class="p-3 rounded-xl border border-clinical-border/70 bg-clinical-surface text-center">
+<span class="block text-[11px] text-clinical-muted font-medium mb-1">إجمالي الصرف</span>
+<span class="text-xs font-bold text-primary">-- ر.س</span>
+</div>
+<div class="p-3 rounded-xl border border-clinical-border/70 bg-clinical-surface text-center">
+<span class="block text-[11px] text-clinical-muted font-medium mb-1">المورد الأوفر</span>
+<span class="text-xs font-bold text-primary">بانتظار البيانات</span>
+</div>
+<div class="p-3 rounded-xl border border-clinical-border/70 bg-clinical-surface text-center">
+<span class="block text-[11px] text-clinical-muted font-medium mb-1">تغطية الأصناف</span>
+<span class="text-xs font-bold text-primary">-- صنف</span>
+</div>
+<div class="p-3 rounded-xl border border-clinical-border/70 bg-clinical-surface text-center">
+<span class="block text-[11px] text-clinical-muted font-medium mb-1">دقة التسليم</span>
+<span class="text-xs font-bold text-emerald-600 font-mono">100%</span>
+</div>
+</div>
+</section>
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- BEGIN: Footer -->
+<footer class="mt-12 py-5 border-t border-clinical-border/70 bg-clinical-surface-lowest text-center text-xs text-clinical-muted" data-purpose="site-footer">
+<div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-clinical-mint"></span>
+<span>نظام إدارة العيادات والمخزن السريري — ClinicOS 2026</span>
+</div>
+<p class="text-[11px] text-clinical-muted/80">جميع الحقوق محفوظة © DentSpaces</p>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ClinicOS - اختيار الأقسام والمخزن</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Font: Cairo & Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Noto+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#0a2e29',
+              dark: '#061d1a',
+              teal: '#0d6559',
+              mint: '#e6f7f2',
+              mintLight: '#f2fbf7',
+              accent: '#10b981',
+              border: '#d1fae5'
+            },
+            surface: {
+              DEFAULT: '#f4fbf8',
+              card: '#ffffff',
+              muted: '#f8fafc',
+              border: '#e2e8f0'
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'Noto Sans Arabic', 'sans-serif']
+          },
+          boxShadow: {
+            'modal': '0 25px 50px -12px rgba(10, 46, 41, 0.25), 0 0 0 1px rgba(10, 46, 41, 0.05)',
+            'card-hover': '0 10px 25px -5px rgba(13, 101, 89, 0.12), 0 8px 10px -6px rgba(13, 101, 89, 0.08)'
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scroll">
+    /* تخصيص شريط التمرير داخل نافذة المودال */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 font-sans antialiased text-slate-800 relative overflow-hidden min-h-screen select-none">
+<!-- BEGIN: BlurredBackgroundDashboard -->
+<!-- خلفية لوحة تحكم إدارة المخزن التفاعلية مع تأثير الغباش الشديد لمحاكاة بيئة المودال -->
+<div class="absolute inset-0 z-0 bg-[#e8f1ed] filter blur-[7px] brightness-[0.72] scale-[1.02] transform transition-all duration-300 pointer-events-none p-6 flex flex-col gap-5" data-purpose="dashboard-underlay">
+<!-- شريط علوي افتراضي للخلفية -->
+<header class="bg-white/80 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-brand flex items-center justify-center text-white font-bold text-lg">عيادتي</div>
+<div>
+<h1 class="text-base font-bold text-slate-800">إدارة الأداء والمخزون</h1>
+<p class="text-xs text-slate-500">الأحد 6 سبتمبر - DentSpaces</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-lg">جرد لحظي نشط</span>
+<div class="w-9 h-9 rounded-full bg-slate-200"></div>
+</div>
+</header>
+<!-- شريط الإحصائيات التوضيحي في الخلفية -->
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-white rounded-2xl p-4 shadow-sm">
+<div class="text-xs text-slate-500 font-medium">رأس المال المجمد</div>
+<div class="text-xl font-extrabold text-brand mt-1">٠ ج.م</div>
+<div class="text-[11px] text-slate-400 mt-1">قيمة البضاعة الحالية</div>
+</div>
+<div class="bg-white rounded-2xl p-4 shadow-sm">
+<div class="text-xs text-slate-500 font-medium">إجمالي الإنفاق على التوريد</div>
+<div class="text-xl font-extrabold text-brand mt-1">٠ ج.م</div>
+<div class="text-[11px] text-slate-400 mt-1">لسه مفيش طلبيات</div>
+</div>
+<div class="bg-white rounded-2xl p-4 shadow-sm">
+<div class="text-xs text-slate-500 font-medium">وفر شراء متاح</div>
+<div class="text-xl font-extrabold text-slate-400 mt-1">٠ ج.م</div>
+<div class="text-[11px] text-slate-400 mt-1">مفيش بدائل أرخص</div>
+</div>
+<div class="bg-white rounded-2xl p-4 shadow-sm">
+<div class="text-xs text-slate-500 font-medium">فلوس راكدة</div>
+<div class="text-xl font-extrabold text-slate-400 mt-1">٠ ج.م</div>
+<div class="text-[11px] text-slate-400 mt-1">مفيش رصيد زائد</div>
+</div>
+</div>
+<!-- بطاقة التقرير التحليلي للخلفية -->
+<div class="flex-1 bg-white rounded-2xl p-6 shadow-sm flex flex-col justify-center items-center text-center">
+<div class="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 mb-3">
+        📊
+      </div>
+<h3 class="text-base font-bold text-slate-700">البيزنس متوازن - مفيش فرص تحسين كبيرة ظاهرة</h3>
+<p class="text-xs text-slate-400 max-w-md mt-1">كل ما تسجلوا إجراءات، الرؤى والتحليلات هتبقى أوضح وأدق في متابعة النواقص والمشتريات.</p>
+</div>
+</div>
+<!-- END: BlurredBackgroundDashboard -->
+<!-- BEGIN: ModalOverlay -->
+<!-- غطاء الشفافية الداكن مع دعم التمركز المحكم للنافذة -->
+<div class="relative z-50 min-h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/40 backdrop-blur-[4px]" data-purpose="modal-container">
+<!-- نافذة المودال الرئيسية -->
+<div class="w-full max-w-[580px] bg-surface-card rounded-3xl shadow-modal border border-white/60 flex flex-col max-h-[90vh] overflow-hidden animate-[fadeIn_0.25s_ease-out]">
+<!-- ترويسة نافذة الأقسام -->
+<!-- BEGIN: ModalHeader -->
+<header class="px-7 py-5 bg-gradient-to-b from-slate-50/90 to-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-20">
+<div class="flex items-center gap-2.5">
+<div class="w-2.5 h-2.5 rounded-full bg-brand-accent animate-pulse"></div>
+<h2 class="text-xl font-extrabold text-brand tracking-tight">الأقسام</h2>
+</div>
+<!-- زر إغلاق النافذة المنبثقة -->
+<button aria-label="إغلاق النافذة" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-brand hover:bg-slate-100 active:scale-95 transition-all duration-200 border border-slate-200/60" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewBox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+</button>
+</header>
+<!-- END: ModalHeader -->
+<!-- جسم النافذة: استعراض مجموعات العمليات والمخزن في شبكة منظمة -->
+<!-- BEGIN: ModalBodyContent -->
+<div class="px-7 py-6 overflow-y-auto custom-scrollbar space-y-7 bg-surface-muted/30">
+<!-- 1. مجموعة: نظرة عامة -->
+<section data-purpose="group-overview">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">نظرة عامة</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- كرت القيادة النشط (Active State) -->
+<button class="relative group flex flex-col items-center justify-center p-4 bg-brand-mint/60 border-2 border-brand-teal rounded-2xl shadow-sm hover:shadow-md transition-all text-center">
+<span class="absolute top-2.5 right-2.5 flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-brand-teal"></span>
+</span>
+<div class="w-13 h-13 w-12 h-12 rounded-xl bg-brand-teal text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-105 transition-transform">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+</svg>
+</div>
+<span class="text-sm font-bold text-brand">القيادة</span>
+<span class="text-[11px] text-brand-teal font-medium mt-0.5">الرئيسية والإحصاء</span>
+</button>
+</div>
+</section>
+<!-- 2. مجموعة: العمليات -->
+<section data-purpose="group-operations">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">العمليات</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- سجل إجراءاتي -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="16" x2="8" y1="13" y2="13"></line>
+<line x1="16" x2="8" y1="17" y2="17"></line>
+<polyline points="10 9 9 9 8 9"></polyline>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">سجل إجراءاتي</span>
+<span class="text-[11px] text-slate-400 mt-0.5">متابعة الاستهلاك الطبي</span>
+</button>
+</div>
+</section>
+<!-- 3. مجموعة: الأصناف والإجراءات -->
+<section data-purpose="group-items-and-procedures">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">الأصناف والإجراءات</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- جرد الأصناف -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3 5v14"></path>
+<path d="M8 5v14"></path>
+<path d="M12 5v14"></path>
+<path d="M17 5v14"></path>
+<path d="M21 5v14"></path>
+<path d="M7 19H3"></path>
+<path d="M21 19h-4"></path>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">جرد الأصناف</span>
+<span class="text-[11px] text-slate-400 mt-0.5">الرصيد الحي والمخزون</span>
+</button>
+<!-- قوائم الإجراءات -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M9 11l3 3L22 4"></path>
+<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">قوائم الإجراءات</span>
+<span class="text-[11px] text-slate-400 mt-0.5">البروتوكولات والمكونات</span>
+</button>
+</div>
+</section>
+<!-- 4. مجموعة: الموردين -->
+<section data-purpose="group-suppliers">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">الموردين</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- تحليل الموردين -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">تحليل الموردين</span>
+<span class="text-[11px] text-slate-400 mt-0.5">مقارنة الأسعار والعروض</span>
+</button>
+<!-- الطلبيات المستلمة -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+<polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+<line x1="12" x2="12" y1="22.08" y2="12"></line>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">الطلبيات المستلمة</span>
+<span class="text-[11px] text-slate-400 mt-0.5">أذونات الاستلام ومطابقتها</span>
+</button>
+</div>
+</section>
+<!-- 5. مجموعة: المال -->
+<section data-purpose="group-finance">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">المال</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- الربحية -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-emerald-600 group-hover:bg-emerald-100/80 flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="1" y2="23"></line>
+<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">الربحية</span>
+<span class="text-[11px] text-slate-400 mt-0.5">العائد وهامش الأرباح</span>
+</button>
+<!-- الهدر -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-rose-600 group-hover:bg-rose-100/80 flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+<polyline points="17 18 23 18 23 12"></polyline>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">الهدر</span>
+<span class="text-[11px] text-slate-400 mt-0.5">المواد منتهية الصلاحية والتالفة</span>
+</button>
+</div>
+</section>
+<!-- 6. مجموعة: التحليلات -->
+<section class="pb-2" data-purpose="group-analytics">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[13px] font-bold text-slate-500 uppercase tracking-wider">التحليلات</span>
+<div class="h-[1px] flex-1 bg-slate-200/80"></div>
+</div>
+<div class="grid grid-cols-2 gap-3.5">
+<!-- الأطباء -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+<circle cx="12" cy="7" r="4"></circle>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">الأطباء</span>
+<span class="text-[11px] text-slate-400 mt-0.5">استهلاك الطبيب والإنتاجية</span>
+</button>
+<!-- كفاءة الاستهلاك -->
+<button class="flex flex-col items-center justify-center p-4 bg-white border border-slate-200/80 rounded-2xl hover:border-brand-teal/40 hover:shadow-card-hover hover:bg-brand-mintLight/40 active:scale-[0.98] transition-all text-center group">
+<div class="w-12 h-12 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-brand-mint group-hover:text-brand-teal flex items-center justify-center mb-2.5 transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+<path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+</svg>
+</div>
+<span class="text-sm font-bold text-slate-700 group-hover:text-brand transition-colors">كفاءة الاستهلاك</span>
+<span class="text-[11px] text-slate-400 mt-0.5">معدلات الاستخدام الشهرية</span>
+</button>
+</div>
+</section>
+</div>
+<!-- END: ModalBodyContent -->
+<!-- شريط سفلي لتأكيد سهولة الخروج والتنقل السريع -->
+<!-- BEGIN: ModalFooter -->
+<footer class="px-7 py-3.5 bg-slate-50/90 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<span class="flex items-center gap-1.5">
+<kbd class="px-2 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-600 shadow-sm">ESC</kbd>
+<span>للإغلاق السريع</span>
+</span>
+<span class="text-brand-teal font-semibold">ClinicOS v2.4 • نظام المخزن الذكي</span>
+</footer>
+<!-- END: ModalFooter -->
+</div>
+</div>
+<!-- END: ModalOverlay -->
+<!-- جافاسكريبت بسيط للإغلاق التفاعلي والمفاتيح المختصرة -->
+<script data-purpose="modal-interaction">
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        const modal = document.querySelector('[data-purpose="modal-container"]');
+        if (modal) {
+          modal.style.opacity = '0';
+          modal.style.transition = 'opacity 0.2s ease-out';
+          setTimeout(() => modal.style.display = 'none', 200);
+        }
+      }
+    });
+  </script>
+</body></html>

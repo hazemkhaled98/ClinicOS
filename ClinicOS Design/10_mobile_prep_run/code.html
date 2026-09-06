@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>تحضير الجلسات - عيادتي • إدارة الأداء</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              50: '#eef8f5',
+              100: '#d7f0e7',
+              800: '#0f4840',
+              900: '#0a2e29',
+              950: '#051916'
+            },
+            emerald: {
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            },
+            amber: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              800: '#92400e'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-styles">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f7f9fa;
+      color: #1a2e2b;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Custom checkmark touch animation */
+    .checkbox-touch {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .checkbox-touch:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+<body class="bg-[#f7f9fa] text-slate-800 antialiased min-h-screen flex justify-center selection:bg-emerald-100 selection:text-forest-900">
+<!-- Mobile Viewport Container (iOS 390px Optimized Frame) -->
+<div class="w-full max-w-[420px] min-h-screen flex flex-col bg-white shadow-xl relative pb-28 border-x border-slate-100">
+<!-- BEGIN: TopBar -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 pt-3 pb-3" data-purpose="mobile-header">
+<!-- iOS Status Area Replica -->
+<div class="flex justify-between items-center text-xs text-slate-500 mb-2 font-medium px-1">
+<span>9:41</span>
+<div class="flex items-center gap-1.5 text-slate-700">
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"></path></svg>
+<span class="text-[10px] font-bold">5G</span>
+<div class="w-5 h-2.5 border border-slate-700 rounded-sm p-0.5 flex items-center">
+<div class="w-full h-full bg-slate-800 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Main Navigation Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button aria-label="القائمة الجانبية" class="p-2 -mr-1 rounded-xl text-forest-900 hover:bg-slate-100 active:scale-95 transition-all" type="button">
+<svg class="w-6 h-6 stroke-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div>
+<div class="flex items-center gap-1.5">
+<h1 class="text-sm font-bold text-forest-900 leading-tight">تحضير الجلسات</h1>
+<span class="text-[10px] bg-forest-50 text-forest-800 font-semibold px-1.5 py-0.5 rounded border border-forest-100">عيادتي</span>
+</div>
+<p class="text-[11px] text-slate-500 font-normal">عيادتي • إدارة الأداء</p>
+</div>
+</div>
+<div class="text-left bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+<span class="block text-[11px] font-medium text-slate-600">الأحد، 6 سبتمبر</span>
+<span class="block text-[9px] text-emerald-600 font-medium text-left">جاهز للبدء</span>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-4 py-4 space-y-4" data-purpose="checklist-run-screen">
+<!-- Page Header & Instructions -->
+<div class="space-y-1">
+<h2 class="text-lg font-extrabold text-forest-900">تحضير الجلسات</h2>
+<p class="text-xs text-slate-500 leading-relaxed">
+          قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة قبل ما يدخل المريض.
+        </p>
+</div>
+<!-- Active Procedure Card -->
+<section class="bg-gradient-to-br from-forest-900 to-[#12423b] text-white rounded-2xl p-4 shadow-sm relative overflow-hidden" data-purpose="procedure-status">
+<div class="absolute -left-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="flex h-2.5 w-2.5 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+<span class="text-xs text-emerald-200 font-medium">جلسة كشف نشطة</span>
+</div>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-100 transition-colors" type="button">
+<span>← رجوع</span>
+</button>
+</div>
+<h3 class="text-base font-bold text-white mb-2">إكزامينيشن (كشف وتشخيص)</h3>
+<!-- Progress Bar Indicator -->
+<div class="space-y-1.5 mt-2">
+<div class="flex justify-between text-xs font-medium text-slate-200">
+<span>التقدم المُنجَز</span>
+<span class="font-bold text-emerald-300" id="progress-text">0 / 9</span>
+</div>
+<div class="w-full h-2 bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-400 rounded-full transition-all duration-300 ease-out" id="progress-bar" style="width: 0%"></div>
+</div>
+</div>
+</section>
+<!-- Warning Alert Banner -->
+<div class="flex items-start gap-2.5 p-3.5 bg-amber-50/90 border border-amber-200/80 rounded-xl text-amber-800 transition-all" data-purpose="status-alert" id="warning-box">
+<svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<div class="text-xs leading-snug">
+<span class="font-bold block text-amber-900" id="warning-text">لسه 5 عناصر أساسية ناقصة</span>
+<span>حضّر الأدوات الأساسية المؤشرة قبل بدء الفحص الطبي لضمان بروتوكول التعقيم.</span>
+</div>
+</div>
+<!-- BEGIN: Checklist Sections -->
+<div class="space-y-4 pt-1" data-purpose="checklist-groups">
+<!-- Category 1: General Prep -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-sm space-y-3">
+<div class="flex items-center justify-between pb-2 border-b border-slate-100">
+<h4 class="text-xs font-bold text-forest-900 flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-forest-50 text-forest-800 flex items-center justify-center text-[10px]">1</span>
+<span>تجهيز عام</span>
+</h4>
+<span class="text-[11px] text-slate-400">5 أدوات</span>
+</div>
+<div class="space-y-2">
+<!-- Item 1 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="true" type="checkbox"/>
+<span class="text-xs font-medium text-slate-800">ميرور (مرآة فحص)</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200/60">أساسي</span>
+</label>
+<!-- Item 2 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="true" type="checkbox"/>
+<span class="text-xs font-medium text-slate-800">إكسبلورر (مسبار)</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200/60">أساسي</span>
+</label>
+<!-- Item 3 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="true" type="checkbox"/>
+<span class="text-xs font-medium text-slate-800">تويزر (ملقط)</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200/60">أساسي</span>
+</label>
+<!-- Item 4 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="true" type="checkbox"/>
+<span class="text-xs font-medium text-slate-800">جلوفز ومناديل</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200/60">أساسي</span>
+</label>
+<!-- Item 5 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="false" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">كوب ومحلول مضمضة</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600">فرعي</span>
+</label>
+</div>
+</div>
+<!-- Category 2: Diagnosis -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-sm space-y-3">
+<div class="flex items-center justify-between pb-2 border-b border-slate-100">
+<h4 class="text-xs font-bold text-forest-900 flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-forest-50 text-forest-800 flex items-center justify-center text-[10px]">2</span>
+<span>دياجنوزيس (التشخيص)</span>
+</h4>
+<span class="text-[11px] text-slate-400">4 أدوات</span>
+</div>
+<div class="space-y-2">
+<!-- Item 6 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="false" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">خافض لسان / تشيك ريتراكتور</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600">اختياري</span>
+</label>
+<!-- Item 7 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="true" type="checkbox"/>
+<span class="text-xs font-medium text-slate-800">جوز (شاش معقم)</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200/60">أساسي</span>
+</label>
+<!-- Item 8 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="false" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">إنترا-أورال كاميرا (لو متاح)</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600">اختياري</span>
+</label>
+<!-- Item 9 -->
+<label class="checkbox-touch flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/70 cursor-pointer select-none">
+<div class="flex items-center gap-2.5">
+<input class="item-checkbox w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0" data-essential="false" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">كارت تسجيل الحالة</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600">سجل</span>
+</label>
+</div>
+</div>
+</div>
+<!-- END: Checklist Sections -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: StickyBottomBar -->
+<div class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white/95 backdrop-blur-lg border-t border-slate-200 p-3.5 shadow-lg z-40" data-purpose="footer-actions">
+<div class="flex items-center gap-2.5">
+<!-- Start Session Primary Button -->
+<button class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all" id="btn-start" type="button">
+<span>بدء الجلسة السريرية</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+<!-- Reset / Recheck Secondary Button -->
+<button aria-label="إعادة فحص" class="px-3.5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 active:scale-95 transition-all text-xs font-semibold flex items-center justify-center gap-1.5" id="btn-reset" type="button">
+<svg class="w-4 h-4 stroke-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="hidden sm:inline">إعادة</span>
+</button>
+</div>
+<!-- iOS Home Indicator -->
+<div class="w-32 h-1 bg-slate-300 rounded-full mx-auto mt-3"></div>
+</div>
+<!-- END: StickyBottomBar -->
+</div>
+<!-- Interactive JavaScript for Checkbox Counting -->
+<script data-purpose="checklist-counter">
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkboxes = document.querySelectorAll('.item-checkbox');
+      const progressText = document.getElementById('progress-text');
+      const progressBar = document.getElementById('progress-bar');
+      const warningBox = document.getElementById('warning-box');
+      const warningText = document.getElementById('warning-text');
+      const btnReset = document.getElementById('btn-reset');
+      const totalItems = checkboxes.length;
+      const totalEssential = document.querySelectorAll('.item-checkbox[data-essential="true"]').length;
+
+      function updateMetrics() {
+        const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+        const checkedEssentialCount = document.querySelectorAll('.item-checkbox[data-essential="true"]:checked').length;
+        const remainingEssential = totalEssential - checkedEssentialCount;
+
+        // Update progress bar & label
+        progressText.textContent = `${checkedCount} / ${totalItems}`;
+        const percentage = Math.round((checkedCount / totalItems) * 100);
+        progressBar.style.width = `${percentage}%`;
+
+        // Update warning box status
+        if (remainingEssential > 0) {
+          warningBox.classList.remove('hidden');
+          warningText.textContent = `لسه ${remainingEssential} عناصر أساسية ناقصة`;
+        } else {
+          warningBox.classList.remove('bg-amber-50/90', 'border-amber-200/80', 'text-amber-800');
+          warningBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+          warningText.textContent = 'اكتملت جميع الأدوات الأساسية بنجاح ✓';
+        }
+      }
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateMetrics);
+      });
+
+      btnReset.addEventListener('click', () => {
+        checkboxes.forEach(cb => { cb.checked = false; });
+        updateMetrics();
+      });
+
+      // Initial run
+      updateMetrics();
+    });
+  </script>
+</body></html>

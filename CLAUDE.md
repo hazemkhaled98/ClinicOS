@@ -6,13 +6,13 @@
 |-------|------------|---------|
 | Runtime | Java | 25 (LTS) |
 | Framework | Spring Boot | 4.1.0 |
-| UI | Vaadin Flow | 25.2.6 |
+| UI | Thymeleaf + HTMX + Alpine.js + Tailwind CSS | 3.1+ / 2.0 / 3.x / 4.1 |
 | Modularity | Spring Modulith | 2.1.1 |
 | SQL | jOOQ | 3.21.7 |
 | Migrations | Flyway | 13.5.0 |
 | Database | PostgreSQL | 17 (prod), Testcontainers in tests |
 | Object Storage | MinIO (S3-compatible) | latest |
-| Testing | Testcontainers, Karibu, Playwright | 1.21.4 / 2.7.2 / latest |
+| Testing | Testcontainers, MockMvc, Playwright | 1.21.4 / — / latest |
 | API Docs | springdoc OpenAPI | 3.1.0 |
 
 ## Module Layout (Spring Modulith)
@@ -28,20 +28,23 @@ com.clinicos
 ├── prep           (CLOSED) — prep checklists, runs (UC-006)
 ├── inventory      (CLOSED) — stock, suppliers, POs, returns, approvals (UC-008)
 ├── procedures     (CLOSED) — procedures, BOM, case costing (UC-008 costing, UC-009)
-└── ui             (CLOSED) — Vaadin views, allowedDependencies = all api modules above
+└── ui             (CLOSED) — Thymeleaf templates + controllers, allowedDependencies = all api modules above
 ```
 
 Each business module exposes `api` and hides `internal`. The `ui` module is verified by `ModularityTests` to only reach published APIs.
 
 ## UI & Design
 
-`DESIGN.md` (repo root) is binding for every new or modified UI component from this point forward. It defines the color tokens, typography scale, spacing, and component specs for ClinicOS's Vaadin Flow UI.
+`DESIGN.md` (repo root) is binding for every new or modified UI component from this point forward. It defines the color tokens, typography scale, spacing, and component specs for ClinicOS's server-rendered Thymeleaf UI.
 
-Two rules apply without exception:
+Design assets live in `ClinicOS Design/<NN>_<screen>/` folders (43 screens × 2 breakpoints). Before implementing or changing any view, read the matching folder's `screen.png` (visual target) and `code.html` (reference markup). Shell chrome (drawer, topbar) is in `drawer_view_desktop/` and `drawer_view_mobile/`. If a screen has no folder, build from the UC spec using `DESIGN.md` conventions plus the nearest existing screen as template — state which screen was used. If a screen folder is missing, create it as part of the implementation with the visual reference.
+
+Three rules apply without exception:
 - **No new color outside DESIGN.md's token set.** If a new UI need isn't covered by an existing token, extend DESIGN.md first, then use it — never hardcode a one-off hex value in a view or CSS file.
-- **RTL logical properties only.** Every CSS rule uses logical properties (`padding-inline-start/end`, `margin-inline`, `border-inline-start`, `inset-inline`) — never `left`/`right`/`padding-left`/etc. The whole UI is Arabic RTL; physical properties silently break on any LTR exception and vice versa.
+- **RTL logical properties only.** Every CSS rule uses logical properties (`padding-inline-start/end`, `margin-inline`, `border-inline-start`, `inset-inline`) — never `left`/`right`/`padding-left`/etc. Same applies to Tailwind utilities: translate physical directions (`ps-`/`pe-`/`ms-`/`me-` for padding/margin, `border-s`/`border-e` for borders, `start-`/`end-` for insets) into logical equivalents before landing code. Raw hex values (`bg-[#...]`) and physical Tailwind utilities (`border-l`, `pl-2`, `ml-3`, `-translate-x`) from Stitch comps must be converted to the configured brand palette utilities (`bg-teal-900`, etc.) defined via Tailwind `@theme` in `styles.css`.
+- **Tailwind CSS enabled.** Utility classes style the Thymeleaf templates directly. Tailwind sources live in `apps/api/src/main/styles/` — `tokens.css` (`@theme` palette from DESIGN.md), `components.css` (classes shared across templates), `main.css` (entry; `@import`s Tailwind + the other two). Compile with `npm run build:css` (Tailwind CLI 4, `apps/api/package.json`) which writes `target/classes/static/css/app.css` (picked up by the Spring build); templates link `/css/app.css`. Run it after any template or `components.css` change.
 
-Theme implementation lives in `apps/api/src/main/frontend/themes/clinicos/styles.css`.
+Templates live in `apps/api/src/main/resources/templates/`; controllers in `com.clinicos.ui` map routes to them and prepopulate a `LayoutModel` (drawer nav from the session's primed permissions/role). Interactive server round-trips use HTMX (`hx-*` attributes) with a `th:attr`-built `hx-headers` carrying the CSRF token; light client state uses Alpine.js.
 
 ## Tenant Context — Critical Rule
 
@@ -85,18 +88,17 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 # Compile + run unit tests (jOOQ codegen in generate-sources requires Docker)
 mvn test
 
-# Run only integration tests (Testcontainers spins up Postgres)
-mvn verify -Dtest=*IT -DfailIfNoTests=false
+# Run only integration tests (Testcontainers spins up Postgres; Playwright chromium auto-installs)
+mvn verify -Dtest=*IT -DfailIfNoSpecifiedTests=false -DskipITs=false
 
 # Full build
 mvn verify
 
-# Production build (minified frontend)
-mvn -Pproduction package
-
 # Check module boundaries
 mvn test -Dtest=ModularityTests
 ```
+
+Tailwind CSS is compiled in the `process-resources` phase (maven-antrun → `npm run build:css`) into `target/classes/static/css/app.css` — no separate frontend build or profile.
 
 **jOOQ codegen** runs unconditionally in the `generate-sources` phase via `testcontainers-jooq-codegen-maven-plugin` — every build spins up a throwaway Postgres, runs Flyway, and generates sources to `target/generated-sources/jooq`. Not committed. A `citext` forced type maps `citext` columns to `String`.
 
@@ -131,7 +133,8 @@ To explore this codebase or any subset of it with minimal token consumption, que
 | `docs/business_rules.md` | BR-G01…BR-G30, traced to UCs |
 | `docs/use_cases/UC-001…UC-009.md` | Use case specs |
 | `docs/backlog/legacy-gaps.md` | Legacy features not in UCs/schema — schema deltas sketched |
-| `apps/api/src/main/resources/application.yml` | Datasource, Flyway, Vaadin, springdoc config |
+| `ClinicOS Design/` | Per-screen UI reference: `code.html` markup + `screen.png` visual target for each of 43 screens |
+| `apps/api/src/main/resources/application.yml` | Datasource, Flyway, Thymeleaf, springdoc config |
 | `apps/api/pom.xml` | Full dependency + plugin config |
 | `apps/api/src/main/java/com/clinicos/shared/TenantConnectionListener.java` | `SET LOCAL app.clinic_id` on transaction begin |
 

@@ -44,4 +44,4 @@ Built as `signup_clinic_with_owner` (a `SECURITY DEFINER` function, the only doo
 | # | Deferred Item | Why It Matters | Notes |
 |---|---------------|----------------|-------|
 | 13 | **Email verification** on sign-up | Without it, sign-up does not prove ownership of the email address; typos silently orphan an account and the email cannot be used for password reset later. | Needs SMTP + a token table (`signup_verification` or reuse), both far beyond Phase 1b's "zero DDL" scope. |
-| 14 | **Sign-up rate limiting / abuse throttling** | A public pre-auth form with instant activation invites mass tenant creation and credential stuffing — each sign-up is also an Argon2 hash for the server to burn. | Needs CAPTCHA and/or per-IP/per-session throttling; also out of the zero-DDL scope. Keyed by both IP and fresh Vaadin session. |
+| 14 | **Sign-up rate limiting / abuse throttling** | A public pre-auth form with instant activation invites mass tenant creation and credential stuffing — each sign-up is also an Argon2 hash for the server to burn. | Needs CAPTCHA and/or per-IP/per-session throttling; also out of the zero-DDL scope. Keyed by both IP and fresh HTTP session. |

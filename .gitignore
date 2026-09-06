@@ -37,6 +37,7 @@ apps/api/src/main/frontend/generated/
 apps/api/src/main/bundles/
 apps/api/frontend/generated/
 apps/api/.vaadin/
+apps/api/vite.generated.ts
 
 # IDE
 .idea/

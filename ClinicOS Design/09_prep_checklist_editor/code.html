@@ -1,0 +1,378 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تحضير الجلسات - عيادتي | ClinicOS</title>
+<!-- Google Fonts: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Tajawal', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              pine: '#0a2e29',
+              teal: '#0d6559',
+              'teal-light': '#14b8a6',
+              'teal-subtle': '#f0fdfa',
+              mint: '#ccfbf1',
+              'mint-dark': '#115e59',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Scoped Styles -->
+<style data-purpose="base-typography">
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style data-purpose="custom-inputs">
+    .custom-checkbox:checked {
+      background-color: #0d6559;
+      border-color: #0d6559;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col justify-between">
+<!-- BEGIN: MainNavbar -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm" data-purpose="navbar">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Brand and Active Context -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-pine flex items-center justify-center text-white font-bold shadow-md shadow-emerald-950/20">
+<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<div class="text-sm font-bold text-brand-pine">عيادتي · إدارة الأداء</div>
+<div class="text-xs text-slate-500 font-medium">تحضير الجلسات</div>
+</div>
+</div>
+</div>
+<!-- Left Side: Date and Navigation Controls -->
+<div class="flex items-center gap-3">
+<!-- Date Badge -->
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-brand-pine border border-emerald-100">
+<svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</span>
+<!-- Menu Button -->
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: MainNavbar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-5xl mx-auto space-y-6">
+<!-- BEGIN: PageHeader -->
+<section class="space-y-1" data-purpose="page-title-section">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-brand-pine tracking-tight">تحضير الجلسات</h1>
+<p class="text-sm sm:text-base text-slate-500 font-normal">
+          قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة
+        </p>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: ProcedureForm -->
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<!-- Procedure Name Card -->
+<div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm">
+<div class="max-w-2xl">
+<label class="block text-sm font-bold text-slate-700 mb-2" for="procedure-name">
+              اسم الإجراء
+            </label>
+<div class="relative">
+<input class="w-full h-12 rounded-xl border border-slate-300 bg-slate-50/50 px-4 text-slate-800 text-sm font-semibold focus:bg-white focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 transition-all outline-none" id="procedure-name" placeholder="اسم الإجراء..." type="text" value="إكزامينيشن (كشف وتشخيص)">
+</div>
+</div>
+</div>
+<!-- Section 1 Container -->
+<div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden" data-purpose="procedure-section-1">
+<!-- Section 1 Header -->
+<div class="bg-slate-50/80 px-4 sm:px-6 py-3.5 border-b border-slate-200 flex items-center justify-between gap-4">
+<div class="flex items-center gap-3 flex-1 max-w-md">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-brand-teal/10 text-brand-pine border border-brand-teal/20 whitespace-nowrap">
+                القسم 1
+              </span>
+<input class="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:border-brand-teal focus:ring-1 focus:ring-brand-teal outline-none" placeholder="عنوان القسم..." type="text" value="تجهيز عام">
+</div>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100" title="حذف القسم" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="hidden sm:inline">القسم</span>
+</button>
+</div>
+<!-- Section 1 Items List -->
+<div class="p-4 sm:p-6 divide-y divide-slate-100 space-y-3">
+<!-- Item 1 -->
+<div class="pt-3 first:pt-0 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">1</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="ميرور (مرآة فحص)">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input checked="" class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">2</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="إكسبلورر (مسبار)">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input checked="" class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 3 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">3</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="تويزر (ملقط)">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input checked="" class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 4 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">4</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="جلوفز ومناديل">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input checked="" class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 5 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">5</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="كوب ومحلول مضمضة">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Add Item Button -->
+<div class="pt-4 flex justify-end">
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-brand-teal border border-dashed border-brand-teal/40 font-bold text-xs sm:text-sm transition-all hover:border-brand-teal shadow-sm" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>عنصر</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 2 Container -->
+<div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden" data-purpose="procedure-section-2">
+<!-- Section 2 Header -->
+<div class="bg-slate-50/80 px-4 sm:px-6 py-3.5 border-b border-slate-200 flex items-center justify-between gap-4">
+<div class="flex items-center gap-3 flex-1 max-w-md">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-brand-teal/10 text-brand-pine border border-brand-teal/20 whitespace-nowrap">
+                القسم 2
+              </span>
+<input class="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:border-brand-teal focus:ring-1 focus:ring-brand-teal outline-none" placeholder="عنوان القسم..." type="text" value="دياجنوزيس">
+</div>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100" title="حذف القسم" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="hidden sm:inline">القسم</span>
+</button>
+</div>
+<!-- Section 2 Items List -->
+<div class="p-4 sm:p-6 divide-y divide-slate-100 space-y-3">
+<!-- Item 1 -->
+<div class="pt-3 first:pt-0 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">1</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="خافض لسان / تشيك ريتراكتور">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">2</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="جوز (شاش معقم)">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input checked="" class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Item 3 -->
+<div class="pt-3 flex items-center gap-2.5 sm:gap-4">
+<span class="w-7 text-center font-bold text-xs sm:text-sm text-slate-400 select-none">3</span>
+<div class="flex-grow">
+<input class="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 px-3.5 text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none" type="text" value="إنترا-أورال كاميرا (لو متاح)">
+</div>
+<label class="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-emerald-50/50 px-3 py-2 rounded-xl border border-slate-200/80 transition-colors select-none">
+<input class="custom-checkbox w-4 h-4 rounded text-brand-teal border-slate-300 focus:ring-brand-teal" type="checkbox">
+<span class="text-xs font-bold text-slate-700">أساسي</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>صورة</span>
+</button>
+<button aria-label="حذف العنصر" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Add Item Button -->
+<div class="pt-4 flex justify-end">
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-brand-teal border border-dashed border-brand-teal/40 font-bold text-xs sm:text-sm transition-all hover:border-brand-teal shadow-sm" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>عنصر</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BEGIN: ActionButtons -->
+<div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200" data-purpose="form-actions">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 font-bold text-sm shadow-sm transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إضافة قسم جديد</span>
+</button>
+<div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+<button class="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm text-brand-pine bg-emerald-100/70 hover:bg-emerald-200 border border-emerald-200 transition-colors" type="button">
+              حفظ القائمة
+            </button>
+<button class="w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-sm text-white bg-brand-teal hover:bg-brand-pine shadow-md shadow-brand-teal/20 transition-all flex items-center justify-center gap-2" type="submit">
+<svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إرسال للاعتماد</span>
+</button>
+</div>
+</div>
+<!-- END: ActionButtons -->
+</form>
+<!-- END: ProcedureForm -->
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: FooterNote -->
+<footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-100">
+    نظام عيادتي (ClinicOS) © 2025 — إدارة مسار العمل السريري المتكامل
+  </footer>
+<!-- END: FooterNote -->
+</body></html>

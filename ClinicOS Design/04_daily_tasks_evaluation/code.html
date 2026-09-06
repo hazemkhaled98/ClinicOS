@@ -1,0 +1,410 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تقييم المهام اليومية - ClinicOS</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&amp;display=swap" rel="stylesheet">
+<!-- FontAwesome Icons for clinic interface -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#071f1c',
+              800: '#0a2e29',
+              700: '#0f423b',
+              600: '#0d9488',
+              500: '#10b981',
+              100: '#e6f4f1',
+              50: '#f0fdf9',
+            },
+            surface: {
+              main: '#f8fafc',
+              card: '#ffffff',
+              border: '#e2e8f0',
+              muted: '#64748b'
+            }
+          },
+          fontFamily: {
+            sans: ['Tajawal', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Layout Adjustments -->
+<style data-purpose="base-styling">
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f6f8fa;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+<!-- BEGIN: MainHeader -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3.5">
+<!-- Clinic Brand & Title -->
+<div class="flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-800 to-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-800/15 ring-2 ring-emerald-500/20">
+<i class="fa-solid fa-tooth text-lg"></i>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-base font-bold text-slate-800 tracking-tight">عيادتي DentalOS</span>
+<span class="bg-teal-50 text-teal-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-teal-200/60">لوحة الإدارة</span>
+</div>
+<p class="text-xs text-slate-500 font-medium">التقييم اليومي السريع والمتابعة</p>
+</div>
+</div>
+<!-- Date Display & Clinic Switcher -->
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 bg-slate-100/90 text-slate-600 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200">
+<i class="fa-regular fa-calendar-check text-brand-600"></i>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<div class="h-8 w-px bg-slate-200 hidden sm:block"></div>
+<button class="flex items-center gap-2 text-slate-700 hover:text-brand-800 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors text-xs font-medium shadow-2xs" type="button">
+<i class="fa-solid fa-shield-halved text-emerald-600"></i>
+<span>د. أحمد (مدير الفرع)</span>
+</button>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+<!-- BEGIN: EmployeeSelectorCard -->
+<section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5" data-purpose="employee-selector">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2 font-bold text-slate-800 text-sm sm:text-base">
+<i class="fa-solid fa-user-check text-brand-600 text-base"></i>
+<span>اختار الموظف</span>
+</div>
+<span class="text-xs text-slate-400 font-medium">3 موظفين مسجلين اليوم</span>
+</div>
+<!-- Employee List / Chips -->
+<div class="flex items-center gap-3 pt-3.5 overflow-x-auto pb-1 custom-scrollbar">
+<!-- Selected Employee: ندى -->
+<button class="relative group flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 border-brand-600 bg-brand-50/40 text-right transition-all shadow-xs shrink-0 ring-4 ring-brand-500/10" type="button">
+<div class="relative w-10 h-10 rounded-full bg-brand-800 text-white flex items-center justify-center font-bold text-sm shadow-inner">
+            ن
+            <span class="absolute -bottom-1 -left-1 w-4 h-4 bg-teal-600 text-white rounded-full flex items-center justify-center text-[9px] border-2 border-white">
+<i class="fa-solid fa-check"></i>
+</span>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-slate-800 text-sm">ندى</span>
+<span class="text-emerald-700 font-bold text-xs">✓</span>
+</div>
+<p class="text-xs text-brand-700 font-medium">استقبال</p>
+</div>
+</button>
+<!-- Employee: نورهان -->
+<button class="group flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/80 text-right transition-all shrink-0" type="button">
+<div class="w-10 h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-sm">
+            ن
+          </div>
+<div class="text-right">
+<span class="font-semibold text-slate-700 text-sm group-hover:text-slate-900 block">نورهان</span>
+<p class="text-xs text-slate-400 font-medium">مساعدة طبيب</p>
+</div>
+</button>
+<!-- Employee: شهد -->
+<button class="group flex items-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/80 text-right transition-all shrink-0" type="button">
+<div class="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-sm">
+            ش
+          </div>
+<div class="text-right">
+<span class="font-semibold text-slate-700 text-sm group-hover:text-slate-900 block">شهد</span>
+<p class="text-xs text-slate-400 font-medium">مساعدة طبيب</p>
+</div>
+</button>
+</div>
+</section>
+<!-- END: EmployeeSelectorCard -->
+<!-- BEGIN: ActiveEmployeeStatusAndNotice -->
+<section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+<!-- Attendance & Active Profile Header -->
+<div class="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-gradient-to-l from-teal-50/20 via-white to-white">
+<!-- Right side: Employee info -->
+<div class="flex items-center gap-3.5">
+<div class="w-12 h-12 rounded-2xl bg-brand-800 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            ن
+          </div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-bold text-slate-900">ندى</h2>
+<span class="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 border border-emerald-200/70 text-xs font-semibold px-2 py-0.5 rounded-md">
+<i class="fa-solid fa-check text-[10px]"></i>
+                مسجل
+              </span>
+</div>
+<p class="text-xs text-slate-500 font-medium mt-0.5">موظفة استقبال - دوام كامل</p>
+</div>
+</div>
+<!-- Left side: Clock in/out time badge -->
+<div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700">
+<div class="flex items-center gap-1.5 text-slate-600">
+<i class="fa-regular fa-clock text-brand-600"></i>
+<span>حضور <strong class="font-bold text-slate-800 font-sans">9:05 ص</strong></span>
+</div>
+<span class="text-slate-300">|</span>
+<div class="flex items-center gap-1.5 text-slate-600">
+<span>انصراف <strong class="font-bold text-slate-800 font-sans">5:00 م</strong></span>
+</div>
+</div>
+</div>
+<!-- Tip Banner: Explaining task auto-calculation -->
+<div class="mx-4 sm:mx-5 my-4 p-3.5 sm:p-4 rounded-xl bg-amber-50/50 border border-amber-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900">
+<div class="flex items-start sm:items-center gap-2.5 text-xs sm:text-sm leading-relaxed">
+<span class="text-base leading-none select-none">💡</span>
+<span>التقييم الفني والسلوكي والمبادرة بيتحسب تلقائيًا من المهام اللي بتأكدها تحت — مفيش تقييم يدوي، عشان يبقى عادل ومبني على شغل فعلي.</span>
+</div>
+<button class="self-end sm:self-center shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-amber-100/50 text-amber-900 border border-amber-300/80 rounded-lg text-xs font-bold transition-all shadow-2xs" type="button">
+<span>فهمت</span>
+<span>✓</span>
+</button>
+</div>
+<!-- Manager Note Area -->
+<div class="p-4 sm:p-5 pt-0 space-y-3" data-purpose="manager-feedback-input">
+<label class="block text-xs font-bold text-slate-700" for="manager-note">ملاحظة سريعة للموظف</label>
+<div class="relative">
+<textarea class="w-full rounded-xl border border-slate-200 bg-slate-50/40 p-3 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 transition resize-none outline-none" id="manager-note" placeholder="اكتب ملاحظتك هنا..." rows="2">شغلك في الاستقبال النهاردة كان منظم 👏</textarea>
+</div>
+<div class="flex items-center justify-between pt-1">
+<label class="inline-flex items-center gap-2 cursor-pointer select-none">
+<input checked="" class="w-4 h-4 rounded text-brand-600 border-slate-300 focus:ring-brand-500 focus:ring-offset-0" type="checkbox">
+<span class="text-xs font-medium text-slate-700">أظهر الملاحظة دي للموظف في تابه</span>
+</label>
+<span class="text-[11px] text-slate-400">سيتم حفظ التغييرات فوراً</span>
+</div>
+</div>
+</section>
+<!-- END: ActiveEmployeeStatusAndNotice -->
+<!-- BEGIN: DailyTasksSection -->
+<section class="space-y-3.5" data-purpose="daily-tasks-evaluation">
+<!-- Section Title & Score Indicator -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="font-bold text-brand-800 text-lg">| المهام اليومية</span>
+<div class="flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-teal-50 px-2.5 py-1 rounded-md border border-teal-200/50">
+<i class="fa-solid fa-award text-xs text-brand-600"></i>
+<span>التقييم الفني</span>
+</div>
+</div>
+<!-- Metric Counter Badge -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-slate-400">المهام المنجزة:</span>
+<span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 tracking-wider">
+            2/5
+          </span>
+</div>
+</div>
+<!-- Tasks List Card -->
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs divide-y divide-slate-100 overflow-hidden">
+<!-- Task Item 1 -->
+<article class="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+              1
+            </div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold text-slate-800 leading-snug truncate">فتح وتجهيز الاستقبال ومراجعة مواعيد اليوم</h3>
+</div>
+</div>
+<!-- Status & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+<span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+<i class="fa-regular fa-circle-xmark text-[10px]"></i>
+              لم يؤكده الموظف
+            </span>
+<div class="flex items-center gap-1.5">
+<!-- تمام Button -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold shadow-2xs transition-colors" type="button">
+<span>تمام</span>
+<span>✓</span>
+</button>
+<!-- راجعها Button -->
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors" type="button">
+<span>راجعها</span>
+<span class="text-rose-500 font-bold">✕</span>
+</button>
+<!-- ملاحظة Button -->
+<button aria-label="إضافة ملاحظة على المهمة" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition-colors" type="button">
+<i class="fa-regular fa-comment"></i>
+</button>
+</div>
+</div>
+</article>
+<!-- Task Item 2 -->
+<article class="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+              2
+            </div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold text-slate-800 leading-snug truncate">تأكيد مواعيد بكرة</h3>
+</div>
+</div>
+<!-- Status & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+<span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+<i class="fa-regular fa-circle-xmark text-[10px]"></i>
+              لم يؤكده الموظف
+            </span>
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold shadow-2xs transition-colors" type="button">
+<span>تمام</span>
+<span>✓</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors" type="button">
+<span>راجعها</span>
+<span class="text-rose-500 font-bold">✕</span>
+</button>
+<button aria-label="إضافة ملاحظة على المهمة" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition-colors" type="button">
+<i class="fa-regular fa-comment"></i>
+</button>
+</div>
+</div>
+</article>
+<!-- Task Item 3 -->
+<article class="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+              3
+            </div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold text-slate-800 leading-snug truncate">تسجيل مصدر كل مريض جديد</h3>
+</div>
+</div>
+<!-- Status & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+<span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+<i class="fa-regular fa-circle-xmark text-[10px]"></i>
+              لم يؤكده الموظف
+            </span>
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 text-xs font-semibold shadow-2xs transition-colors" type="button">
+<span>تمام</span>
+<span class="text-emerald-600 font-bold">✓</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors" type="button">
+<span>راجعها</span>
+<span class="text-rose-500 font-bold">✕</span>
+</button>
+<button aria-label="إضافة ملاحظة على المهمة" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition-colors" type="button">
+<i class="fa-regular fa-comment"></i>
+</button>
+</div>
+</div>
+</article>
+<!-- Task Item 4 -->
+<article class="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+              4
+            </div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold text-slate-800 leading-snug truncate">التحصيل وإقفال الحساب بدقة</h3>
+</div>
+</div>
+<!-- Status & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+<span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+<i class="fa-regular fa-circle-xmark text-[10px]"></i>
+              لم يؤكده الموظف
+            </span>
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 text-xs font-semibold shadow-2xs transition-colors" type="button">
+<span>تمام</span>
+<span class="text-emerald-600 font-bold">✓</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors" type="button">
+<span>راجعها</span>
+<span class="text-rose-500 font-bold">✕</span>
+</button>
+<button aria-label="إضافة ملاحظة على المهمة" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition-colors" type="button">
+<i class="fa-regular fa-comment"></i>
+</button>
+</div>
+</div>
+</article>
+<!-- Task Item 5 -->
+<article class="p-3.5 sm:p-4 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 text-xs font-bold">
+              5
+            </div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold text-slate-800 leading-snug truncate">ترتيب المكان آخر اليوم</h3>
+</div>
+</div>
+<!-- Status & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between md:justify-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+<span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 inline-flex items-center gap-1">
+<i class="fa-regular fa-circle-xmark text-[10px]"></i>
+              لم يؤكده الموظف
+            </span>
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 text-xs font-semibold shadow-2xs transition-colors" type="button">
+<span>تمام</span>
+<span class="text-emerald-600 font-bold">✓</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium transition-colors" type="button">
+<span>راجعها</span>
+<span class="text-rose-500 font-bold">✕</span>
+</button>
+<button aria-label="إضافة ملاحظة على المهمة" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition-colors" type="button">
+<i class="fa-regular fa-comment"></i>
+</button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- END: DailyTasksSection -->
+<!-- BEGIN: QuickBottomActionBar -->
+<div class="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/80 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+<div class="flex items-center gap-2 text-xs text-slate-500">
+<i class="fa-solid fa-circle-info text-teal-600"></i>
+<span>اعتماد هذه المهام يحدّث مؤشر تقييم الأداء الشهري لندى تلقائياً.</span>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto">
+<button class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-brand-800 hover:bg-brand-900 text-white font-bold text-xs tracking-wide shadow-md shadow-brand-900/10 transition-all text-center" type="button">
+          حفظ واعتماد التقييم
+        </button>
+</div>
+</div>
+<!-- END: QuickBottomActionBar -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: SimpleFooter -->
+<footer class="mt-8 border-t border-slate-200/60 bg-white py-4">
+<div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-400 font-medium">
+      نظام إدارة العيادات ClinicOS © 2025 • جميع الحقوق محفوظة
+    </div>
+</footer>
+<!-- END: SimpleFooter -->
+</body></html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>محرر قائمة تحضير الإجراءات - عيادتي (Prep Checklist Editor)</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf9',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              300: '#5eead4',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#0a2e29',
+              950: '#041d1a',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: StyleConfigurations -->
+<style data-purpose="base-styling">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f8faf9;
+    }
+    input[type="checkbox"] {
+      border-radius: 4px;
+    }
+  </style>
+<!-- END: StyleConfigurations -->
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<!-- BEGIN: TopBarNav -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.03)]" data-purpose="mobile-header">
+<div class="flex items-center justify-between gap-2 max-w-md mx-auto">
+<!-- Right Side: Menu trigger and ClinicOS tag -->
+<div class="flex items-center gap-2.5">
+<button aria-label="القائمة الرئيسية" class="p-2 -mr-1.5 rounded-lg text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-colors" type="button">
+<svg class="w-5 h-5 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div class="flex items-center gap-1.5">
+<div class="w-7 h-7 rounded-lg bg-brand-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-brand-900 leading-tight">عيادتي · إدارة الأداء</span>
+<span class="text-[10px] text-slate-500 leading-tight">تحضير الجلسات</span>
+</div>
+</div>
+</div>
+<!-- Left Side: Date Tag -->
+<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50/80 border border-emerald-200 text-emerald-800 text-[11px] font-medium shrink-0">
+<svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="4"></rect>
+<line stroke-linecap="round" stroke-width="2" x1="16" x2="16" y1="2" y2="6"></line>
+<line stroke-linecap="round" stroke-width="2" x1="8" x2="8" y1="2" y2="6"></line>
+<line stroke-width="2" x1="3" x2="21" y1="10" y2="10"></line>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopBarNav -->
+<!-- BEGIN: MainContent -->
+<main class="w-full max-w-md mx-auto px-4 py-5 flex-1 space-y-4" data-purpose="checklist-editor-container">
+<!-- Page Title & Subtitle -->
+<div class="text-right space-y-1" data-purpose="header-section">
+<h1 class="text-2xl font-extrabold text-brand-900 tracking-tight">تحضير الجلسات</h1>
+<p class="text-xs text-slate-500 leading-relaxed">قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة</p>
+</div>
+<!-- Procedure Name Card -->
+<section class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm" data-purpose="procedure-name-card">
+<label class="block text-xs font-bold text-slate-700 mb-1.5" for="procedureName">اسم الإجراء</label>
+<input class="w-full text-right text-sm font-semibold text-slate-800 bg-slate-50/50 border border-slate-300 rounded-xl px-3.5 py-2.5 focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition" id="procedureName" placeholder="أدخل اسم الإجراء..." type="text" value="إكزامينيشن (كشف وتشخيص)">
+</section>
+<!-- BEGIN: Section 1 Card -->
+<section class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-3" data-purpose="checklist-group-1">
+<!-- Section Header -->
+<div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+<!-- Badge & Input -->
+<div class="flex items-center gap-2 flex-1 ml-2">
+<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded-md shrink-0">القسم 1</span>
+<input aria-label="اسم القسم 1" class="w-full max-w-[140px] text-xs font-bold text-slate-800 bg-transparent border-b border-transparent focus:border-brand-600 px-1 py-0.5 focus:ring-0 focus:outline-none" type="text" value="تجهيز عام">
+</div>
+<!-- Delete Section Button -->
+<button class="inline-flex items-center gap-1 text-rose-500 hover:text-rose-700 text-xs font-medium px-2 py-1 rounded-md hover:bg-rose-50 transition" title="حذف القسم" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[11px]">القسم</span>
+</button>
+</div>
+<!-- Items List -->
+<div class="space-y-2" data-purpose="section-items-list">
+<!-- Item 1 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">1</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="ميرور (مرآة فحص)">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input checked="" class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md shadow-2xs" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">2</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="إكسبلورر (مسبار)">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input checked="" class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">3</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="تويزر (ملقط)">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input checked="" class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">4</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="جلوفز ومناديل">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input checked="" class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">5</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="كوب ومحلول مضمضة">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add Item Button -->
+<button class="w-full py-2 border-2 border-dashed border-emerald-200 hover:border-brand-600 text-emerald-800 hover:text-brand-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors bg-emerald-50/40" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>عنصر</span>
+</button>
+</section>
+<!-- END: Section 1 Card -->
+<!-- BEGIN: Section 2 Card -->
+<section class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-3" data-purpose="checklist-group-2">
+<!-- Section Header -->
+<div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+<!-- Badge & Input -->
+<div class="flex items-center gap-2 flex-1 ml-2">
+<span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded-md shrink-0">القسم 2</span>
+<input aria-label="اسم القسم 2" class="w-full max-w-[140px] text-xs font-bold text-slate-800 bg-transparent border-b border-transparent focus:border-brand-600 px-1 py-0.5 focus:ring-0 focus:outline-none" type="text" value="دياجنوزيس">
+</div>
+<!-- Delete Section Button -->
+<button class="inline-flex items-center gap-1 text-rose-500 hover:text-rose-700 text-xs font-medium px-2 py-1 rounded-md hover:bg-rose-50 transition" title="حذف القسم" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[11px]">القسم</span>
+</button>
+</div>
+<!-- Items List -->
+<div class="space-y-2" data-purpose="section-items-list-2">
+<!-- Item 1 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">1</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="خافض لسان / تشيك ريتراكتور">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">2</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="جوز (شاش معقم)">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input checked="" class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-slate-50/70 rounded-xl p-2.5 border border-slate-200/80 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold shrink-0">3</span>
+<input class="flex-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-brand-600 focus:ring-0 focus:outline-none" type="text" value="إنترا-أورال كاميرا (لو متاح)">
+<button class="text-slate-400 hover:text-rose-500 p-1" title="حذف الأداة" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between pr-7 pl-1">
+<label class="flex items-center gap-1.5 cursor-pointer text-[11px] font-medium text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+<input class="w-3.5 h-3.5 text-brand-900 focus:ring-0 rounded" type="checkbox">
+<span>أساسي</span>
+</label>
+<button class="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 px-2 py-0.5 rounded-md" type="button">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" stroke-width="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+<span>صورة</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add Item Button -->
+<button class="w-full py-2 border-2 border-dashed border-emerald-200 hover:border-brand-600 text-emerald-800 hover:text-brand-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors bg-emerald-50/40" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>عنصر</span>
+</button>
+</section>
+<!-- END: Section 2 Card -->
+<!-- Add New Section Row Button -->
+<div class="pt-1">
+<button class="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-xs flex items-center justify-center gap-2 transition active:scale-[0.99]" type="button">
+<svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>إضافة قسم جديد</span>
+</button>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomActionSection -->
+<footer class="sticky bottom-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]" data-purpose="actions-footer">
+<div class="max-w-md mx-auto space-y-3">
+<!-- Dual Action Buttons -->
+<div class="grid grid-cols-2 gap-2.5">
+<button class="py-3 px-3 bg-brand-900 hover:bg-brand-950 active:bg-brand-950 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition" type="button">
+<span>إرسال للاعتماد</span>
+<svg class="w-3.5 h-3.5 text-emerald-400 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<button class="py-3 px-3 bg-emerald-100/70 hover:bg-emerald-200/70 active:bg-emerald-200 text-brand-900 border border-emerald-300/70 rounded-xl text-xs font-bold flex items-center justify-center transition" type="button">
+<span>حفظ القائمة</span>
+</button>
+</div>
+<!-- Legal / Copyright Footer -->
+<p class="text-[10px] text-center text-slate-600 font-medium pt-1 border-t border-slate-100">
+        نظام عيادتي (ClinicOS) © 2025 – إدارة مسار العمل السريري المتكامل
+      </p>
+</div>
+</footer>
+<!-- END: BottomActionSection -->
+</body></html>

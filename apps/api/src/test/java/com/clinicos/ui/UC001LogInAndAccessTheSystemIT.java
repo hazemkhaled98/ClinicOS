@@ -17,27 +17,22 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.vaadin.addons.dramafinder.AbstractBasePlaywrightIT;
-import org.vaadin.addons.dramafinder.element.ButtonElement;
-import org.vaadin.addons.dramafinder.element.PasswordFieldElement;
-import org.vaadin.addons.dramafinder.element.TextFieldElement;
 
 import com.clinicos.PostgresTestSupport;
 import com.clinicos.TestFixtures;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
+import com.microsoft.playwright.options.AriaRole;
 
 /**
  * UC-001: Log In and Access the System, exercised end-to-end through a real
  * browser against the running application (blackbox -- no service/DSLContext
- * access, no Karibu mock).
- *
- * <p>{@link LoginView} submits natively to {@code /login}
- * ({@code LoginForm.setAction("login")}), which Spring Security's form-login
- * processes. These tests drive that real POST: the success scenario only
- * leaves the login screen when a {@code SPRING_SECURITY_CONTEXT} exists, so
- * reaching a non-login page proves the security context was initialized.
+ * access). The Thymeleaf login form submits natively to {@code /login}, which
+ * Spring Security's form-login processes; leaving the login screen proves the
+ * security context was initialized.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
+class UC001LogInAndAccessTheSystemIT extends AbstractBrowserIT {
 
     @LocalServerPort
     private int port;
@@ -60,25 +55,16 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         return String.format("http://localhost:%d/", port);
     }
 
-    @Override
-    public String getView() {
-        return "login";
-    }
-
-    private String rootUrl() {
-        return String.format("http://localhost:%d/", port);
-    }
-
     private void assertLandedInApp() {
-        page.locator(".clinicos-nav-item").first().waitFor();
-        assertThat(page.url()).doesNotContain("/login");
+        page().locator(".clinicos-nav-item").first().waitFor();
+        assertThat(page().url()).doesNotContain("/login");
     }
 
     private void login(String username, String password, String clinicCode) {
-        TextFieldElement.getByLabel(page, "كود العيادة").setValue(clinicCode);
-        TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
-        PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(password);
-        ButtonElement.getByText(page, "دخول").click();
+        page().getByLabel("كود العيادة").fill(clinicCode);
+        page().getByLabel("اسم المستخدم").fill(username);
+        page().getByLabel("كلمة المرور").fill(password);
+        page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("دخول")).click();
     }
 
     private String uniqueSuffix() {
@@ -107,9 +93,13 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         @Test
         @DisplayName("Shows username, password and submit button")
         void showsLoginForm() {
-            TextFieldElement.getByLabel(page, "اسم المستخدم").assertVisible();
-            PasswordFieldElement.getByLabel(page, "كلمة المرور").assertVisible();
-            ButtonElement.getByText(page, "دخول").assertVisible();
+            page().navigate(getUrl() + "login");
+            page().waitForURL(url -> url.contains("/login"));
+            PlaywrightAssertions.assertThat(page().getByLabel("كود العيادة")).isVisible();
+            PlaywrightAssertions.assertThat(page().getByLabel("اسم المستخدم")).isVisible();
+            PlaywrightAssertions.assertThat(page().getByLabel("كلمة المرور")).isVisible();
+            PlaywrightAssertions.assertThat(page().getByRole(
+                    AriaRole.BUTTON, new Page.GetByRoleOptions().setName("دخول"))).isVisible();
         }
     }
 
@@ -123,15 +113,16 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             String username = "badlogin-" + uniqueSuffix();
             String clinicSlug = seedUserWithClinic(username, "the-real-password");
 
+            page().navigate(getUrl() + "login");
             login(username, "wrong-password", clinicSlug);
 
-            page.waitForURL(url -> url.contains("/login?error"));
-            com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
-                    page.getByText("بيانات الدخول غير صحيحة")).isVisible();
+            page().waitForURL(url -> url.contains("/login?error"));
+            PlaywrightAssertions.assertThat(
+                    page().getByText("بيانات الدخول غير صحيحة")).isVisible();
 
-            page.navigate(rootUrl());
-            page.waitForURL(url -> url.contains("/login"));
-            assertThat(page.url()).contains("/login");
+            page().navigate(getUrl());
+            page().waitForURL(url -> url.contains("/login"));
+            assertThat(page().url()).contains("/login");
         }
 
         @Test
@@ -141,6 +132,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             String rawPassword = "correct-horse-battery-staple";
             String clinicSlug = seedUserWithClinic(username, rawPassword);
 
+            page().navigate(getUrl() + "login");
             login(username, rawPassword, clinicSlug);
 
             assertLandedInApp();
@@ -167,42 +159,18 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
                 TestFixtures.insertMembership(connection, clinicB, userB);
             }
 
+            page().navigate(getUrl() + "login");
             login(username, rawPassword, slugA);
 
             assertLandedInApp();
 
-            page.locator(".clinicos-logout").click();
-            page.waitForURL(url -> url.contains("/login"));
+            page().locator(".clinicos-topbar-menu").click();
+            page().locator(".clinicos-logout").click();
+            page().waitForURL(url -> url.contains("/login"));
 
             login(username, rawPassword, slugB);
 
             assertLandedInApp();
-        }
-
-        private void login(String username, String password, String clinicCode) {
-            TextFieldElement.getByLabel(page, "كود العيادة").setValue(clinicCode);
-            TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
-            PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(password);
-            ButtonElement.getByText(page, "دخول").click();
-        }
-
-        private String uniqueSuffix() {
-            return UUID.randomUUID().toString().substring(0, 8);
-        }
-
-        private String seedUserWithClinic(String username, String rawPassword) throws Exception {
-            String slug = "clinic-" + uniqueSuffix();
-            try (Connection connection = DriverManager.getConnection(
-                    PostgresTestSupport.POSTGRES.getJdbcUrl(),
-                    PostgresTestSupport.POSTGRES.getUsername(),
-                    PostgresTestSupport.POSTGRES.getPassword())) {
-                UUID clinicId = TestFixtures.insertClinic(
-                        connection, "Test Clinic " + username, slug);
-                UUID userId = TestFixtures.insertUser(
-                        connection, clinicId, username, passwordEncoder.encode(rawPassword), "active");
-                TestFixtures.insertMembership(connection, clinicId, userId);
-            }
-            return slug;
         }
     }
 
@@ -216,25 +184,25 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             String username = "newowner-" + uniqueSuffix();
             String rawPassword = "correct-horse-battery-staple";
 
-            page.navigate(rootUrl() + "signup");
-            page.waitForURL(url -> url.contains("/signup"));
+            page().navigate(getUrl() + "signup");
+            page().waitForURL(url -> url.contains("/signup"));
 
-            TextFieldElement.getByLabel(page, "اسم العيادة").setValue("عيادة الاختبار " + username);
-            TextFieldElement.getByLabel(page, "الاسم الكامل").setValue("المالك الجديد");
-            TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
-            PasswordFieldElement.getByLabel(page, "كلمة المرور").setValue(rawPassword);
-            PasswordFieldElement.getByLabel(page, "تأكيد كلمة المرور").setValue(rawPassword);
+            page().getByLabel("اسم العيادة").fill("عيادة الاختبار " + username);
+            page().getByLabel("الاسم الكامل").fill("المالك الجديد");
+            page().getByLabel("اسم المستخدم").fill(username);
+            page().getByLabel("كلمة المرور", new Page.GetByLabelOptions().setExact(true)).fill(rawPassword);
+            page().getByLabel("تأكيد كلمة المرور").fill(rawPassword);
 
-            ButtonElement.getByText(page, "إنشاء العيادة").click();
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("إنشاء العيادة")).click();
 
-            page.waitForURL(url -> url.contains("/login"));
-            assertThat(page.url()).contains("signup=success");
-            assertThat(page.url()).contains("clinic=");
-            com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
-                    page.getByText("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل")).isVisible();
+            page().waitForURL(url -> url.contains("/login"));
+            assertThat(page().url()).contains("signup=success");
+            assertThat(page().url()).contains("clinic=");
+            PlaywrightAssertions.assertThat(
+                    page().getByText("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل")).isVisible();
 
-            TextFieldElement clinicCode = TextFieldElement.getByLabel(page, "كود العيادة");
-            String prefilledClinicCode = clinicCode.getValue();
+            page().locator("#clinic").waitFor();
+            String prefilledClinicCode = page().locator("#clinic").inputValue();
             assertThat(prefilledClinicCode).isNotBlank();
 
             login(username, rawPassword, prefilledClinicCode);
@@ -254,19 +222,21 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             String rawPassword = "correct-horse-battery-staple";
             String clinicSlug = seedUserWithClinic(username, rawPassword);
 
+            page().navigate(getUrl() + "login");
             login(username, rawPassword, clinicSlug);
             assertLandedInApp();
 
-            page.locator(".clinicos-logout").click();
+            page().locator(".clinicos-topbar-menu").click();
+            page().locator(".clinicos-logout").click();
 
-            page.waitForURL(url -> url.contains("/login"));
-            assertThat(page.url()).contains("/login");
+            page().waitForURL(url -> url.contains("/login"));
+            assertThat(page().url()).contains("/login");
 
-            page.navigate(rootUrl());
-            page.waitForURL(url -> url.contains("/login"));
-            assertThat(page.url()).contains("/login");
+            page().navigate(getUrl());
+            page().waitForURL(url -> url.contains("/login"));
+            assertThat(page().url()).contains("/login");
 
-            assertThat(page.context().cookies().stream()
+            assertThat(page().context().cookies().stream()
                     .noneMatch(cookie -> "lastSection".equals(cookie.name))).isTrue();
         }
     }

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>عيادتي • إدارة الأداء - الأطباء</title>
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pine: {
+              DEFAULT: '#0a2e29',
+              light: '#134e44',
+              surface: '#f4fbf8',
+              border: '#d4dcd9',
+              subtle: '#eef5f2',
+            },
+            mint: {
+              DEFAULT: '#10b981',
+              light: '#ecfdf5',
+              border: '#a7f3d0'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+<!-- Custom Typography & Layout Base -->
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #0f2824;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<!-- Visual accents and effects -->
+<style data-purpose="visual-accents">
+    .clinic-shadow-sm {
+      box-shadow: 0 1px 3px rgba(10, 46, 41, 0.05);
+    }
+    .clinic-shadow {
+      box-shadow: 0 4px 20px -2px rgba(10, 46, 41, 0.06);
+    }
+    .nav-tab-active {
+      background-color: #0a2e29;
+      color: #ffffff;
+    }
+    .nav-tab-inactive {
+      background-color: #ffffff;
+      color: #3b534f;
+      border: 1px solid #d4dcd9;
+    }
+    .nav-tab-inactive:hover {
+      background-color: #f0f7f4;
+      color: #0a2e29;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4fbf8] text-[#0f2824]">
+<!-- BEGIN: TopBar -->
+<header class="w-full bg-white border-b border-[#d4dcd9] clinic-shadow-sm sticky top-0 z-30" data-purpose="global-header"><div class="px-3.5 py-2.5 flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<button aria-label="القائمة الرئيسية" class="p-1.5 rounded-lg text-gray-600 hover:text-pine hover:bg-pine-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-pine" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2">
+<img alt="Logo" class="w-7 h-7 object-contain rounded-md" src="https://lh3.googleusercontent.com/aida/AEtjO1XScqEgTDVClopUSo-0G-eA_sV2OYYc2rKgrtxAgU4jl2efVpjusDauXh8VnyPQVTth3YxcP3e5i6c4ckbmbvMeQfkMH-7kugIOIesTnm32XD8sMSalxQGi6WkxVdcLpG2yKW5WvEVM4sz2j-TY-ASGPPtVdEtRVrKWTL3u3FgImf2-bEJtmZ0lxBOPQMTBojGQ4Km-N4I_C9e9cowE5AiX_y1IPsKMO-gN_ju1qrSWKAwMsTPx4ig291o"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-pine leading-none">عيادتي • إدارة الأداء</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-[10px] text-emerald-700 font-medium leading-none">المخزن متصل</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1 text-[11px] text-gray-500 font-medium shrink-0 bg-gray-50 px-2 py-1 rounded border border-gray-100">
+<svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div></header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 w-full max-w-md mx-auto px-3.5 py-3.5 space-y-3.5">
+<!-- BEGIN: BranchCard Mobile -->
+<section class="bg-white rounded-xl border border-[#d4dcd9] p-3 clinic-shadow-sm" data-purpose="branch-header-card">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-xl bg-pine flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h1 class="text-sm font-bold text-pine">DentSpaces • المخزن</h1>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+              مباشر
+            </span>
+</div>
+<p class="text-[11px] text-gray-500 font-normal mt-0.5">
+            جرد لحظي — مخزن + تراي v97
+          </p>
+</div>
+</div>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#d4dcd9] text-xs font-medium text-pine hover:bg-pine-subtle transition-all shrink-0" type="button">
+<svg class="w-3.5 h-3.5 text-pine" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المدير العام</span>
+</button>
+</div>
+</section>
+<!-- END: BranchCard Mobile -->
+<!-- BEGIN: NavigationTabs Mobile -->
+<nav aria-label="أقسام المخزن والأداء" class="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin" data-purpose="inventory-navigation">
+<button class="nav-tab-active inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 shadow-sm" type="button">
+<span>الأطباء</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاعتمادات</span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الموردين</span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المرتجعات</span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاستلام</span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>النواقص والطلب</span>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded bg-rose-50 text-rose-600 border border-rose-200">
+        28
+      </span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المخزن</span>
+</button>
+<button class="nav-tab-inactive inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0" type="button">
+<svg class="w-3.5 h-3.5 opacity-75" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>التراي</span>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-amber-700 border border-amber-200">
+        20
+      </span>
+</button>
+</nav>
+<!-- END: NavigationTabs Mobile -->
+<!-- BEGIN: DoctorsSection Mobile -->
+<section class="bg-white rounded-xl border border-[#d4dcd9] clinic-shadow p-3.5 space-y-3.5" data-purpose="doctors-scorecard-section">
+<!-- Header & Action -->
+<div class="space-y-2.5 pb-3 border-b border-gray-100">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-bold text-pine tracking-tight">الأطباء</h2>
+<div class="flex items-center text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-md gap-1">
+<svg class="w-3.5 h-3.5 text-emerald-700" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>أطباء العيادة (0)</span>
+</div>
+</div>
+<button class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-pine text-white text-xs sm:text-sm font-semibold hover:bg-pine-light transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-pine/30 active:scale-[0.98]" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>إضافة طبيب</span>
+</button>
+</div>
+<!-- Guidance Notice -->
+<div class="rounded-lg bg-[#eef5f2] border border-[#d4dcd9] p-2.5 text-xs text-pine flex items-start gap-2" data-purpose="guidance-banner">
+<svg class="w-4 h-4 text-pine shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<p class="leading-relaxed text-[11.5px]">
+        مفيش أطباء مضافين لسه. تقدر تضيفهم هنا، أو هيتسجلوا تلقائيًا أول ما الأسيستنت تكتب اسم دكتور وقت تسجيل الإجراء.
+      </p>
+</div>
+<!-- Description -->
+<p class="text-xs text-gray-600 leading-relaxed font-normal">
+      سكوركارد الأطباء: الإيراد اللي عملوه، تكلفة الخامات الفعلية، الهدر، وصافي مساهمتهم. مرتبين بالأكثر مساهمة.
+    </p>
+<!-- Search Input -->
+<div class="relative w-full" data-purpose="search-box">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<input class="w-full pr-9 pl-3 py-2 bg-white border border-[#d4dcd9] rounded-lg text-xs text-[#0f2824] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pine focus:border-pine transition-all" placeholder="دور باسم الدكتور..." type="text"/>
+</div>
+<!-- Empty State -->
+<div class="py-12 px-3 flex flex-col items-center justify-center text-center rounded-lg border-2 border-dashed border-[#d4dcd9]/80 bg-[#fbfdfc]" data-purpose="empty-state-card">
+<div class="w-12 h-12 rounded-full bg-pine-subtle text-pine flex items-center justify-center mb-3 ring-8 ring-emerald-50/50">
+<svg class="w-6 h-6 text-pine" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-xs sm:text-sm font-semibold text-gray-600">
+        مفيش إجراءات مسجلة بعد
+      </h3>
+<p class="text-[11px] text-gray-400 mt-1 max-w-xs leading-relaxed">
+        عند إضافة وتعيين الأطباء وتسجيل الإجراءات السريرية ستظهر إحصائيات الإيراد والخامات مباشرة هنا.
+      </p>
+</div>
+</section>
+<!-- END: DoctorsSection Mobile -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Footer -->
+<footer class="mt-auto py-4 border-t border-[#d4dcd9] bg-white text-center px-3" data-purpose="global-footer">
+<p class="text-[11px] text-gray-500">
+    نظام إدارة العيادات والمخزن السريري — ClinicOS 2026 • جميع الحقوق محفوظة
+  </p>
+</footer>
+<!-- END: Footer -->
+</body></html>

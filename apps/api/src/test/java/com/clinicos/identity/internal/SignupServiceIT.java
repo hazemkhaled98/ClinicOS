@@ -213,6 +213,43 @@ try (Connection connection = superuserConnection()) {
                                 .contains("permission denied for table clinic"));
     }
 
+    @Test
+    void failedSignupRollsBackTheWholeClinic() throws Exception {
+        String suffix = uniqueSuffix();
+        String clinicName = "Rollback Clinic " + suffix;
+        String username = "rollback-" + suffix;
+
+        try (Connection connection = superuserConnection()) {
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            superuserDsl.query("create function test_abort_signup() returns trigger language plpgsql as "
+                    + "$$ begin raise exception 'deliberate signup failure'; end $$")
+                    .execute();
+            superuserDsl.query("create trigger test_abort_signup_trigger before insert on membership "
+                    + "for each row execute function test_abort_signup()")
+                    .execute();
+        }
+        try {
+            assertThatThrownBy(() -> signupService.signUp(new SignupRequest(
+                    clinicName, "A", username, null, "password-12345")))
+                    .isInstanceOf(org.jooq.exception.DataAccessException.class);
+        } finally {
+            try (Connection connection = superuserConnection()) {
+                DSL.using(connection, SQLDialect.POSTGRES)
+                        .query("drop trigger if exists test_abort_signup_trigger on membership")
+                        .execute();
+                DSL.using(connection, SQLDialect.POSTGRES)
+                        .query("drop function if exists test_abort_signup()")
+                        .execute();
+            }
+        }
+
+        try (Connection connection = superuserConnection()) {
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            assertThat(superuserDsl.fetchCount(CLINIC, CLINIC.NAME.eq(clinicName))).isZero();
+            assertThat(superuserDsl.fetchCount(APP_USER, APP_USER.USERNAME.eq(username))).isZero();
+        }
+    }
+
     private void insertClinicRow(Connection connection, String name, String slug) {
         DSL.using(connection, SQLDialect.POSTGRES)
                 .insertInto(CLINIC, CLINIC.NAME, CLINIC.SLUG)

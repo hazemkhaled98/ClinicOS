@@ -1,0 +1,81 @@
+@theme {
+  --font-sans: "Noto Sans Arabic", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Noto Sans Arabic", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-surface: #f6faf8;
+  --color-on-surface: #161d1b;
+  --color-on-surface-variant: #414846;
+
+  --color-teal-950: #071f1c;
+  --color-teal-900: #0a2e29;
+  --color-teal-850: #0d3832;
+  --color-teal-800: #114a42;
+  --color-teal-700: #17655a;
+  --color-teal-600: #1f8375;
+  --color-teal-500: #2a9d8f;
+
+  --color-teal-300: #5eead4;
+  --color-teal-100: #ccfbf1;
+
+  --color-emerald-800: #065f46;
+  --color-emerald-700: #047857;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-50:  #ecfdf5;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+
+  --color-neutral-900: #0f172a;
+  --color-neutral-800: #1e293b;
+  --color-neutral-700: #334155;
+  --color-neutral-600: #475569;
+  --color-neutral-500: #64748b;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-50:  #f8fafc;
+
+  --color-danger-600: #b23b30;
+  --color-danger-50:  #fdf2f2;
+
+  --shadow-drawer: 0 8px 40px rgba(10, 46, 41, 0.12);
+  --shadow-auth: 0 24px 60px rgba(10, 46, 41, 0.18);
+}
+
+/* Noto Sans Arabic: variable, 300-800 */
+@font-face {
+  font-family: "Noto Sans Arabic";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("/fonts/noto-sans-arabic-arabic.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF,
+    U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E;
+}
+
+@font-face {
+  font-family: "Noto Sans Arabic";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("/fonts/noto-sans-arabic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Inter: variable, 400-700 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
