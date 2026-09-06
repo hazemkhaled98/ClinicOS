@@ -68,33 +68,54 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         menu.getElement().setAttribute("aria-label", "القائمة");
 
         Span title = new Span("عيادتي · إدارة الأداء");
-        title.addClassName("clinicos-topbar-t2");
+        title.addClassNames("text-base", "font-semibold", "text-slate-900", "clinicos-topbar-t2");
 
         Span date = new Span(arabicLongDate(LocalDate.now()));
-        date.addClassName("clinicos-topbar-date");
+        date.addClassNames("text-xs", "text-slate-500", "whitespace-nowrap", "clinicos-topbar-date");
 
         Div titles = new Div(title);
         titles.getStyle().set("flex", "1");
 
         HorizontalLayout topbar = new HorizontalLayout(menu, titles, date);
-        topbar.addClassName("clinicos-topbar");
+        topbar.addClassNames("h-16", "bg-white", "border-b", "border-slate-200", "px-6", "gap-4", "clinicos-topbar");
         topbar.setWidthFull();
         topbar.setAlignItems(Alignment.CENTER);
         return topbar;
     }
 
     private Div createDrawer() {
-        Span brand = new Span("عيادتي");
-        brand.addClassName("clinicos-brand");
-
+        Div brand = createBrandBlock();
         Div nav = createNav();
-
         Div who = createUserBlock();
 
         Div drawer = new Div(brand, nav, who);
-        drawer.addClassName("clinicos-drawer");
-        drawer.setSizeFull();
+        drawer.addClassNames("flex", "flex-col", "h-full", "bg-teal-900", "text-white", "w-72", "ps-0", "pe-0");
         return drawer;
+    }
+
+    private Div createBrandBlock() {
+        Div logoBox = new Div();
+        logoBox.addClassNames("w-11", "h-11", "rounded-xl", "bg-white", "shadow-md", "flex", "items-center", "justify-center", "flex-shrink-0");
+
+        Span proBadge = new Span("PRO");
+        proBadge.addClassNames("text-[10px]", "font-medium", "bg-emerald-500/20", "text-emerald-300", "border", "border-emerald-500/30", "px-1.5", "py-0.5", "rounded");
+
+        Span title = new Span("عيادتي");
+        title.addClassNames("text-lg", "font-bold", "tracking-tight", "text-white", "flex", "items-center", "gap-1.5", "clinicos-brand");
+        title.add(proBadge);
+
+        Span subtitle = new Span("نظام الإدارة المتكامل");
+        subtitle.addClassNames("text-[11px]", "text-teal-300/60", "font-medium");
+
+        Div titleStack = new Div(title, subtitle);
+        titleStack.addClassNames("flex", "flex-col");
+
+        Div logoSection = new Div(logoBox, titleStack);
+        logoSection.addClassNames("flex", "items-center", "gap-3");
+
+        Div brand = new Div(logoSection);
+        brand.addClassNames("px-6", "pt-7", "pb-6", "flex", "items-center", "justify-between", "border-b", "border-teal-850/70");
+        return brand;
     }
 
     private Div createNav() {
@@ -104,26 +125,26 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         List<String> codes = session == null ? null : (List<String>) session.getAttribute(TenantSessionBinder.SESSION_PERMISSIONS);
 
         nav = new Div();
-        nav.addClassName("clinicos-nav");
+        nav.addClassNames("flex-1", "overflow-y-auto", "ps-4", "pe-4", "py-6", "space-y-1.5", "clinicos-nav");
 
         if (roleCode == null || codes == null) {
             return nav;
         }
         for (NavSection section : NavSectionResolver.resolve(new HashSet<>(codes), roleCode)) {
             Div iconTile = new Div(new Icon(section.icon()));
-            iconTile.addClassName("clinicos-nav-icon");
+            iconTile.addClassNames("w-8", "h-8", "rounded-lg", "bg-teal-800/40", "flex", "items-center", "justify-center", "text-teal-300", "clinicos-nav-icon");
 
             Span label = new Span(section.label());
-            label.addClassName("clinicos-nav-item-label");
+            label.addClassNames("text-sm", "font-medium", "clinicos-nav-item-label");
 
             Span subtitle = new Span(section.subtitle());
-            subtitle.addClassName("clinicos-nav-item-sub");
+            subtitle.addClassNames("text-xs", "font-normal", "text-teal-300/60", "clinicos-nav-item-sub");
 
             Div textStack = new Div(label, subtitle);
+            textStack.addClassNames("flex", "flex-col");
 
             Button item = new Button();
-            item.addClassName("clinicos-nav-item");
-            item.setWidthFull();
+            item.addClassNames("group", "flex", "items-center", "justify-between", "w-full", "px-3.5", "py-3", "rounded-xl", "text-teal-100/80", "hover:bg-teal-800/50", "hover:text-white", "transition-all", "duration-150", "bg-transparent", "border-none", "text-start", "cursor-pointer", "clinicos-nav-item");
             item.getElement().setAttribute("data-route", section.route());
             item.getElement().appendChild(iconTile.getElement(), textStack.getElement());
             item.addClickListener(e -> UI.getCurrent().navigate(section.route()));
@@ -139,25 +160,33 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         }
 
         Span avatar = new Span(initialOf(name));
-        avatar.addClassName("clinicos-who-av");
+        avatar.addClassNames("w-9", "h-9", "rounded-full", "bg-teal-700/60", "border", "border-emerald-400/40", "flex", "items-center", "justify-center", "text-teal-100", "font-bold", "text-xs", "flex-shrink-0", "relative", "clinicos-who-av");
+
+        Span statusDot = new Span();
+        statusDot.addClassNames("absolute", "bottom-0", "end-0", "w-2.5", "h-2.5", "rounded-full", "bg-emerald-400", "border-2", "border-teal-900");
+
+        avatar.add(statusDot);
 
         Span nameLabel = new Span(name);
-        nameLabel.addClassName("clinicos-who-name");
+        nameLabel.addClassNames("text-xs", "font-bold", "text-white", "leading-tight", "clinicos-who-name");
 
         Span role = new Span(roleDisplayName());
-        role.addClassName("clinicos-who-role");
+        role.addClassNames("text-[11px]", "text-teal-300/70", "font-normal", "clinicos-who-role");
 
         Div meta = new Div(nameLabel, role);
-        meta.addClassName("clinicos-who-meta");
+        meta.addClassNames("flex", "flex-col", "clinicos-who-meta");
 
         Icon logoutIcon = new Icon(VaadinIcon.POWER_OFF);
         Span logout = new Span(logoutIcon);
-        logout.addClassName("clinicos-logout");
+        logout.addClassNames("w-8", "h-8", "rounded-lg", "bg-teal-800/50", "text-teal-300", "hover:text-white", "hover:bg-teal-800", "flex", "items-center", "justify-center", "transition-colors", "cursor-pointer", "clinicos-logout");
         logout.getElement().setAttribute("title", "تسجيل الخروج");
         logout.getElement().addEventListener("click", event -> authenticationContext.logout());
 
-        Div who = new Div(avatar, meta, logout);
-        who.addClassName("clinicos-who");
+        Div userCard = new Div(avatar, meta, logout);
+        userCard.addClassNames("flex", "items-center", "justify-between", "p-2", "rounded-xl", "bg-teal-900/50", "border", "border-teal-800/60", "hover:border-teal-700", "transition-colors");
+
+        Div who = new Div(userCard);
+        who.addClassNames("p-4", "border-t", "border-teal-850/80", "bg-teal-950/40", "clinicos-who");
         return who;
     }
 

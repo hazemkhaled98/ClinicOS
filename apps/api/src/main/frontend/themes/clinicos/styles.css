@@ -144,185 +144,50 @@ vaadin-drawer-toggle {
   color: var(--c-primary);
 }
 
-.clinicos-topbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  width: 100%;
-  height: 56px;
-  padding-block: var(--space-md);
-  padding-inline: var(--space-lg);
-  background-color: var(--c-surface);
-  border-block-end: 1px solid var(--c-hairline);
-  box-shadow: var(--shadow-topbar);
-  color: var(--c-ink);
-  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-}
-
-.clinicos-topbar-t2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--c-ink);
-}
-
-.clinicos-topbar-date {
-  font-size: 13px;
-  color: var(--c-ink-muted);
-  white-space: nowrap;
-}
-
-.clinicos-drawer {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: linear-gradient(180deg, var(--c-drawer-gradient-start), var(--c-drawer-gradient-end));
-  color: var(--c-on-drawer);
-  padding-block: 0;
-  padding-inline: 0;
-  width: 240px;
-  box-shadow: var(--shadow-drawer);
-}
-
-.clinicos-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  font-weight: 700;
-  font-size: 16px;
-  padding: var(--space-lg);
-  color: var(--c-on-drawer);
-  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
-}
-
-.clinicos-nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding-inline: var(--space-md);
-  padding-block: var(--space-md);
-  flex: 1;
-  overflow-y: auto;
-}
-
-.clinicos-nav-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding-block: var(--space-sm);
-  padding-inline: var(--space-md);
-  border-radius: var(--radius-md);
-  background: transparent;
-  border: none;
-  color: var(--c-on-drawer-muted);
-  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: 0;
-  text-align: start;
-  cursor: pointer;
-  transition: background-color 0.12s, color 0.12s;
-}
-
-.clinicos-nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--c-on-drawer);
-}
-
-.clinicos-nav-item[aria-current="page"] {
-  background-color: var(--c-dark-primary);
-  color: var(--c-ink);
-  font-weight: 400;
-}
-
-.clinicos-nav-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 32px;
-  block-size: 32px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.06);
-  color: inherit;
-}
-
-.clinicos-nav-item-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.clinicos-nav-item-sub {
-  display: block;
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--c-on-drawer-muted);
-  opacity: 0.8;
-}
-
-.clinicos-who {
-  margin-block-start: auto;
-  padding: var(--space-md) var(--space-lg) var(--space-sm);
-  border-block-start: 1px solid rgba(255, 255, 255, 0.14);
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--c-on-drawer);
-  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
-}
-
-.clinicos-who-av {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex: none;
-  font-size: 12px;
-}
-
-.clinicos-who-name {
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-.clinicos-who-meta {
-  flex: 1;
-  min-width: 0;
-}
-
-.clinicos-who-role {
-  opacity: 0.7;
-  font-size: 11px;
-  line-height: 1.3;
-}
-
+/* Test marker classes (no visual styling, used by Karibu tests) */
+.clinicos-topbar,
+.clinicos-topbar-t2,
+.clinicos-topbar-date,
+.clinicos-drawer,
+.clinicos-brand,
+.clinicos-nav,
+.clinicos-nav-item,
+.clinicos-nav-icon,
+.clinicos-nav-item-label,
+.clinicos-nav-item-sub,
+.clinicos-who,
+.clinicos-who-av,
+.clinicos-who-name,
+.clinicos-who-meta,
+.clinicos-who-role,
 .clinicos-logout {
-  background: rgba(255, 255, 255, 0.12);
-  border: none;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  color: var(--c-on-drawer);
-  font-size: 16px;
-  transition: background-color 0.12s;
+  /* Markers for test discovery; styling via Tailwind utilities */
 }
 
-.clinicos-logout:hover {
-  background: rgba(255, 255, 255, 0.25);
+/* Active nav item state styling */
+button[data-route][aria-current="page"] {
+  background-color: var(--color-teal-700);
+  background-color: rgba(23, 101, 90, 0.6);
+  color: white;
+  border: 1px solid rgba(23, 101, 90, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+button[data-route][aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  background-color: var(--color-emerald-400);
+  border-start-end-radius: 9999px;
+  border-end-end-radius: 9999px;
+}
+
+button[data-route][aria-current="page"] > div:first-child {
+  padding-inline-start: 8px;
 }
 
 .clinicos-section {
