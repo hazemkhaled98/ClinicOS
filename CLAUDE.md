@@ -83,19 +83,19 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 
 ```bash
 # Compile + run unit tests (jOOQ codegen in generate-sources requires Docker)
-mvn -pl apps/api test
+mvn test
 
 # Run only integration tests (Testcontainers spins up Postgres)
-mvn -pl apps/api verify -Dtest=*IT -DfailIfNoTests=false
+mvn verify -Dtest=*IT -DfailIfNoTests=false
 
 # Full build
-mvn -pl apps/api verify
+mvn verify
 
 # Production build (minified frontend)
-mvn -pl apps/api -Pproduction package
+mvn -Pproduction package
 
 # Check module boundaries
-mvn -pl apps/api test -Dtest=ModularityTests
+mvn test -Dtest=ModularityTests
 ```
 
 **jOOQ codegen** runs unconditionally in the `generate-sources` phase via `testcontainers-jooq-codegen-maven-plugin` — every build spins up a throwaway Postgres, runs Flyway, and generates sources to `target/generated-sources/jooq`. Not committed. A `citext` forced type maps `citext` columns to `String`.
@@ -114,7 +114,7 @@ Manual equivalent:
 docker compose up -d postgres minio
 # Wait for postgres healthy, then:
 docker exec clinicos-postgres psql -U postgres -d clinicos -c "ALTER ROLE app_rw PASSWORD 'local-dev-only';"
-mvn -pl apps/api spring-boot:run
+mvn spring-boot:run
 # App at http://localhost:8080
 # OpenAPI at http://localhost:8080/api-docs/ui
 ```

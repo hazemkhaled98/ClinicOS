@@ -6,7 +6,7 @@
 ./dev-up.ps1
 ```
 
-`dev-up.ps1` bundles: `docker compose up -d postgres minio` (idempotent, tolerates pre-existing containers) → waits for postgres healthy → ensures the `app_rw` role has a password (fresh-cluster safe) → kills stale leftover ClinicOS java processes on port 8080 → runs `mvn -pl apps/api spring-boot:run` in the foreground.
+`dev-up.ps1` bundles: `docker compose up -d postgres minio` (idempotent, tolerates pre-existing containers) → waits for postgres healthy → ensures the `app_rw` role has a password (fresh-cluster safe) → kills stale leftover ClinicOS java processes on port 8080 → runs `mvn spring-boot:run` from `apps/api/` in the foreground.
 
 - App: http://localhost:8080
 - OpenAPI: http://localhost:8080/api-docs/ui

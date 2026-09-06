@@ -93,8 +93,8 @@ Use `TestFixtures` / `AbstractPostgresIntegrationTest` as-is — no new test inf
 ```bash
 docker compose up -d postgres minio
 docker exec clinicos-postgres psql -U postgres -d clinicos -c "ALTER ROLE app_rw PASSWORD 'local-dev-only';"
-mvn -pl apps/api verify -Pcodegen
-mvn -pl apps/api spring-boot:run
+mvn verify -Pcodegen
+mvn spring-boot:run
 ```
 Then in the browser: `http://localhost:8080/login` → follow the sign-up link → create a clinic → confirm you land in the app shell with the full owner nav (BR-G03), log out, log back in with the same credentials, and confirm the clinic picker is skipped (single membership).
 

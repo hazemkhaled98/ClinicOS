@@ -290,7 +290,7 @@ These apply to every phase; decide them once in Phase 0 rather than per-screen.
 
 Per phase:
 
-1. `mvn -pl apps/api verify` — unit, Karibu view, and Testcontainers integration tests.
+1. `mvn verify` (from `apps/api/`) — unit, Karibu view, and Testcontainers integration tests.
 2. `ApplicationModules.of(Application.class).verify()` — proves the UI module has not reached into backend internals.
 3. `aiup-vaadin-jooq:uc-coverage` against the phase's UC — maps every main-scenario step, alternative flow and business rule onto code and tests, and reports the gaps.
 4. Manual click-through against the corresponding legacy screen, side by side, for visual fidelity.
