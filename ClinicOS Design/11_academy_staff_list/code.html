@@ -1,0 +1,208 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>أكاديمية التأهيل - عيادتي إدارة الأداء</title>
+<!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              deep: '#0a2e29',
+              emerald: '#0d6559',
+              mint: '#12a08c',
+              light: '#f4fbf8',
+              surface: '#f9fdfb',
+              accent: '#e6f7f3'
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'sans-serif'],
+            display: ['Cairo', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for elevated aesthetic -->
+<style data-purpose="custom-decorations">
+    body {
+      background-color: #f4fbf8;
+      font-family: 'Cairo', sans-serif;
+      color: #1e293b;
+    }
+
+    .card-elevation {
+      box-shadow: 0 4px 20px -2px rgba(10, 46, 41, 0.05), 0 2px 6px -1px rgba(10, 46, 41, 0.03);
+    }
+    
+    .card-hover:hover {
+      box-shadow: 0 10px 25px -4px rgba(13, 101, 89, 0.1), 0 4px 10px -2px rgba(13, 101, 89, 0.04);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col selection:bg-teal-100 selection:text-teal-900">
+<!-- BEGIN: TopNavigation -->
+<header class="bg-white/80 backdrop-blur-md border-b border-teal-900/10 sticky top-0 z-30">
+<div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+<!-- Right Side: System identity and hierarchy -->
+<div class="flex items-center space-x-3 space-x-reverse">
+<button aria-label="القائمة" class="p-2 text-slate-500 hover:text-brand-emerald hover:bg-slate-50 rounded-lg transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center space-x-2 space-x-reverse text-sm font-medium text-slate-500">
+<span class="inline-flex items-center text-rose-500 font-bold text-xs gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+            أكاديمية التأهيل
+          </span>
+<span class="text-slate-300">•</span>
+<span class="text-brand-deep font-semibold">عيادتي · إدارة الأداء</span>
+</div>
+</div>
+<!-- Left Side: Date display -->
+<div class="text-xs md:text-sm font-medium text-slate-500 flex items-center gap-2">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopNavigation -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 max-w-6xl w-full mx-auto px-6 py-8 md:py-10 space-y-6">
+<!-- Page Title & Tagline -->
+<section class="text-right space-y-1.5 pb-2" data-purpose="page-header">
+<h1 class="text-2xl md:text-3xl font-extrabold text-brand-deep tracking-tight">
+        أكاديمية التأهيل
+      </h1>
+<p class="text-sm md:text-base text-slate-500 font-medium">
+        منهج تعليمي متدرج للموظف الجديد — يتعلّم، يتدرب، ويتقيّم خطوة بخطوة
+      </p>
+</section>
+<!-- BEGIN: BannerInfoCard -->
+<section class="bg-white border border-teal-800/15 rounded-2xl p-6 md:p-7 card-elevation relative overflow-hidden transition duration-300" data-purpose="academy-info-card">
+<div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-600 to-teal-800 opacity-90"></div>
+<!-- Card Top Bar: Title & Primary Actions -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+<!-- Title with Graduation Icon -->
+<div class="flex items-center space-x-3 space-x-reverse">
+<div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-lg text-brand-emerald shadow-sm">
+            🎓
+          </div>
+<div>
+<h2 class="text-lg md:text-xl font-bold text-brand-deep">
+              أكاديمية التأهيل
+            </h2>
+</div>
+</div>
+<!-- Action Control Buttons -->
+<div class="flex items-center gap-2.5 self-start sm:self-auto">
+<!-- تعديل المنهج -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:border-brand-emerald hover:text-brand-emerald rounded-lg transition shadow-xs active:scale-[0.98]" type="button">
+<span>✏</span>
+<span>تعديل المنهج</span>
+</button>
+<!-- إعدادات -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:border-brand-emerald hover:text-brand-emerald rounded-lg transition shadow-xs active:scale-[0.98]" type="button">
+<span>⚙</span>
+<span>إعدادات</span>
+</button>
+</div>
+</div>
+<!-- Explanatory Copy Content -->
+<div class="pt-4 text-slate-600 leading-relaxed text-sm md:text-base font-normal">
+<p>
+          منهج موحّد للموظف الجديد مقسّم بالمهارة — يتعلّم المواد والأدوات والتعقيم والإجراءات والتعامل، ويثبت إتقانه بأسئلة تشغّل تفكيره. الاستقبال بياخد كور الأسيستنت كمان.
+        </p>
+</div>
+</section>
+<!-- END: BannerInfoCard -->
+<!-- BEGIN: TraineeList -->
+<section class="space-y-3.5 pt-2" data-purpose="trainees-list-section">
+<!-- Item 1: ندى (استقبال) -->
+<article class="bg-white border border-slate-200/90 rounded-2xl p-5 md:px-7 md:py-6 card-elevation card-hover transition duration-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4" data-purpose="trainee-card">
+<!-- Right side: Name & Status indicator -->
+<div class="flex items-center space-x-4 space-x-reverse">
+<div class="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-brand-emerald font-bold text-base shadow-xs">
+            ن
+          </div>
+<div class="space-y-1 text-right">
+<h3 class="text-base md:text-lg font-bold text-brand-deep">
+              ندى (استقبال)
+            </h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60">
+              عادي
+            </span>
+</div>
+</div>
+<!-- Left side: CTA Button -->
+<div class="flex items-center justify-end">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0d6559] hover:bg-[#0a4e45] active:bg-[#073630] text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow transition-all duration-150 active:scale-[0.98]" type="button">
+<span>ابدأ تأهيله</span>
+<span class="text-base">🎓</span>
+</button>
+</div>
+</article>
+<!-- Item 2: نورهان (مساعدة) -->
+<article class="bg-white border border-slate-200/90 rounded-2xl p-5 md:px-7 md:py-6 card-elevation card-hover transition duration-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4" data-purpose="trainee-card">
+<!-- Right side: Name & Status indicator -->
+<div class="flex items-center space-x-4 space-x-reverse">
+<div class="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-brand-emerald font-bold text-base shadow-xs">
+            ن
+          </div>
+<div class="space-y-1 text-right">
+<h3 class="text-base md:text-lg font-bold text-brand-deep">
+              نورهان (مساعدة)
+            </h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60">
+              عادي
+            </span>
+</div>
+</div>
+<!-- Left side: CTA Button -->
+<div class="flex items-center justify-end">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0d6559] hover:bg-[#0a4e45] active:bg-[#073630] text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow transition-all duration-150 active:scale-[0.98]" type="button">
+<span>ابدأ تأهيله</span>
+<span class="text-base">🎓</span>
+</button>
+</div>
+</article>
+<!-- Item 3: شهد (مساعدة) -->
+<article class="bg-white border border-slate-200/90 rounded-2xl p-5 md:px-7 md:py-6 card-elevation card-hover transition duration-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4" data-purpose="trainee-card">
+<!-- Right side: Name & Status indicator -->
+<div class="flex items-center space-x-4 space-x-reverse">
+<div class="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-brand-emerald font-bold text-base shadow-xs">
+            ش
+          </div>
+<div class="space-y-1 text-right">
+<h3 class="text-base md:text-lg font-bold text-brand-deep">
+              شهد (مساعدة)
+            </h3>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/60">
+              عادي
+            </span>
+</div>
+</div>
+<!-- Left side: CTA Button -->
+<div class="flex items-center justify-end">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0d6559] hover:bg-[#0a4e45] active:bg-[#073630] text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow transition-all duration-150 active:scale-[0.98]" type="button">
+<span>ابدأ تأهيله</span>
+<span class="text-base">🎓</span>
+</button>
+</div>
+</article>
+</section>
+<!-- END: TraineeList -->
+</main>
+<!-- END: MainContent -->
+</body></html>

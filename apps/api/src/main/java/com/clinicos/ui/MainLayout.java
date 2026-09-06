@@ -110,10 +110,23 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
             return nav;
         }
         for (NavSection section : NavSectionResolver.resolve(new HashSet<>(codes), roleCode)) {
-            Button item = new Button(section.label(), e -> UI.getCurrent().navigate(section.route()));
+            Div iconTile = new Div(new Icon(section.icon()));
+            iconTile.addClassName("clinicos-nav-icon");
+
+            Span label = new Span(section.label());
+            label.addClassName("clinicos-nav-item-label");
+
+            Span subtitle = new Span(section.subtitle());
+            subtitle.addClassName("clinicos-nav-item-sub");
+
+            Div textStack = new Div(label, subtitle);
+
+            Button item = new Button();
             item.addClassName("clinicos-nav-item");
             item.setWidthFull();
             item.getElement().setAttribute("data-route", section.route());
+            item.getElement().appendChild(iconTile.getElement(), textStack.getElement());
+            item.addClickListener(e -> UI.getCurrent().navigate(section.route()));
             nav.add(item);
         }
         return nav;
@@ -131,7 +144,7 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         Span nameLabel = new Span(name);
         nameLabel.addClassName("clinicos-who-name");
 
-        Span role = new Span("مستخدم");
+        Span role = new Span(roleDisplayName());
         role.addClassName("clinicos-who-role");
 
         Div meta = new Div(nameLabel, role);
@@ -146,6 +159,19 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         Div who = new Div(avatar, meta, logout);
         who.addClassName("clinicos-who");
         return who;
+    }
+
+    private static String roleDisplayName() {
+        VaadinSession session = VaadinSession.getCurrent();
+        String roleCode = session == null ? null : (String) session.getAttribute(TenantSessionBinder.SESSION_ROLE_CODE);
+        if (roleCode == null) {
+            return "مستخدم";
+        }
+        return switch (roleCode) {
+            case "owner" -> "المالك";
+            case "manager" -> "مدير";
+            default -> "مستخدم";
+        };
     }
 
     private static String currentUsername() {

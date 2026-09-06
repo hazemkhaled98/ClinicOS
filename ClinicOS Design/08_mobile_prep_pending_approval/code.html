@@ -1,0 +1,192 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>تحضير الجلسات - قوائم بانتظار الاعتماد | عيادتي</title>
+<!-- Tailwind CSS v3 with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            clinic: {
+              emerald: '#0a2e29',
+              'emerald-hover': '#082521',
+              'emerald-light': '#14463e',
+              surface: '#F8FAF9',
+              card: '#FFFFFF',
+              border: '#E5EBE8',
+              amberBg: '#FEF9EE',
+              amberBorder: '#FDE4B4',
+              amberText: '#B45309',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography-and-effects">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #F8FAF9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .shadow-soft {
+      box-shadow: 0 4px 20px -2px rgba(10, 46, 41, 0.05);
+    }
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  </style>
+</head>
+<body class="bg-clinic-surface text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-100 selection:text-clinic-emerald">
+<!-- BEGIN: MainContainer -->
+<div class="w-full max-w-[420px] mx-auto min-h-screen bg-clinic-surface flex flex-col justify-between pb-6">
+<div>
+<!-- BEGIN: TopBar -->
+<header class="bg-white border-b border-clinic-border sticky top-0 z-30 px-4 py-3 shadow-sm" data-purpose="mobile-top-header">
+<div class="flex items-center justify-between gap-2">
+<!-- Clinic Branding & Section Breadcrumb -->
+<div class="flex items-center gap-2.5">
+<button aria-label="القائمة الجانبية" class="touch-target p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex flex-col text-right">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+<span class="text-xs font-semibold text-slate-400">تحضير الجلسات</span>
+</div>
+<span class="text-xs font-bold text-slate-800 tracking-tight">عيادتي · إدارة الأداء</span>
+</div>
+</div>
+<!-- Date Tag -->
+<div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-lg text-[11px] font-medium text-slate-600">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 py-5 space-y-5" data-purpose="mobile-main-layout">
+<!-- Page Hero / Titles -->
+<section class="text-right space-y-1.5 pt-1" data-purpose="hero-title-section">
+<h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">تحضير الجلسات</h1>
+<p class="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+            قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة
+          </p>
+</section>
+<!-- BEGIN: QuickActionCard -->
+<section class="bg-white border border-clinic-border rounded-2xl p-4 shadow-soft space-y-3.5" data-purpose="quick-actions-card">
+<div class="space-y-1 text-right">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-clinic-emerald inline-block"></span>
+<h2 class="text-base font-bold text-slate-800">قوائم تحضير الإجراءات</h2>
+</div>
+<p class="text-xs text-slate-500 leading-normal pr-4">
+              حضّر أدوات ومواد كل إجراء بالترتيب من غير ما تنسى حاجة. أي قائمة جديدة بيعتمدها المدير قبل الاستخدام.
+            </p>
+</div>
+<!-- Action Buttons Stack (Optimized for thumb tapping) -->
+<div class="flex flex-col gap-2.5 pt-1">
+<button class="w-full touch-target flex items-center justify-center gap-2 bg-clinic-emerald hover:bg-clinic-emerald-hover text-white text-sm font-semibold py-3 px-4 rounded-xl shadow-sm transition active:scale-[0.99]" data-purpose="btn-add-procedure">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>إجراء جديد</span>
+</button>
+<button class="w-full touch-target flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium py-2.5 px-4 rounded-xl border border-slate-300 transition active:scale-[0.99]" data-purpose="btn-templates">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>قوالب جاهزة</span>
+</button>
+</div>
+</section>
+<!-- END: QuickActionCard -->
+<!-- BEGIN: PendingSection -->
+<section class="space-y-3 pt-1" data-purpose="pending-approval-section">
+<!-- Section Heading -->
+<div class="flex items-center gap-2 text-right">
+<span aria-label="ساعة رملية" class="text-base" role="img">⏳</span>
+<h3 class="text-sm font-bold text-slate-800">بانتظار الاعتماد</h3>
+</div>
+<!-- Procedure Approval Card -->
+<article class="bg-white border border-clinic-border rounded-2xl p-4 shadow-soft space-y-3.5 text-right transition hover:border-slate-300" data-purpose="prep-list-item-card">
+<!-- Card Header: Status Tag -->
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200/70">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                بانتظار اعتماد المدير
+              </span>
+</div>
+<!-- Title and Specs -->
+<div class="space-y-1.5">
+<h4 class="text-base font-bold text-slate-900 tracking-normal leading-snug">
+                إكزامينيشن (كشف وتشخيص)
+              </h4>
+<div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+<svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<div class="flex items-center gap-1.5">
+<span>2 أقسام</span>
+<span>·</span>
+<span>9 عنصر</span>
+<span>·</span>
+<span class="text-emerald-700 font-semibold">5 أساسي</span>
+</div>
+</div>
+</div>
+<hr class="border-slate-100 my-1">
+<!-- Card Actions for Mobile -->
+<div class="flex items-center gap-2 pt-0.5">
+<!-- Approve Button -->
+<button class="flex-1 touch-target flex items-center justify-center gap-1.5 bg-clinic-emerald hover:bg-clinic-emerald-hover text-white text-xs font-semibold py-2.5 px-3 rounded-xl shadow-sm transition active:scale-[0.98]" data-purpose="btn-approve">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>اعتماد</span>
+</button>
+<!-- Edit Button -->
+<button class="flex-1 touch-target flex items-center justify-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium py-2.5 px-3 rounded-xl border border-slate-200 transition active:scale-[0.98]" data-purpose="btn-edit">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>تعديل</span>
+</button>
+<!-- Delete / Archive Icon Button -->
+<button aria-label="حذف القائمة" class="touch-target flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/80 transition" data-purpose="btn-delete">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</article>
+</section>
+<!-- END: PendingSection -->
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- BEGIN: Footer -->
+<footer class="mt-8 px-4 text-center border-t border-slate-200/60 pt-4" data-purpose="mobile-footer">
+<p class="text-[11px] text-slate-400 leading-relaxed font-normal">
+        منظومة عيادتي لإدارة الأداء والتحضير الإكلينيكي © 2026
+      </p>
+</footer>
+<!-- END: Footer -->
+</div>
+<!-- END: MainContainer -->
+</body></html>

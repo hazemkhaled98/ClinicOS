@@ -1,0 +1,309 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>التراي والعمليات السريرية - DentSpaces عيادتي</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#0a2e29',
+              dark: '#061e1b',
+              surface: '#0d3d36',
+              light: '#e6f3ef',
+              accent: '#0e766e',
+              emerald: '#059669',
+              emeraldHover: '#047857',
+            },
+            surface: {
+              DEFAULT: '#f8fafc',
+              card: '#ffffff',
+              muted: '#f1f5f9',
+              border: '#e2e8f0',
+            },
+            status: {
+              redBg: '#fef2f2',
+              redText: '#dc2626',
+              redBorder: '#fecaca',
+              barBg: '#b91c1c',
+            }
+          },
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          boxShadow: {
+            card: '0 1px 3px 0 rgba(10, 46, 41, 0.05), 0 1px 2px -1px rgba(10, 46, 41, 0.05)',
+            subtle: '0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
+            floating: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style data-purpose="interactive-enhancements">
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24 text-slate-800 antialiased selection:bg-brand selection:text-white">
+<!-- BEGIN: TopBar -->
+<!-- Top navigation bar containing clinic management status and date -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm" data-purpose="top-header">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+<!-- Right Side: System identity and quick navigation -->
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-600 hover:text-brand hover:bg-slate-100 rounded-lg transition-colors focus:outline-none" title="القائمة">
+<i class="fa-solid fa-bars text-lg"></i>
+</button>
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></span>
+<h1 class="text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
+            المخزن <span class="text-slate-300 font-normal mx-1">•</span> عيادتي <span class="text-slate-300 font-normal mx-1">•</span> إدارة الأداء
+          </h1>
+</div>
+</div>
+<!-- Left Side: System Date -->
+<div class="flex items-center text-xs sm:text-sm text-slate-500 font-medium gap-2">
+<i class="fa-regular fa-calendar text-slate-400"></i>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 w-full flex-grow">
+<!-- Store Sub-header / Branch Banner -->
+<section class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200/80" data-purpose="store-banner">
+<!-- Store Identity -->
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-xl bg-brand flex items-center justify-center text-white shadow-sm ring-4 ring-brand/10">
+<i class="fa-solid fa-boxes-stacked text-lg"></i>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-bold text-slate-900 tracking-tight">DentSpaces • المخزن</h2>
+</div>
+<p class="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            جرد لحظي — مخزن + تراي <span class="text-slate-400 font-mono">v97</span>
+</p>
+</div>
+</div>
+<!-- User Role Chip -->
+<div class="flex items-center self-start sm:self-auto">
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-slate-300 transition-colors">
+<div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-brand">
+<i class="fa-solid fa-user-shield text-xs"></i>
+</div>
+<span class="text-xs font-semibold text-slate-700">المدير العام</span>
+</div>
+</div>
+</section>
+<!-- Navigation Tabs Section -->
+<nav class="mt-4 overflow-x-auto no-scrollbar py-2" data-purpose="store-navigation">
+<div class="flex items-center gap-2 min-w-max">
+<!-- Department Dropdown Button -->
+<button class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all focus:outline-none">
+<span>الأقسام</span>
+<i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+</button>
+<span class="h-4 w-px bg-slate-200 mx-1"></span>
+<!-- Active Prominent Tab: التراي -->
+<button class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-brand rounded-lg shadow-sm ring-1 ring-brand/20 transition-all">
+<i class="fa-solid fa-cart-shopping text-xs"></i>
+<span>التراي</span>
+<span class="bg-emerald-500/30 text-emerald-100 px-1.5 py-0.5 rounded text-[10px] font-bold">20</span>
+</button>
+<!-- Standard Navigation Tabs -->
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<i class="fa-solid fa-warehouse text-slate-400 text-xs"></i>
+<span>المخزن</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<span>النواقص والطلب</span>
+<span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[10px] font-bold">28</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<i class="fa-solid fa-truck-ramp-box text-slate-400 text-xs"></i>
+<span>الاستلام</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<i class="fa-solid fa-arrow-rotate-left text-slate-400 text-xs"></i>
+<span>المرتجعات</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<i class="fa-solid fa-users text-slate-400 text-xs"></i>
+<span>الموردين</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200/80 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+<i class="fa-solid fa-clipboard-check text-slate-400 text-xs"></i>
+<span>الاعتمادات</span>
+</button>
+</div>
+</nav>
+<!-- Page Title & Clinical Action Callout -->
+<section class="mt-8 mb-6" data-purpose="page-intro">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<div>
+<h2 class="text-2xl font-extrabold text-slate-900">التراي</h2>
+<p class="text-sm text-slate-600 mt-1.5 max-w-3xl leading-relaxed">
+            سجّل الإجراء وانت واقف معاه، وطلّع الكميات الفعلية. الكمية بتتجز من التراي فوراً (معلّقة)، وبعد اعتماد المدير من «الاعتمادات» بيتأكد الخصم.
+          </p>
+</div>
+</div>
+<!-- Action Button: سجل الإجراء -->
+<div class="mt-5">
+<button class="w-full py-3.5 px-6 rounded-xl bg-brand text-white font-bold text-base hover:bg-brand-surface shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group active:scale-[0.99]">
+<i class="fa-solid fa-plus text-sm group-hover:rotate-90 transition-transform duration-200"></i>
+<span>+ سجل الإجراء</span>
+</button>
+</div>
+</section>
+<!-- Search Bar -->
+<section class="mt-6 mb-8" data-purpose="search-container">
+<div class="relative">
+<input class="w-full bg-white border border-slate-200 rounded-xl py-3 pr-11 pl-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand shadow-sm transition-all" placeholder="دور في التراي..." type="text">
+<div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+<i class="fa-solid fa-magnifying-glass text-sm"></i>
+</div>
+</div>
+</section>
+<!-- Tray Items Section -->
+<section data-purpose="tray-items-inventory">
+<!-- Section Header -->
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-slate-700 tracking-wide">
+          الموجود على اليونت دلوقتي
+        </h3>
+<span class="text-xs font-semibold text-slate-400">4 أصناف مسجلة</span>
+</div>
+<!-- Tray Cards List -->
+<div class="space-y-3">
+<!-- Item 1: كمبوزيت -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-card hover:shadow-subtle transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-1 h-full bg-rose-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Left on RTL: Name & Alert Notice -->
+<div class="space-y-2">
+<h4 class="text-base font-bold text-slate-900 group-hover:text-brand transition-colors">كمبوزيت</h4>
+<div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+<i class="fa-regular fa-bell text-[11px]"></i>
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+</div>
+<!-- Right on RTL: Quantity & Unit Status -->
+<div class="text-left flex flex-col items-start sm:items-end justify-center bg-slate-50 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
+<span class="text-base font-bold text-rose-600 font-mono tracking-tight">0 استخدام</span>
+<span class="text-xs text-slate-400 mt-0.5">متاح على اليونت</span>
+</div>
+</div>
+</article>
+<!-- Item 2: بوندينج -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-card hover:shadow-subtle transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-1 h-full bg-rose-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Left on RTL: Name & Alert Notice -->
+<div class="space-y-2">
+<h4 class="text-base font-bold text-slate-900 group-hover:text-brand transition-colors">بوندينج</h4>
+<div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+<i class="fa-regular fa-bell text-[11px]"></i>
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+</div>
+<!-- Right on RTL: Quantity & Unit Status -->
+<div class="text-left flex flex-col items-start sm:items-end justify-center bg-slate-50 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
+<span class="text-base font-bold text-rose-600 font-mono tracking-tight">0 استخدام</span>
+<span class="text-xs text-slate-400 mt-0.5">متاح على اليونت</span>
+</div>
+</div>
+</article>
+<!-- Item 3: أنيستيتك -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-card hover:shadow-subtle transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-1 h-full bg-rose-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Left on RTL: Name & Alert Notice -->
+<div class="space-y-2">
+<h4 class="text-base font-bold text-slate-900 group-hover:text-brand transition-colors">أنيستيتك</h4>
+<div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+<i class="fa-regular fa-bell text-[11px]"></i>
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+</div>
+<!-- Right on RTL: Quantity & Unit Status -->
+<div class="text-left flex flex-col items-start sm:items-end justify-center bg-slate-50 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
+<span class="text-base font-bold text-rose-600 font-mono tracking-tight">0 كارتريدج</span>
+<span class="text-xs text-slate-400 mt-0.5">متاح على اليونت</span>
+</div>
+</div>
+</article>
+<!-- Item 4: نيدل -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-4 sm:p-5 shadow-card hover:shadow-subtle transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-1 h-full bg-rose-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<!-- Left on RTL: Name & Alert Notice -->
+<div class="space-y-2">
+<h4 class="text-base font-bold text-slate-900 group-hover:text-brand transition-colors">نيدل</h4>
+<div class="flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+<i class="fa-regular fa-bell text-[11px]"></i>
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+</div>
+<!-- Right on RTL: Quantity & Unit Status -->
+<div class="text-left flex flex-col items-start sm:items-end justify-center bg-slate-50 sm:bg-transparent p-2.5 sm:p-0 rounded-lg">
+<span class="text-base font-bold text-rose-600 font-mono tracking-tight">0 إبرة</span>
+<span class="text-xs text-slate-400 mt-0.5">متاح على اليونت</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: FloatingAlertBar -->
+<!-- Sticky / Floating Bottom Warning Action Bar -->
+<aside class="fixed bottom-4 inset-x-4 sm:max-w-4xl sm:mx-auto z-40" data-purpose="floating-alert-action">
+<div class="bg-[#a82924] text-white px-4 sm:px-6 py-3.5 rounded-2xl shadow-floating flex flex-col sm:flex-row items-center justify-between gap-3 border border-red-700/50 backdrop-blur-md">
+<!-- Warning Text -->
+<div class="flex items-center gap-2.5 text-xs sm:text-sm font-medium text-right w-full sm:w-auto">
+<i class="fa-regular fa-bell text-base animate-bounce"></i>
+<span>28 صنف فاضي — والمخزن مفيهوش رصيد، محتاج استلام طلبية الأول</span>
+</div>
+<!-- Action Button Pill -->
+<button class="w-full sm:w-auto px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-semibold text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-not-allowed opacity-90">
+<span>مفيش رصيد للسحب</span>
+<i class="fa-solid fa-arrow-left text-[11px]"></i>
+</button>
+</div>
+</aside>
+<!-- END: FloatingAlertBar -->
+</body></html>

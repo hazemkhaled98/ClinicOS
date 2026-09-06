@@ -1,0 +1,184 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تحضير الجلسات - عيادتي</title>
+<!-- Google Fonts: Cairo & Tajawal for modern Arabic SaaS typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Tajawal:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config Customization -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#071f1b',
+              800: '#0a2e29',
+              700: '#114a42',
+              600: '#0d9488',
+              500: '#14b8a6',
+              400: '#2dd4bf',
+              100: '#ccfbf1',
+              50: '#f0fdfa',
+            },
+            surface: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'Tajawal', 'sans-serif'],
+          },
+          boxShadow: {
+            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
+            'card': '0 4px 18px -2px rgba(10, 46, 41, 0.05), 0 2px 8px -2px rgba(0, 0, 0, 0.02)',
+            'btn': '0 2px 8px rgba(13, 148, 136, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #f8fafc;
+    }
+  </style>
+<style data-purpose="animations">
+    .btn-hover-effect {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-hover-effect:hover {
+      transform: translateY(-1px);
+    }
+    .btn-hover-effect:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col selection:bg-brand-500 selection:text-white">
+<!-- BEGIN: MainHeader -->
+<header class="w-full bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-sm" data-purpose="site-header">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Brand, Module Breadcrumbs & Menu Toggle -->
+<div class="flex items-center gap-4">
+<!-- Hamburger Menu Button -->
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</button>
+<!-- Vertical Divider -->
+<div class="h-5 w-px bg-slate-200"></div>
+<!-- System Hierarchy / Breadcrumb -->
+<div class="flex flex-col text-right">
+<div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-brand-800 font-semibold">عيادتي</span>
+<span>·</span>
+<span>إدارة الأداء</span>
+</div>
+<span class="text-xs font-bold text-slate-800">تحضير الجلسات</span>
+</div>
+</div>
+<!-- Left Side: Date & Clinic Context -->
+<div class="flex items-center gap-3">
+<!-- Optional logo icon display if available -->
+<img alt="شعار عيادتي" class="h-7 w-auto object-contain hidden sm:block opacity-90 hover:opacity-100 transition-opacity" onerror="this.style.display='none'" src="https://lh3.googleusercontent.com/aida/AEtjO1XScqEgTDVClopUSo-0G-eA_sV2OYYc2rKgrtxAgU4jl2efVpjusDauXh8VnyPQVTth3YxcP3e5i6c4ckbmbvMeQfkMH-7kugIOIesTnm32XD8sMSalxQGi6WkxVdcLpG2yKW5WvEVM4sz2j-TY-ASGPPtVdEtRVrKWTL3u3FgImf2-bEJtmZ0lxBOPQMTBojGQ4Km-N4I_C9e9cowE5AiX_y1IPsKMO-gN_ju1qrSWKAwMsTPx4ig291o">
+<!-- Current Date Pill -->
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-600 shadow-xs">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8" data-purpose="session-preparation-page">
+<!-- BEGIN: PageTitleArea -->
+<section class="space-y-1.5" data-purpose="page-heading">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-[#0a2e29] tracking-tight">
+        تحضير الجلسات
+      </h1>
+<p class="text-sm sm:text-base text-slate-500 font-normal">
+        قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة
+      </p>
+</section>
+<!-- END: PageTitleArea -->
+<!-- BEGIN: ToolbarCard -->
+<section class="bg-white rounded-2xl border border-slate-200/80 shadow-card p-5 sm:p-6 transition-shadow hover:shadow-md" data-purpose="actions-toolbar">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<!-- Left (RTL Start): Action Title & Subtext Information -->
+<div class="space-y-1.5 max-w-2xl">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span>
+<h2 class="text-lg font-bold text-slate-900">
+              قوائم تحضير الإجراءات
+            </h2>
+</div>
+<p class="text-xs sm:text-sm text-slate-500 leading-relaxed pr-4">
+            حضّر أدوات ومواد كل إجراء بالترتيب من غير ما تنسى حاجة. أي قائمة جديدة يعتمدها المدير قبل الاستخدام.
+          </p>
+</div>
+<!-- Right (RTL End): Interaction Action Buttons -->
+<div class="flex flex-wrap items-center gap-3 sm:shrink-0">
+<!-- Secondary Action: Ready Templates -->
+<button class="btn-hover-effect inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 shadow-xs" data-purpose="templates-button" type="button">
+<span class="text-base leading-none">📑</span>
+<span>قوالب جاهزة</span>
+</button>
+<!-- Primary Action: New Procedure Button -->
+<button class="btn-hover-effect inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white text-sm font-bold rounded-xl shadow-btn transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2" data-purpose="add-procedure-button" type="button">
+<svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>إجراء جديد</span>
+</button>
+</div>
+</div>
+</section>
+<!-- END: ToolbarCard -->
+<!-- BEGIN: EmptyStateCard -->
+<section class="bg-white rounded-2xl border border-dashed border-slate-200 shadow-card py-16 px-6 sm:px-12 text-center flex flex-col items-center justify-center min-h-[340px]" data-purpose="empty-state-container">
+<!-- Visual Placeholder Illustration / Badge -->
+<div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center mb-5 shadow-inner">
+<svg class="w-8 h-8 sm:w-10 sm:h-10 text-brand-600 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<!-- Descriptive Text from Original Screenshot -->
+<h3 class="text-base sm:text-lg font-semibold text-slate-700 max-w-lg mb-2">
+        لسه مفيش إجراءات. اضغط «إجراء جديد» لإضافة أول قائمة تحضير.
+      </h3>
+<p class="text-xs sm:text-sm text-slate-400 max-w-md">
+        يمكنك أيضاً تصفح القوالب الجاهزة المعتمدة للأدوات والمواد الخاصة بجراحات الأسنان والتركيبات.
+      </p>
+<!-- Quick Action Inside Empty State -->
+<button class="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-4 py-2 rounded-lg transition-colors" type="button">
+<span>إنشاء قائمة إجراء الآن</span>
+<svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</section>
+<!-- END: EmptyStateCard -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Footer -->
+<footer class="w-full border-t border-slate-200/60 bg-white py-4 mt-auto" data-purpose="site-footer">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-slate-400 font-medium">
+      منظومة عيادتي لإدارة الأداء والتحضير الإكلينيكي © 2024
+    </div>
+</footer>
+<!-- END: Footer -->
+</body></html>

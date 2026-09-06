@@ -1,0 +1,282 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>أكاديمية التأهيل - عيادتي إدارة الأداء</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clinic: {
+              teal: '#0a2e29',
+              emerald: '#0d6559',
+              primary: '#0e7063',
+              accent: '#14b8a6',
+              light: '#f4fbf8',
+              surface: '#ffffff',
+              border: '#dff1eb',
+              gold: '#eab308'
+            }
+          },
+          fontFamily: {
+            sans: ['Tajawal', 'Segoe UI', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+  </style>
+<style data-purpose="interactive-ratings">
+    .star-group {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      gap: 0.35rem;
+    }
+    .star-item {
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: color 0.15s ease, transform 0.15s ease;
+      font-size: 1.25rem;
+      user-select: none;
+    }
+    .star-item:hover,
+    .star-item:hover ~ .star-item {
+      color: #fbbf24;
+      transform: scale(1.1);
+    }
+    .star-item.active,
+    .star-item.active ~ .star-item {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-clinic-light text-slate-800 antialiased min-h-screen flex flex-col selection:bg-teal-100 selection:text-teal-900">
+<!-- BEGIN: TopNavigation -->
+<header class="bg-white border-b border-clinic-border/70 sticky top-0 z-30 shadow-xs">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Platform Brand & Module -->
+<div class="flex items-center gap-3">
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-500 hover:text-clinic-teal hover:bg-slate-50 transition" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center text-sm font-semibold tracking-wide">
+<span class="text-clinic-emerald font-bold">أكاديمية التأهيل</span>
+<span class="mx-2 text-slate-300">•</span>
+<span class="text-slate-600">عيادتي · إدارة الأداء</span>
+</div>
+</div>
+<!-- Left Side: Date and Quick Status -->
+<div class="flex items-center gap-4 text-sm text-slate-500">
+<span class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-3 py-1 rounded-full font-medium text-xs text-slate-600">
+<svg class="w-3.5 h-3.5 text-clinic-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          الأحد، 6 سبتمبر
+        </span>
+</div>
+</div>
+</header>
+<!-- END: TopNavigation -->
+<!-- Main Content Layout -->
+<main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+<!-- BEGIN: PageHeader -->
+<section class="text-right space-y-1.5" data-purpose="page-title-banner">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-clinic-teal tracking-tight">أكاديمية التأهيل</h1>
+<p class="text-slate-500 text-sm sm:text-base leading-relaxed">
+        منهج تعليمي متدرج للموظف الجديد — يتعلّم، يتدرب، ويتقيّم خطوة بخطوة
+      </p>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: NavigationAndCurriculumMetaBar -->
+<section class="bg-white border border-clinic-border rounded-xl p-4 shadow-sm" data-purpose="curriculum-overview">
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<!-- Right Action: Return & Track Title -->
+<div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition" type="button">
+<span>←</span>
+<span>رجوع</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="text-base font-bold text-clinic-teal flex items-center gap-1.5">
+<span>🎓</span>
+<span>منهج ندى</span>
+</span>
+<span class="text-xs bg-emerald-50 text-clinic-emerald border border-emerald-200/60 font-semibold px-2 py-0.5 rounded-full">
+              إتقان المنهج
+            </span>
+</div>
+</div>
+<!-- Left Action: Sync images and Progress status -->
+<div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-clinic-emerald bg-teal-50 hover:bg-teal-100/70 border border-teal-200/60 rounded-lg transition shadow-2xs" type="button">
+<svg class="w-4 h-4 text-clinic-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تحديث الصور</span>
+</button>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+<span class="font-bold text-slate-800">0/8 وحدة</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-500 font-semibold">0%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: NavigationAndCurriculumMetaBar -->
+<!-- BEGIN: DailyEvaluationSection -->
+<section class="bg-white border-2 border-amber-300/80 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden" data-purpose="trainer-evaluation-card">
+<div class="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-l from-amber-400 to-amber-300"></div>
+<!-- Card Header -->
+<div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-5">
+<div class="flex items-center gap-2">
+<span class="text-lg">⭐</span>
+<h2 class="text-base sm:text-lg font-bold text-slate-900">تقييم المـدرّب اليوم (06-09-2026)</h2>
+</div>
+<p class="text-xs sm:text-sm text-slate-500">دوس على النجوم لكل بند — بيتدمج في تقرير القرار.</p>
+</div>
+<!-- Rating Criteria Rows -->
+<div class="space-y-4 max-w-xl mx-auto sm:mx-0">
+<!-- Criteria: المبادرة -->
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<div class="star-group" data-criteria="initiative">
+<span class="star-item" data-value="5">★</span>
+<span class="star-item" data-value="4">★</span>
+<span class="star-item" data-value="3">★</span>
+<span class="star-item" data-value="2">★</span>
+<span class="star-item" data-value="1">★</span>
+</div>
+<span class="text-sm sm:text-base font-semibold text-slate-700">المبادرة</span>
+</div>
+<!-- Criteria: النظافة -->
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<div class="star-group" data-criteria="cleanliness">
+<span class="star-item" data-value="5">★</span>
+<span class="star-item" data-value="4">★</span>
+<span class="star-item" data-value="3">★</span>
+<span class="star-item" data-value="2">★</span>
+<span class="star-item" data-value="1">★</span>
+</div>
+<span class="text-sm sm:text-base font-semibold text-slate-700">النظافة</span>
+</div>
+<!-- Criteria: التعامل -->
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<div class="star-group" data-criteria="communication">
+<span class="star-item" data-value="5">★</span>
+<span class="star-item" data-value="4">★</span>
+<span class="star-item" data-value="3">★</span>
+<span class="star-item" data-value="2">★</span>
+<span class="star-item" data-value="1">★</span>
+</div>
+<span class="text-sm sm:text-base font-semibold text-slate-700">التعامل</span>
+</div>
+<!-- Criteria: السرعة -->
+<div class="flex items-center justify-between py-2">
+<div class="star-group" data-criteria="speed">
+<span class="star-item" data-value="5">★</span>
+<span class="star-item" data-value="4">★</span>
+<span class="star-item" data-value="3">★</span>
+<span class="star-item" data-value="2">★</span>
+<span class="star-item" data-value="1">★</span>
+</div>
+<span class="text-sm sm:text-base font-semibold text-slate-700">السرعة</span>
+</div>
+</div>
+</section>
+<!-- END: DailyEvaluationSection -->
+<!-- BEGIN: TrainerNotesSection -->
+<section class="bg-white border border-clinic-border rounded-2xl p-5 sm:p-6 shadow-sm space-y-4" data-purpose="trainer-notes-card">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-base">📝</span>
+<h2 class="text-base sm:text-lg font-bold text-slate-900">ملاحظات المـدرّب</h2>
+</div>
+<span class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">مفيش ملاحظات.</span>
+</div>
+<!-- Add Note Input Group -->
+<form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2" onsubmit="event.preventDefault();">
+<input class="flex-1 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-2 focus:ring-clinic-primary/20 focus:border-clinic-primary bg-slate-50/50 hover:bg-white transition placeholder:text-slate-400" placeholder="اكتب توجيه للموظف..." type="text">
+<button class="px-6 py-2.5 bg-clinic-emerald hover:bg-clinic-primary text-white text-sm font-bold rounded-xl transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-1.5" type="button">
+<span>إضافة</span>
+</button>
+</form>
+</section>
+<!-- END: TrainerNotesSection -->
+<!-- BEGIN: LearningUnitSection -->
+<section class="bg-white border-2 border-clinic-emerald/40 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5" data-purpose="learning-unit-details">
+<!-- Unit Title -->
+<div class="flex items-center justify-end gap-2 border-b border-slate-100 pb-3">
+<h2 class="text-base sm:text-lg font-bold text-slate-900">عقلية النجاح والمبادرة</h2>
+<span class="text-xl">🎯</span>
+</div>
+<!-- Target/Goal Banner -->
+<div class="bg-emerald-50/60 border border-emerald-200/70 rounded-xl p-3.5 flex items-start gap-2.5 text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed">
+<span class="shrink-0 text-sm">🎯</span>
+<p>
+<strong class="font-bold text-clinic-teal">الهدف:</strong> 
+          تطلع من الوحدة دي وانت فاهم إزاي تتعلّم بسرعة، تبادر، وتكون قيمة حقيقية للفريق من أول يوم.
+        </p>
+</div>
+<!-- Golden Rules Callout with Clinic Accent Border -->
+<div class="border-r-4 border-clinic-emerald bg-slate-50/70 rounded-l-xl p-4 sm:p-5 space-y-3">
+<h3 class="text-sm font-bold text-clinic-teal flex items-center gap-2">
+<span>القاعدة الذهبية</span>
+</h3>
+<ul class="space-y-2 text-xs sm:text-sm text-slate-700 font-medium leading-loose pr-1">
+<li class="flex items-baseline gap-2">
+<span class="text-clinic-emerald font-bold">•</span>
+<span>اسأل بدل ما تخمّن — الغلط في التعلّم عادي، الغلط من غير سؤال لأ.</span>
+</li>
+<li class="flex items-baseline gap-2">
+<span class="text-clinic-emerald font-bold">•</span>
+<span>لو نسيت خطوة، ارجع للمنهج أو اسأل، متكفلش على شك.</span>
+</li>
+<li class="flex items-baseline gap-2">
+<span class="text-clinic-emerald font-bold">•</span>
+<span class="font-semibold text-slate-900">المبادرة بتفرق</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- END: LearningUnitSection -->
+</main>
+<!-- BEGIN: InteractiveRatingsScript -->
+<script data-purpose="star-rating-interaction">
+    document.addEventListener('DOMContentLoaded', () => {
+      const starGroups = document.querySelectorAll('.star-group');
+      
+      starGroups.forEach(group => {
+        const stars = group.querySelectorAll('.star-item');
+        
+        stars.forEach(star => {
+          star.addEventListener('click', () => {
+            const val = parseInt(star.getAttribute('data-value'), 10);
+            
+            // Remove previous selection in this group
+            stars.forEach(s => s.classList.remove('active'));
+            
+            // Apply active class to selected star and previous logical stars
+            stars.forEach(s => {
+              if (parseInt(s.getAttribute('data-value'), 10) <= val) {
+                s.classList.add('active');
+              }
+            });
+          });
+        });
+      });
+    });
+  </script>
+<!-- END: InteractiveRatingsScript -->
+</body></html>

@@ -122,7 +122,7 @@ class MainLayoutTest {
         MainLayout layout = new MainLayout(authenticationContext);
 
         assertThat(navLabels(layout)).containsExactly(
-                "إدارة الموظفين", "تقييمي", "الوصول السريع", "إعداد الإجراءات", "المخزون");
+                "تسجيل الموظف", "تقييمي", "الوصول السريع", "تحضير الجلسات", "المخزن");
     }
 
     @Test
@@ -132,7 +132,7 @@ class MainLayoutTest {
         MainLayout layout = new MainLayout(authenticationContext);
 
         assertThat(navLabels(layout)).containsExactly(
-                "إدارة الموظفين", "الوصول السريع", "إعداد الإجراءات", "الأكاديمية", "المخزون", "لوحة التحكم");
+                "تسجيل الموظف", "الوصول السريع", "تحضير الجلسات", "الأكاديمية", "المخزن", "لوحة التحكم");
     }
 
     @Test
@@ -141,8 +141,7 @@ class MainLayoutTest {
 
         MainLayout layout = new MainLayout(authenticationContext);
 
-        Button quick = _get(layout, Button.class,
-                spec -> spec.withClasses("clinicos-nav-item").withText("الوصول السريع"));
+        Button quick = navItemWithLabel(layout, "الوصول السريع");
         _click(quick);
 
         SectionPlaceholderView placeholder = _get(UI.getCurrent(), SectionPlaceholderView.class);
@@ -156,8 +155,7 @@ class MainLayoutTest {
 
         MainLayout layout = new MainLayout(authenticationContext);
 
-        Button quick = _get(layout, Button.class,
-                spec -> spec.withClasses("clinicos-nav-item").withText("الوصول السريع"));
+        Button quick = navItemWithLabel(layout, "الوصول السريع");
         String quickRoute = quick.getElement().getAttribute("data-route");
 
         AfterNavigationEvent event = mock(AfterNavigationEvent.class);
@@ -170,8 +168,7 @@ class MainLayoutTest {
         assertThat(quick.getElement().getAttribute("aria-current"))
                 .isEqualTo("page");
 
-        Button emp = _get(layout, Button.class,
-                spec -> spec.withClasses("clinicos-nav-item").withText("إدارة الموظفين"));
+        Button emp = navItemWithLabel(layout, "تسجيل الموظف");
         assertThat(emp.getElement().getAttribute("aria-current"))
                 .isNull();
     }
@@ -185,8 +182,20 @@ class MainLayoutTest {
     private static List<String> navLabels(MainLayout layout) {
         return _find(layout, Button.class, spec -> spec.withClasses("clinicos-nav-item"))
                 .stream()
-                .map(Button::getText)
+                .map(MainLayoutTest::labelOf)
                 .toList();
+    }
+
+    private static Button navItemWithLabel(MainLayout layout, String label) {
+        return _find(layout, Button.class, spec -> spec.withClasses("clinicos-nav-item"))
+                .stream()
+                .filter(button -> labelOf(button).equals(label))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static String labelOf(Button button) {
+        return _get(button, Span.class, spec -> spec.withClasses("clinicos-nav-item-label")).getText();
     }
 
     private static Set<String> fullCatalog() {

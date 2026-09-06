@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>إعدادات أكاديمية التأهيل - عيادتي</title>
+<!-- Google Font: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0a2e29',
+              emerald: '#008060',
+              accent: '#0d9488',
+              surface: '#f8fafc',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Style Configurations -->
+<style data-purpose="base-styling">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f1f5f9;
+    }
+    /* Hide scrollbar for a clean mobile app look */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<!-- END: Style Configurations -->
+</head>
+<body class="flex justify-center items-center min-h-screen text-slate-800 antialiased p-0 sm:p-4">
+<!-- BEGIN: Mobile Viewport Container -->
+<main class="w-full max-w-[400px] min-h-screen sm:min-h-[844px] bg-slate-50 flex flex-col justify-between shadow-2xl relative sm:rounded-[40px] overflow-hidden border border-slate-200" data-purpose="mobile-viewport">
+<!-- BEGIN: Top Area (Status Bar & Header) -->
+<div class="bg-white border-b border-slate-100 shrink-0 sticky top-0 z-30">
+<!-- iOS Status Bar Placeholder -->
+<div class="h-10 px-6 pt-2 flex items-center justify-between text-xs font-semibold tracking-tight text-slate-800" data-purpose="status-bar">
+<span>9:41</span>
+<div class="flex items-center space-x-1.5 space-x-reverse">
+<!-- Signal Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z" opacity="0.3"></path>
+<path d="M12 6a6 6 0 0 0-6 6c0 1.41.49 2.72 1.32 3.74L12 18.5l4.68-2.76A5.98 5.98 0 0 0 18 12a6 6 0 0 0-6-6z"></path>
+</svg>
+<!-- Wifi Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0 0 12 4z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 border border-slate-800 rounded-sm p-0.5 flex items-center">
+<div class="w-full h-full bg-slate-800 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- Main Navigation Header -->
+<header class="px-4 py-2.5 flex items-center justify-between" data-purpose="app-header">
+<div class="flex items-center gap-2.5">
+<!-- Drawer Menu Button -->
+<button aria-label="القائمة الجانبية" class="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 active:scale-95 transition-all" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-slate-900">عيادتي</span>
+<span class="text-[10px] text-slate-400">•</span>
+<span class="text-[11px] font-medium text-slate-500">إدارة الأداء</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="text-[11px] font-semibold text-emerald-800">أكاديمية التأهيل</span>
+</div>
+</div>
+</div>
+<!-- Date Pill -->
+<div class="bg-slate-100 text-slate-600 text-[11px] font-medium px-2.5 py-1 rounded-full border border-slate-200/80">
+          الأحد، 6 سبتمبر
+        </div>
+</header>
+</div>
+<!-- END: Top Area -->
+<!-- BEGIN: Scrollable Body Content -->
+<div class="flex-1 overflow-y-auto px-4 py-4 space-y-4" data-purpose="content-container">
+<!-- Section: Page Title & Brief -->
+<div class="space-y-1 pr-1">
+<h1 class="text-2xl font-black text-brand-dark tracking-tight">أكاديمية التأهيل</h1>
+<p class="text-[12.5px] leading-relaxed text-slate-500 font-medium">
+          منهج تعليمي متدرّج للموظف الجديد — يتعلّم، يتدرّب، ويتقيّم خطوة بخطوة
+        </p>
+</div>
+<!-- Section: Header Action Card -->
+<section class="bg-white rounded-2xl p-4 border border-slate-200/70 shadow-sm flex items-center justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-lg">⚙️</span>
+<h2 class="text-sm font-bold text-slate-900">إعدادات الأكاديمية</h2>
+</div>
+<p class="text-[11.5px] leading-snug text-slate-500">
+            فعّل أو أطفي أي ميزة. اللي تطفيه مايظهرش للموظف ولا المدرّب.
+          </p>
+</div>
+<button class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-600 border border-slate-200 rounded-xl text-xs font-semibold transition-all" type="button">
+<span>رجوع</span>
+<span class="text-sm leading-none font-bold">←</span>
+</button>
+</section>
+<!-- Section: Feature Toggles List -->
+<section class="space-y-2.5" data-purpose="features-list">
+<!-- Subheader -->
+<div class="flex items-center justify-between px-1">
+<h3 class="text-sm font-extrabold text-slate-900">المزايا</h3>
+<span class="text-xs font-semibold text-slate-400">6 مزايا متاحة</span>
+</div>
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden">
+<!-- Item 1: المهام العملية -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>المهام العملية</span>
+<span>🛠️</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                مهام «اعملها قدام المدرّب» لكل وحدة، والمدرّب يأكدها.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+<!-- Item 2: تقييم المدرّب اليومي -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>تقييم المدرّب اليومي</span>
+<span>⭐</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                المدرّب يدي نجوم يومية (مبادرة/نظافة/تعامل/سرعة) تندمج في تقرير القرار.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+<!-- Item 3: الاختبار النهائي -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>الاختبار النهائي</span>
+<span>🎯</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                امتحان شامل من كل المنهج في الآخر.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+<!-- Item 4: شهادة التخرّج -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>شهادة التخرّج</span>
+<span>🎓</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                شهادة تطلع بعد اجتياز التأهيل.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+<!-- Item 5: سؤال اليوم -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>سؤال اليوم</span>
+<span>🧠</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                سؤال يومي عشوائي من وحدة عدّاها لتثبيت المعلومة.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+<!-- Item 6: ملاحظات المدرّب -->
+<article class="p-3.5 flex items-start justify-between gap-3 hover:bg-slate-50/50 transition-colors">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+<span>ملاحظات المدرّب</span>
+<span>📝</span>
+</div>
+<p class="text-[11.5px] leading-normal text-slate-500 font-normal">
+                مساحة المدرّب يكتب توجيه للموظف.
+              </p>
+</div>
+<div class="shrink-0 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+<span>مفعلة</span>
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</article>
+</div>
+</section>
+<!-- Section: Final Exam Configuration Card -->
+<section class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3.5" data-purpose="exam-settings">
+<div class="flex items-center gap-2">
+<span class="text-base">🎯</span>
+<h3 class="text-xs font-bold text-slate-900">الاختبار النهائي</h3>
+</div>
+<div class="space-y-1.5">
+<label class="block text-[11.5px] font-semibold text-slate-700" for="success-rate-input">
+            درجة النجاح (%)
+          </label>
+<div class="relative">
+<input class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-4 text-left font-bold text-slate-800 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 outline-none transition-all" dir="ltr" id="success-rate-input" type="number" value="80"/>
+<span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs pointer-events-none">
+              %
+            </span>
+</div>
+</div>
+<!-- Clarification Bullet -->
+<p class="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 pr-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>لو الموظف سقط، يعيد الاختبار.</span>
+</p>
+</section>
+<!-- Copyright Subtext -->
+<footer class="text-center py-2 text-[10px] text-slate-400 font-medium">
+        نظام إدارة الأداء والجاهزية السريرية © 2026 — ClinicOS
+      </footer>
+</div>
+<!-- END: Scrollable Body Content -->
+<!-- BEGIN: Mobile Bottom Navigation Bar -->
+<nav class="bg-white border-t border-slate-200/80 px-6 py-2 pb-5 flex items-center justify-between shrink-0 sticky bottom-0 z-30" data-purpose="bottom-navigation">
+<!-- Nav Item 1: الأكاديمية (Active) -->
+<a class="flex flex-col items-center gap-1 text-emerald-800 select-none group" href="#academy">
+<div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm shadow-sm ring-1 ring-emerald-600/20">
+          🎓
+        </div>
+<span class="text-[10px] font-bold text-emerald-900">الأكاديمية</span>
+</a>
+<!-- Nav Item 2: المهام -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 select-none transition-colors" href="#tasks">
+<div class="w-8 h-8 flex items-center justify-center text-sm">
+          📋
+        </div>
+<span class="text-[10px] font-medium">المهام</span>
+</a>
+<!-- Nav Item 3: المخزن -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 select-none transition-colors" href="#inventory">
+<div class="w-8 h-8 flex items-center justify-center text-sm">
+          📦
+        </div>
+<span class="text-[10px] font-medium">المخزن</span>
+</a>
+<!-- Nav Item 4: الإدارة -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 select-none transition-colors" href="#management">
+<div class="w-8 h-8 flex items-center justify-center text-sm">
+          ⚙️
+        </div>
+<span class="text-[10px] font-medium">الإدارة</span>
+</a>
+</nav>
+<!-- END: Mobile Bottom Navigation Bar -->
+</main>
+<!-- END: Mobile Viewport Container -->
+</body></html>

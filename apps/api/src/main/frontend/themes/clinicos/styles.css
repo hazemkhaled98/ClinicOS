@@ -26,13 +26,13 @@
   --c-primary-text: #17786a;
   --c-on-primary: #ffffff;
 
-  --c-canvas: #f4f7f6;
+  --c-canvas: #f5f8f8;
   --c-surface: #ffffff;
-  --c-hairline: #e1e8e5;
-  --c-ink: #16201d;
-  --c-ink-muted: #5c6b66;
-  --c-table-header-bg: #eef3f1;
-  --c-zebra-row: #f8faf9;
+  --c-hairline: #e2e8f0;
+  --c-ink: #1e293b;
+  --c-ink-muted: #64748b;
+  --c-table-header-bg: #f1f5f9;
+  --c-zebra-row: #f8fafc;
 
   --c-status-success-deep: #166534;
   --c-status-success-bg: #e3f6ea;
@@ -41,16 +41,34 @@
   --c-status-warning-bg: #fef3d6;
   --c-status-warning: #b87900;
   --c-status-danger-deep: #9d2b1f;
-  --c-status-danger-bg: #fce4e1;
-  --c-status-danger: #b23b30;
+  --c-status-danger-bg: #fef2f2;
+  --c-status-danger: #b91c1c;
+  --c-status-danger-border: #fecaca;
   --c-status-info-deep: #1d4ed8;
   --c-status-info-bg: #e3edfb;
   --c-status-info: #2563eb;
 
-  --radius-xs: 2px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
+  --c-brand-950: #071f1c;
+  --c-brand-800: #0d3832;
+  --c-brand-700: #114a42;
+  --c-brand-600: #17655a;
+  --c-brand-500: #1f8375;
+  --c-brand-400: #2a9d8f;
+  --c-accent: #10b981;
+  --c-accent-dark: #059669;
+  --c-accent-light: #34d399;
+  --c-input-bg: #f8fafc;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
   --radius-pill: 9999px;
+
+  --shadow-topbar: 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-tile: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 20px 50px -12px rgba(10, 46, 41, 0.25);
+  --shadow-drawer: 4px 0 24px rgba(0, 0, 0, 0.15);
 
   --space-xs: 4px;
   --space-sm: 8px;
@@ -65,8 +83,8 @@
   --c-dark-table-header-bg: #1f2b26;
   --c-dark-zebra-row: #141d1a;
   --c-dark-primary: #2dd4bf;
-  --c-drawer-gradient-start: #0a2e29;
-  --c-drawer-gradient-end: #051917;
+  --c-drawer-gradient-start: #0d3832;
+  --c-drawer-gradient-end: #071f1c;
   --c-on-drawer: #eaf1ee;
   --c-on-drawer-muted: #93a49b;
   --c-dark-status-success-deep: #4ade80;
@@ -121,6 +139,7 @@ vaadin-drawer-toggle {
   padding-inline: var(--space-lg);
   background-color: var(--c-surface);
   border-block-end: 1px solid var(--c-hairline);
+  box-shadow: var(--shadow-topbar);
   color: var(--c-ink);
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
   font-size: 14px;
@@ -148,6 +167,7 @@ vaadin-drawer-toggle {
   padding-block: 0;
   padding-inline: 0;
   width: 240px;
+  box-shadow: var(--shadow-drawer);
 }
 
 .clinicos-brand {
@@ -174,9 +194,10 @@ vaadin-drawer-toggle {
 .clinicos-nav-item {
   display: flex;
   align-items: center;
+  gap: var(--space-sm);
   padding-block: var(--space-sm);
   padding-inline: var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: transparent;
   border: none;
   color: var(--c-on-drawer-muted);
@@ -199,6 +220,32 @@ vaadin-drawer-toggle {
   background-color: var(--c-dark-primary);
   color: var(--c-ink);
   font-weight: 400;
+}
+
+.clinicos-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.clinicos-nav-item-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.clinicos-nav-item-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--c-on-drawer-muted);
+  opacity: 0.8;
 }
 
 .clinicos-who {
@@ -248,7 +295,7 @@ vaadin-drawer-toggle {
   border: none;
   width: 34px;
   height: 34px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -307,8 +354,8 @@ vaadin-drawer-toggle {
 
 .clinicos-auth-card {
   background-color: var(--c-surface);
-  border: 1px solid var(--c-hairline);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
   padding: var(--space-lg);
   max-width: 360px;
   width: 100%;
@@ -350,7 +397,7 @@ vaadin-drawer-toggle {
   background-color: var(--c-status-success-bg);
   color: var(--c-status-success-deep);
   border: 1px solid var(--c-status-success);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding-block: var(--space-md);
   padding-inline: var(--space-lg);
   font-size: 14px;
@@ -358,4 +405,285 @@ vaadin-drawer-toggle {
   line-height: 1.5;
   letter-spacing: 0;
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+}
+
+.clinicos-banner-error {
+  background-color: var(--c-status-danger-bg);
+  color: var(--c-status-danger-deep);
+  border: 1px solid var(--c-status-danger);
+  border-radius: var(--radius-md);
+  padding-block: var(--space-md);
+  padding-inline: var(--space-lg);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+}
+
+.clinicos-field-error vaadin-text-field::part(input-field),
+.clinicos-field-error vaadin-password-field::part(input-field) {
+  border-color: var(--c-status-danger);
+}
+
+.clinicos-auth-card vaadin-login-form::part(form) {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.clinicos-auth-card vaadin-login-form::part(form-title) {
+  display: none;
+}
+
+.clinicos-auth-card vaadin-text-field,
+.clinicos-auth-card vaadin-password-field,
+.clinicos-auth-card vaadin-text-field.clinicos-clinic-field {
+  width: 100%;
+}
+
+.clinicos-auth-card vaadin-text-field::part(input-field),
+.clinicos-auth-card vaadin-password-field::part(input-field) {
+  background: var(--c-input-bg);
+  border: 1px solid var(--c-hairline);
+  border-radius: var(--radius-md);
+  min-height: 44px;
+}
+
+.clinicos-auth-card vaadin-text-field::part(label),
+.clinicos-auth-card vaadin-password-field::part(label) {
+  color: var(--c-ink);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.clinicos-auth-card vaadin-button::part(button) {
+  border-radius: var(--radius-md);
+  min-height: 44px;
+}
+
+.clinicos-auth-security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  color: var(--c-ink-muted);
+  font-size: 12px;
+  margin-block-start: var(--space-md);
+}
+
+.clinicos-auth-security-note vaadin-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.clinicos-auth-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f6faf8;
+  background-image:
+    radial-gradient(at 85% 15%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+    radial-gradient(at 10% 90%, rgba(10, 46, 41, 0.05) 0px, transparent 50%),
+    linear-gradient(rgba(10, 46, 41, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 46, 41, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+.clinicos-auth-hero {
+  flex: 1 1 58%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: right;
+  padding: var(--space-xxl);
+  gap: var(--space-lg);
+  min-height: 100vh;
+}
+
+.clinicos-auth-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.clinicos-auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-block: var(--space-xs);
+  padding-inline: var(--space-md);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--c-hairline);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--c-ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+}
+
+.clinicos-auth-badge vaadin-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--c-accent-dark);
+}
+
+.clinicos-auth-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--c-accent);
+  flex: none;
+}
+
+.clinicos-auth-badge-sep {
+  color: var(--c-hairline);
+}
+
+.clinicos-auth-badge-accent {
+  color: var(--c-accent-dark);
+  font-weight: 400;
+}
+
+.clinicos-auth-hero-footer {
+  width: 100%;
+  margin-block-start: auto;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  color: var(--c-ink-muted);
+  font-size: 12px;
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+}
+
+.clinicos-auth-hero-accent-bar {
+  width: 48px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--c-accent), var(--c-primary));
+}
+
+.clinicos-auth-hero-title {
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--c-primary);
+  margin: 0;
+}
+
+.clinicos-auth-hero-title-line {
+  display: block;
+}
+
+.clinicos-auth-hero-title-accent {
+  display: block;
+  background: linear-gradient(to left, var(--c-accent-dark), var(--c-primary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.clinicos-auth-hero-sub {
+  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  font-size: 15px;
+  color: var(--c-ink-muted);
+  max-width: 480px;
+  margin: 0;
+}
+
+.clinicos-auth-feature-grid {
+  width: 100%;
+  justify-content: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.clinicos-auth-feature {
+  flex: 1 1 200px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.clinicos-auth-feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--c-status-success-bg);
+  color: var(--c-status-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-block-end: var(--space-sm);
+}
+
+.clinicos-auth-feature-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-ink-muted);
+  margin-block-end: 2px;
+}
+
+.clinicos-auth-feature-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--c-primary);
+}
+
+.clinicos-auth-feature p {
+  font-size: 11px;
+  color: var(--c-ink-muted);
+  margin: var(--space-xs) 0 0;
+}
+
+.clinicos-auth-panel {
+  flex: 1 1 42%;
+  background: radial-gradient(circle at 10% 20%, var(--c-brand-800) 0%, var(--c-primary) 60%, var(--c-brand-950) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xxl);
+}
+
+.clinicos-auth-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-tile);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-lg);
+  padding: 6px;
+}
+
+.clinicos-auth-logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-xs);
+  object-fit: contain;
+}
+
+@media (max-width: 1024px) {
+  .clinicos-auth-page {
+    flex-direction: column;
+  }
+  .clinicos-auth-panel {
+    flex: none;
+    padding-block: var(--space-xl);
+  }
+  .clinicos-auth-hero {
+    flex: none;
+    padding-block-start: var(--space-lg);
+  }
 }

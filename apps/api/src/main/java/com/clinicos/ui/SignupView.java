@@ -11,10 +11,11 @@ import com.clinicos.shared.TenantContext;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -120,14 +121,18 @@ public class SignupView extends VerticalLayout {
         this.activityLogService = activityLogService;
 
         setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
+        setPadding(false);
+        setSpacing(false);
         getElement().setAttribute("dir", "rtl");
+
+        Div logo = new Div();
+        logo.addClassName("clinicos-auth-logo");
+        logo.add(new com.vaadin.flow.component.html.Image(LoginView.BRAND_LOGO_DATA_URI, "ClinicOS"));
 
         H2 heading = new H2("إنشاء عيادة جديدة");
         heading.getElement().setAttribute("dir", "rtl");
 
-        VerticalLayout card = new VerticalLayout(heading, clinicNameField, fullNameField,
+        VerticalLayout card = new VerticalLayout(logo, heading, clinicNameField, fullNameField,
                 usernameField, passwordField, confirmPasswordField, emailField, submitButton);
         card.addClassName("clinicos-auth-card");
         card.setPadding(true);
@@ -146,7 +151,20 @@ public class SignupView extends VerticalLayout {
         bindFields();
         submitButton.addClickListener(event -> onSubmit());
 
-        add(card);
+        H1 heroTitle = new H1("أنشئ عيادتك");
+        heroTitle.addClassName("clinicos-auth-hero-title");
+        Paragraph heroSub = new Paragraph("سجّل عيادتك الآن وابدأ إدارة فريقك وعملياتك اليومية في مكان واحد");
+        heroSub.addClassName("clinicos-auth-hero-sub");
+        Div hero = new Div(heroTitle, heroSub);
+        hero.addClassName("clinicos-auth-hero");
+
+        Div panel = new Div(card);
+        panel.addClassName("clinicos-auth-panel");
+
+        Div page = new Div(panel, hero);
+        page.addClassName("clinicos-auth-page");
+
+        add(page);
     }
 
     private void bindFields() {

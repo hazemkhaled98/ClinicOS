@@ -1,0 +1,357 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تحضير الجلسات - عيادتي إدارة الأداء</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            clinic: {
+              teal: '#0a2e29',
+              dark: '#0f3d36',
+              primary: '#0d6559',
+              light: '#148071',
+              accent: '#10b981',
+              mint: '#d1fae5',
+              soft: '#ecfdf5',
+              surface: '#f4fbf8',
+              card: '#ffffff',
+              border: '#e2e8f0',
+              textPrimary: '#0f172a',
+              textSecondary: '#475569',
+              textMuted: '#94a3b8',
+              badgeBg: '#fef3c7',
+              badgeText: '#92400e',
+              badgeBorder: '#fde68a'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px 0 rgba(10, 46, 41, 0.05), 0 1px 2px -1px rgba(10, 46, 41, 0.03)',
+            'card-hover': '0 10px 25px -5px rgba(13, 101, 89, 0.07), 0 8px 10px -6px rgba(13, 101, 89, 0.05)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Checkbox and Fine Adjustments -->
+<style data-purpose="custom-styling">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #0f172a;
+    }
+    
+    /* Smooth transition for checklist toggles */
+    .checklist-item {
+      transition: all 0.2s ease-in-out;
+    }
+    .checklist-item:hover {
+      background-color: #f0fdf9;
+      border-color: #cbd5e1;
+    }
+    
+    /* Custom Checkbox Design */
+    .custom-check:checked {
+      background-color: #0d6559;
+      border-color: #0d6559;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    }
+    .custom-check:focus {
+      --tw-ring-color: #148071;
+      --tw-ring-offset-width: 2px;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col justify-between selection:bg-teal-100 selection:text-teal-900">
+<!-- BEGIN: MainHeader -->
+<header class="w-full bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs" data-purpose="top-navigation">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Breadcrumbs and Hamburger Icon (RTL alignment) -->
+<div class="flex items-center gap-3.5">
+<button aria-label="القائمة" class="p-2 text-slate-500 hover:text-clinic-teal hover:bg-slate-100 rounded-lg transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-clinic-teal font-bold tracking-tight">تحضير الجلسات</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-500 font-medium">عيادتي · إدارة الأداء</span>
+</div>
+</div>
+<!-- Left Side: Date and Clinic Quick Info -->
+<div class="flex items-center gap-4 text-xs sm:text-sm text-slate-500">
+<div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full font-medium text-slate-600">
+<svg class="w-4 h-4 text-clinic-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 py-8" data-purpose="checklist-execution-screen">
+<!-- Page Title & Subtitle Section -->
+<div class="mb-8" data-purpose="page-title-section">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-clinic-teal mb-2">تحضير الجلسات</h1>
+<p class="text-slate-600 text-sm sm:text-base font-normal">
+        قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة
+      </p>
+</div>
+<!-- Active Procedure Card with Return and Progress -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-card-subtle p-5 sm:p-6 mb-8" data-purpose="session-header-card">
+<!-- Upper Header Row: Back button and Procedure Title Badge -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-50 hover:text-clinic-teal transition-all shadow-2xs" href="#">
+<span>→</span>
+<span>رجوع</span>
+</a>
+<div class="inline-flex items-center px-3 py-1.5 rounded-lg bg-teal-50 text-clinic-primary font-bold text-sm sm:text-base border border-teal-100/80">
+<span>إكزامينيشن (كشف وتشخيص)</span>
+</div>
+</div>
+<!-- Progress Counter -->
+<div class="flex items-center gap-2" data-purpose="progress-counter">
+<span class="text-xs font-semibold text-slate-500">التقدم</span>
+<span class="text-sm font-extrabold text-clinic-teal bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200" id="progress-text">0/9</span>
+</div>
+</div>
+<!-- Modern Progress Bar -->
+<div class="mt-4 mb-4">
+<div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+<div class="bg-gradient-to-l from-clinic-accent to-clinic-primary h-full rounded-full transition-all duration-300 ease-out" id="progress-bar" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Attention Warning Banner -->
+<div class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-amber-50/80 border border-amber-200/70 text-amber-900 text-xs sm:text-sm font-medium" data-purpose="missing-items-alert">
+<svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span id="alert-message">لسه 5 عنصر أساسي ناقص — حضّرهم قبل ما تبدأ</span>
+</div>
+</div>
+<!-- BEGIN: ChecklistSections -->
+<div class="space-y-6" data-purpose="checklist-groups">
+<!-- SECTION 1: تجهيز عام -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-card-subtle p-5 sm:p-6" data-purpose="section-general-prep">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-base sm:text-lg font-bold text-clinic-teal flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-clinic-primary inline-block"></span>
+            1. تجهيز عام
+          </h2>
+<span class="text-xs font-semibold text-slate-600">5 عناصر</span>
+</div>
+<div class="space-y-2.5">
+<!-- Item 1 -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="true" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">ميرور (مرآة فحص)</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              أساسي
+            </span>
+</label>
+<!-- Item 2 -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="true" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">إكسبلورر (مسبار)</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              أساسي
+            </span>
+</label>
+<!-- Item 3 -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="true" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">تويزر (ملقط)</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              أساسي
+            </span>
+</label>
+<!-- Item 4 -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="true" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">جلوفز ومناديل</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              أساسي
+            </span>
+</label>
+<!-- Item 5 (Optional) -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="false" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">كوب ومحلول مضمضة</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-normal text-slate-600 bg-slate-50 border border-slate-200">
+              إضافي
+            </span>
+</label>
+</div>
+</div>
+<!-- SECTION 2: دياجنوزيس -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-card-subtle p-5 sm:p-6" data-purpose="section-diagnosis">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-base sm:text-lg font-bold text-clinic-teal flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-clinic-primary inline-block"></span>
+            2. دياجنوزيس
+          </h2>
+<span class="text-xs font-semibold text-slate-600">4 عناصر</span>
+</div>
+<div class="space-y-2.5">
+<!-- Item 6 (Optional) -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="false" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">خافض لسان / تشيك ريتراكتور</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-normal text-slate-600 bg-slate-50 border border-slate-200">
+              إضافي
+            </span>
+</label>
+<!-- Item 7 (Essential) -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="true" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">جوز (شاش معقم)</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+              أساسي
+            </span>
+</label>
+<!-- Item 8 (Optional) -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="false" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">إنترا-أورال كاميرا (لو متاح)</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-normal text-slate-600 bg-slate-50 border border-slate-200">
+              اختياري
+            </span>
+</label>
+<!-- Item 9 (Optional) -->
+<label class="checklist-item flex items-center justify-between p-3.5 rounded-xl border border-slate-200/90 cursor-pointer select-none">
+<div class="flex items-center gap-3">
+<input class="custom-check w-5 h-5 text-clinic-primary rounded border-slate-300 focus:ring-clinic-primary cursor-pointer transition" data-essential="false" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 item-title">كارت تسجيل الحالة</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-normal text-slate-600 bg-slate-50 border border-slate-200">
+              إضافي
+            </span>
+</label>
+</div>
+</div>
+</div>
+<!-- END: ChecklistSections -->
+<!-- Quick Action Footer Strip inside Content Area -->
+<div class="mt-8 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/80">
+<p class="text-xs text-slate-500 font-medium text-center sm:text-right">
+        يتم حفظ التقدم تلقائيًا لكل عيادة وكرسي معالجة
+      </p>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<button class="w-1/2 sm:w-auto px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition" id="reset-btn" type="button">
+          إعادة ضبط
+        </button>
+<button class="w-1/2 sm:w-auto px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-clinic-primary hover:bg-clinic-teal rounded-lg shadow-sm transition flex items-center justify-center gap-2" type="button">
+<span>بدء الجلسة الآن</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: PageFooter -->
+<footer class="w-full bg-white border-t border-slate-200 py-4 mt-8" data-purpose="app-footer">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
+<span>ClinicOS — نظام إدارة الأداء والجاهزية الطبية</span>
+<span>جميع الحقوق محفوظة © 2025</span>
+</div>
+</footer>
+<!-- END: PageFooter -->
+<!-- BEGIN: Interactive Logic Script -->
+<script data-purpose="checklist-state-manager">
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkboxes = document.querySelectorAll('.custom-check');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const alertMessage = document.getElementById('alert-message');
+      const resetBtn = document.getElementById('reset-btn');
+
+      const totalItems = checkboxes.length; // 9
+      const totalEssential = Array.from(checkboxes).filter(cb => cb.dataset.essential === 'true').length; // 5
+
+      function updateStatus() {
+        const checkedItems = Array.from(checkboxes).filter(cb => cb.checked);
+        const checkedCount = checkedItems.length;
+        
+        // Essential items missing count
+        const checkedEssentialCount = checkedItems.filter(cb => cb.dataset.essential === 'true').length;
+        const missingEssential = totalEssential - checkedEssentialCount;
+
+        // Update progress counter text
+        progressText.textContent = `${checkedCount}/${totalItems}`;
+
+        // Update visual progress bar width
+        const percentage = Math.round((checkedCount / totalItems) * 100);
+        progressBar.style.width = `${percentage}%`;
+
+        // Update text labels decoration on check
+        checkboxes.forEach(cb => {
+          const title = cb.closest('label').querySelector('.item-title');
+          if (cb.checked) {
+            title.classList.add('line-through', 'text-slate-400');
+            title.classList.remove('text-slate-800');
+          } else {
+            title.classList.remove('line-through', 'text-slate-400');
+            title.classList.add('text-slate-800');
+          }
+        });
+
+        // Update Alert Warning
+        if (missingEssential > 0) {
+          alertMessage.textContent = `لسه ${missingEssential} عنصر أساسي ناقص — حضّرهم قبل ما تبدأ`;
+          alertMessage.parentElement.className = 'flex items-center gap-2.5 px-4 py-3 rounded-xl bg-amber-50/80 border border-amber-200/70 text-amber-900 text-xs sm:text-sm font-medium';
+        } else {
+          alertMessage.textContent = 'رائع! كل العناصر الأساسية جاهزة لبدء الجلسة';
+          alertMessage.parentElement.className = 'flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs sm:text-sm font-semibold';
+        }
+      }
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateStatus);
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          checkboxes.forEach(cb => cb.checked = false);
+          updateStatus();
+        });
+      }
+
+      // Initial state calculation
+      updateStatus();
+    });
+  </script>
+<!-- END: Interactive Logic Script -->
+</body></html>

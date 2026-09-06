@@ -1,0 +1,292 @@
+<!DOCTYPE html><html dir="rtl" lang="ar" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ClinicOS - Slide-over Navigation Drawer</title>
+<!-- Google Fonts: Noto Sans Arabic & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans Arabic', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            teal: {
+              950: '#071f1c',
+              900: '#0a2e29',
+              850: '#0d3832',
+              800: '#114a42',
+              700: '#17655a',
+              600: '#1f8375',
+              500: '#2a9d8f',
+            },
+            emerald: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            }
+          },
+          boxShadow: {
+            'drawer': '-10px 0 40px -5px rgba(0, 0, 0, 0.4), -4px 0 15px -3px rgba(0, 0, 0, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Micro-transitions -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen relative flex">
+<!-- BEGIN: Underlying Page Content (Dimmed / Blurred Backdrop) -->
+<div class="w-full min-h-screen flex flex-col bg-slate-50 filter blur-[2px] transition-all select-none pointer-events-none" data-purpose="background-app-page">
+<!-- App Top Bar (Muted background representation) -->
+<header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<span class="text-xs font-semibold text-slate-400">الأحد، 6 سبتمبر</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-8 w-28 bg-slate-200 rounded-md"></div>
+<div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+</div>
+</header>
+<!-- Sub Navigation Tabs Behind Modal -->
+<div class="px-8 pt-6 pb-2 flex items-center gap-2 border-b border-slate-200/80 bg-slate-100/60">
+<button class="px-4 py-2 bg-teal-900 text-white text-xs font-medium rounded-lg flex items-center gap-2 shadow-sm">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        الصلاحيات
+      </button>
+<button class="px-3.5 py-2 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-200 flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+        سجل النشاط
+      </button>
+<button class="px-3.5 py-2 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-200 flex items-center gap-1.5">
+        الأهداف والتحفيز
+      </button>
+<button class="px-3.5 py-2 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-200 flex items-center gap-1.5">
+        المستخدمون
+      </button>
+<button class="px-3.5 py-2 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-200 flex items-center gap-1.5">
+        الإعدادات
+      </button>
+<button class="px-3.5 py-2 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-200 flex items-center gap-1.5">
+        المهام
+      </button>
+</div>
+<!-- Main Card Body Behind Drawer -->
+<div class="p-8 max-w-5xl">
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+<!-- Banner Header -->
+<div class="bg-teal-900 px-6 py-4 text-white">
+<h2 class="text-base font-bold">التوصيف الوظيفي</h2>
+<p class="text-xs text-teal-200/80 mt-1">صلاحيات التوصيف الوظيفي للموظفين والمخزن تطبق فوراً.</p>
+</div>
+<!-- Role Badges Filter -->
+<div class="p-5 border-b border-slate-100 flex items-center gap-3 bg-slate-50/50">
+<span class="px-3.5 py-1.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs">
+            👑 المدير / إداري
+          </span>
+<span class="px-3.5 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-medium">
+            موظف الاستقبال
+          </span>
+</div>
+<!-- Permissions Table Demo Mock -->
+<div class="p-6">
+<div class="mb-4">
+<h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+<span class="">🖥️</span> صلاحيات لوحة النظام
+            </h3>
+<p class="text-xs text-slate-500 mt-1">التبويبات التي «مساعد طبيب» يقدر يدخلها — بتتطبق تلقائياً على كل مستخدم بنفس التوصيف.</p>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 rounded-lg border border-teal-100 bg-teal-50/30">
+<span class="text-xs font-medium text-slate-700">تسجيل الموظف (حضور ومهام)</span>
+<div class="w-4 h-4 rounded bg-teal-600 flex items-center justify-center text-white text-[10px]">✓</div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
+<span class="text-xs font-medium text-slate-600">تقييم وتحقّق المدير + اعتماد</span>
+<div class="w-4 h-4 rounded border border-slate-300"></div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
+<span class="text-xs font-medium text-slate-600">Admin dashboard</span>
+<div class="w-4 h-4 rounded border border-slate-300"></div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
+<span class="text-xs font-medium text-slate-600">إدارة المهام</span>
+<div class="w-4 h-4 rounded border border-slate-300"></div>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-white">
+<span class="text-xs font-medium text-slate-600">اعتماد لقطات الأكاديمية</span>
+<div class="w-4 h-4 rounded border border-slate-300"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- END: Underlying Page Content -->
+<!-- BEGIN: Backdrop Overlay (Scrim) -->
+<div aria-hidden="true" class="fixed inset-0 bg-slate-900/40 backdrop-blur-[3px] transition-opacity z-40" data-purpose="drawer-backdrop"></div>
+<!-- END: Backdrop Overlay -->
+<!-- BEGIN: Navigation Drawer (Slide-over RTL Right Panel) -->
+<aside aria-label="القائمة الرئيسية للنظام" class="fixed inset-y-0 right-0 z-50 w-72 sm:w-80 bg-teal-900 text-white flex flex-col justify-between shadow-drawer border-l border-teal-800/40 transform transition-transform duration-300 ease-out" data-purpose="navigation-drawer" id="slide-over-navigation">
+<!-- Top & Navigation Section -->
+<div class="flex flex-col flex-1 overflow-hidden">
+<!-- Brand & Header Container -->
+<div class="px-6 pt-7 pb-6 flex items-center justify-between border-b border-teal-850/70">
+<div class="flex items-center gap-3">
+<!-- Logo Brand Icon with subtle glow -->
+<div class="w-11 h-11 rounded-xl bg-white shadow-md flex items-center justify-center flex-shrink-0 border border-teal-800/40 overflow-hidden p-0.5"><img src="https://lh3.googleusercontent.com/aida/AEtjO1XScqEgTDVClopUSo-0G-eA_sV2OYYc2rKgrtxAgU4jl2efVpjusDauXh8VnyPQVTth3YxcP3e5i6c4ckbmbvMeQfkMH-7kugIOIesTnm32XD8sMSalxQGi6WkxVdcLpG2yKW5WvEVM4sz2j-TY-ASGPPtVdEtRVrKWTL3u3FgImf2-bEJtmZ0lxBOPQMTBojGQ4Km-N4I_C9e9cowE5AiX_y1IPsKMO-gN_ju1qrSWKAwMsTPx4ig291o" alt="شعار عيادتي" class="w-full h-full block select-none pointer-events-none" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.4); transform-origin: center;"></div>
+<div class="flex flex-col">
+<span class="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+              عيادتي
+              <span class="text-[10px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded">PRO</span>
+</span>
+<span class="text-[11px] text-teal-300/60 font-medium">نظام الإدارة المتكامل</span>
+</div>
+</div>
+<!-- Optional Close / Dismiss button icon -->
+<button aria-label="إغلاق القائمة" class="text-teal-300/60 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Navigation List Items -->
+<nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 custom-scrollbar">
+<!-- Item 1: تسجيل الموظف -->
+<a class="group flex items-center justify-between px-3.5 py-3 rounded-xl text-teal-100/80 hover:bg-teal-800/50 hover:text-white transition-all duration-150" href="#staff-attendance">
+<div class="flex items-center gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-teal-800/40 flex items-center justify-center text-teal-300 group-hover:text-emerald-300 group-hover:bg-teal-800/70 transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-medium">تسجيل الموظف</span>
+</div>
+<svg class="w-4 h-4 text-teal-400/40 group-hover:text-teal-200 transform group-hover:-translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+<!-- Item 2: تقييم وتحقق المدير -->
+<a class="group flex items-center justify-between px-3.5 py-3 rounded-xl text-teal-100/80 hover:bg-teal-800/50 hover:text-white transition-all duration-150" href="#manager-eval">
+<div class="flex items-center gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-teal-800/40 flex items-center justify-center text-teal-300 group-hover:text-emerald-300 group-hover:bg-teal-800/70 transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-medium">تقييم وتحقّق المدير</span>
+</div>
+</a>
+<!-- Item 3: تحضير الجلسات -->
+<a class="group flex items-center justify-between px-3.5 py-3 rounded-xl text-teal-100/80 hover:bg-teal-800/50 hover:text-white transition-all duration-150" href="#session-prep">
+<div class="flex items-center gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-teal-800/40 flex items-center justify-center text-teal-300 group-hover:text-emerald-300 group-hover:bg-teal-800/70 transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-medium">تحضير الجلسات</span>
+</div>
+</a>
+<!-- Item 4: الأكاديمية -->
+<a class="group flex items-center justify-between px-3.5 py-3 rounded-xl text-teal-100/80 hover:bg-teal-800/50 hover:text-white transition-all duration-150" href="#academy">
+<div class="flex items-center gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-teal-800/40 flex items-center justify-center text-teal-300 group-hover:text-emerald-300 group-hover:bg-teal-800/70 transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-medium">الأكاديمية</span>
+</div>
+</a>
+<!-- Item 5: المخزن (With Notification Badge 56) -->
+<a class="group flex items-center justify-between px-3.5 py-3 rounded-xl text-teal-100/80 hover:bg-teal-800/50 hover:text-white transition-all duration-150" href="#inventory">
+<div class="flex items-center gap-3.5">
+<div class="w-8 h-8 rounded-lg bg-teal-800/40 flex items-center justify-center text-teal-300 group-hover:text-emerald-300 group-hover:bg-teal-800/70 transition-colors">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-medium">المخزن</span>
+</div>
+<!-- Warm Coral Badge as in reference -->
+<span class="px-2 py-0.5 text-xs font-bold rounded-full bg-rose-500/90 text-white shadow-sm ring-2 ring-teal-900">
+            56
+          </span>
+</a>
+<!-- Item 6: Admin Dashboard (Active Highlighted Selection) -->
+<a class="group relative flex items-center justify-between px-3.5 py-3 rounded-xl bg-teal-700/60 text-white shadow-inner border border-teal-600/40 transition-all duration-150" href="#admin-dashboard">
+<!-- Active Indicator Pill/Bar -->
+<div class="absolute right-0 top-2 bottom-2 w-1.5 bg-emerald-400 rounded-l-full"></div>
+<div class="flex items-center gap-3.5 pl-2">
+<div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center shadow-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-sm font-semibold tracking-wide">Admin dashboard</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+</a>
+</nav>
+</div>
+<!-- BEGIN: User / Profile Footer Section -->
+<div class="p-4 border-t border-teal-850/80 bg-teal-950/40" data-purpose="drawer-footer-user">
+<div class="flex items-center justify-between p-2 rounded-xl bg-teal-900/50 border border-teal-800/60 hover:border-teal-700 transition-colors">
+<!-- User Info & Avatar -->
+<div class="flex items-center gap-3">
+<!-- Profile Avatar with subtle status border -->
+<div class="relative">
+<div class="w-9 h-9 rounded-full bg-teal-700/60 border border-emerald-400/40 flex items-center justify-center text-teal-100 font-bold text-xs shadow-inner">
+<svg class="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-teal-900"></span>
+</div>
+<!-- Titles -->
+<div class="flex flex-col">
+<span class="text-xs font-bold text-white leading-tight">المدير العام</span>
+<span class="text-[11px] text-teal-300/70 font-normal">المدير العام</span>
+</div>
+</div>
+<!-- Security / Quick Action Lock Icon -->
+<button class="w-8 h-8 rounded-lg bg-teal-800/50 text-teal-300 hover:text-white hover:bg-teal-750 flex items-center justify-center transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-400" title="قفل الشاشة / الصلاحيات الإدارية" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- END: User / Profile Footer Section -->
+</aside>
+<!-- END: Navigation Drawer -->
+
+
+
+
+
+
+</body></html>

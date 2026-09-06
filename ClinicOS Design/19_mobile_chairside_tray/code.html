@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>التراي والعمليات السريرية - عيادتي</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Font: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#0a362f',
+              tealDark: '#062420',
+              tealLight: '#114a40',
+              primary: '#0e705b',
+              accent: '#10b981'
+            },
+            danger: {
+              dark: '#992d2d',
+              light: '#fef2f2',
+              border: '#fecaca',
+              text: '#dc2626'
+            }
+          },
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbars">
+    /* إخفاء شريط التمرير الأفقي للأناقة البصرية */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-arabic text-slate-800 antialiased flex justify-center min-h-screen selection:bg-teal-700 selection:text-white">
+<!-- BEGIN: MobileDeviceContainer -->
+<!-- Container mimicking iPhone 14/15 frame (~390px-430px) -->
+<div class="w-full max-w-[420px] bg-slate-50 min-h-screen flex flex-col shadow-2xl relative border-x border-gray-200 pb-36">
+<!-- BEGIN: iOSStatusBar -->
+<header class="w-full pt-3 px-6 pb-2 flex justify-between items-center bg-white sticky top-0 z-30 select-none">
+<!-- Time -->
+<span class="text-sm font-semibold tracking-tight text-slate-900">9:41</span>
+<!-- Dynamic Island / Sensor Notch Placeholder (Subtle indicator) -->
+<div class="w-20 h-4 bg-black/5 rounded-full"></div>
+<!-- System Icons -->
+<div class="flex items-center gap-1.5 text-slate-900">
+<!-- Cellular Signal -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M2 17h2.5v4H2v-4zm5-4h2.5v8H7v-8zm5-5h2.5v13H12V8zm5-5h2.5v18H17V3z"></path>
+</svg>
+<!-- Wifi Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.73 0 7.15 1.43 9.72 3.78L12 19.38 2.28 11.28C4.85 8.93 8.27 7.5 12 7.5z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="flex items-center">
+<div class="w-5 h-2.5 border border-slate-900 rounded-sm p-0.5 flex items-center">
+<div class="h-full w-3 bg-slate-900 rounded-2xs"></div>
+</div>
+<div class="w-0.5 h-1 bg-slate-900 rounded-r-xs"></div>
+</div>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: AppMainHeader -->
+<section class="bg-white border-b border-gray-200 px-4 py-3 sticky top-9 z-20 shadow-xs">
+<!-- Upper Header Row -->
+<div class="flex items-center justify-between gap-2">
+<!-- Left: Quick Actions (Manager Badge & Hamburger) -->
+<div class="flex items-center gap-2">
+<button aria-label="القائمة الرئيسية" class="p-2 hover:bg-slate-100 rounded-lg text-slate-700 transition">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- المدير العام button -->
+<button class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border border-gray-300 rounded-md text-slate-700 hover:bg-gray-50">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>المدير العام</span>
+</button>
+</div>
+<!-- Right: ClinicOS Logo & Context -->
+<div class="flex items-center gap-2">
+<div class="text-left leading-tight">
+<div class="flex items-center justify-end gap-1.5 font-bold text-xs text-slate-900">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>المخزن • DentSpaces</span>
+</div>
+<div class="text-[10px] text-slate-500 font-medium tracking-tight">
+              جرد لحظي — مخزن + تراي <span class="bg-gray-100 text-slate-600 px-1 py-0.2 rounded font-mono">v97</span>
+</div>
+</div>
+<div class="w-8 h-8 rounded-lg bg-brand-teal text-emerald-300 flex items-center justify-center font-bold text-sm shadow-xs">
+            ع
+          </div>
+</div>
+</div>
+<!-- Subheader: Category & Navigation Horizontal Tabs -->
+<div class="mt-3 pt-2.5 border-t border-gray-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+<!-- Dropdown "الأقسام" Button -->
+<button class="shrink-0 flex items-center gap-1 text-xs font-semibold text-slate-700 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-200 transition">
+<span>الأقسام</span>
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M19.5 8.25l-7.5 7.5-7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Active Tab: التراي 20 -->
+<button class="shrink-0 flex items-center gap-1.5 text-xs font-bold bg-brand-teal text-white px-3.5 py-1.5 rounded-full shadow-xs">
+<span>التراي</span>
+<span class="bg-emerald-500/30 text-emerald-200 text-[10px] px-1.5 py-0.2 rounded-full">20</span>
+</button>
+<!-- Other Tabs -->
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24">
+<path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>المخزن</span>
+</button>
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<span>النواقص والطلب</span>
+<span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-1.5 py-0.2 rounded-full">28</span>
+</button>
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<span>الاستلام</span>
+</button>
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<span>المرتجعات</span>
+</button>
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<span>الموردين</span>
+</button>
+<button class="shrink-0 flex items-center gap-1 text-xs font-medium text-slate-600 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">
+<span>الاعتمادات</span>
+</button>
+</div>
+</section>
+<!-- END: AppMainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-4 py-4 space-y-4">
+<!-- Screen Title & Educational Subtitle -->
+<section class="space-y-1.5" data-purpose="screen-title">
+<h1 class="text-xl font-black text-slate-900 tracking-tight">التراي</h1>
+<p class="text-[12px] leading-relaxed text-slate-600 font-normal bg-white p-3 rounded-xl border border-gray-200/80 shadow-xs">
+          سجّل الإجراء وانت واقف معاه، وطلّع الكميات الفعلية. الكمية بتتحجز من التراي فوراً <span class="text-amber-700 font-semibold">(معلّقة)</span>، وبعد اعتماد المدير من «الاعتمادات» بيتأكد الخصم.
+        </p>
+</section>
+<!-- Primary Action: Register Procedure -->
+<section data-purpose="primary-action">
+<button class="w-full bg-brand-teal hover:bg-brand-tealDark active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base transition-all duration-150">
+<svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>+ سجّل الإجراء</span>
+</button>
+</section>
+<!-- Search Input Bar -->
+<section data-purpose="tray-search">
+<div class="relative">
+<input class="w-full bg-white text-xs text-slate-800 placeholder-slate-400 pl-4 pr-10 py-3 rounded-xl border border-gray-300 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-hidden shadow-xs transition" placeholder="دور في التراي..." type="search"/>
+<div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</section>
+<!-- Section: Active Tray Inventory Status -->
+<section class="space-y-2.5" data-purpose="unit-inventory-list">
+<div class="flex items-center justify-between px-1">
+<h2 class="text-xs font-bold text-slate-700">الموجود على اليونت دلوقتي</h2>
+<span class="text-[11px] font-medium text-slate-400">4 أصناف مسجلة</span>
+</div>
+<!-- Inventory Cards Stack -->
+<div class="space-y-2.5">
+<!-- Card 1: كمبوزيت -->
+<div class="bg-white rounded-xl p-3.5 border-r-4 border-r-rose-500 border-y border-l border-gray-200/90 shadow-xs">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-sm font-bold text-slate-900">كمبوزيت</h3>
+<span class="text-[11px] text-slate-500">متاح على اليونت</span>
+</div>
+<div class="text-left">
+<span class="text-lg font-black text-rose-600 block leading-none">0</span>
+<span class="text-[10px] text-slate-500">استخدام</span>
+</div>
+</div>
+<!-- Alert Badge inside card -->
+<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-rose-600 font-semibold bg-rose-50/70 -mx-1.5 px-2.5 py-1 rounded-md">
+<div class="flex items-center gap-1">
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+<span class="text-xs">🔔</span>
+</div>
+</div>
+<!-- Card 2: بوندينج -->
+<div class="bg-white rounded-xl p-3.5 border-r-4 border-r-rose-500 border-y border-l border-gray-200/90 shadow-xs">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-sm font-bold text-slate-900">بوندينج</h3>
+<span class="text-[11px] text-slate-500">متاح على اليونت</span>
+</div>
+<div class="text-left">
+<span class="text-lg font-black text-rose-600 block leading-none">0</span>
+<span class="text-[10px] text-slate-500">استخدام</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-rose-600 font-semibold bg-rose-50/70 -mx-1.5 px-2.5 py-1 rounded-md">
+<div class="flex items-center gap-1">
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+<span class="text-xs">🔔</span>
+</div>
+</div>
+<!-- Card 3: أنيستيتك -->
+<div class="bg-white rounded-xl p-3.5 border-r-4 border-r-rose-500 border-y border-l border-gray-200/90 shadow-xs">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-sm font-bold text-slate-900">أنيستيتك</h3>
+<span class="text-[11px] text-slate-500">متاح على اليونت</span>
+</div>
+<div class="text-left">
+<span class="text-lg font-black text-rose-600 block leading-none">0</span>
+<span class="text-[10px] text-slate-500">كارتريدج</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-rose-600 font-semibold bg-rose-50/70 -mx-1.5 px-2.5 py-1 rounded-md">
+<div class="flex items-center gap-1">
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+<span class="text-xs">🔔</span>
+</div>
+</div>
+<!-- Card 4: نيدل -->
+<div class="bg-white rounded-xl p-3.5 border-r-4 border-r-rose-500 border-y border-l border-gray-200/90 shadow-xs">
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-sm font-bold text-slate-900">نيدل</h3>
+<span class="text-[11px] text-slate-500">متاح على اليونت</span>
+</div>
+<div class="text-left">
+<span class="text-lg font-black text-rose-600 block leading-none">0</span>
+<span class="text-[10px] text-slate-500">إبرة</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-rose-600 font-semibold bg-rose-50/70 -mx-1.5 px-2.5 py-1 rounded-md">
+<div class="flex items-center gap-1">
+<span>خلص من التراي • نافد بالمخزن</span>
+</div>
+<span class="text-xs">🔔</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: FloatingAlertBanner -->
+<!-- التنبيه العريض في أسفل الصفحة فوق القائمة السفلية تماماً كما بالصورة -->
+<aside class="fixed bottom-16 left-0 right-0 max-w-[420px] mx-auto px-3 z-30 pointer-events-auto" data-purpose="shortage-warning-banner">
+<div class="bg-rose-900 text-white rounded-xl p-3 shadow-lg flex items-center justify-between gap-2 border border-rose-700/60 backdrop-blur-sm">
+<!-- Text & Icon Details -->
+<div class="flex items-start gap-2 overflow-hidden">
+<span class="text-base shrink-0 mt-0.5">🔔</span>
+<div class="text-[11px] leading-tight font-medium text-rose-100">
+<span class="font-bold text-white">28 صنف فاضي —</span>
+<span>والمخزن مفيهوش رصيد، محتاج استلام طلبية الأول</span>
+</div>
+</div>
+<!-- Action Button -->
+<button class="shrink-0 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-semibold text-[11px] py-2 px-2.5 rounded-lg border border-white/20 transition flex items-center gap-1 whitespace-nowrap">
+<span>مفيش رصيد للسحب</span>
+<span class="text-xs">←</span>
+</button>
+</div>
+</aside>
+<!-- END: FloatingAlertBanner -->
+<!-- BEGIN: MobileBottomNavigation -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white/95 backdrop-blur-md border-t border-gray-200 px-6 py-2 z-40 flex justify-between items-center" data-purpose="mobile-bottom-tabs">
+<!-- Tab: المخزن (Active) -->
+<a class="flex flex-col items-center gap-1 text-brand-teal group" href="#inventory">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+<svg class="w-4 h-4 text-brand-teal" fill="currentColor" viewbox="0 0 24 24">
+<path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 4v10h16V8H4zm4 2h8v2H8v-2z"></path>
+</svg>
+</div>
+<span class="text-[10px] font-bold">المخزن</span>
+</a>
+<!-- Tab: المهام -->
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-800 transition" href="#tasks">
+<div class="w-8 h-8 flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[10px] font-medium">المهام</span>
+</a>
+<!-- Tab: الإدارة -->
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-800 transition" href="#admin">
+<div class="w-8 h-8 flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[10px] font-medium">الإدارة</span>
+</a>
+<!-- Tab: الأكاديمية -->
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-800 transition" href="#academy">
+<div class="w-8 h-8 flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[10px] font-medium">الأكاديمية</span>
+</a>
+</nav>
+<!-- END: MobileBottomNavigation -->
+</div>
+<!-- END: MobileDeviceContainer -->
+</body></html>

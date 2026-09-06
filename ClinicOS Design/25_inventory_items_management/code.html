@@ -1,0 +1,441 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DentSpaces • جرد الأصناف - إدارة الأداء</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            pine: {
+              850: '#072420',
+              900: '#0a2e29',
+              950: '#051815',
+            },
+            clinical: {
+              teal: '#0d6559',
+              emerald: '#10b981',
+              surface: '#f4fbf8',
+              card: '#ffffff',
+              border: '#e1ede7',
+              borderDark: '#cbdad3',
+              subtle: '#627c75',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f7faf9;
+      color: #1a2e2b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-[#f7faf9] min-h-screen text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b border-[#e5eeea] px-6 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+<!-- Right side (Start in RTL): Brand & Nav button -->
+<div class="flex items-center gap-3">
+<button aria-label="القائمة الرئيسية" class="p-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+<span class="text-slate-400">المخزن</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-700 font-semibold">عيادتي • إدارة الأداء</span>
+</div>
+</div>
+<!-- Left side (End in RTL): Date & Status -->
+<div class="flex items-center gap-4 text-xs text-slate-500 font-medium">
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: PageContainer -->
+<main class="max-w-[1240px] mx-auto px-4 sm:px-6 py-5 space-y-5">
+<!-- BEGIN: BranchAndIdentityBanner -->
+<section class="flex flex-wrap items-center justify-between gap-4 bg-white p-3.5 px-4 rounded-xl border border-[#e2ece7] shadow-sm">
+<!-- User / Role pill button -->
+<div class="flex items-center">
+<button class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المدير العام</span>
+</button>
+</div>
+<!-- Branch Info & Real-time Indicator -->
+<div class="flex items-center gap-3">
+<div class="text-right">
+<div class="flex items-center gap-2 justify-end">
+<span class="text-xs text-slate-500 font-medium">المخزن</span>
+<span class="text-sm font-bold text-slate-800">DentSpaces</span>
+</div>
+<div class="text-[11px] text-emerald-700 font-medium flex items-center gap-1.5 mt-0.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>جرد لحظي — مخزن + تراي <span class="font-mono text-[10px] text-slate-400">v97</span></span>
+</div>
+</div>
+<div class="w-9 h-9 rounded-xl bg-pine-900 text-white flex items-center justify-center font-bold text-xs shadow-inner">
+          DS
+        </div>
+</div>
+</section>
+<!-- END: BranchAndIdentityBanner -->
+<!-- BEGIN: SubNavigationTabs -->
+<nav aria-label="أقسام المخزن" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-medium no-scrollbar border-b border-transparent">
+<!-- Active Dropdown Tab -->
+<div class="relative shrink-0">
+<button class="flex items-center gap-1.5 bg-pine-900 text-white px-3.5 py-1.5 rounded-lg shadow-sm font-bold hover:bg-pine-850 transition-colors" type="button">
+<span>جرد الأصناف</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors" type="button">
+        الاعتمادات
+      </button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الموردين</span>
+</button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المرتجعات</span>
+</button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الاستلام</span>
+</button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[10px] font-bold">28</span>
+<span>النواقص والطلب</span>
+</button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1" type="button">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المخزن</span>
+</button>
+<button class="shrink-0 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[10px] font-bold">20</span>
+<span>التراي</span>
+</button>
+</nav>
+<!-- END: SubNavigationTabs -->
+<!-- BEGIN: TitleAndActionHeader -->
+<section class="space-y-4">
+<h1 class="text-xl font-bold text-slate-900 tracking-tight">جرد الأصناف</h1>
+<!-- Top Action Bar: Add Item Button + Search Input -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+<!-- New Item Button -->
+<button class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-4 py-2 rounded-lg text-xs shadow-sm transition-all hover:border-slate-400" type="button">
+<span class="text-emerald-600 text-base leading-none font-bold">+</span>
+<span>صنف جديد</span>
+</button>
+<!-- Search Bar -->
+<div class="relative w-full sm:w-80">
+<input class="w-full text-xs bg-white border border-slate-200 rounded-lg pl-3 pr-9 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 shadow-sm" placeholder="دور على صنف..." type="text">
+<div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Categories / Filter Tags -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-300 font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition-colors" type="button">
+          الكل
+        </button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors" type="button">
+          مواد
+        </button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors" type="button">
+          حشو
+        </button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>مخدر</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>أدوات</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>عصب</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>مستهلكات</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>تقويم</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>طباعة</span>
+</button>
+<button class="px-3.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span>سيمنت</span>
+</button>
+</div>
+<!-- Manager Notice Alert -->
+<div class="bg-emerald-50/70 border border-emerald-300/80 rounded-xl p-2.5 px-4 flex items-center gap-2 text-xs text-emerald-800">
+<svg class="w-4 h-4 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<p class="font-medium">
+          إنت مدير — أي تعديل أو إضافة أو حذف بيتطبق على طول من غير اعتماد
+        </p>
+</div>
+</section>
+<!-- END: TitleAndActionHeader -->
+<!-- BEGIN: InventoryCardsList -->
+<section aria-label="قائمة الأصناف" class="space-y-3.5 pt-1">
+<!-- Item Card 1: كمبوزيت -->
+<article class="bg-white rounded-xl border border-slate-200/90 shadow-sm hover:border-slate-300 transition-shadow overflow-hidden">
+<!-- Card Top Bar: Title & Actions -->
+<div class="px-5 py-3 flex items-center justify-between border-b border-slate-100 bg-white">
+<!-- Card Action Buttons (Left) -->
+<div class="flex items-center gap-1.5">
+<button aria-label="حذف الصنف" class="text-rose-500 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعديل</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعطيل</span>
+</button>
+</div>
+<!-- Card Header Info (Right) -->
+<div class="flex items-center gap-2.5">
+<span class="bg-rose-50 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded border border-rose-100">
+              نافد
+            </span>
+<h2 class="text-sm font-bold text-slate-900">كمبوزيت</h2>
+</div>
+</div>
+<!-- Card Metrics Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x sm:divide-x-reverse divide-slate-100 py-3.5 px-4 text-center text-xs">
+<!-- Col 1: المخزن -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المخزن</span>
+<span class="font-bold text-rose-600 text-sm">0 عبوة</span>
+</div>
+<!-- Col 2: التراي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">التراي</span>
+<span class="font-bold text-rose-600 text-sm">0 استخدام</span>
+</div>
+<!-- Col 3: عبوة بتدي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">عبوة بتدي</span>
+<span class="font-bold text-slate-800 text-sm">20 استخدام</span>
+</div>
+<!-- Col 4: سعر عبوة -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">سعر عبوة</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+<!-- Col 5: المورد -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المورد</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+</div>
+<!-- Card Footer: Alerts & Meta Tags -->
+<div class="px-5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px]">
+<div class="flex items-center gap-2 text-slate-500 font-medium">
+<span>تنبيه عند 2 عبوة مخزن • 5 استخدام تراي</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 hover:text-slate-600">مواد</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-400 hover:text-slate-600">حشو</span>
+</div>
+</div>
+</article>
+<!-- Item Card 2: بوندينج -->
+<article class="bg-white rounded-xl border border-slate-200/90 shadow-sm hover:border-slate-300 transition-shadow overflow-hidden">
+<!-- Card Top Bar: Title & Actions -->
+<div class="px-5 py-3 flex items-center justify-between border-b border-slate-100 bg-white">
+<!-- Actions (Left) -->
+<div class="flex items-center gap-1.5">
+<button aria-label="حذف الصنف" class="text-rose-500 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعديل</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعطيل</span>
+</button>
+</div>
+<!-- Header Info (Right) -->
+<div class="flex items-center gap-2.5">
+<span class="bg-rose-50 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded border border-rose-100">
+              نافد
+            </span>
+<h2 class="text-sm font-bold text-slate-900">بوندينج</h2>
+</div>
+</div>
+<!-- Card Metrics Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x sm:divide-x-reverse divide-slate-100 py-3.5 px-4 text-center text-xs">
+<!-- Col 1: المخزن -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المخزن</span>
+<span class="font-bold text-rose-600 text-sm">0 عبوة</span>
+</div>
+<!-- Col 2: التراي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">التراي</span>
+<span class="font-bold text-rose-600 text-sm">0 استخدام</span>
+</div>
+<!-- Col 3: عبوة بتدي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">عبوة بتدي</span>
+<span class="font-bold text-slate-800 text-sm">60 استخدام</span>
+</div>
+<!-- Col 4: سعر عبوة -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">سعر عبوة</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+<!-- Col 5: المورد -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المورد</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+</div>
+<!-- Card Footer -->
+<div class="px-5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px]">
+<div class="flex items-center gap-2 text-slate-500 font-medium">
+<span>تنبيه عند 1 عبوة مخزن • 10 استخدام تراي</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 hover:text-slate-600">مواد</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-400 hover:text-slate-600">حشو</span>
+</div>
+</div>
+</article>
+<!-- Item Card 3: أنيستيتك -->
+<article class="bg-white rounded-xl border border-slate-200/90 shadow-sm hover:border-slate-300 transition-shadow overflow-hidden">
+<!-- Card Top Bar: Title & Actions -->
+<div class="px-5 py-3 flex items-center justify-between border-b border-slate-100 bg-white">
+<!-- Actions (Left) -->
+<div class="flex items-center gap-1.5">
+<button aria-label="حذف الصنف" class="text-rose-500 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعديل</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعطيل</span>
+</button>
+</div>
+<!-- Header Info (Right) -->
+<div class="flex items-center gap-2.5">
+<span class="bg-rose-50 text-rose-700 text-[11px] font-bold px-2 py-0.5 rounded border border-rose-100">
+              نافد
+            </span>
+<h2 class="text-sm font-bold text-slate-900">أنيستيتك</h2>
+</div>
+</div>
+<!-- Card Metrics Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x sm:divide-x-reverse divide-slate-100 py-3.5 px-4 text-center text-xs">
+<!-- Col 1: المخزن -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المخزن</span>
+<span class="font-bold text-rose-600 text-sm">0 علبة</span>
+</div>
+<!-- Col 2: التراي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">التراي</span>
+<span class="font-bold text-rose-600 text-sm">0 كارتريدج</span>
+</div>
+<!-- Col 3: علبة بتدي -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">علبة بتدي</span>
+<span class="font-bold text-slate-800 text-sm">50 كارتريدج</span>
+</div>
+<!-- Col 4: سعر علبة -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">سعر علبة</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+<!-- Col 5: المورد -->
+<div class="py-2 sm:py-0">
+<span class="text-slate-400 text-[11px] block mb-1">المورد</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+</div>
+<!-- Card Footer -->
+<div class="px-5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px]">
+<div class="flex items-center gap-2 text-slate-500 font-medium">
+<span>تنبيه عند 2 علبة مخزن • 10 كارتريدج تراي</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-slate-400 hover:text-slate-600">أدوية</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-400 hover:text-slate-600">مخدر</span>
+</div>
+</div>
+</article>
+</section>
+<!-- END: InventoryCardsList -->
+</main>
+<!-- END: PageContainer -->
+</body></html>

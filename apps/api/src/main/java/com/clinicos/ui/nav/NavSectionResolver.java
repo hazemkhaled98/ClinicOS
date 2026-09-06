@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
+
 /**
  * Maps a membership's effective permission codes to the drawer sections it may
  * open, following the legacy panel's rules:
@@ -28,14 +30,14 @@ public final class NavSectionResolver {
             "received", "itemAnalysis", "approvals", "ledger");
 
     private static final List<NavSection> ALL = List.of(
-            new NavSection("emp", "employees", "إدارة الموظفين", "إدارة الموظفين", "إدارة ملفات الموظفين وصلاحياتهم"),
-            new NavSection("myeval", "my-evaluation", "تقييمي", "تقييمي", "تقييم الأداء الشخصي"),
-            new NavSection("quick", "quick-access", "الوصول السريع", "الوصول السريع", "أدوات سريعة للمهام اليومية"),
-            new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية"),
-            new NavSection("prep", "prep", "إعداد الإجراءات", "إعداد الإجراءات", "إعداد قوائم الإجراءات الطبية"),
-            new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية"),
-            new NavSection("inv", "inventory", "المخزون", "المخزون", "إدارة مخزون العيادة وتكاليف الإجراءات"),
-            new NavSection("ceo", "admin-dashboard", "لوحة التحكم", "لوحة التحكم", "التحليلات التشغيلية والإدارية"));
+            new NavSection("emp", "employees", "تسجيل الموظف", "تسجيل الموظف", "إدارة ملفات الموظفين وصلاحياتهم", VaadinIcon.USER),
+            new NavSection("myeval", "my-evaluation", "تقييمي", "تقييمي", "تقييم الأداء الشخصي", VaadinIcon.EDIT),
+            new NavSection("quick", "quick-access", "الوصول السريع", "الوصول السريع", "أدوات سريعة للمهام اليومية", VaadinIcon.BOLT),
+            new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية", VaadinIcon.TASKS),
+            new NavSection("prep", "prep", "تحضير الجلسات", "تحضير الجلسات", "إعداد قوائم الإجراءات الطبية", VaadinIcon.CLIPBOARD_CHECK),
+            new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية", VaadinIcon.STAR),
+            new NavSection("inv", "inventory", "المخزن", "المخزن", "إدارة مخزون العيادة وتكاليف الإجراءات", VaadinIcon.ARCHIVE),
+            new NavSection("ceo", "admin-dashboard", "لوحة التحكم", "لوحة التحكم", "التحليلات التشغيلية والإدارية", VaadinIcon.CHART));
 
     private NavSectionResolver() {
     }

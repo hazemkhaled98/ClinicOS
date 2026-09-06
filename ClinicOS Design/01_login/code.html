@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="ar" dir="rtl" style=""><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - عيادتي (Login Option B)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+    }
+    .custom-gradient-bg {
+      background: radial-gradient(circle at 10% 20%, #0d3832 0%, #0a2e29 60%, #061e1b 100%);
+    }
+    .subtle-mesh {
+      background-color: #f6faf8;
+      background-image: 
+        radial-gradient(at 85% 15%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 10% 90%, rgba(10, 46, 41, 0.05) 0px, transparent 50%),
+        linear-gradient(rgba(10, 46, 41, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10, 46, 41, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+    .glass-feature-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between overflow-x-hidden relative text-[#0a2e29] bg-[#f6faf8]">
+
+  <!-- Split Screen Grid -->
+  <main class="w-full min-h-screen flex flex-col lg:flex-row flex-1">
+    
+    <!-- Left Column: Login Card & Brand Portal (Dark Teal Ambient) -->
+    <section class="lg:w-5/12 w-full custom-gradient-bg relative flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 shadow-2xl z-10 border-l border-[#10b981]/20">
+      
+      <!-- Ambient Glow Orbs -->
+      <div class="absolute top-1/4 -left-20 w-72 h-72 bg-[#10b981]/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-10 right-0 w-64 h-64 bg-[#0a2e29] rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Modern Card Container -->
+      <div class="w-full max-w-[420px] bg-white rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10 border border-emerald-50">
+        
+        <!-- Logo & Brand Header -->
+        <div class="flex flex-col items-center text-center mb-8">
+          <div class="w-24 h-24 mb-6 flex items-center justify-center bg-white rounded-2xl shadow-lg border border-slate-200/80 p-1.5"><img src="https://lh3.googleusercontent.com/aida/AEtjO1XScqEgTDVClopUSo-0G-eA_sV2OYYc2rKgrtxAgU4jl2efVpjusDauXh8VnyPQVTth3YxcP3e5i6c4ckbmbvMeQfkMH-7kugIOIesTnm32XD8sMSalxQGi6WkxVdcLpG2yKW5WvEVM4sz2j-TY-ASGPPtVdEtRVrKWTL3u3FgImf2-bEJtmZ0lxBOPQMTBojGQ4Km-N4I_C9e9cowE5AiX_y1IPsKMO-gN_ju1qrSWKAwMsTPx4ig291o" alt="ClinicOS Logo" class="object-contain drop-shadow w-full h-full"></div>
+          <h1 class="text-2xl font-bold tracking-tight text-[#0a2e29]">عيادتي · إدارة الأداء</h1>
+          <p class="text-sm font-medium text-slate-500 mt-1">سجّل دخولك للمتابعة</p>
+        </div>
+
+        <!-- Form Elements -->
+        <form class="space-y-5" onsubmit="event.preventDefault();">
+          <!-- Username Field -->
+          <div>
+            <label for="username" class="block text-xs font-bold text-slate-700 mb-1.5 text-right">اسم المستخدم</label>
+            <div class="relative">
+              <input id="username" type="text" placeholder="اسم المستخدم" class="w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#0a2e29] focus:ring-2 focus:ring-[#0a2e29]/10 text-slate-800 transition-all placeholder:text-slate-400">
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5 text-right">كلمة المرور</label>
+            <div class="relative">
+              <input id="password" type="password" placeholder="كلمة المرور" class="w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-[#0a2e29] focus:ring-2 focus:ring-[#0a2e29]/10 text-slate-800 transition-all placeholder:text-slate-400">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-[#0a2e29] hover:bg-[#0d3b34] active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-[#0a2e29]/20 transition-all flex items-center justify-center gap-2 group">
+              <span class="">دخول</span>
+              <svg class="w-4 h-4 text-[#10b981] group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+          </div>
+        </form>
+
+        <!-- Security Footer Badge -->
+        <div class="mt-8 pt-5 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-400 font-medium">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="">تسجيل آمن ومشفر 256-bit</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Right Column: Re-imagined Modern Showcase with Pillars & Visual Hierarchy (SAME TEXT) -->
+    <section class="lg:w-7/12 w-full subtle-mesh relative flex flex-col justify-between p-8 sm:p-14 lg:p-20">
+      
+      <!-- Top Bar Badges -->
+      <div class="flex flex-wrap items-center justify-between gap-4 w-full">
+        <!-- Badge 1: System status -->
+        <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/90 border border-emerald-200/60 shadow-sm text-xs font-semibold text-[#0a2e29]">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="">نظام الإدارة السريرية المتقدم</span>
+          <span class="text-slate-300">|</span>
+          <span class="text-emerald-700 font-normal">v3.2.0</span>
+        </div>
+
+        <!-- Badge 2: Health Compliance -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50/80 border border-emerald-200 text-xs font-semibold text-[#0a2e29]">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+          <span class="">منصة مشفّرة ومطابقة لمعايير القطاع الصحي</span>
+        </div>
+      </div>
+
+      <!-- Center Hero Display: Modernized Typography & Interactive Card Columns -->
+      <div class="my-auto py-12 max-w-2xl">
+        
+        <!-- Decorative subtle icon accent -->
+        <div class="w-12 h-1.5 bg-gradient-to-r from-emerald-500 to-[#0a2e29] rounded-full mb-6"></div>
+
+        <!-- Main Title (Same text, upgraded high-impact styling) -->
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0a2e29] leading-[1.25] tracking-tight">
+          إدارة الكفاءة السريرية <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-[#0a2e29]">بمعايير عالمية متكاملة</span>
+        </h2>
+
+        <!-- Paragraph Description (Same verbatim text) -->
+        <p class="mt-6 text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
+          متابعة مباشرة لمؤشرات الأداء، تدفق المراجعين، والإنتاجية الطبية في منصة موحدة مصممة لرفع كفاءة المنشآت الطبية الحديثة.
+        </p>
+
+        <!-- Redesigned Feature / Metric Highlights (Visual Breakdown of the statement) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10">
+          
+          <!-- Pillar 1: مؤشرات الأداء -->
+          <div class="glass-feature-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 text-[#0a2e29]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-slate-400 mb-1">المؤشرات الحية</div>
+            <div class="text-sm font-bold text-[#0a2e29]">مؤشرات الأداء السريري</div>
+            <div class="text-[11px] text-slate-500 mt-1">تتبع آني لكفاءة الجلسات والعمليات</div>
+          </div>
+
+          <!-- Pillar 2: تدفق المراجعين -->
+          <div class="glass-feature-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group">
+            <div class="w-10 h-10 rounded-xl bg-teal-100/70 text-teal-800 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 text-[#0a2e29]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-slate-400 mb-1">مسار الاستقبال</div>
+            <div class="text-sm font-bold text-[#0a2e29]">تدفق المراجعين الذكي</div>
+            <div class="text-[11px] text-slate-500 mt-1">تقليص أوقات الانتظار والأشغال</div>
+          </div>
+
+          <!-- Pillar 3: الإنتاجية الطبية -->
+          <div class="glass-feature-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <svg class="w-5 h-5 text-[#0a2e29]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              </svg>
+            </div>
+            <div class="text-xs font-bold text-slate-400 mb-1">الربحية والتحكم</div>
+            <div class="text-sm font-bold text-[#0a2e29]">الإنتاجية الطبية</div>
+            <div class="text-[11px] text-slate-500 mt-1">ضبط الهدر والمخزون والتشغيل</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Footer Elements (Same verbatim copy: الإصدار و الحقوق) -->
+      <div class="w-full flex items-center justify-between text-xs text-slate-400 border-t border-slate-200/80 pt-6">
+        <div class="font-medium">الإصدار 3.2.0</div>
+        <div class="">© 2025 عيادتي ClinicOS · جميع الحقوق محفوظة</div>
+      </div>
+
+    </section>
+
+  </main>
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

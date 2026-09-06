@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>عيادتي - الأهداف والتحفيز وبرنامج الشارات</title>
+<!-- Tailwind CSS v3 with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0a2e29',
+              emerald: '#0e4a42',
+              light: '#e6f3f0',
+              accent: '#10b981',
+              muted: '#64748b'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scroll-and-resets">
+    /* Hide scrollbar for clean mobile horizontal scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Noto Sans Arabic', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-28">
+<!-- BEGIN: iOSStatusBar -->
+<!-- Top device status bar for simulated iOS mobile frame -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md px-6 py-2.5 flex items-center justify-between text-xs font-semibold text-slate-800 border-b border-slate-100" data-purpose="status-bar">
+<span class="tracking-tight text-sm font-bold">9:41</span>
+<div class="flex items-center gap-1.5">
+<!-- Cellular Signal Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 2c3.87 0 7 3.13 7 7 0 1.54-.5 2.97-1.35 4.14L12 19.64l-5.65-3.5C5.5 14.97 5 13.54 5 12c0-3.87 3.13-7 7-7z" opacity="0.3"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+<!-- WiFi Icon -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.56 0 6.81 1.34 9.27 3.55L12 19.31 2.73 11.05C5.19 8.84 8.44 7.5 12 7.5z"></path>
+</svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 border border-slate-700 rounded-sm p-0.5 flex items-center">
+<div class="h-full w-3 bg-slate-800 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: AppHeader -->
+<!-- Header showing clinic context, date, and menu button -->
+<header class="bg-white px-4 py-3 border-b border-slate-100 flex items-center justify-between" data-purpose="app-header">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-xl bg-brand-dark flex items-center justify-center text-white font-bold text-lg shadow-sm">
+        ع
+      </div>
+<div>
+<div class="text-[11px] text-brand-muted font-medium flex items-center gap-1">
+<span>لوحة التحليلات</span>
+<span>•</span>
+<span class="text-brand-dark font-semibold">عيادتي</span>
+<span>•</span>
+<span>إدارة الأداء</span>
+</div>
+<div class="text-xs text-slate-500 font-medium">الأحد، 6 سبتمبر</div>
+</div>
+</div>
+<!-- Menu Action Button -->
+<button aria-label="القائمة" class="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</header>
+<!-- END: AppHeader -->
+<!-- BEGIN: MainContent -->
+<main class="p-4 space-y-4 max-w-lg mx-auto">
+<!-- Title & Subtitle Banner -->
+<div class="pt-1 pb-1" data-purpose="page-title">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="text-2xl font-black text-brand-dark tracking-tight">Admin dashboard</h1>
+<p class="text-xs text-slate-500 mt-0.5 font-medium">نظرة شاملة على الأداء والمرتبات والحوافز</p>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-brand-accent border border-emerald-200/50">
+          مباشر
+        </span>
+</div>
+</div>
+<!-- BEGIN: HorizontalTabsNav -->
+<!-- Management navigation pills with horizontal drag -->
+<nav aria-label="تبويبات الإدارة" class="overflow-x-auto no-scrollbar py-1" data-purpose="tabs-navigation">
+<div class="flex items-center gap-2 min-w-max">
+<!-- Active Tab -->
+<button class="bg-brand-dark text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md shadow-brand-dark/20 flex items-center gap-1.5" type="button">
+<span>★</span>
+<span>الأهداف والتحفيز</span>
+</button>
+<!-- Inactive Tabs -->
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          نظرة عامة
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          ملف الموظف
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          المهام
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          الإعدادات
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          المستخدمون
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          سجل النشاط
+        </button>
+<button class="bg-white border border-slate-200 text-slate-600 px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-slate-50" type="button">
+          الصلاحيات
+        </button>
+</div>
+</nav>
+<!-- END: HorizontalTabsNav -->
+<!-- BEGIN: Card1_IncentiveScope -->
+<!-- General Motivation & Scope Selector -->
+<section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100" data-purpose="incentives-overview">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-amber-500 text-base">★</span>
+<h2 class="font-bold text-sm text-slate-800">الأهداف والتحفيز</h2>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed mb-3">
+        تحكّم في برنامج الإنجاز والمكافآت: شغّل/أوقف أقسام، عدّل أهداف الأسبوع وحدود الشارات — للموظفين عموماً، أو لموظف محدّد، أو للمدير.
+      </p>
+<div class="pt-2 border-t border-slate-100">
+<label class="block text-xs font-semibold text-slate-600 mb-1.5" for="scope-selector">النطاق المطبق عليه:</label>
+<div class="relative">
+<select class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 pr-9 text-xs font-semibold text-slate-700 appearance-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark" id="scope-selector">
+<option selected="">عام لكل الموظفين 🌐</option>
+<option>أطباء الأسنان والجلدية 🩺</option>
+<option>طاقم التمريض والرعاية 💉</option>
+<option>موظفو الاستقبال والمحاسبة 📋</option>
+<option>موظف محدد (تخصيص فردي) 👤</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Card1_IncentiveScope -->
+<!-- BEGIN: Card2_VisibleSections -->
+<!-- Employee Visible Modules Toggles -->
+<section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100" data-purpose="visible-sections-config">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-base">👁️</span>
+<h2 class="font-bold text-sm text-slate-800">الأقسام الظاهرة للموظف</h2>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- Toggle Item 1 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">حلقة المستوى</span>
+</label>
+<!-- Toggle Item 2 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">السلاسل والرقم القياسي</span>
+</label>
+<!-- Toggle Item 3 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">الشارات</span>
+</label>
+<!-- Toggle Item 4 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">هدف الأسبوع</span>
+</label>
+<!-- Toggle Item 5 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">مواكبة الهدف</span>
+</label>
+<!-- Toggle Item 6 -->
+<label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-brand-dark focus:ring-brand-dark/20 border-slate-300" type="checkbox"/>
+<span class="text-xs font-medium text-slate-700">التنبيهات والتحذيرات</span>
+</label>
+</div>
+</section>
+<!-- END: Card2_VisibleSections -->
+<!-- BEGIN: Card3_WeeklyGoals -->
+<!-- Weekly Goals Configuration & Suggestion Badges -->
+<section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100" data-purpose="weekly-goals-builder">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="text-base">🎯</span>
+<h2 class="font-bold text-sm text-slate-800">أهداف الأسبوع</h2>
+</div>
+<span class="text-[11px] font-semibold text-brand-muted bg-slate-100 px-2 py-0.5 rounded-full">أقصى 3</span>
+</div>
+<!-- Active Goal Row -->
+<div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center justify-between gap-2 mb-3">
+<div class="flex items-center gap-2">
+<span class="text-base">🎯</span>
+<span class="text-xs font-bold text-slate-800">أيام في الميعاد</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 font-medium">الهدف:</span>
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" max="7" min="1" type="number" value="5"/>
+<button aria-label="حذف الهدف" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Quick Preset Suggestions Horizontal Scroll -->
+<div>
+<p class="text-[11px] font-semibold text-slate-500 mb-2">اقتراحات جاهزة — دوس للإضافة:</p>
+<div class="flex flex-wrap gap-1.5">
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>📅</span> أيام حضور
+          </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>✅</span> نسبة إنجاز المهام (%)
+          </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>⏰</span> مهام مكلّفة في موعدها
+          </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>🌟</span> أسبوع بدون تأخير
+          </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>📷</span> صور إثبات للمهام
+          </button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-[11px] text-slate-700 font-medium transition-colors" type="button">
+<span>💡</span> اقتراح مهام بنفسك (مبادرة)
+          </button>
+</div>
+</div>
+</section>
+<!-- END: Card3_WeeklyGoals -->
+<!-- BEGIN: Card4_BadgeThresholds -->
+<!-- Badge Thresholds and Percentages -->
+<section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100" data-purpose="badge-thresholds">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-base">🏅</span>
+<h2 class="font-bold text-sm text-slate-800">حدود الشارات</h2>
+</div>
+<div class="space-y-2.5">
+<!-- Item 1: قدوة الشهر -->
+<div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2">
+<span class="text-base">🎖️</span>
+<div>
+<p class="text-xs font-bold text-slate-800">قدوة الشهر</p>
+<p class="text-[10px] text-slate-400">الدرجة النهائية</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" type="number" value="90"/>
+<span class="text-xs text-slate-500 font-bold">%</span>
+</div>
+</div>
+<!-- Item 2: ملتزم بالمواعيد -->
+<div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2">
+<span class="text-base">⏱️</span>
+<div>
+<p class="text-xs font-bold text-slate-800">ملتزم بالمواعيد</p>
+<p class="text-[10px] text-slate-400">نسبة الحضور بالدقيقة</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" type="number" value="90"/>
+<span class="text-xs text-slate-500 font-bold">%</span>
+</div>
+</div>
+<!-- Item 3: منجز المهام -->
+<div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2">
+<span class="text-base">⚡</span>
+<div>
+<p class="text-xs font-bold text-slate-800">منجز المهام</p>
+<p class="text-[10px] text-slate-400">اكتمال المهام في موعدها</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" type="number" value="90"/>
+<span class="text-xs text-slate-500 font-bold">%</span>
+</div>
+</div>
+<!-- Item 4: مواظبة -->
+<div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2">
+<span class="text-base">🔥</span>
+<div>
+<p class="text-xs font-bold text-slate-800">مواظبة</p>
+<p class="text-[10px] text-slate-400">سلسلة الأيام المتتالية</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" type="number" value="3"/>
+<span class="text-xs text-slate-500 font-bold">أيام</span>
+</div>
+</div>
+<!-- Item 5: مبادر -->
+<div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-100">
+<div class="flex items-center gap-2">
+<span class="text-base">💡</span>
+<div>
+<p class="text-xs font-bold text-slate-800">مبادر</p>
+<p class="text-[10px] text-slate-400">اقتراح وحل المشكلات</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<input class="w-14 text-center py-1 text-xs font-bold rounded-lg border-slate-200 bg-white focus:border-brand-dark focus:ring-1 focus:ring-brand-dark" type="number" value="80"/>
+<span class="text-xs text-slate-500 font-bold">%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Card4_BadgeThresholds -->
+<!-- BEGIN: Card5_RewardMessages -->
+<!-- Custom Reward Level Milestone Message -->
+<section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100" data-purpose="reward-message-config">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="text-base">🎁</span>
+<h2 class="font-bold text-sm text-slate-800">رسائل المكافأة <span class="text-slate-400 font-normal">(اختياري)</span></h2>
+</div>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">مفعّل</span>
+</div>
+<p class="text-xs text-slate-500 leading-relaxed mb-3">
+        تظهر للموظف كتحفيز عند الوصول للمستوى — اكتب المكافأة اللي بتقدمها (إجازة، مكافأة مالية، أنت تحدّد).
+      </p>
+<div class="relative">
+<textarea class="w-full text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 leading-relaxed focus:border-brand-dark focus:ring-1 focus:ring-brand-dark resize-none" placeholder="اكتب نص المكافأة التشجيعية هنا..." rows="3">مثال: أحسنت العمل هذا الأسبوع! لقد تأهلت للحصول على يوم إجازة إضافي أو بونص تشجيعي في مسير الرواتب القادم 🎉</textarea>
+</div>
+<!-- Action Buttons -->
+<div class="mt-4 flex items-center gap-2">
+<button class="flex-1 bg-brand-dark hover:bg-brand-emerald text-white py-2.5 px-4 rounded-xl text-xs font-bold transition shadow-sm" type="button">
+          حفظ التغييرات
+        </button>
+<button class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition" type="button">
+          إلغاء
+        </button>
+</div>
+</section>
+<!-- END: Card5_RewardMessages -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<!-- Floating Mobile App Bottom Navigation Bar -->
+<div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-2 z-50" data-purpose="bottom-navigation">
+<div class="max-w-md mx-auto flex items-center justify-between text-center">
+<!-- Nav Item 1 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-dark transition-colors py-1" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">الرئيسية</span>
+</a>
+<!-- Nav Item 2 (Active) -->
+<a class="flex flex-col items-center gap-1 text-brand-dark font-bold py-1" href="#">
+<div class="relative">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5"></span>
+</div>
+<span class="text-[10px]">التحفيز</span>
+</a>
+<!-- Nav Item 3 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-dark transition-colors py-1" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">الموظفون</span>
+</a>
+<!-- Nav Item 4 -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-dark transition-colors py-1" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">الإعدادات</span>
+</a>
+</div>
+</div>
+<!-- END: BottomNavigation -->
+</body></html>

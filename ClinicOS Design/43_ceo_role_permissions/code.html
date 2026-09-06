@@ -1,0 +1,353 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي - توزيع الصلاحيات حسب التوصيف الوظيفي</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              pine: '#0a2e29',
+              pineDark: '#07201c',
+              pineLight: '#14463f',
+              emerald: '#10b981',
+              mint: '#34d399',
+              lightBg: '#f8fafc',
+              cardBg: '#ffffff',
+              border: '#e2e8f0'
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Layout Adjustments -->
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<!-- Custom Form Controls Styling -->
+<style data-purpose="custom-checkbox">
+    .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.3rem;
+      height: 1.3rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 0.375rem;
+      background-color: #ffffff;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.15s ease-in-out;
+    }
+    .custom-checkbox:hover {
+      border-color: #10b981;
+    }
+    .custom-checkbox:checked {
+      background-color: #10b981;
+      border-color: #10b981;
+    }
+    .custom-checkbox:checked::before {
+      content: "";
+      width: 0.75rem;
+      height: 0.75rem;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      transform: scale(1);
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+<!-- BEGIN: GlobalTopBar -->
+<header class="w-full bg-white border-b border-brand-border px-6 py-3" data-purpose="global-top-bar">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<!-- Right Side: Breadcrumbs and System Context -->
+<div class="flex items-center gap-3">
+<button aria-label="قائمة النظام" class="text-slate-600 hover:text-slate-900 transition-colors focus:outline-none">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+<span class="text-slate-500">لوحة التحليلات</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-800 font-semibold">عيادتي • إدارة الأداء</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>
+</div>
+</div>
+<!-- Left Side: Date Pill -->
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-sm">
+<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: GlobalTopBar -->
+<!-- BEGIN: MainContentContainer -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
+<!-- BEGIN: PageHeader -->
+<section class="text-center md:text-right space-y-1" data-purpose="page-title-section">
+<h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Admin dashboard</h1>
+<p class="text-sm font-medium text-slate-500">نظرة شاملة على الأداء والمرتبات والحوافز</p>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: NavigationTabsBar -->
+<nav aria-label="تبويبات لوحة الإدارة" class="flex items-center justify-center md:justify-start gap-2 overflow-x-auto py-2 px-1 text-sm font-medium no-scrollbar">
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        نظرة عامة
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        ملف الموظف
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        المهام
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        الإعدادات
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        المستخدمون
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        الأهداف والتحفيز
+      </a>
+<a class="px-4 py-2 rounded-xl text-slate-600 bg-white border border-slate-200/70 hover:bg-slate-50 transition-colors whitespace-nowrap flex items-center gap-1.5" href="#">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        سجل النشاط
+      </a>
+<!-- Active Tab: الصلاحيات -->
+<a aria-current="page" class="px-5 py-2 rounded-xl text-white bg-brand-pine shadow-sm hover:bg-brand-pineLight transition-all whitespace-nowrap flex items-center gap-1.5 font-bold" href="#">
+<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        الصلاحيات
+      </a>
+</nav>
+<!-- END: NavigationTabsBar -->
+<!-- BEGIN: PermissionsMainCard -->
+<div class="bg-white border border-brand-border rounded-2xl shadow-sm overflow-hidden" data-purpose="permissions-container-card">
+<!-- Header Banner / Card Top -->
+<div class="bg-brand-pine text-white p-6 sm:p-7 space-y-1 text-center md:text-right" data-purpose="card-banner-header">
+<h2 class="text-xl sm:text-2xl font-bold tracking-tight">توزيع الصلاحيات حسب التوصيف الوظيفي</h2>
+<p class="text-xs sm:text-sm text-emerald-100/90 font-normal">
+          اختار التوصيف وحدد يشوف إيه في النظام والمخزن. صلاحيات المخزن بتنطبق فورًا.
+        </p>
+</div>
+<!-- Card Body Content -->
+<div class="p-6 sm:p-8 space-y-8">
+<!-- Role Selector Pills -->
+<div class="flex flex-wrap items-center justify-start gap-3" data-purpose="role-selector">
+<!-- Active Role: مساعد طبيب -->
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-pine text-white font-bold text-sm shadow-sm hover:bg-brand-pineLight transition-colors" type="button">
+<span class="text-emerald-400">❤</span>
+<span>مساعد طبيب</span>
+</button>
+<!-- Inactive Role: موظف الاستقبال -->
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold text-sm transition-colors" type="button">
+<span>موظف الاستقبال</span>
+<span class="text-amber-500">🗂</span>
+</button>
+<!-- Inactive Role: المدير / إداري -->
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold text-sm transition-colors" type="button">
+<span>المدير / إداري</span>
+<span>👑</span>
+</button>
+</div>
+<!-- Permissions Two-Column Grid (RTL layout) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-slate-100 pt-2" data-purpose="permissions-columns">
+<!-- COLUMN 1 (Right in RTL): صلاحيات المخزن -->
+<div class="space-y-6 lg:pl-6" data-purpose="inventory-permissions-column">
+<!-- Section Header -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-slate-900 font-bold text-lg">
+<span class="text-amber-600">📦</span>
+<h3>صلاحيات المخزن</h3>
+</div>
+<p class="text-xs text-slate-500 font-medium">الأقسام اللي «مساعد طبيب» هيشوفها داخل تبويب مخزون العيادة</p>
+</div>
+<!-- Group 1: العمليات اليومية -->
+<div class="space-y-3">
+<span class="text-xs font-bold text-slate-400 tracking-wider">العمليات اليومية</span>
+<div class="space-y-2.5 pr-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">التراي</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">المخزن</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">قوائم الإجراءات</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">سجل إجراءاتي</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">جرد الأصناف</span>
+</label>
+</div>
+</div>
+<!-- Group 2: الشراء والتوريد -->
+<div class="space-y-3 pt-2">
+<span class="text-xs font-bold text-slate-400 tracking-wider">الشراء والتوريد</span>
+<div class="space-y-2.5 pr-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">النواقص والطلب</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">الاستلام</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">المرتجعات</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">الموردين</span>
+</label>
+</div>
+</div>
+<!-- Group 3: الماليات والتحليلات -->
+<div class="space-y-3 pt-2">
+<span class="text-xs font-bold text-slate-400 tracking-wider">الماليات والتحليلات</span>
+<div class="space-y-2.5 pr-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">التكاليف والربحية</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">التحليلات</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">تقارير الهدر</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">أطباء العيادة</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">تحليل الأصناف</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">الطلبيات المستلمة</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">تحليل الموردين</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">سجل الحركات</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">الاعتمادات</span>
+</label>
+</div>
+</div>
+</div>
+<!-- COLUMN 2 (Left in RTL): صلاحيات لوحة النظام -->
+<div class="space-y-6 pt-6 lg:pt-0 lg:pr-6" data-purpose="system-permissions-column">
+<!-- Section Header -->
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-slate-900 font-bold text-lg">
+<span class="text-cyan-600">💻</span>
+<h3>صلاحيات لوحة النظام</h3>
+</div>
+<p class="text-xs text-slate-500 font-medium">التبويبات اللي «مساعد طبيب» يقدر يدخلها — بتنطلق تلقائيًا على كل مستخدم بنفس التوصيف</p>
+</div>
+<!-- Dashboard Permissions Checkbox list -->
+<div class="space-y-4 pt-2 pr-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="custom-checkbox" type="checkbox">
+<span class="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">تسجيل الموظف (حضور ومهام)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">تقييم وتحقق المدير + اعتماد</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Admin dashboard</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">إدارة المهام</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">اعتماد لقطات الأكاديمية</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="custom-checkbox" type="checkbox">
+<span class="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">تعديل منهج الأكاديمية</span>
+</label>
+</div>
+</div>
+</div>
+<!-- BEGIN: NoticeAlertBar -->
+<div class="mt-8 bg-[#eefbf6] border border-emerald-200/80 rounded-xl p-4 flex items-center gap-3 text-emerald-900" data-purpose="instant-sync-notice">
+<div class="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 text-xs shadow-sm">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+</svg>
+</div>
+<span class="text-xs sm:text-sm font-semibold">
+            أي تعديل هنا بيتطبق تلقائيًا حسب التوصيف الوظيفي — مفيش حاجة محتاجة تأكيد
+          </span>
+</div>
+<!-- END: NoticeAlertBar -->
+</div>
+</div>
+<!-- END: PermissionsMainCard -->
+</main>
+<!-- END: MainContentContainer -->
+</body></html>

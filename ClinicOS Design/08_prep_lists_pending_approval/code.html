@@ -1,0 +1,205 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تحضير الجلسات - عيادتي | ClinicOS</title>
+<!-- Google Fonts: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Tajawal', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              pine: '#0a2e29',
+              teal: '#0d6559',
+              tealHover: '#0a5248',
+              surface: '#f8fafc',
+              card: '#ffffff',
+              border: '#e2e8f0',
+              muted: '#64748b',
+              accentMint: '#e6f4f1',
+              warning: '#d97706',
+              warningBg: '#fef3c7',
+              warningBorder: '#fde68a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Typography and Base Layout Styles -->
+<style data-purpose="base-theme">
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 selection:bg-brand-teal selection:text-white">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b border-brand-border sticky top-0 z-30 shadow-sm" data-purpose="app-header">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Brand Hierarchy & Navigation Item -->
+<div class="flex items-center gap-3">
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-500 hover:text-brand-teal hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-teal" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2">
+<!-- Notification Status Dot -->
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+</span>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5 text-xs text-brand-muted font-medium">
+<span>تحضير الجلسات</span>
+</div>
+<div class="text-sm font-bold text-brand-pine tracking-tight">
+              عيادتي <span class="text-slate-300 font-light mx-0.5">·</span> إدارة الأداء
+            </div>
+</div>
+</div>
+</div>
+<!-- Left Side: Date and Quick Status -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/80 border border-slate-200/80 text-xs text-slate-600 font-medium shadow-[inset_0_1px_1px_rgba(0,0,0,0.03)]">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-6xl mx-auto space-y-8">
+<!-- BEGIN: PageTitleSection -->
+<section class="space-y-1.5" data-purpose="page-title">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-brand-pine tracking-tight">
+          تحضير الجلسات
+        </h1>
+<p class="text-sm sm:text-base text-slate-500 font-normal">
+          قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة
+        </p>
+</section>
+<!-- END: PageTitleSection -->
+<!-- BEGIN: ControlBarSection -->
+<section class="bg-white rounded-2xl border border-brand-border p-5 sm:p-6 shadow-sm transition-all hover:shadow-md" data-purpose="action-bar">
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+<!-- Info Details -->
+<div class="space-y-1 max-w-2xl">
+<h2 class="text-base sm:text-lg font-bold text-brand-pine flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-brand-teal"></span>
+              قوائم تحضير الإجراءات
+            </h2>
+<p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              حضّر أدوات ومواد كل إجراء بالترتيب من غير ما تنسى حاجة. أي قائمة جديدة بيعتمدها المدير قبل الاستخدام.
+            </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-3 w-full lg:w-auto self-end lg:self-center">
+<!-- Secondary: Templates Button -->
+<button class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-brand-border bg-white text-brand-pine hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 text-sm font-semibold transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20" type="button">
+<svg class="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>قوالب جاهزة</span>
+</button>
+<!-- Primary: Add New Procedure Button -->
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealHover active:bg-teal-900 text-white text-sm font-semibold transition-all shadow-sm shadow-brand-teal/20 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:ring-offset-2" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>إجراء جديد</span>
+</button>
+</div>
+</div>
+</section>
+<!-- END: ControlBarSection -->
+<!-- BEGIN: PendingApprovalSection -->
+<section class="space-y-4" data-purpose="pending-approval-list">
+<!-- Section Header Badge -->
+<div class="flex items-center gap-2 text-slate-700 font-bold text-sm sm:text-base">
+<span aria-label="ساعة رملية" class="text-base" role="img">⏳</span>
+<h3>بانتظار الاعتماد</h3>
+</div>
+<!-- Pending Items Container -->
+<div class="space-y-3">
+<!-- Procedure Card Item -->
+<article class="group bg-white rounded-2xl border border-brand-border p-5 sm:p-6 shadow-sm hover:border-slate-300 hover:shadow-md transition-all" data-purpose="procedure-card">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+<!-- Card Information & Status -->
+<div class="space-y-2.5 flex-1">
+<!-- Status Badge -->
+<div class="flex items-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/70">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    بانتظار اعتماد المدير
+                  </span>
+</div>
+<!-- Procedure Title -->
+<div>
+<h4 class="text-lg font-bold text-brand-pine tracking-tight group-hover:text-brand-teal transition-colors">
+                    إكزامينيشن (كشف وتشخيص)
+                  </h4>
+</div>
+<!-- Meta Details -->
+<div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+<span class="flex items-center gap-1">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+                    2 أقسام
+                  </span>
+<span class="text-slate-300">·</span>
+<span>9 عنصر</span>
+<span class="text-slate-300">·</span>
+<span class="text-brand-teal font-semibold">5 أساسي</span>
+</div>
+</div>
+<!-- Action Controls -->
+<div class="flex items-center gap-2.5 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 justify-end">
+<!-- Delete Action Button -->
+<button aria-label="حذف القائمة" class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl border border-transparent hover:border-rose-100 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500/20" title="حذف القائمة" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Edit Action Button -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300" type="button">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تعديل</span>
+</button>
+<!-- Approve Action Button -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white bg-brand-teal hover:bg-brand-tealHover active:bg-teal-900 transition-colors shadow-sm shadow-brand-teal/20 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:ring-offset-1" type="button">
+<span>اعتماد</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- END: PendingApprovalSection -->
+</div>
+</main>
+<!-- END: MainContent -->
+</body></html>

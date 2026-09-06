@@ -1,0 +1,291 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>تعديل منهج الأكاديمية - عيادتي | ClinicOS</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0a2e29',
+              primary: '#0d6559',
+              hover: '#094c43',
+              accent: '#10b981',
+              light: '#f0fdf9',
+              surface: '#f4fbf8',
+              card: '#ffffff'
+            }
+          },
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif']
+          },
+          boxShadow: {
+            'card-subtle': '0 2px 8px -2px rgba(13, 101, 89, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 8px 24px -4px rgba(13, 101, 89, 0.1), 0 2px 6px -1px rgba(0, 0, 0, 0.04)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography & Micro-interactions Styles -->
+<style data-purpose="base-styles">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+<!-- BEGIN: TopNavigationBar -->
+<header class="w-full bg-white border-b border-slate-200/80 sticky top-0 z-40" data-purpose="top-navigation">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Left Controls: Menu button & Date -->
+<div class="flex items-center space-x-3 space-x-reverse">
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="h-4 w-px bg-slate-200"></div>
+<div class="flex items-center text-xs font-medium text-slate-500 gap-1.5">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+<!-- Right Controls: ClinicOS Branding -->
+<div class="flex items-center gap-3">
+<div class="text-right">
+<div class="flex items-center justify-end gap-1.5">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-sm font-bold text-slate-800">عيادتي • إدارة الأداء</span>
+</div>
+<p class="text-xs text-brand-primary font-medium">أكاديمية التأهيل</p>
+</div>
+<div class="w-9 h-9 rounded-xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary font-bold text-base shadow-sm">
+          🏥
+        </div>
+</div>
+</div>
+</header>
+<!-- END: TopNavigationBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-grow py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-7" data-purpose="curriculum-editor-main">
+<!-- BEGIN: PageHeader -->
+<section class="text-center sm:text-right space-y-1.5" data-purpose="page-title-banner">
+<h1 class="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">أكاديمية التأهيل</h1>
+<p class="text-sm sm:text-base text-slate-600 font-normal">منهج تعليمي متدرج للموظف الجديد — يتعلّم، يتدرّب، ويتقيّم خطوة بخطوة</p>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: InstructionsAndActionToolbar -->
+<section class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-card-subtle" data-purpose="curriculum-control-card">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-5 border-b border-slate-100 pb-5">
+<!-- Action Title & Back Button -->
+<div class="flex items-center justify-between md:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="text-xl">✏️</span>
+<h2 class="text-lg sm:text-xl font-bold text-slate-800">تعديل منهج الأكاديمية</h2>
+</div>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 rounded-lg border border-slate-200 transition-colors shadow-sm" type="button">
+<span>← رجوع</span>
+</button>
+</div>
+<!-- Persistence & Action Buttons -->
+<div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+<button class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-semibold transition-colors shadow-sm" type="button">
+<span>↺ استرجاع المنهج الافتراضي</span>
+</button>
+<button class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-hover text-white text-xs sm:text-sm font-bold shadow-sm shadow-brand-primary/20 transition-all hover:shadow-md" type="button">
+<span>💾 حفظ التعديلات</span>
+</button>
+</div>
+</div>
+<!-- Instruction Note & Disclaimer -->
+<div class="mt-4 pt-1 flex items-start sm:items-center gap-2 text-xs sm:text-sm text-slate-600 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100/70">
+<span class="text-amber-500 shrink-0">⚠️</span>
+<p class="leading-relaxed">
+          عدّل الوحدات والمحتوى والأسئلة ومهام التصوير. التعديلات بتتحفظ لكل العيادة. راجع المحتوى الطبي ليطابق بروتوكولات عيادتك.
+        </p>
+</div>
+</section>
+<!-- END: InstructionsAndActionToolbar -->
+<!-- BEGIN: Track1CoreUnits -->
+<section class="space-y-3.5" data-purpose="track-core-curriculum">
+<!-- Section Header -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2 font-bold text-slate-800 text-base sm:text-lg">
+<span class="text-emerald-600">✳️</span>
+<h3>الكور (للكل)</h3>
+<span class="text-xs sm:text-sm font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">(7 وحدة)</span>
+</div>
+</div>
+<!-- Unit Cards List -->
+<div class="space-y-2.5">
+<!-- Unit Item 1 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🎯</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">عقلية النجاح والمبادرة</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">3 سؤال • 1 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 2 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🧼</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">التعقيم ومكافحة العدوى (Infection Control)</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">4 سؤال • 4 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 3 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🩺</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">الأدوات (Instruments)</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">5 سؤال • 5 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 4 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🧪</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">المواد والخامات (Materials)</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">5 سؤال • 5 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 5 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🤝</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">مساعدة الطبيب أثناء الإجراء (Chairside)</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">4 سؤال • 2 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 6 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">📋</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">تسلسل الإجراءات + دور الأسيستنت (Procedures)</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">5 سؤال • 3 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Unit Item 7 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">💬</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">التعامل مع المريض</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">2 سؤال • 1 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+</div>
+<!-- Add New Unit Button -->
+<div class="pt-2">
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border-2 border-dashed border-brand-primary/30 hover:border-brand-primary bg-brand-light/60 hover:bg-brand-light text-brand-primary font-semibold text-xs sm:text-sm transition-all shadow-sm" type="button">
+<span>+ وحدة جديدة</span>
+</button>
+</div>
+</section>
+<!-- END: Track1CoreUnits -->
+<!-- BEGIN: Track2AssistantSection -->
+<section class="space-y-3.5 pt-4" data-purpose="track-assistant-curriculum">
+<!-- Section Header -->
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2 font-bold text-slate-800 text-base sm:text-lg">
+<span class="text-blue-500">👥</span>
+<h3>مسار المساعدة</h3>
+<span class="text-xs sm:text-sm font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">(1 وحدة)</span>
+</div>
+</div>
+<!-- Unit Cards List -->
+<div class="space-y-2.5">
+<!-- Assistant Unit Item 1 -->
+<div class="bg-white hover:bg-slate-50/70 border border-slate-200/90 rounded-xl p-3.5 sm:px-5 sm:py-3.5 transition-all shadow-card-subtle hover:shadow-card-hover flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="text-xl">🧰</span>
+<span class="text-sm sm:text-base font-semibold text-slate-800">الأساسيات — تجهيز وإتقان متقدم</span>
+</div>
+<div class="flex items-center gap-2 sm:gap-3">
+<span class="text-xs font-medium text-slate-500 bg-slate-100/90 px-3 py-1.5 rounded-lg whitespace-nowrap">2 سؤال • 3 صورة</span>
+<button class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-brand-primary bg-brand-light hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all" type="button">تعديل</button>
+<button aria-label="حذف الوحدة" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Track2AssistantSection -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: MainFooter -->
+<footer class="mt-auto border-t border-slate-200 bg-white py-6" data-purpose="page-footer">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-700">ClinicOS</span>
+<span>•</span>
+<span>منظومة إدارة الجودة والتأهيل المهني للعيادات</span>
+</div>
+<div class="flex items-center gap-4">
+<span>الإصدار 3.4.0</span>
+<span class="text-slate-300">|</span>
+<a class="hover:text-brand-primary transition-colors" href="#">الدعم والمساعدة</a>
+<span class="text-slate-300">|</span>
+<a class="hover:text-brand-primary transition-colors" href="#">سياسة الخصوصية</a>
+</div>
+</div>
+</footer>
+<!-- END: MainFooter -->
+</body></html>

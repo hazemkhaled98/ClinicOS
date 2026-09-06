@@ -1,0 +1,388 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي - تحليل الأصناف والمخزن</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#0a2e29',
+              tealLight: '#114a42',
+              mint: '#10b981',
+              mintLight: '#d1fae5',
+              surface: '#f4fbf8',
+              surfaceDim: '#eef5f2',
+              border: '#e2ece7',
+              muted: '#6b7280'
+            }
+          },
+          fontFamily: {
+            arabic: ['"Noto Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Typography and Micro-Interactions Style -->
+<style data-purpose="custom-styling">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1a2e29;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 4px;
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c2d6ce;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f4fbf8] text-slate-800 antialiased font-arabic selection:bg-emerald-100 selection:text-teal-900">
+<!-- BEGIN: TopHeader -->
+<header class="w-full bg-white border-b border-brand-border px-4 lg:px-8 py-3 sticky top-0 z-40 shadow-sm" data-purpose="top-navigation">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<!-- Right Side: System Info & Context -->
+<div class="flex items-center gap-3">
+<button aria-label="القائمة الرئيسية" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-bold text-slate-900 text-sm md:text-base tracking-tight">المخزن</span>
+<span class="text-slate-300">•</span>
+<span class="font-medium text-slate-600 text-xs md:text-sm">عيادتي | إدارة الأداء</span>
+</div>
+</div>
+<!-- Left Side: Date Display -->
+<div class="flex items-center gap-2 text-xs md:text-sm font-medium text-slate-500 bg-slate-50 border border-slate-200/70 px-3 py-1.5 rounded-md">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContentContainer -->
+<main class="max-w-7xl mx-auto px-4 lg:px-8 py-5 space-y-6">
+<!-- BEGIN: SubBarWorkspaceIdentity -->
+<section class="bg-white border border-brand-border rounded-xl p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4" data-purpose="workspace-identity">
+<!-- Right info: DentSpaces -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#0a2e29] text-white flex items-center justify-center font-bold text-base shadow-sm">
+          DS
+        </div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-base font-bold text-slate-900 leading-none">DentSpaces • المخزن</h1>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">نشط</span>
+</div>
+<p class="text-xs text-slate-500 mt-1">جرد لحظي — مخزن + تراي v97</p>
+</div>
+</div>
+<!-- Left Action: Role Pill -->
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>المدير العام</span>
+</button>
+</div>
+</section>
+<!-- END: SubBarWorkspaceIdentity -->
+<!-- BEGIN: SubNavigationTabs -->
+<nav aria-label="تبويبات إدارة المخزن" class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1 text-sm font-medium text-slate-600" data-purpose="inventory-tabs">
+<!-- Active Item Analysis Tab -->
+<button class="flex items-center gap-1.5 px-4 py-2 bg-[#0a2e29] text-white rounded-lg font-semibold shadow-sm shrink-0 hover:bg-[#114a42] transition-colors" type="button">
+<span>تحليل الأصناف</span>
+<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Other Tabs -->
+<button class="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+        الاعتمادات
+      </button>
+<button class="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+        الموردين
+      </button>
+<button class="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+        المرتجعات
+      </button>
+<button class="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+        الاستلام
+      </button>
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+<span>النواقص والطلب</span>
+<span class="bg-rose-100 text-rose-700 text-xs px-1.5 py-0.5 rounded-full font-bold">28</span>
+</button>
+<button class="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+        المخزن
+      </button>
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg shrink-0 transition-colors" type="button">
+<span>التراي</span>
+<span class="bg-slate-100 text-slate-700 text-xs px-1.5 py-0.5 rounded-full font-bold">20</span>
+</button>
+</nav>
+<!-- END: SubNavigationTabs -->
+<!-- BEGIN: PageHeader -->
+<header class="space-y-1" data-purpose="page-title-section">
+<h2 class="text-xl md:text-2xl font-black text-slate-900">تحليل الأصناف</h2>
+<p class="text-xs md:text-sm text-slate-600 max-w-4xl leading-relaxed">
+        نظرة شاملة على أسعار كل صنف وتاريخها، تنبيهات الغلاء والوفر، وترشيح أفضل مورّد بالأسباب — عشان تاخد قرارات شراء مدروسة. البيانات بتتعمّر مع الاستلامات.
+      </p>
+</header>
+<!-- END: PageHeader -->
+<!-- BEGIN: KPICardsGrid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4" data-purpose="kpi-metrics-grid">
+<!-- KPI 1: Inventory Value -->
+<article class="bg-white p-4 rounded-xl border border-brand-border shadow-sm flex flex-col justify-between">
+<span class="text-xs font-semibold text-slate-500">قيمة المخزون</span>
+<div class="mt-2 flex items-baseline gap-1">
+<span class="text-2xl font-black text-slate-900">0</span>
+<span class="text-xs text-slate-500 font-semibold">ج.م</span>
+</div>
+</article>
+<!-- KPI 2: Items with Prices -->
+<article class="bg-white p-4 rounded-xl border border-brand-border shadow-sm flex flex-col justify-between">
+<span class="text-xs font-semibold text-slate-500">أصناف عليها أسعار</span>
+<div class="mt-2 flex items-baseline gap-1">
+<span class="text-2xl font-black text-slate-900">28 / 0</span>
+</div>
+</article>
+<!-- KPI 3: Price Alerts -->
+<article class="bg-white p-4 rounded-xl border border-brand-border shadow-sm flex flex-col justify-between">
+<span class="text-xs font-semibold text-slate-500">تنبيهات غلاء</span>
+<div class="mt-2 flex items-baseline gap-1">
+<span class="text-2xl font-black text-slate-900">0</span>
+</div>
+</article>
+<!-- KPI 4: Available Savings -->
+<article class="bg-white p-4 rounded-xl border border-brand-border shadow-sm flex flex-col justify-between">
+<span class="text-xs font-semibold text-slate-500">وفر متاح</span>
+<div class="mt-2 flex items-baseline gap-1">
+<span class="text-2xl font-black text-emerald-600">0</span>
+<span class="text-xs text-slate-500 font-semibold">ج.م</span>
+</div>
+</article>
+</section>
+<!-- END: KPICardsGrid -->
+<!-- BEGIN: PriceAlertsCollapsibleSection -->
+<section class="bg-white border border-brand-border rounded-xl p-4 shadow-sm" data-purpose="price-alerts-banner">
+<div class="flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-2 text-slate-800 font-bold text-sm md:text-base">
+<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تنبيهات الأسعار</span>
+</div>
+<button aria-label="طي تنبيهات الأسعار" class="text-slate-400 hover:text-slate-600" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</section>
+<!-- END: PriceAlertsCollapsibleSection -->
+<!-- BEGIN: ItemAnalysisSectionHeaderAndFilters -->
+<section class="space-y-4" data-purpose="item-analysis-section">
+<div class="flex items-center gap-2 text-slate-900 font-bold text-base md:text-lg">
+<svg class="w-5 h-5 text-[#0a2e29]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تحليل كل صنف</span>
+</div>
+<!-- Filter Controls: Search & Chips -->
+<div class="flex flex-col md:flex-row gap-3">
+<!-- Search and Filter Button -->
+<div class="flex items-center gap-2 flex-1">
+<div class="relative flex-1">
+<input class="w-full pl-4 pr-10 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0a2e29] focus:border-transparent" placeholder="دور على صنف..." type="text">
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium bg-white border border-slate-200 hover:border-slate-300 rounded-lg text-slate-700 shadow-sm shrink-0" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>فلترة</span>
+</button>
+</div>
+<!-- Filter Quick Tags -->
+<div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-1">
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">سريع</button>
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">راكد</button>
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">هدر</button>
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">قرب ينتهي</button>
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">ناقص</button>
+<button class="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 shrink-0" type="button">وفر متاح</button>
+<span class="text-xs font-bold text-slate-400 mr-2 shrink-0">28 صنف</span>
+</div>
+</div>
+<!-- BEGIN: ItemAnalysisCard_Composite -->
+<article class="bg-white border border-brand-border rounded-xl p-5 shadow-sm space-y-4" data-purpose="item-card-composite">
+<!-- Top row: Name, tags & price badge -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<h3 class="text-base md:text-lg font-bold text-slate-900">كمبوزيت</h3>
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 text-xs rounded bg-slate-100 text-slate-600 font-medium">حشو</span>
+<span class="px-2 py-0.5 text-xs rounded bg-slate-100 text-slate-600 font-medium">مواد</span>
+</div>
+</div>
+<p class="text-xs text-slate-500 font-medium">
+              عبوة = 20 استخدام • تكلفة الاستخدام 0.00 ج.م
+            </p>
+</div>
+<div class="self-start sm:self-center">
+<span class="text-base md:text-lg font-bold text-slate-900">0 ج.م <span class="text-xs text-slate-400 font-normal">/ عبوة</span></span>
+</div>
+</div>
+<!-- Metric badges table-like row -->
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 bg-[#f4fbf8] p-3 rounded-lg border border-slate-100 text-center">
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">قيمة الاستهلاك</span>
+<span class="font-bold text-slate-800 text-sm">0 ج.م</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">الكمية</span>
+<span class="font-bold text-slate-800 text-sm">0 استخدام</span>
+</div>
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">مرات</span>
+<span class="font-bold text-slate-800 text-sm">0</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">إجراءات</span>
+<span class="font-bold text-slate-800 text-sm">0</span>
+</div>
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">مخزن</span>
+<span class="font-bold text-slate-800 text-sm">0 عبوة</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">تراي</span>
+<span class="font-bold text-slate-800 text-sm">0 استخدام</span>
+</div>
+<div class="p-1 col-span-2 sm:col-span-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">هدر</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+</div>
+<!-- Info Notification -->
+<div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 border border-slate-200/70 flex items-center gap-2">
+<svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>لسه مفيش أسعار مسجلة للصنف ده — المقارنة بتظهر بعد استلام طلبيات بأسعار</span>
+</div>
+<!-- Price History Section -->
+<div class="pt-2 border-t border-slate-100">
+<div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تاريخ السعر</span>
+</div>
+<p class="text-xs text-slate-500">
+            محتاج طلبيتين على الأقل بأسعار عشان يبان تاريخ ورسم لسه مفيش أسعار.
+          </p>
+</div>
+</article>
+<!-- END: ItemAnalysisCard_Composite -->
+<!-- BEGIN: ItemAnalysisCard_Bonding -->
+<article class="bg-white border border-brand-border rounded-xl p-5 shadow-sm space-y-4" data-purpose="item-card-bonding">
+<!-- Top row: Name, tags & price badge -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<h3 class="text-base md:text-lg font-bold text-slate-900">بوندينج</h3>
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 text-xs rounded bg-slate-100 text-slate-600 font-medium">حشو</span>
+<span class="px-2 py-0.5 text-xs rounded bg-slate-100 text-slate-600 font-medium">مواد</span>
+</div>
+</div>
+<p class="text-xs text-slate-500 font-medium">
+              عبوة = 60 استخدام • تكلفة الاستخدام 0.00 ج.م
+            </p>
+</div>
+<div class="self-start sm:self-center">
+<span class="text-base md:text-lg font-bold text-slate-900">0 ج.م <span class="text-xs text-slate-400 font-normal">/ عبوة</span></span>
+</div>
+</div>
+<!-- Metric badges table-like row -->
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 bg-[#f4fbf8] p-3 rounded-lg border border-slate-100 text-center">
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">قيمة الاستهلاك</span>
+<span class="font-bold text-slate-800 text-sm">0 ج.م</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">الكمية</span>
+<span class="font-bold text-slate-800 text-sm">0 استخدام</span>
+</div>
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">مرات</span>
+<span class="font-bold text-slate-800 text-sm">0</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">إجراءات</span>
+<span class="font-bold text-slate-800 text-sm">0</span>
+</div>
+<div class="p-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">مخزن</span>
+<span class="font-bold text-slate-800 text-sm">0 عبوة</span>
+</div>
+<div class="p-1 border-r border-slate-200/60 sm:border-r-0">
+<span class="block text-[11px] text-slate-500 mb-0.5">تراي</span>
+<span class="font-bold text-slate-800 text-sm">0 استخدام</span>
+</div>
+<div class="p-1 col-span-2 sm:col-span-1">
+<span class="block text-[11px] text-slate-500 mb-0.5">هدر</span>
+<span class="font-bold text-slate-400 text-sm">—</span>
+</div>
+</div>
+<!-- Info Notification -->
+<div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 border border-slate-200/70 flex items-center gap-2">
+<svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>لسه مفيش أسعار مسجلة للصنف ده — المقارنة بتظهر بعد استلام طلبيات بأسعار</span>
+</div>
+<!-- Price History Section -->
+<div class="pt-2 border-t border-slate-100">
+<div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>تاريخ السعر</span>
+</div>
+<p class="text-xs text-slate-500">
+            محتاج طلبيتين على الأقل بأسعار عشان يبان تاريخ ورسم لسه مفيش أسعار.
+          </p>
+</div>
+</article>
+<!-- END: ItemAnalysisCard_Bonding -->
+</section>
+<!-- END: ItemAnalysisSectionHeaderAndFilters -->
+</main>
+<!-- END: MainContentContainer -->
+</body></html>

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.login.LoginOverlay;
+import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.QueryParameters;
 import org.junit.jupiter.api.AfterEach;
@@ -45,8 +45,8 @@ class LoginViewTest {
     @Test
     void loginViewHasArabicLabels() {
         LoginView view = new LoginView();
-        LoginOverlay overlay = _get(view, LoginOverlay.class);
-        assertThat(overlay).isNotNull();
+        LoginForm form = _get(view, LoginForm.class);
+        assertThat(form).isNotNull();
     }
 
     @Test

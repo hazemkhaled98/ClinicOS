@@ -1,0 +1,332 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>عيادتي · إدارة الأداء</title>
+<!-- Tailwind CSS CDN with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+            surface: {
+              bg: '#f3f6f8',
+              card: '#ffffff',
+            }
+          },
+          fontFamily: {
+            sans: ['"Segoe UI"', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-enhancements">
+    /* Subtle custom ring and scroll styling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .gauge-circle {
+      stroke-dasharray: 283;
+      stroke-dashoffset: 68; /* 76% representation */
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+  </style>
+</head>
+<body class="bg-surface-bg text-slate-800 font-sans min-h-screen antialiased flex flex-col items-center">
+<!-- BEGIN: TopBar -->
+<header class="w-full bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+<!-- Right Section: System Title & Breadcrumbs -->
+<div class="flex items-center gap-3">
+<button aria-label="القائمة" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-600" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">عيادتي · إدارة الأداء</h1>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</div>
+<p class="text-xs text-slate-500 font-medium">تقييم وتحقّق المدير</p>
+</div>
+</div>
+<!-- Left Section: Current Date Display -->
+<div class="flex items-center gap-2 text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-semibold shadow-2xs">
+<svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- Main Container -->
+<main class="w-full max-w-6xl px-4 sm:px-6 py-6 space-y-6">
+<!-- BEGIN: HeroBanner -->
+<section class="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-brand-950 via-brand-900 to-teal-950 text-white p-6 sm:p-8 shadow-xl shadow-brand-950/15 border border-brand-800/40" data-purpose="manager-summary-banner">
+<!-- Top Decorative Glows -->
+<div class="absolute -top-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -right-24 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-6">
+<!-- Header row with welcome & KPI Gauge -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<!-- Welcome message and motivational tagline -->
+<div class="space-y-2">
+<h2 class="text-2xl sm:text-3xl font-extrabold flex items-center gap-2 tracking-tight">
+<span>أهلاً المدير العام</span>
+<span class="inline-block transform hover:rotate-12 transition-transform cursor-pointer">👋</span>
+</h2>
+<p class="text-emerald-200/90 text-sm sm:text-base font-normal flex items-center gap-1.5">
+<span>✨ النجاح الجماعي بيبدأ من إشراف عادل ومحفّز — وده إنت ✨</span>
+</p>
+</div>
+<!-- KPI Circular Gauge and quick indicator badges -->
+<div class="flex items-center flex-wrap gap-4 sm:gap-6 bg-brand-900/60 p-3.5 px-5 rounded-2xl border border-brand-700/40 backdrop-blur-sm self-start lg:self-auto">
+<!-- Gauge circle -->
+<div class="relative flex items-center justify-center w-20 h-20">
+<svg class="w-20 h-20" viewBox="0 0 100 100">
+<!-- Track -->
+<circle class="text-brand-950/80 stroke-current" cx="50" cy="50" fill="transparent" r="45" stroke-width="7"></circle>
+<!-- Filled Arc -->
+<circle class="text-emerald-400 stroke-current gauge-circle" cx="50" cy="50" fill="transparent" r="45" stroke-linecap="round" stroke-width="7.5"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center text-center">
+<span class="text-xl font-black text-white leading-none">76</span>
+<span class="text-[10px] text-emerald-200/80 mt-0.5">من 100</span>
+</div>
+</div>
+<!-- Quick Sub-indicators -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<!-- Star badge -->
+<button class="w-7 h-7 rounded-full bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 hover:bg-amber-400/30 transition-colors" title="التقييم العام" type="button">
+<span class="text-xs">⭐</span>
+</button>
+<!-- Shield badge -->
+<button class="w-7 h-7 rounded-full bg-blue-400/20 border border-blue-300/40 flex items-center justify-center text-blue-300 hover:bg-blue-400/30 transition-colors" title="التوافق والالتزام" type="button">
+<span class="text-xs">🛡️</span>
+</button>
+<!-- Eye badge -->
+<button class="w-7 h-7 rounded-full bg-teal-400/20 border border-teal-300/40 flex items-center justify-center text-teal-200 hover:bg-teal-400/30 transition-colors" title="نسبة التغطية والمتابعة" type="button">
+<span class="text-xs">👁️</span>
+</button>
+<!-- Alert badge -->
+<button class="w-7 h-7 rounded-full bg-rose-400/20 border border-rose-300/40 flex items-center justify-center text-rose-300 hover:bg-rose-400/30 transition-colors" title="الملاحظات والتنبيهات" type="button">
+<span class="text-xs">🔔</span>
+</button>
+</div>
+<p class="text-[11px] text-emerald-300/90 font-medium">اضغط على أي مؤشر لتفاصيله 👆</p>
+</div>
+</div>
+</div>
+<!-- Quick Summary Metrics Bar -->
+<div class="bg-brand-950/40 border border-brand-800/60 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between text-xs sm:text-sm text-emerald-100 font-medium gap-2">
+<span>نظرة الفريق: متوسط 35 • تغطية 0% • التزام 92% • 🔥 5</span>
+</div>
+<!-- Operational Target Progress Bar -->
+<div class="bg-white/95 text-slate-800 rounded-xl p-3.5 shadow-md flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs sm:text-sm font-bold">
+<span class="text-emerald-700">100%</span>
+<span class="flex items-center gap-1 text-slate-700">
+<span>مواكبة هدفنا للتشغيل</span>
+<span class="text-brand-600">🎯</span>
+</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
+<div class="bg-gradient-to-l from-emerald-600 to-teal-500 h-full rounded-full w-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: HeroBanner -->
+<!-- BEGIN: QuickDetailsTab -->
+<div class="bg-white border border-slate-200/80 rounded-2xl px-5 py-3.5 shadow-xs flex items-center justify-between">
+<span class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1.5">
+<span>تفاصيل أكثر — اللي يقوّي إشرافك</span>
+<span>✨</span>
+</span>
+<button class="text-xs text-brand-700 hover:text-brand-800 font-semibold flex items-center gap-1" type="button">
+<span>عرض الكل</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- END: QuickDetailsTab -->
+<!-- BEGIN: ReviewCalendarSection -->
+<section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4" data-purpose="review-calendar">
+<!-- Section Title & Earlier History Button -->
+<div class="flex items-center justify-between">
+<button class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 px-3.5 py-1.5 rounded-lg transition-colors focus:ring-2 focus:ring-brand-500" type="button">
+          تاريخ أبعد
+        </button>
+<h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+<span>تاريخ المراجعة</span>
+<span class="text-base">📅</span>
+</h3>
+</div>
+<!-- Horizontal Calendar Timeline -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 pt-1">
+<!-- Day 24 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">اثنين</span>
+<span class="text-sm font-bold text-slate-700">24</span>
+</button>
+<!-- Day 25 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">تلاتاء</span>
+<span class="text-sm font-bold text-slate-700">25</span>
+</button>
+<!-- Day 26 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">أربعاء</span>
+<span class="text-sm font-bold text-slate-700">26</span>
+</button>
+<!-- Day 27 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">خميس</span>
+<span class="text-sm font-bold text-slate-700">27</span>
+</button>
+<!-- Day 28 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">جمعة</span>
+<span class="text-sm font-bold text-slate-700">28</span>
+</button>
+<!-- Day 29 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">سبت</span>
+<span class="text-sm font-bold text-slate-700">29</span>
+</button>
+<!-- Day 30 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">أحد</span>
+<span class="text-sm font-bold text-slate-700">30</span>
+</button>
+<!-- Day 31 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">اثنين</span>
+<span class="text-sm font-bold text-slate-700">31</span>
+</button>
+<!-- Day 1 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">تلاتاء</span>
+<span class="text-sm font-bold text-slate-700">1</span>
+</button>
+<!-- Day 2 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">أربعاء</span>
+<span class="text-sm font-bold text-slate-700">2</span>
+</button>
+<!-- Day 3 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">خميس</span>
+<span class="text-sm font-bold text-slate-700">3</span>
+</button>
+<!-- Day 4 -->
+<button class="flex-shrink-0 min-w-[50px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-400 font-medium">جمعة</span>
+<span class="text-sm font-bold text-slate-700">4</span>
+</button>
+<!-- Day 5 (Yesterday) -->
+<button class="flex-shrink-0 min-w-[54px] flex flex-col items-center py-2 px-1 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/40 transition-all text-center" type="button">
+<span class="text-[10px] text-slate-500 font-medium">إمبارح</span>
+<span class="text-sm font-bold text-slate-700">5</span>
+</button>
+<!-- Day 6 (Today - Active) -->
+<button class="flex-shrink-0 min-w-[58px] flex flex-col items-center py-2 px-1.5 rounded-xl bg-brand-600 text-white font-semibold shadow-md shadow-brand-600/30 border border-brand-500 text-center" type="button">
+<span class="text-[10px] text-emerald-100 font-medium">النهاردة</span>
+<span class="text-sm font-bold text-white">6</span>
+</button>
+</div>
+<!-- Explanatory Tip Box -->
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs leading-relaxed text-slate-600">
+<p class="flex items-start gap-2">
+<span class="text-amber-500 text-sm mt-0.5">✨</span>
+<span>
+            علّم التقييم وهو بيتحفظ تلقائيًا — مش محتاج زرار حفظ. الموظف بيأكّد مهامه، وإنت بتراجع وتعلّم على اللي اتعمل فعلاً (تأكيدك هو اللي بيتحسب).
+          </span>
+</p>
+<button class="self-end sm:self-auto shrink-0 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-4 py-1.5 rounded-lg shadow-2xs transition-colors" type="button">
+          فهمت ✓
+        </button>
+</div>
+</section>
+<!-- END: ReviewCalendarSection -->
+<!-- BEGIN: StaffSelectorSection -->
+<section class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4" data-purpose="staff-selection">
+<div class="flex items-center justify-between">
+<div></div>
+<h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+<span>اختار الموظف</span>
+<span class="text-base">👤</span>
+</h3>
+</div>
+<!-- Staff Selection Cards / Pills -->
+<div class="flex flex-wrap items-center justify-end gap-3">
+<!-- Staff Member 3: Shahd -->
+<button class="group flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl p-2.5 px-4 transition-all hover:border-brand-500" type="button">
+<div class="text-right">
+<h4 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-700 transition-colors">شهد</h4>
+<p class="text-[11px] text-slate-500">مساعدة طبيب</p>
+</div>
+<div class="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center ring-2 ring-teal-100">
+            ش
+          </div>
+</button>
+<!-- Staff Member 2: Nourhan -->
+<button class="group flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl p-2.5 px-4 transition-all hover:border-brand-500" type="button">
+<div class="text-right">
+<h4 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-700 transition-colors">نورهان</h4>
+<p class="text-[11px] text-slate-500">مساعدة طبيب</p>
+</div>
+<div class="w-9 h-9 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center ring-2 ring-teal-100">
+            ن
+          </div>
+</button>
+<!-- Staff Member 1: Nada (Active Selection) -->
+<button class="flex items-center gap-3 bg-brand-700 text-white rounded-2xl p-2.5 px-4 shadow-md shadow-brand-700/20 ring-2 ring-brand-500 ring-offset-2 transition-all" type="button">
+<span class="text-xs bg-brand-800/80 rounded-full w-5 h-5 flex items-center justify-center text-emerald-200">✓</span>
+<div class="text-right">
+<h4 class="text-xs sm:text-sm font-bold text-white">ندى</h4>
+<p class="text-[11px] text-brand-100">استقبال</p>
+</div>
+<div class="w-9 h-9 rounded-full bg-white text-brand-800 font-bold text-xs flex items-center justify-center shadow-xs">
+            ن
+          </div>
+</button>
+</div>
+</section>
+<!-- END: StaffSelectorSection -->
+</main>
+<script data-purpose="interactive-actions">
+    // Light interactivity for toggling selection styles
+    document.addEventListener('DOMContentLoaded', () => {
+      const understandBtn = document.querySelector('button:has-text("فهمت ✓")') || document.querySelector('button');
+      // Gentle feedback on button clicks
+      document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.classList.add('scale-[0.98]');
+          setTimeout(() => btn.classList.remove('scale-[0.98]'), 120);
+        });
+      });
+    });
+  </script>
+</body></html>

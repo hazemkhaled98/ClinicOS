@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>محرر الوحدة التدريبية والأسئلة - أكاديمية التأهيل</title>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Forms Plugin -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              teal: '#0d5c58',
+              tealDark: '#083e3b',
+              tealLight: '#e6f4f1',
+              mint: '#10b981',
+              accent: '#f3fbf9',
+              slate: '#f8fafc',
+              border: '#e2e8f0',
+              textPrimary: '#0f172a',
+              textSecondary: '#475569',
+              textMuted: '#94a3b8',
+            }
+          },
+          boxShadow: {
+            'card': '0 2px 10px -2px rgba(0, 0, 0, 0.04), 0 1px 4px -1px rgba(0, 0, 0, 0.02)',
+            'floating': '0 -4px 16px rgba(0, 0, 0, 0.06)',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbars-and-reset">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    textarea {
+      resize: vertical;
+    }
+    /* Hide default scrollbars in modern mobile viewports */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7f8] text-brand-textPrimary min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-brand-teal">
+<!-- BEGIN: MobileContainer -->
+<div class="w-full max-w-[440px] mx-auto min-h-screen flex flex-col bg-white shadow-2xl relative">
+<!-- BEGIN: MobileStatusBar -->
+<!-- Mimics iOS standard top status bar -->
+<header class="w-full pt-3 px-6 pb-2 flex justify-between items-center bg-white text-slate-800 text-xs font-semibold select-none border-b border-slate-50" data-purpose="status-bar">
+<div class="time">9:41</div>
+<div class="notch w-24 h-4 bg-slate-900 rounded-full mx-auto hidden sm:block"></div>
+<div class="icons flex items-center space-x-1.5 space-x-reverse text-slate-700">
+<!-- Cellular Signal -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.23C2.89 16.38 2 14.29 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10c0 2.29-.89 4.38-2.35 6.23l-.62-.62C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 4c-2.76 0-5 2.24-5 5 0 1.25.46 2.39 1.22 3.27l.71-.71C8.35 13.91 8 13 8 12c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1-.35 1.91-.93 2.56l.71.71C16.54 14.39 17 13.25 17 12c0-2.76-2.24-5-5-5zm0 3c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path>
+</svg>
+<!-- Wifi -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98A16.88 16.88 0 0012 4zm0 3c3.78 0 7.22 1.48 9.77 3.91L12 18.66 2.23 10.91A13.9 13.9 0 0112 7z"></path>
+</svg>
+<!-- Battery -->
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path d="M17 6H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h13c1.1 0 2-.9 2-2v-1h1c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1h-1V8c0-1.1-.9-2-2-2zm-1 10H4V8h12v8z"></path>
+</svg>
+</div>
+</header>
+<!-- END: MobileStatusBar -->
+<!-- BEGIN: TopBarNav -->
+<!-- App Header & Navigation -->
+<div class="px-4 py-3 bg-white flex items-center justify-between border-b border-slate-100 sticky top-0 z-30" data-purpose="app-navigation">
+<!-- Left side: Menu hamburger & Date pill -->
+<div class="flex items-center space-x-2 space-x-reverse">
+<button aria-label="القائمة الجانبية" class="p-2 -mr-1 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/70 rounded-md text-[11px] text-slate-600 font-medium">
+<svg class="w-3.5 h-3.5 text-teal-700" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+</div>
+<!-- Right side: Branding badge & Logo avatar -->
+<div class="flex items-center space-x-2 space-x-reverse text-left">
+<div class="flex flex-col items-end">
+<span class="text-[10px] font-bold text-teal-700 leading-tight tracking-wide">أكاديمية التأهيل</span>
+<span class="text-[11px] font-semibold text-slate-800 leading-tight">عيادتي • إدارة الأداء</span>
+</div>
+<div class="w-8 h-8 rounded-lg bg-teal-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+          ع
+        </div>
+</div>
+</div>
+<!-- END: TopBarNav -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 px-4 py-4 space-y-4 pb-36 overflow-y-auto bg-[#f8fafc]/60">
+<!-- Page Title & Tagline -->
+<section class="text-center py-2" data-purpose="academy-header">
+<h1 class="text-xl font-extrabold text-slate-900 tracking-tight">أكاديمية التأهيل</h1>
+<p class="text-xs text-slate-500 mt-1 font-normal">منهج تعليمي متدرج للموظف الجديد — يتعلّم، يتدرّب، ويتقيّم خطوة بخطوة</p>
+</section>
+<!-- Action Sub-header: Back Button & Mode Status -->
+<div class="flex items-center justify-between pt-1" data-purpose="sub-header-actions">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#eaf5f2] text-teal-800 hover:bg-teal-100 rounded-full text-xs font-semibold border border-teal-200/50 transition" type="button">
+<span>رجوع للقائمة</span>
+<svg class="w-3.5 h-3.5 transform -scale-x-100" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="inline-flex items-center gap-2 text-xs font-bold text-slate-800">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+<span>تعديل وحدة</span>
+</div>
+</div>
+<!-- BEGIN: UnitDetailsCard -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-4" data-purpose="unit-editor-card">
+<!-- Fields: Unit Icon & Title -->
+<div class="grid grid-cols-12 gap-3">
+<!-- Icon Picker Item -->
+<div class="col-span-4">
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right">أيقونة</label>
+<div class="flex items-center justify-between px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition">
+<span class="text-xl leading-none">🎯</span>
+<button class="text-[11px] text-slate-400 hover:text-teal-700 font-medium" type="button">تغيير</button>
+</div>
+</div>
+<!-- Unit Title Field -->
+<div class="col-span-8">
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right" for="unit-title">عنوان الوحدة</label>
+<input class="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 text-slate-800" id="unit-title" type="text" value="عقلية النجاح والمبادرة"/>
+</div>
+</div>
+<!-- Field: Goal / Objective -->
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right" for="unit-goal">
+<span>الهدف</span>
+<span class="mr-1">🎯</span>
+</label>
+<textarea class="w-full text-xs leading-relaxed text-slate-800 p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-white" id="unit-goal" rows="3">تطلع من الوحدة دي وانت فاهم إزاي تتعلّم بسرعة، تبادر، وتكون قيمة حقيقية للفريق من أول يوم.</textarea>
+</div>
+<!-- Field: Structured Content -->
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right leading-snug" for="unit-content">
+            المحتوى <span class="text-slate-500 font-normal">(كل قسم: السطر الأول عنوان، والسطور اللي بعده نقاط. افصل بين الأقسام بسطر فيه ---)</span> 📄
+          </label>
+<textarea class="w-full font-mono text-[11.5px] leading-6 text-slate-700 p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-slate-50/50" id="unit-content" rows="9">القاعدة الذهبية
+• اسأل بدل ما تخمّن — الغلط في التعلّم عادي، الغلط من غير سؤال لأ.
+• لو نسيت خطوة، ارجع للمنهج أو اسأل، متكفّلش على شك.
+---
+المبادرة بتفرق
+• اللي بياخد خطوة قبل ما يتقاله بيتعلّم أسرع وبيكون قيمة للفريق.
+• لاحظ الناقص واعلمه من غير انتظار (تراي مش مجهز، مخزون قرب يخلص).
+• اكتب اللي بتتعلمه — بيثبّت المعلومة.</textarea>
+</div>
+<!-- Field: Photo Missions -->
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right" for="photo-tasks">
+            مهام التصوير <span class="text-slate-500 font-normal">(مهمة في كل سطر)</span> 📷
+          </label>
+<textarea class="w-full text-xs text-slate-800 p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-white placeholder:text-slate-400" id="photo-tasks" placeholder="اكتب مهام التصوير المطلوبة هنا..." rows="2.5"></textarea>
+</div>
+</section>
+<!-- END: UnitDetailsCard -->
+<!-- BEGIN: QuestionsSection -->
+<section class="pt-2 space-y-3" data-purpose="questions-management-section">
+<!-- Section Title Header -->
+<div class="flex items-center justify-between px-1">
+<h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+<span>الأسئلة</span>
+<span>🧠</span>
+</h2>
+<span class="text-[11px] text-slate-400 font-medium">سؤال واحد مضاف</span>
+</div>
+<!-- Question Item Card -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3 relative" data-purpose="question-card">
+<!-- Top Row: Type, Question Text, and Delete Action -->
+<div class="flex items-start gap-2">
+<!-- Delete button -->
+<button aria-label="حذف السؤال" class="p-2 mt-0.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Question Input Field -->
+<div class="flex-1">
+<label class="block text-[11px] font-bold text-slate-600 mb-1" for="question-1">السؤال</label>
+<input class="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 text-slate-800" id="question-1" type="text" value="لو مش متأكد من خطوة في إجراء، الأصح:"/>
+</div>
+<!-- Type dropdown selector -->
+<div class="w-24">
+<label class="block text-[11px] font-bold text-slate-600 mb-1" for="type-1">النوع</label>
+<select class="w-full text-xs font-medium px-2.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-slate-50 text-slate-700" id="type-1">
+<option selected="">فهم</option>
+<option>تطبيق</option>
+<option>حفظ</option>
+</select>
+</div>
+</div>
+<!-- Answers Choices Box -->
+<div>
+<label class="block text-[11px] font-bold text-slate-600 mb-1" for="answers-1">الاختيارات (واحد في كل سطر)</label>
+<textarea class="w-full font-mono text-xs text-slate-700 p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-600 focus:border-teal-600 bg-slate-50/60 leading-6" id="answers-1" rows="4">تخمّن وتكمّل بسرعة
+تسأل المسؤول قبل ما تكمل
+تسيبها وتعدّي</textarea>
+<p class="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+              ملاحظة: السطر الأول أو المحدد سيمثل الإجابة الافتراضية الصحيحة ما لم يتم تحديد غير ذلك.
+            </p>
+</div>
+</div>
+<!-- Add Question Button -->
+<button class="w-full py-3 border border-dashed border-teal-600/40 hover:border-teal-600 bg-[#eaf7f4]/40 hover:bg-[#eaf7f4] rounded-2xl flex items-center justify-center gap-1.5 text-xs font-bold text-teal-800 transition" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إضافة سؤال جديد</span>
+</button>
+</section>
+<!-- END: QuestionsSection -->
+<!-- Footer Micro Copy -->
+<footer class="pt-4 pb-2 text-center text-[10.5px] text-slate-400 font-normal">
+        © 2024 عيادتي ClinicOS — جميع الحقوق محفوظة لـ نظام إدارة العيادات والتأهيل الذكي
+      </footer>
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: StickyBottomBar -->
+<!-- Mobile optimized bottom sticky action sheet -->
+<aside class="sticky bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-3 shadow-floating z-40" data-purpose="sticky-bottom-actions">
+<!-- Auto-save state indicator -->
+<div class="flex items-center justify-center gap-1.5 pb-2.5 text-[11px] font-medium text-slate-500">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+<span>تم الحفظ تلقائياً كمسودة</span>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-12 gap-2">
+<!-- Discard Button -->
+<button class="col-span-5 px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition active:scale-[0.98]" type="button">
+          إلغاء التغييرات
+        </button>
+<!-- Save & Publish Button -->
+<button class="col-span-7 px-4 py-2.5 rounded-xl bg-teal-900 hover:bg-teal-800 text-white text-xs font-bold shadow-md shadow-teal-900/10 flex items-center justify-center gap-1.5 transition active:scale-[0.98]" type="button">
+<span>حفظ ونشر التعديلات</span>
+<svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- iPhone Home Bar Indicator space -->
+<div class="w-28 h-1 bg-slate-300 rounded-full mx-auto mt-2.5"></div>
+</aside>
+<!-- END: StickyBottomBar -->
+</div>
+<!-- END: MobileContainer -->
+</body></html>

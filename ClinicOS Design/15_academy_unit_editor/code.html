@@ -1,0 +1,267 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>أكاديمية التأهيل - تعديل وحدة | عيادتي ClinicOS</title>
+<!-- Google Fonts: Noto Sans Arabic & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms and Container Queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#0a2e29',
+              emerald: '#0d6559',
+              mint: '#10b981',
+              lightMint: '#ecfdf5',
+              surface: '#f4fbf8',
+              muted: '#64748b',
+              border: '#e2e8f0',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02)',
+            'card': '0 4px 12px -2px rgba(10, 46, 41, 0.05), 0 2px 6px -1px rgba(10, 46, 41, 0.03)',
+          }
+        }
+      }
+    };
+  </script>
+<!-- Base Custom Styling -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background-color: #f4fbf8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style data-purpose="form-controls">
+    /* Custom subtle styling for form focus rings with brand emerald color */
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #0d6559 !important;
+      box-shadow: 0 0 0 3px rgba(13, 101, 89, 0.15) !important;
+    }
+    /* Custom scrollbar for textareas */
+    textarea::-webkit-scrollbar {
+      width: 6px;
+    }
+    textarea::-webkit-scrollbar-track {
+      background: #f8fafc;
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f4fbf8] text-slate-800 antialiased">
+<!-- BEGIN: TopNavigation -->
+<header class="w-full bg-white border-b border-slate-200/90 sticky top-0 z-30 shadow-xs" data-purpose="main-header">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Right Side: Platform Identity & Breadcrumbs -->
+<div class="flex items-center space-x-3 space-x-reverse">
+<div class="w-9 h-9 rounded-xl bg-brand-teal text-emerald-300 flex items-center justify-center font-bold text-lg shadow-sm">
+          ع
+        </div>
+<div class="flex flex-col">
+<span class="text-xs font-medium text-emerald-700 leading-none">أكاديمية التأهيل</span>
+<h1 class="text-sm font-bold text-slate-900 tracking-wide mt-1">عيادتي • إدارة الأداء</h1>
+</div>
+</div>
+<!-- Left Side: Date, Status, and Controls -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-slate-500 text-xs font-medium bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>الأحد، 6 سبتمبر</span>
+</div>
+<button aria-label="القائمة الرئيسية" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors focus:ring-2 focus:ring-emerald-600" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopNavigation -->
+<!-- BEGIN: MainContentContainer -->
+<main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8">
+<!-- BEGIN: PageHeaderIntro -->
+<section class="text-center mb-8" data-purpose="section-hero">
+<h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">أكاديمية التأهيل</h2>
+<p class="text-sm sm:text-base text-slate-600 font-normal">منهج تعليمي متدرج للموظف الجديد — يتعلّم، يتدرّب، ويتقيّم خطوة بخطوة</p>
+</section>
+<!-- END: PageHeaderIntro -->
+<!-- BEGIN: ActionHeaderBar -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 mb-6 shadow-sm flex items-center justify-between" data-purpose="top-action-bar">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<h3 class="text-lg font-bold text-slate-800">تعديل وحدة</h3>
+</div>
+<!-- Back to list button -->
+<a class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/60 rounded-xl transition-colors duration-150" href="#back">
+<span>رجوع للقائمة</span>
+<svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+<!-- END: ActionHeaderBar -->
+<!-- BEGIN: EditorForm -->
+<form action="#" class="space-y-6" id="unit-editor-form" method="POST">
+<!-- BEGIN: UnitDetailsSection -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-card transition-shadow duration-200" data-purpose="unit-details-card">
+<!-- Header row: Icon & Title -->
+<div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-6">
+<!-- Icon Picker Input -->
+<div class="sm:col-span-3 lg:col-span-2">
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right" for="unit-icon">أيقونة</label>
+<div class="relative flex items-center justify-center border border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-100/50 transition-colors h-[42px] cursor-pointer">
+<span aria-label="أيقونة الوحدة" class="text-xl" role="img">🎯</span>
+<input id="unit-icon" name="unit_icon" type="hidden" value="🎯">
+<span class="text-[10px] text-slate-400 absolute bottom-0.5 right-1">تغيير</span>
+</div>
+</div>
+<!-- Unit Title Input -->
+<div class="sm:col-span-9 lg:col-span-10">
+<label class="block text-xs font-bold text-slate-700 mb-1.5 text-right" for="unit-title">عنوان الوحدة</label>
+<input class="w-full h-[42px] px-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 placeholder-slate-400 transition focus:bg-white" id="unit-title" name="unit_title" required="" type="text" value="عقلية النجاح والمبادرة">
+</div>
+</div>
+<!-- Field: Objective (الهدف) -->
+<div class="mb-6">
+<label class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5" for="unit-goal">
+<span>الهدف</span>
+<span class="text-base leading-none">🎯</span>
+</label>
+<textarea class="w-full p-3.5 bg-slate-50/30 border border-slate-200 rounded-xl text-sm leading-relaxed text-slate-700 focus:bg-white transition resize-y" id="unit-goal" name="unit_goal" rows="2">تطلع من الوحدة دي وانت فاهم إزاي تتعلّم بسرعة، تبادر، وتكون قيمة حقيقية للفريق من أول يوم.</textarea>
+</div>
+<!-- Field: Main Content (المحتوى) -->
+<div class="mb-6">
+<div class="flex items-center justify-between mb-1.5">
+<label class="flex items-center gap-1.5 text-xs font-bold text-slate-700" for="unit-content">
+<span>المحتوى (كل قسم: السطر الأول عنوان، والسطور اللي بعده نقاط. افصل بين الأقسام بسطر فيه ---)</span>
+<span class="text-base leading-none">📄</span>
+</label>
+</div>
+<textarea class="w-full p-4 font-mono text-sm leading-relaxed bg-slate-50/30 border border-slate-200 rounded-xl text-slate-800 focus:bg-white transition resize-y" id="unit-content" name="unit_content" rows="10">القاعدة الذهبية
+• اسأل بدل ما تخمّن — الغلط في التعلّم عادي، الغلط من غير سؤال لأ.
+• لو نسيت خطوة، ارجع للمنهج أو اسأل، متكفّلش على شك.
+---
+المبادرة بتفرق
+• اللي بياخد خطوة قبل ما يتقاله بيتعلّم أسرع وبيكون قيمة للفريق.
+• لاحظ الناقص واعلمه من غير انتظار (تراي مش مجهز، مخزون قرب يخلص).
+• اكتب اللي بتتعلمه — بيثبّت المعلومة.</textarea>
+</div>
+<!-- Field: Photography/Media Tasks (مهام التصوير) -->
+<div>
+<label class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5" for="unit-tasks">
+<span>مهام التصوير (مهمة في كل سطر)</span>
+<span class="text-base leading-none">📷</span>
+</label>
+<textarea class="w-full p-3.5 bg-slate-50/30 border border-slate-200 rounded-xl text-sm leading-relaxed text-slate-700 placeholder-slate-400 focus:bg-white transition resize-y" id="unit-tasks" name="unit_tasks" placeholder="اكتب مهام التصوير المطلوبة هنا..." rows="3"></textarea>
+</div>
+</div>
+<!-- END: UnitDetailsSection -->
+<!-- BEGIN: QuestionsAssessmentSection -->
+<div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-card transition-shadow duration-200" data-purpose="unit-questions-card">
+<!-- Section Title -->
+<div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+<span class="text-lg">🧠</span>
+<h4 class="text-base font-bold text-slate-800">الأسئلة</h4>
+</div>
+<!-- Question Item Container -->
+<div class="bg-slate-50/60 border border-slate-200/70 rounded-xl p-4 sm:p-5 space-y-4 relative">
+<!-- Top Row: Question Text, Type, and Delete -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+<!-- Delete Button -->
+<button class="order-3 sm:order-1 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors flex items-center justify-center self-end sm:self-auto" title="حذف السؤال" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Question Input Field -->
+<div class="order-1 sm:order-2 flex-1 w-full">
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="question-title-1">السؤال</label>
+<input class="w-full h-10 px-3.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 transition" id="question-title-1" name="questions[0][title]" type="text" value="لو مش متأكد من خطوة في إجراء، الأصح:">
+</div>
+<!-- Question Type Dropdown -->
+<div class="order-2 sm:order-3 w-full sm:w-36">
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="question-type-1">النوع</label>
+<div class="relative">
+<select class="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition appearance-none cursor-pointer" id="question-type-1" name="questions[0][type]">
+<option selected="" value="comprehension">فهم</option>
+<option value="practical">تطبيق عملي</option>
+<option value="recall">استرجاع</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2 text-slate-500">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom: Choices List -->
+<div class="pt-2">
+<label class="block text-xs font-semibold text-slate-600 mb-1.5" for="question-choices-1">الاختيارات (واحد في كل سطر)</label>
+<textarea class="w-full p-3 bg-white border border-slate-200 rounded-lg text-xs leading-6 text-slate-700 font-mono transition" id="question-choices-1" name="questions[0][choices]" rows="3">تخمّن وتكمّل بسرعة
+تسأل المسؤول قبل ما تكمل
+تسيبها وتعدّى</textarea>
+<p class="mt-1 text-[11px] text-slate-400">ملاحظة: السطر الأول أو المحدد سيمثل الإجابة الافتراضية الصحيحة ما لم يتم تحديد غير ذلك.</p>
+</div>
+</div>
+<!-- Add Question Quick Button -->
+<div class="mt-4 text-center">
+<button class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50/60 hover:bg-emerald-100/60 border border-dashed border-emerald-300 px-4 py-2 rounded-xl transition-all" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>إضافة سؤال جديد</span>
+</button>
+</div>
+</div>
+<!-- END: QuestionsAssessmentSection -->
+<!-- BEGIN: StickyActionBar -->
+<div class="sticky bottom-4 z-20 bg-white/95 backdrop-blur-sm border border-slate-200 p-4 rounded-2xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3" data-purpose="form-actions-footer">
+<div class="flex items-center gap-2 text-xs text-slate-500 w-full sm:w-auto justify-center sm:justify-start">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>تم الحفظ تلقائياً كمسودة</span>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<button class="w-1/2 sm:w-auto px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition" type="button">
+            إلغاء التغييرات
+          </button>
+<button class="w-1/2 sm:w-auto px-6 py-2.5 text-xs font-bold text-white bg-[#0d6559] hover:bg-[#0a2e29] shadow-md hover:shadow-lg rounded-xl transition duration-150 flex items-center justify-center gap-2" type="submit">
+<svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>حفظ ونشر التعديلات</span>
+</button>
+</div>
+</div>
+<!-- END: StickyActionBar -->
+</form>
+<!-- END: EditorForm -->
+</main>
+<!-- END: MainContentContainer -->
+<!-- BEGIN: MinimalFooter -->
+<footer class="mt-auto py-6 border-t border-slate-200/60 text-center text-xs text-slate-400" data-purpose="site-footer">
+<p>© 2024 عيادتي ClinicOS — جميع الحقوق محفوظة لـ نظام إدارة العيادات والتأهيل الذكي</p>
+</footer>
+<!-- END: MinimalFooter -->
+</body></html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>النواقص والطلب - DentSpaces المخزن</title>
+<!-- Tailwind CSS CDN with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Noto Sans Arabic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- FontAwesome for Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Arabic"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              dark: '#0f3922'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="base-styling">
+    body {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    
+    /* Hide scrollbars on tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-gray-100 text-slate-800 flex justify-center items-start min-h-screen">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-[420px] bg-[#f8fafc] min-h-screen flex flex-col shadow-2xl relative border-x border-slate-200 pb-28">
+<!-- BEGIN: iOSStatusBar -->
+<header class="bg-white px-5 pt-3 pb-2 flex justify-between items-center text-xs font-semibold text-slate-800 shrink-0 select-none">
+<span class="tracking-tight font-medium text-sm">9:41</span>
+<div class="flex items-center gap-1.5 text-slate-700 text-xs">
+<i class="fa-solid fa-signal text-[11px]"></i>
+<i class="fa-solid fa-wifi text-[11px]"></i>
+<i class="fa-solid fa-battery-full text-sm"></i>
+</div>
+</header>
+<!-- END: iOSStatusBar -->
+<!-- BEGIN: TopBar -->
+<section class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between gap-2 shrink-0">
+<div class="flex items-center gap-2.5">
+<button aria-label="القائمة" class="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 active:bg-slate-100">
+<i class="fa-solid fa-bars text-sm"></i>
+</button>
+<button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-700 text-xs font-medium hover:bg-slate-50">
+<i class="fa-solid fa-table-cells-large text-slate-500 text-[11px]"></i>
+<span>المدير العام</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<div class="text-left">
+<div class="flex items-center gap-1.5 justify-end">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-bold text-xs text-slate-800">DentSpaces · المخزن</span>
+</div>
+<span class="text-[10px] text-slate-400 block tracking-tight">جرد لحظي — مخزن + تراي v97</span>
+</div>
+<div class="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+<i class="fa-solid fa-teeth-open"></i>
+</div>
+</div>
+</section>
+<!-- END: TopBar -->
+<!-- BEGIN: HorizontalNavigationTabs -->
+<nav class="bg-white border-b border-slate-200 px-3 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+<button class="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border border-slate-200 text-slate-700 whitespace-nowrap bg-slate-50 font-medium">
+<span>الأقسام</span>
+<i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+</button>
+<!-- Active Tab -->
+<button class="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full bg-emerald-800 text-white whitespace-nowrap font-medium shadow-sm">
+<i class="fa-solid fa-basket-shopping text-[11px]"></i>
+<span>النواقص والطلب</span>
+<span class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">28</span>
+</button>
+<button class="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+        المخزن
+      </button>
+<button class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+<span>التراي</span>
+<span class="bg-slate-100 text-slate-500 text-[10px] px-1.5 rounded-full">20</span>
+</button>
+<button class="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+        الاستلام
+      </button>
+<button class="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+        المرتجعات
+      </button>
+<button class="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+        الموردين
+      </button>
+<button class="text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 whitespace-nowrap font-normal bg-white">
+        الاعتمادات
+      </button>
+</nav>
+<!-- END: HorizontalNavigationTabs -->
+<!-- BEGIN: MainContentArea -->
+<main class="p-3.5 flex-1 flex flex-col gap-3">
+<!-- Header & Instructions -->
+<section class="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm" data-purpose="instructions-banner">
+<h1 class="text-base font-bold text-slate-800 mb-1.5">النواقص والطلب</h1>
+<p class="text-xs text-slate-500 leading-relaxed">
+          اختار الأصناف اللي عايز تطلبها (شيل العلامة عن اللي مش هتطلبه دلوقتي — هيفضل في النواقص). واختار المورّد، وظبّط الكميات. تأكيد الطلب بيجهّز رسالة واتساب بالأصناف المختارة بس.
+        </p>
+<!-- Add Custom Item Button -->
+<button class="w-full mt-3 py-2 px-3 border-2 border-dashed border-slate-300 hover:border-emerald-600 hover:text-emerald-700 rounded-lg text-xs font-semibold text-slate-600 flex items-center justify-center gap-2 bg-slate-50/50 transition">
+<i class="fa-solid fa-plus text-xs"></i>
+<span>ضيف صنف للطلب</span>
+</button>
+</section>
+<!-- Batch Selection & Counter Header -->
+<section class="flex items-center justify-between px-1" data-purpose="selection-summary">
+<div>
+<span class="text-xs font-bold text-slate-800 block">الطلبية</span>
+<span class="text-[11px] text-slate-500">28 من 28 صنف مختار للطلب</span>
+</div>
+<button class="text-xs font-medium text-slate-600 bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:bg-slate-50 flex items-center gap-1">
+<i class="fa-solid fa-xmark text-slate-400 text-xs"></i>
+<span>شيل التحديد عن الكل</span>
+</button>
+</section>
+<!-- BEGIN: OrdersList -->
+<section class="flex flex-col gap-2.5" data-purpose="orders-item-list">
+<!-- Item 1: كمبوزيت -->
+<article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm transition relative overflow-hidden" data-purpose="order-card">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-600 border-slate-300" type="checkbox"/>
+<h2 class="font-bold text-sm text-slate-800">كمبوزيت</h2>
+</div>
+<span class="bg-rose-50 text-rose-600 border border-rose-200/80 text-[10px] px-2 py-0.5 rounded font-bold">
+              نافد
+            </span>
+</div>
+<!-- Stock Info -->
+<div class="mt-1.5 pr-6 flex flex-col gap-1 text-[11px] text-slate-500">
+<div class="flex items-center gap-1.5 text-slate-600">
+<i class="fa-solid fa-box-open text-[10px] text-slate-400"></i>
+<span>بالمخزن <strong class="text-slate-800">0</strong> عبوة • تنبيه عند 2</span>
+</div>
+<div class="text-slate-400 flex items-center gap-1">
+<i class="fa-solid fa-circle-info text-[10px]"></i>
+<span>مفيش سعر مسجّل بعد للترشيح</span>
+</div>
+</div>
+<!-- Quantity Stepper Row -->
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+<span class="text-xs text-slate-500 font-medium">المطلوب</span>
+<div class="flex items-center gap-2">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button aria-label="إنقاص" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">-</button>
+<span class="w-8 text-center text-xs font-bold text-slate-800 bg-white py-1">3</span>
+<button aria-label="زيادة" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">+</button>
+</div>
+<span class="text-xs text-slate-500 font-medium">عبوة</span>
+</div>
+</div>
+</article>
+<!-- Item 2: بوندينج -->
+<article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm transition relative overflow-hidden" data-purpose="order-card">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-600 border-slate-300" type="checkbox"/>
+<h2 class="font-bold text-sm text-slate-800">بوندينج</h2>
+</div>
+<span class="bg-rose-50 text-rose-600 border border-rose-200/80 text-[10px] px-2 py-0.5 rounded font-bold">
+              نافد
+            </span>
+</div>
+<div class="mt-1.5 pr-6 flex flex-col gap-1 text-[11px] text-slate-500">
+<div class="flex items-center gap-1.5 text-slate-600">
+<i class="fa-solid fa-box-open text-[10px] text-slate-400"></i>
+<span>بالمخزن <strong class="text-slate-800">0</strong> عبوة • تنبيه عند 1</span>
+</div>
+<div class="text-slate-400 flex items-center gap-1">
+<i class="fa-solid fa-circle-info text-[10px]"></i>
+<span>مفيش سعر مسجّل بعد للترشيح</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+<span class="text-xs text-slate-500 font-medium">المطلوب</span>
+<div class="flex items-center gap-2">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button aria-label="إنقاص" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">-</button>
+<span class="w-8 text-center text-xs font-bold text-slate-800 bg-white py-1">2</span>
+<button aria-label="زيادة" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">+</button>
+</div>
+<span class="text-xs text-slate-500 font-medium">عبوة</span>
+</div>
+</div>
+</article>
+<!-- Item 3: أنيستيتك -->
+<article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm transition relative overflow-hidden" data-purpose="order-card">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-600 border-slate-300" type="checkbox"/>
+<h2 class="font-bold text-sm text-slate-800">أنيستيتك</h2>
+</div>
+<span class="bg-rose-50 text-rose-600 border border-rose-200/80 text-[10px] px-2 py-0.5 rounded font-bold">
+              نافد
+            </span>
+</div>
+<div class="mt-1.5 pr-6 flex flex-col gap-1 text-[11px] text-slate-500">
+<div class="flex items-center gap-1.5 text-slate-600">
+<i class="fa-solid fa-box-open text-[10px] text-slate-400"></i>
+<span>بالمخزن <strong class="text-slate-800">0</strong> علبة • تنبيه عند 1</span>
+</div>
+<div class="text-slate-400 flex items-center gap-1">
+<i class="fa-solid fa-circle-info text-[10px]"></i>
+<span>مفيش سعر مسجّل بعد للترشيح</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+<span class="text-xs text-slate-500 font-medium">المطلوب</span>
+<div class="flex items-center gap-2">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button aria-label="إنقاص" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">-</button>
+<span class="w-8 text-center text-xs font-bold text-slate-800 bg-white py-1">2</span>
+<button aria-label="زيادة" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">+</button>
+</div>
+<span class="text-xs text-slate-500 font-medium">علبة</span>
+</div>
+</div>
+</article>
+<!-- Item 4: نيدل -->
+<article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm transition relative overflow-hidden" data-purpose="order-card">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-600 border-slate-300" type="checkbox"/>
+<h2 class="font-bold text-sm text-slate-800">نيدل (Dental Needles 30G)</h2>
+</div>
+<span class="bg-amber-50 text-amber-600 border border-amber-200/80 text-[10px] px-2 py-0.5 rounded font-bold">
+              أوشك
+            </span>
+</div>
+<div class="mt-1.5 pr-6 flex flex-col gap-1 text-[11px] text-slate-500">
+<div class="flex items-center gap-1.5 text-slate-600">
+<i class="fa-solid fa-box-open text-[10px] text-slate-400"></i>
+<span>بالمخزن <strong class="text-slate-800">1</strong> علبة • تنبيه عند 2</span>
+</div>
+<div class="text-slate-400 flex items-center gap-1">
+<i class="fa-solid fa-circle-info text-[10px]"></i>
+<span>مفيش سعر مسجّل بعد للترشيح</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+<span class="text-xs text-slate-500 font-medium">المطلوب</span>
+<div class="flex items-center gap-2">
+<div class="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+<button aria-label="إنقاص" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">-</button>
+<span class="w-8 text-center text-xs font-bold text-slate-800 bg-white py-1">4</span>
+<button aria-label="زيادة" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:bg-slate-300 text-sm font-bold">+</button>
+</div>
+<span class="text-xs text-slate-500 font-medium">علبة</span>
+</div>
+</div>
+</article>
+</section>
+<!-- END: OrdersList -->
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: FloatingCTA -->
+<div class="fixed bottom-14 left-0 right-0 max-w-[420px] mx-auto px-4 z-20 pointer-events-none">
+<button class="pointer-events-auto w-full bg-emerald-800 hover:bg-emerald-900 active:scale-[0.99] text-white py-3 px-4 rounded-xl shadow-lg flex items-center justify-between transition border border-emerald-700 font-semibold text-xs">
+<div class="flex items-center gap-2">
+<i class="fa-brands fa-whatsapp text-lg text-emerald-300"></i>
+<span>تأكيد وتجهيز رسالة الواتساب</span>
+</div>
+<span class="bg-emerald-900/60 px-2 py-1 rounded text-[11px] font-bold text-emerald-200">28 صنف</span>
+</button>
+</div>
+<!-- END: FloatingCTA -->
+<!-- BEGIN: BottomNavigationBar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 px-6 py-2 flex justify-between items-center z-10 text-[10px]">
+<!-- Inventory Tab (Active) -->
+<a class="flex flex-col items-center gap-1 text-emerald-700 font-bold" href="#">
+<i class="fa-solid fa-boxes-stacked text-base"></i>
+<span>المخزن</span>
+</a>
+<!-- Tasks Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium" href="#">
+<i class="fa-solid fa-list-check text-base"></i>
+<span>المهام</span>
+</a>
+<!-- Patients/Appointments Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium" href="#">
+<i class="fa-solid fa-user-doctor text-base"></i>
+<span>العيادة</span>
+</a>
+<!-- Admin Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium" href="#">
+<i class="fa-solid fa-chart-pie text-base"></i>
+<span>الإدارة</span>
+</a>
+<!-- Academy Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium" href="#">
+<i class="fa-solid fa-graduation-cap text-base"></i>
+<span>الأكاديمية</span>
+</a>
+</nav>
+<!-- END: BottomNavigationBar -->
+</div>
+<!-- END: MobileDeviceFrame -->
+</body></html>
