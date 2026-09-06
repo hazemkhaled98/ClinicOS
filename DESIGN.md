@@ -50,49 +50,49 @@ colors:
   surface-variant: '#dde4e1'
 typography:
   display-lg:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 32px
     fontWeight: '700'
     lineHeight: 40px
     letterSpacing: -0.02em
   headline-lg:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 24px
     fontWeight: '700'
     lineHeight: 32px
     letterSpacing: -0.01em
   headline-sm:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 18px
     fontWeight: '600'
     lineHeight: 26px
   title-md:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 16px
     fontWeight: '600'
     lineHeight: 24px
   body-lg:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 15px
     fontWeight: '400'
     lineHeight: 22px
   body-md:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 13px
     fontWeight: '400'
     lineHeight: 18px
   label-md:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 12px
     fontWeight: '600'
     lineHeight: 16px
   label-xs:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 11px
     fontWeight: '500'
     lineHeight: 14px
   numeric-metric:
-    fontFamily: Cairo
+    fontFamily: Noto Sans Arabic
     fontSize: 28px
     fontWeight: '700'
     lineHeight: 32px
@@ -134,6 +134,7 @@ The palette establishes an environment of surgical cleanliness and grounded perm
 
 Typography prioritizes Arabic-first visual balance and compact operational density. Headings and operational body copy maintain strict optical alignments with baseline metrics.
 
+- **Font Stack**: **Noto Sans Arabic** carries all text (weights 300–800), with **Inter** (weights 400–700) as the Latin companion glyph set. Configure via Tailwind `fontFamily.sans = ['Noto Sans Arabic', 'Inter', 'sans-serif']`; both fonts are self-hosted.
 - **Numerics**: Monospaced tabular figures (`font-variant-numeric: tabular-nums`) must be active for all tables, price fields, dental tooth notations, patient IDs, and KPI counters.
 - **RTL Fluidity**: When switching from Arabic to English, line heights remain strictly fixed at their defined pixel values to eliminate horizontal row jumping or baseline shifting across bilingual inputs.
 - **Weight Pairing**: Restrict weights to 400 (Regular), 500 (Medium), 600 (SemiBold), and 700 (Bold). Avoid extra-thin or ultra-heavy weights that render inconsistently on clinical monitors.

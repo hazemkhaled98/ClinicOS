@@ -14,9 +14,6 @@ spring:
   jooq:
     sql-dialect: postgres
 
-vaadin:
-  launch-browser: false
-
 springdoc:
   api-docs:
     path: /api-docs
