@@ -20,8 +20,12 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -30,11 +34,12 @@ import jakarta.annotation.security.PermitAll;
 
 @Layout
 @PermitAll
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private static final Locale ARABIC = Locale.of("ar");
 
     private final AuthenticationContext authenticationContext;
+    private Div nav;
 
     /**
      * No-arg overload so Vaadin test tooling that instantiates layouts by
@@ -53,6 +58,7 @@ public class MainLayout extends AppLayout {
     @Autowired
     public MainLayout(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
+        getElement().setAttribute("dir", "rtl");
         addToNavbar(createTopbar());
         addToDrawer(createDrawer());
     }
@@ -97,7 +103,7 @@ public class MainLayout extends AppLayout {
         @SuppressWarnings("unchecked")
         List<String> codes = session == null ? null : (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
 
-        Div nav = new Div();
+        nav = new Div();
         nav.addClassName("clinicos-nav");
 
         if (roleCode == null || codes == null) {
@@ -107,6 +113,7 @@ public class MainLayout extends AppLayout {
             Button item = new Button(section.label(), e -> UI.getCurrent().navigate(section.route()));
             item.addClassName("clinicos-nav-item");
             item.setWidthFull();
+            item.getElement().setAttribute("data-route", section.route());
             nav.add(item);
         }
         return nav;
@@ -130,7 +137,8 @@ public class MainLayout extends AppLayout {
         Div meta = new Div(nameLabel, role);
         meta.addClassName("clinicos-who-meta");
 
-        Span logout = new Span("🚪");
+        Icon logoutIcon = new Icon(VaadinIcon.POWER_OFF);
+        Span logout = new Span(logoutIcon);
         logout.addClassName("clinicos-logout");
         logout.getElement().setAttribute("title", "تسجيل الخروج");
         logout.getElement().addEventListener("click", event -> authenticationContext.logout());
@@ -157,5 +165,22 @@ public class MainLayout extends AppLayout {
         Month month = date.getMonth();
         return day.getDisplayName(TextStyle.FULL, ARABIC) + " " + date.getDayOfMonth() + " "
                 + month.getDisplayName(TextStyle.FULL, ARABIC);
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        if (nav == null) {
+            return;
+        }
+        String currentRoute = event.getLocation().getPath();
+        for (int i = 0; i < nav.getComponentCount(); i++) {
+            var child = nav.getComponentAt(i);
+            String route = child.getElement().getAttribute("data-route");
+            if (route != null && currentRoute.equals(route)) {
+                child.getElement().setAttribute("aria-current", "page");
+            } else {
+                child.getElement().removeAttribute("aria-current");
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.server.VaadinSession;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,8 +71,9 @@ class ClinicPickerViewTest {
 
         ClinicPickerView view = new ClinicPickerView(membershipLookupService, permissionsService, activityLogService);
 
-        H2 heading = _get(view, H2.class);
-        assertThat(heading.getText()).isEqualTo("لا توجد عيادات مسجلة");
+        Paragraph message = _get(view, Paragraph.class,
+                spec -> spec.withClasses("clinicos-empty-state-message"));
+        assertThat(message.getText()).isEqualTo("لا توجد عيادات مسجلة. لا تملك صلاحية الدخول إلى أي عيادة.");
     }
 
     @Test

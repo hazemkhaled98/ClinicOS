@@ -12,6 +12,7 @@ import java.util.UUID;
 import static com.github.mvysny.kaributesting.v10.BasicUtilsKt._fireDomEvent;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +28,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.Location;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
@@ -84,7 +88,7 @@ class MainLayoutTest {
         Span logout = _get(layout, Span.class, spec -> spec.withClasses("clinicos-logout"));
 
         assertThat(name.getText()).isEqualTo("ahmed");
-        assertThat(logout.getText()).isEqualTo("🚪");
+        assertThat(logout.getChildren()).anyMatch(Icon.class::isInstance);
     }
 
     @Test
@@ -144,6 +148,32 @@ class MainLayoutTest {
         SectionPlaceholderView placeholder = _get(UI.getCurrent(), SectionPlaceholderView.class);
         H1 title = _get(placeholder, H1.class);
         assertThat(title.getText()).isEqualTo("الوصول السريع");
+    }
+
+    @Test
+    void ariaCurrentIndicatesActiveNavItem() {
+        sessionPermissions("manager", Set.of("quick", "emp"));
+
+        MainLayout layout = new MainLayout(authenticationContext);
+
+        Button quick = _get(layout, Button.class,
+                spec -> spec.withClasses("clinicos-nav-item").withText("الوصول السريع"));
+        String quickRoute = quick.getElement().getAttribute("data-route");
+
+        AfterNavigationEvent event = mock(AfterNavigationEvent.class);
+        Location location = mock(Location.class);
+        when(location.getPath()).thenReturn(quickRoute);
+        when(event.getLocation()).thenReturn(location);
+
+        layout.afterNavigation(event);
+
+        assertThat(quick.getElement().getAttribute("aria-current"))
+                .isEqualTo("page");
+
+        Button emp = _get(layout, Button.class,
+                spec -> spec.withClasses("clinicos-nav-item").withText("إدارة الموظفين"));
+        assertThat(emp.getElement().getAttribute("aria-current"))
+                .isNull();
     }
 
     private static void sessionPermissions(String roleCode, Set<String> codes) {

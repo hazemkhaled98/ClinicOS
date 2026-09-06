@@ -2,8 +2,11 @@ package com.clinicos.ui;
 
 import com.clinicos.ui.nav.NavSection;
 import com.clinicos.ui.nav.NavSectionResolver;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -48,10 +51,15 @@ public class SectionPlaceholderView extends VerticalLayout implements BeforeEnte
         Paragraph subtitle = new Paragraph(section == null ? "" : section.subtitle());
         subtitle.addClassName("clinicos-section-sub");
 
-        Paragraph soon = new Paragraph("سيتم تفعيل هذا القسم قريباً.");
-        soon.addClassName("clinicos-section-soon");
+        Icon icon = new Icon(VaadinIcon.HOURGLASS_START);
+        Paragraph message = new Paragraph("سيتم تفعيل هذا القسم قريباً.");
+        message.addClassName("clinicos-empty-state-message");
 
-        add(headline, title, subtitle, soon);
+        Div emptyState = new Div(icon, message);
+        emptyState.addClassName("clinicos-empty-state");
+        icon.addClassName("clinicos-empty-state-icon");
+
+        add(headline, title, subtitle, emptyState);
     }
 
     static void writeCookie(String route) {

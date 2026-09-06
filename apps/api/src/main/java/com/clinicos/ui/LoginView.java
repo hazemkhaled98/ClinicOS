@@ -38,6 +38,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         overlay.setTitle("ClinicOS");
         overlay.setI18n(createArabicLabels());
         overlay.setForgotPasswordButtonVisible(false);
+        overlay.addClassName("clinicos-auth-card");
 
         clinicField = new TextField("كود العيادة");
         clinicField.getElement().setAttribute("name", "clinic");
@@ -45,8 +46,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         overlay.getCustomFormArea().add(clinicField);
 
         Paragraph signupHint = new Paragraph(new RouterLink("ليس لديك حساب؟ أنشئ عيادة جديدة", SignupView.class));
-        signupHint.getStyle().set("margin-top", "1rem");
-        signupHint.getStyle().set("color", "var(--ink)");
+        signupHint.addClassName("clinicos-auth-hint");
         overlay.getFooter().add(signupHint);
 
         add(overlay);
@@ -64,9 +64,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         params.getSingleParameter("clinic").ifPresent(clinicField::setValue);
         if (params.getSingleParameter("signup").map("success"::equals).orElse(false)) {
             Paragraph banner = new Paragraph("تم إنشاء العيادة بنجاح، سجّل الدخول لبدء العمل");
-            banner.getStyle().set("margin-bottom", "1rem");
-            banner.getStyle().set("color", "var(--teal)");
-            banner.getStyle().set("font-weight", "600");
+            banner.addClassName("clinicos-banner-success");
             overlay.getCustomFormArea().add(banner);
         }
     }

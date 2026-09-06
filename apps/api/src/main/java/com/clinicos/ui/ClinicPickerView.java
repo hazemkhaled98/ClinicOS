@@ -13,8 +13,12 @@ import com.clinicos.identity.api.PermissionsService.MembershipAccess;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.TenantContext;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -59,7 +63,15 @@ public class ClinicPickerView extends VerticalLayout {
         }
 
         if (memberships.isEmpty()) {
-            add(new H2("لا توجد عيادات مسجلة"), new Paragraph("لا تملك صلاحية الدخول إلى أي عيادة."));
+            Icon icon = new Icon(VaadinIcon.EXCLAMATION_CIRCLE);
+            Paragraph message = new Paragraph("لا توجد عيادات مسجلة. لا تملك صلاحية الدخول إلى أي عيادة.");
+
+            Div emptyState = new Div(icon, message);
+            emptyState.addClassName("clinicos-empty-state");
+            icon.addClassName("clinicos-empty-state-icon");
+            message.addClassName("clinicos-empty-state-message");
+
+            add(emptyState);
             return;
         }
 
