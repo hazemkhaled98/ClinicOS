@@ -31,6 +31,7 @@
   --color-emerald-600: #059669;
   --color-emerald-500: #10b981;
   --color-emerald-400: #34d399;
+  --color-emerald-100: #d1fae5;
   --shadow-drawer: -10px 0 40px -5px rgba(0, 0, 0, 0.4), -4px 0 15px -3px rgba(0, 0, 0, 0.25);
 }
 
@@ -366,6 +367,12 @@ vaadin-drawer-toggle {
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 }
 
+.auth-glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
 .clinicos-auth-card {
   background-color: var(--c-surface);
   border-radius: var(--radius-lg);
@@ -438,6 +445,26 @@ vaadin-drawer-toggle {
 .clinicos-field-error vaadin-text-field::part(input-field),
 .clinicos-field-error vaadin-password-field::part(input-field) {
   border-color: var(--c-status-danger);
+}
+
+.clinicos-auth-card.clinicos-auth-error vaadin-text-field::part(input-field),
+.clinicos-auth-card.clinicos-auth-error vaadin-password-field::part(input-field) {
+  border-color: var(--c-status-danger);
+  background-color: rgba(244, 63, 94, 0.05);
+}
+
+.clinicos-auth-card vaadin-login-form::part(error-message) {
+  background-color: var(--c-status-danger-bg);
+  color: var(--c-status-danger-deep);
+  border: 1px solid var(--c-status-danger-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
 }
 
 .clinicos-auth-card vaadin-login-form::part(form) {
