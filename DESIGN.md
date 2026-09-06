@@ -147,7 +147,7 @@ The design uses moderate corner radii to project approachability and visual refi
 ### Buttons
 - **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring.
 - **Secondary Action**: Background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29`. Hover applies background `#f6faf8`.
-- **Destructive Action**: Background `#fdf2f2`, border 1px solid `#b23b30`, text `#b23b30`.
+- **Destructive Action**: Background `bg-danger-50`, border 1px solid `border-danger-600`, text `text-danger-600`.
 
 ### Data Grids & Tabular Views
 - **Header**: Background `#f4f7f6`, text color `#0a2e29` (70% opacity), font size `11px`, font weight `600`, border-bottom 1px solid `#e1e8e5`.
@@ -156,13 +156,13 @@ The design uses moderate corner radii to project approachability and visual refi
 
 ### Input Fields & Controls
 - **Input Housing**: Background `#ffffff`, border 1px solid `#e2e8f0`, radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text), font size `14px`; in-app dense inputs may use smaller heights.
-- **State Behavior**: Focus state applies an active border of `1.5px solid #0a2e29` with zero ambient outer glow. Error state switches the border to `#b23b30`.
+- **State Behavior**: Focus state applies an active border of `1.5px solid #0a2e29` with zero ambient outer glow. Error state switches the border to `border-danger-600`.
 - **Labels**: Positioned persistently above inputs (`font-size: 12px`, weight `600`, color `#0a2e29`).
 
 ### Gamification & Staff Performance Modules
-- **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `neutral-300`, active stroke `success-600` (or `warning-600` when behind schedule).
-- **Streak Badges**: Pill-shaped container (`rounded-full`), background `bg-warning-50`, border 1px solid `warning-600`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
-- **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`bg-info-50`), subtle 1px border (`info-600`), and text-xs typography to build positive momentum.
+- **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `bg-neutral-300`, active stroke `text-success-600` (or `text-warning-600` when behind schedule).
+- **Streak Badges**: Pill-shaped container (`rounded-full`), background `bg-warning-50`, border 1px solid `border-warning-600`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
+- **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`bg-info-50`), subtle 1px border (`border-info-600`), and `text-xs` typography to build positive momentum.
 
 ### Chips & Semantic Status Badges
 - **Dimensions**: Height `22px`, horizontal padding `8px`, corner radius `9999px`, font size `11px`, weight `600`.
@@ -171,10 +171,6 @@ The design uses moderate corner radii to project approachability and visual refi
   - Pending / In-Chair: `bg-warning-50 text-warning-600`.
   - Cancelled / Overdue: `bg-danger-50 text-danger-600`.
   - Scheduled: `bg-info-50 text-info-600`.
-
-## Comps Are Wireframes
-
-Design comp files (`ClinicOS Design/<NN>_<screen>/code.html`) serve as layout references and information architecture guides. Extract copy and structural decisions from them, but never port over raw hex values, Tailwind config overrides, inline `<style>` blocks, font-family declarations, or physical-direction utilities (`pl-`, `pr-`, `left-`, `right-`, `border-l`, `border-r`, etc.). Every color, spacing, and styling primitive used in a Thymeleaf template must come from this document's authorized token set (`tokens.css` and `components.css`). Comp files remain read-only on disk and are never edited during implementation.
 
 ### Brand Color Palette (Tailwind Utilities)
 
@@ -188,3 +184,7 @@ The following brand colors are configured as Tailwind utilities in `apps/api/src
 Error text and error-state borders use the `danger-600` base, with soft tint surfaces (alerts, destructive-action chips) on `danger-50`. Do not use Tailwind's stock `red-*` steps; reach for `danger-*` instead. Same rule for gray: `neutral-*`, never `slate-*`.
 
 These are the canonical colors for all UI elements; hex values used in Stitch comps must be translated to their utility equivalents before implementation.
+
+## Comps Are Wireframes
+
+Design comp files (`ClinicOS Design/<NN>_<screen>/code.html`) serve as layout references and information architecture guides. Extract copy and structural decisions from them, but never port over raw hex values, Tailwind config overrides, inline `<style>` blocks, font-family declarations, or physical-direction utilities (`pl-`, `pr-`, `left-`, `right-`, `border-l`, `border-r`, etc.). Every color, spacing, and styling primitive used in a Thymeleaf template must come from this document's authorized token set (`tokens.css` and `components.css`). Comp files remain read-only on disk and are never edited during implementation.
