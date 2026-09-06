@@ -5,8 +5,8 @@ description: A data-dense clinic back-office design system for Arabic RTL enviro
 
 colors:
   # Primary & Brand
-  primary: "#17786a"
-  primary-50pct: "#abb0ad"
+  primary: "#0a2e29"
+  primary-50pct: "#859794"
   on-primary: "#ffffff"
   
   # Neutrals (Light)
@@ -147,8 +147,8 @@ components:
     backgroundColor: "rgba(255, 255, 255, 0.05)"
     textColor: "{colors.dark-ink}"
   nav-item-active:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
+    backgroundColor: "{colors.dark-primary}"
+    textColor: "{colors.ink}"
   topbar:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -231,10 +231,10 @@ components:
     rounded: "{rounded.sm}"
     padding: "{spacing.sm} {spacing.lg}"
   button-primary-hover:
-    backgroundColor: "#146c5f"
+    backgroundColor: "#1e3f3a"
     textColor: "{colors.on-primary}"
   button-primary-active:
-    backgroundColor: "#136659"
+    backgroundColor: "#2c4b47"
     textColor: "{colors.on-primary}"
   button-primary-disabled:
     backgroundColor: "{colors.primary-50pct}"
@@ -284,7 +284,7 @@ components:
 
 ## Overview
 
-ClinicOS is a data-dense clinic back-office built on Vaadin Flow and Spring Boot, designed for Arabic RTL environments. The design system follows IBM Carbon discipline: a light canvas, near-square corners, hairline borders as the primary elevation cue, a flat tile-based layout, and a single structural teal accent (`#17786a`). There are no decorative drop shadows — depth is signalled by a 1px border and, sparingly, by a barely-there modal shadow for dialogs. Type is set in **Cairo** (a typeface that supports Arabic and Latin seamlessly) with no negative tracking, which would degrade Arabic glyph joining. All logical CSS properties (padding-inline, margin-block, border-inline-start, etc.) are used throughout; `left` and `right` are never used, ensuring correct RTL layout.
+ClinicOS is a data-dense clinic back-office built on Vaadin Flow and Spring Boot, designed for Arabic RTL environments. The design system follows IBM Carbon discipline: a light canvas, near-square corners, hairline borders as the primary elevation cue, a flat tile-based layout, and a single structural deep-teal accent (`#0a2e29`, the same color as the app-drawer's own background). There are no decorative drop shadows — depth is signalled by a 1px border and, sparingly, by a barely-there modal shadow for dialogs. Type is set in **Cairo** (a typeface that supports Arabic and Latin seamlessly) with no negative tracking, which would degrade Arabic glyph joining. All logical CSS properties (padding-inline, margin-block, border-inline-start, etc.) are used throughout; `left` and `right` are never used, ensuring correct RTL layout.
 
 **Key Characteristics:**
 - Light neutral canvas `{colors.canvas}` with white surfaces `{colors.surface}` for contrast
@@ -300,8 +300,8 @@ ClinicOS is a data-dense clinic back-office built on Vaadin Flow and Spring Boot
 ## Colors
 
 ### Primary & Brand
-- **Teal Primary** (`{colors.primary}` — #17786a): the single structural accent, reserved for primary CTAs, active states, and focus signals. This is the only colour that signals a primary action or interaction state.
-- **Primary at 50%** (`{colors.primary-50pct}` — #abb0ad): used for disabled states or secondary visual hierarchy within a primary context.
+- **Deep Teal Primary** (`{colors.primary}` — #0a2e29): the single structural accent, reserved for primary CTAs, active states, and focus signals. This is the only colour that signals a primary action or interaction state. It doubles as `{colors.dark-drawer-start}` — the drawer's own background gradient now sets the site's accent color.
+- **Primary at 50%** (`{colors.primary-50pct}` — #859794): used for disabled states or secondary visual hierarchy within a primary context.
 - **On Primary** (`{colors.on-primary}` — #ffffff): white text/icons on the teal primary.
 
 ### Neutrals (Light)
@@ -426,9 +426,9 @@ This app's `theme.json` imports `typography, color, spacing, badge, utility` fro
 
 | ClinicOS Token | Lumo Custom Property | Notes |
 |---|---|---|
-| `primary` (#17786a) | `--lumo-primary-color` | Primary accent for buttons, active states, focus rings |
-| `primary` at 50% (#abb0ad) | `--lumo-primary-color-50pct` | Used for disabled/secondary contexts |
-| `primary` (#17786a) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
+| `primary` (#0a2e29) | `--lumo-primary-color` | Primary accent for buttons, active states, focus rings |
+| `primary` at 50% (#859794) | `--lumo-primary-color-50pct` | Used for disabled/secondary contexts |
+| `primary` (#0a2e29) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
 | `canvas` (#f4f7f6) | `--lumo-tint-5pct` | Page/container background context |
 | `surface` (#ffffff) | `--lumo-base-color` | Card and input surfaces |
 | `hairline` (#e1e8e5) | `--lumo-shade-5pct` | Border and divider color |
@@ -474,7 +474,7 @@ Each component is defined with its default state and typical variants. All use l
 **`nav-item`** — Sidebar navigation row (default / hover / active)
 - **Default:** Transparent background, muted text `{colors.dark-ink-muted}`, padding `{spacing.sm} {spacing.md}`, rounded `{rounded.sm}`
 - **Hover:** Subtle white overlay at 5% opacity, text brightens to `{colors.dark-ink}`
-- **Active:** Teal solid background `{colors.primary}`, white text, with a 3px left (LTR) / right (RTL) border-inline-start
+- **Active:** Since the drawer background now equals `{colors.primary}`, the active row instead uses `{colors.dark-primary}` (#2dd4bf, a brighter accent) as its background, with `{colors.ink}` text for contrast
 - Typography: `{typography.body-sm}` (13px)
 
 **`topbar`** — Top navigation bar
@@ -484,6 +484,7 @@ Each component is defined with its default state and typical variants. All use l
 - Padding: `{spacing.md}` (12px) vertical × `{spacing.lg}` (16px) horizontal (using block/inline logical properties)
 - Height: 56px (fixed, for consistent icon/avatar sizing)
 - Typical content: clinic name, user menu, breadcrumbs (if needed)
+- Drawer-toggle icon: `{colors.primary}` — the topbar's hamburger icon that opens/closes the drawer
 
 ### Page Layout
 
@@ -562,15 +563,15 @@ Each component is defined with its default state and typical variants. All use l
 ### Buttons
 
 **`button-primary`** — Primary action (submit, create, save, etc.)
-- Background: `{colors.primary}` (#17786a, teal)
+- Background: `{colors.primary}` (#0a2e29, deep teal)
 - Text: `{colors.on-primary}` (white)
 - Rounded: `{rounded.sm}` (6px)
 - Padding: `{spacing.sm}` (8px) block × `{spacing.lg}` (16px) inline
 - Typography: `{typography.body-sm}` (13px / 600)
 - Border: none
 - Cursor: pointer
-- **Hover:** background `#146c5f` (~10% darker)
-- **Active/Pressed:** background `#136659` (~15% darker)
+- **Hover:** background `#1e3f3a` (lightens, since the base color is already near-black)
+- **Active/Pressed:** background `#2c4b47` (lightens further, for a clearer pressed state)
 - **Disabled:** background `{colors.primary-50pct}`, text `{colors.ink}` (not white — fails contrast on the muted fill), cursor not-allowed
 
 **`button-secondary`** — Secondary action (cancel, close, reset)

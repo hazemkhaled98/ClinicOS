@@ -21,7 +21,7 @@
 }
 
 :root {
-  --c-primary: #17786a;
+  --c-primary: #0a2e29;
   --c-primary-50pct: color-mix(in srgb, var(--c-primary) 50%, transparent);
   --c-on-primary: #ffffff;
 
@@ -104,6 +104,10 @@ body {
 vaadin-app-layout::part(navbar) {
   background-color: var(--c-surface);
   border-block-end: 1px solid var(--c-hairline);
+}
+
+vaadin-drawer-toggle {
+  color: var(--c-primary);
 }
 
 .clinicos-topbar {
@@ -191,8 +195,8 @@ vaadin-app-layout::part(navbar) {
 }
 
 .clinicos-nav-item[aria-current="page"] {
-  background-color: var(--c-primary);
-  color: var(--c-on-primary);
+  background-color: var(--c-dark-primary);
+  color: var(--c-ink);
   font-weight: 400;
 }
 
