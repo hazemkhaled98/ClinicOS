@@ -20,6 +20,20 @@
   font-display: swap;
 }
 
+@theme {
+  --color-teal-950: #071f1c;
+  --color-teal-900: #0a2e29;
+  --color-teal-850: #0d3832;
+  --color-teal-800: #114a42;
+  --color-teal-700: #17655a;
+  --color-teal-600: #1f8375;
+  --color-teal-500: #2a9d8f;
+  --color-emerald-600: #059669;
+  --color-emerald-500: #10b981;
+  --color-emerald-400: #34d399;
+  --shadow-drawer: -10px 0 40px -5px rgba(0, 0, 0, 0.4), -4px 0 15px -3px rgba(0, 0, 0, 0.25);
+}
+
 :root {
   --c-primary: #0a2e29;
   --c-primary-50pct: color-mix(in srgb, var(--c-primary) 50%, transparent);
