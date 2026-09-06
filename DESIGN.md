@@ -2,101 +2,69 @@
 name: ClinicOS
 colors:
   surface: '#f6faf8'
-  surface-dim: '#d5dcd9'
-  surface-bright: '#f6faf8'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#eef5f2'
-  surface-container: '#e8efec'
-  surface-container-high: '#e3eae7'
-  surface-container-highest: '#dde4e1'
   on-surface: '#161d1b'
   on-surface-variant: '#414846'
-  inverse-surface: '#2b3230'
-  inverse-on-surface: '#ebf2ef'
-  outline: '#717976'
-  outline-variant: '#c1c8c5'
-  surface-tint: '#43655e'
-  primary: '#001814'
-  on-primary: '#ffffff'
-  primary-container: '#0a2e29'
-  on-primary-container: '#749790'
-  inverse-primary: '#aacec6'
-  secondary: '#076c41'
-  on-secondary: '#ffffff'
-  secondary-container: '#9bf2bb'
-  on-secondary-container: '#117145'
-  tertiary: '#201100'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#37250c'
-  on-tertiary-container: '#a68b6a'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#93000a'
-  primary-fixed: '#c5eae2'
-  primary-fixed-dim: '#aacec6'
-  on-primary-fixed: '#00201c'
-  on-primary-fixed-variant: '#2b4d47'
-  secondary-fixed: '#9ef5be'
-  secondary-fixed-dim: '#82d8a3'
-  on-secondary-fixed: '#002110'
-  on-secondary-fixed-variant: '#005230'
-  tertiary-fixed: '#feddb8'
-  tertiary-fixed-dim: '#e0c19d'
-  on-tertiary-fixed: '#281803'
-  on-tertiary-fixed-variant: '#584327'
-  background: '#f6faf8'
-  on-background: '#161d1b'
-  surface-variant: '#dde4e1'
+  teal-950: '#071f1c'
+  teal-900: '#0a2e29'
+  teal-850: '#0d3832'
+  teal-800: '#114a42'
+  teal-700: '#17655a'
+  teal-600: '#1f8375'
+  teal-500: '#2a9d8f'
+  teal-300: '#5eead4'
+  teal-100: '#ccfbf1'
+  emerald-800: '#065f46'
+  emerald-700: '#047857'
+  emerald-600: '#059669'
+  emerald-500: '#10b981'
+  emerald-400: '#34d399'
+  emerald-300: '#6ee7b7'
+  emerald-200: '#a7f3d0'
+  emerald-100: '#d1fae5'
+  emerald-50: '#ecfdf5'
+  neutral-900: '#0f172a'
+  neutral-800: '#1e293b'
+  neutral-700: '#334155'
+  neutral-600: '#475569'
+  neutral-500: '#64748b'
+  neutral-400: '#94a3b8'
+  neutral-300: '#cbd5e1'
+  neutral-200: '#e2e8f0'
+  neutral-100: '#f1f5f9'
+  neutral-50: '#f8fafc'
+  danger-600: '#b23b30'
+  danger-50: '#fdf2f2'
+  success-600: '#1f7a4d'
+  success-50: '#e8f5ed'
+  warning-600: '#b87900'
+  warning-50: '#fef7e6'
+  info-600: '#2563eb'
+  info-50: '#eff6ff'
 typography:
-  display-lg:
-    fontFamily: Noto Sans Arabic
-    fontSize: 32px
-    fontWeight: '700'
-    lineHeight: 40px
-    letterSpacing: -0.02em
   headline-lg:
     fontFamily: Noto Sans Arabic
-    fontSize: 24px
+    fontSize: text-2xl
     fontWeight: '700'
-    lineHeight: 32px
-    letterSpacing: -0.01em
   headline-sm:
     fontFamily: Noto Sans Arabic
-    fontSize: 18px
+    fontSize: text-lg
     fontWeight: '600'
-    lineHeight: 26px
   title-md:
     fontFamily: Noto Sans Arabic
-    fontSize: 16px
+    fontSize: text-base
     fontWeight: '600'
-    lineHeight: 24px
-  body-lg:
-    fontFamily: Noto Sans Arabic
-    fontSize: 15px
-    fontWeight: '400'
-    lineHeight: 22px
-  body-md:
-    fontFamily: Noto Sans Arabic
-    fontSize: 13px
-    fontWeight: '400'
-    lineHeight: 18px
   label-md:
     fontFamily: Noto Sans Arabic
-    fontSize: 12px
+    fontSize: text-xs
     fontWeight: '600'
-    lineHeight: 16px
   label-xs:
     fontFamily: Noto Sans Arabic
-    fontSize: 11px
+    fontSize: text-micro
     fontWeight: '500'
-    lineHeight: 14px
   numeric-metric:
     fontFamily: Noto Sans Arabic
-    fontSize: 28px
+    fontSize: text-metric
     fontWeight: '700'
-    lineHeight: 32px
-    letterSpacing: -0.02em
 rounded:
   sm: 8px
   md: 12px
@@ -125,10 +93,10 @@ The palette establishes an environment of surgical cleanliness and grounded perm
 - **Primary Ink (`#0a2e29`)**: A near-black, deep surgical teal used for primary brand elements, dominant headings, and high-impact navigational anchors.
 
 ### Semantic Tiers
-- **Success & Goal Completion**: Base `#1f7a4d` on soft tint `#e8f5ed`. Applied to treatment completions, collected receivables, and performance badges.
-- **Warning & Pending Status**: Base `#b87900` on soft tint `#fef7e6`. Applied to overdue recalls, expiring insurance pre-authorizations, and inventory low-stock limits.
-- **Critical & Emergency**: Base `#b23b30` on soft tint `#fdf2f2`. Reserved strictly for medical alerts, severe billing disputes, system errors, and canceled procedures.
-- **Informational & Scheduling**: Base `#2563eb` on soft tint `#eff6ff`. Denotes upcoming appointments, doctor reassignments, and system audit trails.
+- **Success & Goal Completion**: `bg-success-50 text-success-600`. Applied to treatment completions, collected receivables, and performance badges.
+- **Warning & Pending Status**: `bg-warning-50 text-warning-600`. Applied to overdue recalls, expiring insurance pre-authorizations, and inventory low-stock limits.
+- **Critical & Emergency**: `bg-danger-50 text-danger-600`. Reserved strictly for medical alerts, severe billing disputes, system errors, and canceled procedures.
+- **Informational & Scheduling**: `bg-info-50 text-info-600`. Denotes upcoming appointments, doctor reassignments, and system audit trails.
 
 ## Typography
 
@@ -168,16 +136,16 @@ The system layers surfaces with a combination of crisp structural borders, layer
 
 The design uses moderate corner radii to project approachability and visual refinement while maintaining structural clarity:
 
-- **Small Radius (8px, `rounded-sm`)**: Applied to icon containers and micro-elements.
-- **Standard Radius (12px, `rounded-md`)**: Applied to text input fields, operational buttons, card shells, navigation items, form controls, and dropdowns.
-- **Large Radius (16px, `rounded-lg`)**: Applied to feature highlight tiles and grouped card sections.
-- **Extra-Large Radius (24px, `rounded-xl`)**: Applied to the primary auth card and drawer feature sections for visual prominence.
-- **Pill Exception (9999px)**: Strictly reserved for status badges, gamified performance streak bubbles, motivational metric pills, and active user avatars. Never apply pill radii to structural containers, inputs, or operational buttons.
+- **Small Radius (8px, `rounded-lg`)**: Applied to icon containers and micro-elements.
+- **Standard Radius (12px, `rounded-xl`)**: Applied to text input fields, operational buttons, card shells, navigation items, form controls, and dropdowns.
+- **Large Radius (16px, `rounded-2xl`)**: Applied to feature highlight tiles and grouped card sections.
+- **Extra-Large Radius (24px, `rounded-3xl`)**: Applied to the primary auth card and drawer feature sections for visual prominence.
+- **Pill Exception (9999px, `rounded-full`)**: Strictly reserved for status badges, gamified performance streak bubbles, motivational metric pills, and active user avatars. Never apply pill radii to structural containers, inputs, or operational buttons.
 
 ## Components
 
 ### Buttons
-- **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `12px`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring.
+- **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring.
 - **Secondary Action**: Background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29`. Hover applies background `#f6faf8`.
 - **Destructive Action**: Background `#fdf2f2`, border 1px solid `#b23b30`, text `#b23b30`.
 
@@ -187,22 +155,26 @@ The design uses moderate corner radii to project approachability and visual refi
 - **Cell Alignment**: Text content follows layout alignment (right-aligned for Arabic). Numerical metrics, monetary values, and phone numbers are strictly left-aligned or positioned with fixed-width tabular formatting.
 
 ### Input Fields & Controls
-- **Input Housing**: Background `#ffffff`, border 1px solid `#e2e8f0`, radius `12px`. Auth/marketing screens: height `52px` (py-3.5 + sm text), font size `14px`; in-app dense inputs may use smaller heights.
+- **Input Housing**: Background `#ffffff`, border 1px solid `#e2e8f0`, radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text), font size `14px`; in-app dense inputs may use smaller heights.
 - **State Behavior**: Focus state applies an active border of `1.5px solid #0a2e29` with zero ambient outer glow. Error state switches the border to `#b23b30`.
 - **Labels**: Positioned persistently above inputs (`font-size: 12px`, weight `600`, color `#0a2e29`).
 
 ### Gamification & Staff Performance Modules
-- **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `#e1e8e5`, active stroke `#1f7a4d` (or `#b87900` when behind schedule).
-- **Streak Badges**: Pill-shaped container (`border-radius: 9999px`), background `#fef7e6`, border 1px solid `#b87900`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
-- **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`#eff6ff`), subtle 1px border (`#2563eb`), and 12px typography to build positive momentum.
+- **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `neutral-300`, active stroke `success-600` (or `warning-600` when behind schedule).
+- **Streak Badges**: Pill-shaped container (`rounded-full`), background `bg-warning-50`, border 1px solid `warning-600`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
+- **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`bg-info-50`), subtle 1px border (`info-600`), and text-xs typography to build positive momentum.
 
 ### Chips & Semantic Status Badges
 - **Dimensions**: Height `22px`, horizontal padding `8px`, corner radius `9999px`, font size `11px`, weight `600`.
 - **Semantic Pairing**:
-  - Confirmed / Paid: Background `#e8f5ed`, text `#1f7a4d`.
-  - Pending / In-Chair: Background `#fef7e6`, text `#b87900`.
-  - Cancelled / Overdue: Background `#fdf2f2`, text `#b23b30`.
-  - Scheduled: Background `#eff6ff`, text `#2563eb`.
+  - Confirmed / Paid: `bg-success-50 text-success-600`.
+  - Pending / In-Chair: `bg-warning-50 text-warning-600`.
+  - Cancelled / Overdue: `bg-danger-50 text-danger-600`.
+  - Scheduled: `bg-info-50 text-info-600`.
+
+## Comps Are Wireframes
+
+Design comp files (`ClinicOS Design/<NN>_<screen>/code.html`) serve as layout references and information architecture guides. Extract copy and structural decisions from them, but never port over raw hex values, Tailwind config overrides, inline `<style>` blocks, font-family declarations, or physical-direction utilities (`pl-`, `pr-`, `left-`, `right-`, `border-l`, `border-r`, etc.). Every color, spacing, and styling primitive used in a Thymeleaf template must come from this document's authorized token set (`tokens.css` and `components.css`). Comp files remain read-only on disk and are never edited during implementation.
 
 ### Brand Color Palette (Tailwind Utilities)
 

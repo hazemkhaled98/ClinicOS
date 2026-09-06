@@ -41,6 +41,18 @@
   --color-danger-600: #b23b30;
   --color-danger-50:  #fdf2f2;
 
+  --color-success-600: #1f7a4d;
+  --color-success-50: #e8f5ed;
+  --color-warning-600: #b87900;
+  --color-warning-50: #fef7e6;
+  --color-info-600: #2563eb;
+  --color-info-50: #eff6ff;
+
+  --text-metric: 28px;
+  --text-metric--line-height: 32px;
+  --text-micro: 11px;
+  --text-micro--line-height: 14px;
+
   --shadow-drawer: 0 8px 40px rgba(10, 46, 41, 0.12);
   --shadow-auth: 0 24px 60px rgba(10, 46, 41, 0.18);
 }
