@@ -48,3 +48,6 @@ apps/api/.vaadin/
 
 # graphify knowledge graph output
 graphify-out/
+
+# Legacy app screenshots (reference only, not part of the build)
+Legacy Screenshots/
