@@ -20,7 +20,7 @@
 ```
 com.clinicos
 ├── shared         (OPEN) — tenant context, jOOQ metamodel
-├── identity       (CLOSED) — clinics, users, memberships, roles, permissions, login, clinic picker (UC-001)
+├── identity       (CLOSED) — clinics, users, memberships, roles, permissions, login (UC-001)
 ├── clinicconfig   (CLOSED) — clinic settings, evaluation weights, incentive tiers (UC-002 settings half)
 ├── staff          (CLOSED) — employees, tasks, attendance, daily records (UC-003, UC-002 roster half)
 ├── evaluation     (CLOSED) — scoring engine, overrides, frozen snapshots (UC-004, UC-005)
@@ -63,7 +63,7 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 - V1–V8: schema, tables, triggers
 - V9: RLS policies + `app_rw` role (created **without password**)
 - V10: cross-cutting triggers (frozen snapshot, return ceiling, append-only ledger, cross-tenant FK guard)
-- V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for the clinic picker (replaced the originally-planned privileged auth role)
+- V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for session priming (membership → permissions + login activity log; replaced the originally-planned privileged auth role)
 - V12: seeds `permission` codes and legacy default `role_permission` sets
 - V13: `signup_clinic_with_owner` — `SECURITY DEFINER` self-service sign-up (clinic + owner atomically, before a tenant exists; the only door for `app_rw` to create a clinic)
 - V14: `app_user.clinic_id` NOT NULL + `unique (clinic_id, username)` — usernames are per-clinic, not global; auth key becomes (clinic_slug, username) via `app_user_credentials_lookup_by_clinic_username`; sign-up returns the clinic slug (the login screen's clinic code)
@@ -83,19 +83,19 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 
 ```bash
 # Compile + run unit tests (jOOQ codegen in generate-sources requires Docker)
-mvn -pl apps/api test
+mvn test
 
 # Run only integration tests (Testcontainers spins up Postgres)
-mvn -pl apps/api verify -Dtest=*IT -DfailIfNoTests=false
+mvn verify -Dtest=*IT -DfailIfNoTests=false
 
 # Full build
-mvn -pl apps/api verify
+mvn verify
 
 # Production build (minified frontend)
-mvn -pl apps/api -Pproduction package
+mvn -Pproduction package
 
 # Check module boundaries
-mvn -pl apps/api test -Dtest=ModularityTests
+mvn test -Dtest=ModularityTests
 ```
 
 **jOOQ codegen** runs unconditionally in the `generate-sources` phase via `testcontainers-jooq-codegen-maven-plugin` — every build spins up a throwaway Postgres, runs Flyway, and generates sources to `target/generated-sources/jooq`. Not committed. A `citext` forced type maps `citext` columns to `String`.
@@ -114,7 +114,7 @@ Manual equivalent:
 docker compose up -d postgres minio
 # Wait for postgres healthy, then:
 docker exec clinicos-postgres psql -U postgres -d clinicos -c "ALTER ROLE app_rw PASSWORD 'local-dev-only';"
-mvn -pl apps/api spring-boot:run
+mvn spring-boot:run
 # App at http://localhost:8080
 # OpenAPI at http://localhost:8080/api-docs/ui
 ```
