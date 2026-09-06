@@ -206,9 +206,13 @@ The design uses moderate corner radii to project approachability and visual refi
 
 ### Brand Color Palette (Tailwind Utilities)
 
-The following brand colors are configured as Tailwind utilities in `apps/api/src/main/frontend/themes/clinicos/styles.css` via a `@theme` block. Use these utility names (`bg-teal-900`, `text-emerald-500`, `border-teal-850`) rather than raw hex or arbitrary values (`bg-[#...]`):
+The following brand colors are configured as Tailwind utilities in `apps/api/src/main/styles/tokens.css` via a `@theme` block. Use these utility names (`bg-teal-900`, `text-emerald-500`, `border-teal-850`) rather than raw hex or arbitrary values (`bg-[#...]`):
 
-- **Teal Scale**: teal-950 `#071f1c`, teal-900 `#0a2e29`, teal-850 `#0d3832`, teal-800 `#114a42`, teal-700 `#17655a`, teal-600 `#1f8375`, teal-500 `#2a9d8f`
-- **Emerald Scale**: emerald-600 `#059669`, emerald-500 `#10b981`, emerald-400 `#34d399`
+- **Teal Scale**: teal-950 `#071f1c`, teal-900 `#0a2e29`, teal-850 `#0d3832`, teal-800 `#114a42`, teal-700 `#17655a`, teal-600 `#1f8375`, teal-500 `#2a9d8f`, teal-300 `#5eead4`, teal-100 `#ccfbf1`
+- **Emerald Scale** (full, stock Tailwind emerald adopted as brand): emerald-800 `#065f46`, emerald-700 `#047857`, emerald-600 `#059669`, emerald-500 `#10b981`, emerald-400 `#34d399`, emerald-300 `#6ee7b7`, emerald-200 `#a7f3d0`, emerald-100 `#d1fae5`, emerald-50 `#ecfdf5`
+- **Neutral Scale** (stock Tailwind slate adopted as the named neutral ramp; matches the Structural Hairlines anchor `#e2e8f0` at step 200): neutral-900 `#0f172a`, neutral-800 `#1e293b`, neutral-700 `#334155`, neutral-600 `#475569`, neutral-500 `#64748b`, neutral-400 `#94a3b8`, neutral-300 `#cbd5e1`, neutral-200 `#e2e8f0`, neutral-100 `#f1f5f9`, neutral-50 `#f8fafc`
+- **Danger Scale** (the Critical & Emergency tier's own two-tone system — base + tint, not a full ramp): danger-600 `#b23b30`, danger-50 `#fdf2f2`
+
+Error text and error-state borders use the `danger-600` base, with soft tint surfaces (alerts, destructive-action chips) on `danger-50`. Do not use Tailwind's stock `red-*` steps; reach for `danger-*` instead. Same rule for gray: `neutral-*`, never `slate-*`.
 
 These are the canonical colors for all UI elements; hex values used in Stitch comps must be translated to their utility equivalents before implementation.

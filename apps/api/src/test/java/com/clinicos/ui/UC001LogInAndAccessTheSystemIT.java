@@ -164,6 +164,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBrowserIT {
 
             assertLandedInApp();
 
+            page().locator(".clinicos-topbar-menu").click();
             page().locator(".clinicos-logout").click();
             page().waitForURL(url -> url.contains("/login"));
 
@@ -225,6 +226,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBrowserIT {
             login(username, rawPassword, clinicSlug);
             assertLandedInApp();
 
+            page().locator(".clinicos-topbar-menu").click();
             page().locator(".clinicos-logout").click();
 
             page().waitForURL(url -> url.contains("/login"));

@@ -76,9 +76,4 @@
     font-weight: 500;
     transition: color 0.15s ease, background-color 0.15s ease;
   }
-
-  .clinicos-logout:hover {
-    color: #fecaca;
-    background: rgba(185, 28, 28, 0.15);
-  }
 }

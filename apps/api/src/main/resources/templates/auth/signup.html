@@ -13,67 +13,67 @@
       <div class="w-full max-w-[480px] bg-white rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10 border border-emerald-50">
 
         <div class="flex flex-col items-center text-center mb-8">
-          <div class="w-24 h-24 mb-6 flex items-center justify-center bg-white rounded-2xl shadow-lg border border-slate-200/80 p-1.5">
+          <div class="w-24 h-24 mb-6 flex items-center justify-center bg-white rounded-2xl shadow-lg border border-neutral-200/80 p-1.5">
             <img th:src="@{/branding/logo.png}" alt="ClinicOS" class="object-contain drop-shadow w-full h-full">
           </div>
           <h1 class="text-2xl font-bold tracking-tight text-teal-900">إنشاء عيادة جديدة</h1>
-          <p class="text-sm font-medium text-slate-500 mt-1">ابدأ رحلتك نحو إدارة أفضل</p>
+          <p class="text-sm font-medium text-neutral-500 mt-1">ابدأ رحلتك نحو إدارة أفضل</p>
         </div>
 
-        <div th:if="${generalError}" class="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold text-center">
+        <div th:if="${generalError}" class="mb-5 px-4 py-3 rounded-xl bg-danger-50 border border-danger-600/40 text-danger-600 text-xs font-semibold text-center">
           <span th:text="${generalError}">حدث خطأ</span>
         </div>
 
         <form method="post" th:action="@{/signup}" th:object="${form}" class="space-y-4">
 
           <div>
-            <label for="clinicName" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">اسم العيادة</label>
+            <label for="clinicName" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">اسم العيادة</label>
             <input id="clinicName" name="clinicName" type="text" th:value="*{clinicName}" placeholder="اسم العيادة"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['clinicName']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['clinicName']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['clinicName']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['clinicName']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['clinicName']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['clinicName']}">خطأ</p>
           </div>
 
           <div>
-            <label for="fullName" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">الاسم الكامل</label>
+            <label for="fullName" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">الاسم الكامل</label>
             <input id="fullName" name="fullName" type="text" th:value="*{fullName}" placeholder="الاسم الكامل"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['fullName']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['fullName']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['fullName']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['fullName']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['fullName']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['fullName']}">خطأ</p>
           </div>
 
           <div>
-            <label for="username" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">اسم المستخدم</label>
+            <label for="username" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">اسم المستخدم</label>
             <input id="username" name="username" type="text" th:value="*{username}" placeholder="اسم المستخدم"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['username']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['username']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['username']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['username']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['username']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['username']}">خطأ</p>
           </div>
 
           <div>
-            <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">كلمة المرور</label>
+            <label for="password" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">كلمة المرور</label>
             <input id="password" name="password" type="password" placeholder="كلمة المرور"
                    autocomplete="new-password"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['password']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['password']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['password']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['password']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['password']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['password']}">خطأ</p>
           </div>
 
           <div>
-            <label for="confirmPassword" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">تأكيد كلمة المرور</label>
+            <label for="confirmPassword" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">تأكيد كلمة المرور</label>
             <input id="confirmPassword" name="confirmPassword" type="password" placeholder="تأكيد كلمة المرور"
                    autocomplete="new-password"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['confirmPassword']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['confirmPassword']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['confirmPassword']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['confirmPassword']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['confirmPassword']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['confirmPassword']}">خطأ</p>
           </div>
 
           <div>
-            <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">البريد الإلكتروني (اختياري)</label>
+            <label for="email" class="block text-xs font-bold text-neutral-700 mb-1.5 text-end">البريد الإلكتروني (اختياري)</label>
             <input id="email" name="email" type="text" th:value="*{email}" placeholder="البريد الإلكتروني"
-                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
-                   th:classappend="${fieldErrors['email']} ? 'border-red-400' : ''">
-            <p th:if="${fieldErrors['email']}" class="text-xs text-red-600 mt-1.5" th:text="${fieldErrors['email']}">خطأ</p>
+                   class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400"
+                   th:classappend="${fieldErrors['email']} ? 'border-danger-600/40' : ''">
+            <p th:if="${fieldErrors['email']}" class="text-xs text-danger-600 mt-1.5" th:text="${fieldErrors['email']}">خطأ</p>
           </div>
 
           <button type="submit"
@@ -85,7 +85,7 @@
           </button>
         </form>
 
-        <p class="text-slate-600 text-xs mt-6 text-center">
+        <p class="text-neutral-600 text-xs mt-6 text-center">
           لديك حساب بالفعل؟
           <a th:href="@{/login}" class="font-bold text-teal-700 hover:text-teal-800">سجّل الدخول</a>
         </p>
@@ -97,7 +97,7 @@
       <div class="my-auto py-12 max-w-2xl">
         <div class="w-12 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-900 rounded-full mb-6"></div>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-teal-900 leading-[1.25] tracking-tight">أنشئ عيادتك</h2>
-        <p class="mt-6 text-base sm:text-lg text-slate-600 leading-relaxed font-normal">
+        <p class="mt-6 text-base sm:text-lg text-neutral-600 leading-relaxed font-normal">
           سجّل عيادتك الآن وابدأ إدارة فريقك وعملياتك اليومية في مكان واحد متكامل، بأدوات تتبع وتقارير تساعد على رفع الكفاءة والإنتاجية.
         </p>
       </div>

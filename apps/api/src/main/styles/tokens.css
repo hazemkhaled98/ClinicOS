@@ -14,9 +14,32 @@
   --color-teal-600: #1f8375;
   --color-teal-500: #2a9d8f;
 
+  --color-teal-300: #5eead4;
+  --color-teal-100: #ccfbf1;
+
+  --color-emerald-800: #065f46;
+  --color-emerald-700: #047857;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-50:  #ecfdf5;
   --color-emerald-400: #34d399;
   --color-emerald-500: #10b981;
   --color-emerald-600: #059669;
+
+  --color-neutral-900: #0f172a;
+  --color-neutral-800: #1e293b;
+  --color-neutral-700: #334155;
+  --color-neutral-600: #475569;
+  --color-neutral-500: #64748b;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-50:  #f8fafc;
+
+  --color-danger-600: #b23b30;
+  --color-danger-50:  #fdf2f2;
 
   --shadow-drawer: 0 8px 40px rgba(10, 46, 41, 0.12);
   --shadow-auth: 0 24px 60px rgba(10, 46, 41, 0.18);
