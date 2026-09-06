@@ -36,7 +36,7 @@
 
 ### A2: No Confirmed Connection to the Shared Data — Not Applicable
 
-**Status:** Out of scope by decision (see `docs/roadmap.md`, "Offline mode" row and the UC-001 deviation note). ClinicOS is a server-rendered Vaadin app with no client-side offline queue — this flow does not exist and will not be implemented.
+**Status:** Out of scope by decision (see `docs/roadmap.md`, "Offline mode" row and the UC-001 deviation note). ClinicOS is a server-rendered Thymeleaf app with no client-side offline queue — this flow does not exist and will not be implemented.
 
 ### A3: Returning to a Previously Open Section
 

@@ -12,7 +12,7 @@
 | Migrations | Flyway | 13.5.0 |
 | Database | PostgreSQL | 17 (prod), Testcontainers in tests |
 | Object Storage | MinIO (S3-compatible) | latest |
-| Testing | Testcontainers, Karibu, Playwright | 1.21.4 / 2.7.2 / latest |
+| Testing | Testcontainers, MockMvc, Playwright | 1.21.4 / — / latest |
 | API Docs | springdoc OpenAPI | 3.1.0 |
 
 ## Module Layout (Spring Modulith)

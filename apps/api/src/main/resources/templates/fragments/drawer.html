@@ -2,7 +2,7 @@
        xmlns:th="http://www.thymeleaf.org"
        id="slide-over-navigation"
        aria-label="القائمة الرئيسية للنظام"
-       class="fixed inset-y-0 end-0 z-50 w-72 sm:w-80 bg-teal-900 text-white flex flex-col shadow-drawer border-s border-teal-800/40">
+       class="fixed inset-y-0 start-0 z-50 w-72 sm:w-80 bg-teal-900 text-white flex flex-col shadow-drawer border-e border-teal-800/40">
   <div class="flex flex-col flex-1 overflow-hidden">
     <div class="px-6 pt-7 pb-6 flex items-center justify-between border-b border-teal-850/70">
       <div class="flex items-center gap-3">
@@ -65,7 +65,7 @@
           <div class="w-9 h-9 rounded-full bg-teal-700/60 border border-emerald-400/40 flex items-center justify-center text-teal-100 font-bold text-xs flex-shrink-0 clinicos-who-av">
             <span th:text="${#strings.isEmpty(layout.username) ? '؟' : #strings.substring(layout.username, 0, 1)}">؟</span>
           </div>
-          <span class="absolute bottom-0 end-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-teal-900"></span>
+          <span class="absolute bottom-0 start-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-teal-900"></span>
         </div>
         <div class="flex flex-col">
           <span class="text-xs font-bold text-white leading-tight clinicos-who-name" th:text="${layout.username}">مستخدم</span>
