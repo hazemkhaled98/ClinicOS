@@ -1,7 +1,5 @@
 package com.clinicos.ui;
 
-import java.util.List;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,8 +54,12 @@ public class AppController {
         if (section == null) {
             return "redirect:/";
         }
+        LayoutModel.LayoutData layout = layoutModel.forRequest(session, route);
+        if (!layout.nav().contains(section)) {
+            return "redirect:/";
+        }
         writeLastSectionCookie(response, route);
-        model.addAttribute("layout", layoutModel.forRequest(session, route));
+        model.addAttribute("layout", layout);
         model.addAttribute("section", section);
         model.addAttribute("message", "سيتم تفعيل هذا القسم قريباً.");
         return "section";

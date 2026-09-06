@@ -224,6 +224,23 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>npm-install</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="npm.cmd" osfamily="windows" dir="${project.basedir}" failonerror="true">
+                                    <arg value="ci" />
+                                </exec>
+                                <exec executable="npm" osfamily="unix" dir="${project.basedir}" failonerror="true">
+                                    <arg value="ci" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>build-tailwind-css</id>
                         <phase>process-resources</phase>
                         <goals>

@@ -28,14 +28,14 @@ public final class NavSectionResolver {
             "received", "itemAnalysis", "approvals", "ledger");
 
     private static final List<NavSection> ALL = List.of(
-            new NavSection("emp", "employees", "تسجيل الموظف", "تسجيل الموظف", "إدارة ملفات الموظفين وصلاحياتهم", "user"),
-            new NavSection("myeval", "my-evaluation", "تقييمي", "تقييمي", "تقييم الأداء الشخصي", "edit"),
-            new NavSection("quick", "quick-access", "الوصول السريع", "الوصول السريع", "أدوات سريعة للمهام اليومية", "bolt"),
-            new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية", "tasks"),
-            new NavSection("prep", "prep", "تحضير الجلسات", "تحضير الجلسات", "إعداد قوائم الإجراءات الطبية", "clipboard-check"),
-            new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية", "star"),
-            new NavSection("inv", "inventory", "المخزن", "المخزن", "إدارة مخزون العيادة وتكاليف الإجراءات", "archive"),
-            new NavSection("ceo", "admin-dashboard", "لوحة التحكم", "لوحة التحكم", "التحليلات التشغيلية والإدارية", "chart"));
+            new NavSection("emp", "employees", "تسجيل الموظف", "تسجيل الموظف", "إدارة ملفات الموظفين وصلاحياتهم", NavIcon.USER),
+            new NavSection("myeval", "my-evaluation", "تقييمي", "تقييمي", "تقييم الأداء الشخصي", NavIcon.EDIT),
+            new NavSection("quick", "quick-access", "الوصول السريع", "الوصول السريع", "أدوات سريعة للمهام اليومية", NavIcon.BOLT),
+            new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية", NavIcon.TASKS),
+            new NavSection("prep", "prep", "تحضير الجلسات", "تحضير الجلسات", "إعداد قوائم الإجراءات الطبية", NavIcon.CLIPBOARD_CHECK),
+            new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية", NavIcon.STAR),
+            new NavSection("inv", "inventory", "المخزن", "المخزن", "إدارة مخزون العيادة وتكاليف الإجراءات", NavIcon.ARCHIVE),
+            new NavSection("ceo", "admin-dashboard", "لوحة التحكم", "لوحة التحكم", "التحليلات التشغيلية والإدارية", NavIcon.CHART));
 
     private NavSectionResolver() {
     }

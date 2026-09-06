@@ -60,7 +60,8 @@
   .clinicos-nav-item--active {
     color: #ffffff;
     background: rgba(16, 185, 129, 0.16);
-    box-shadow: inset 3px 0 0 rgba(16, 185, 129, 0.9);
+    border-inline-start: 3px solid rgba(16, 185, 129, 0.9);
+    padding-inline-start: calc(0.875rem - 3px);
   }
 
   .clinicos-logout {

@@ -111,7 +111,7 @@ public class AuthController {
         }
         if (form.getConfirmPassword() == null || form.getConfirmPassword().isBlank()) {
             errors.put("confirmPassword", "تأكيد كلمة المرور مطلوب");
-        } else if (!form.getPassword().equals(form.getConfirmPassword())) {
+        } else if (!form.getConfirmPassword().equals(form.getPassword())) {
             errors.put("confirmPassword", "كلمتا المرور غير متطابقتين");
         }
         String email = form.getEmail();

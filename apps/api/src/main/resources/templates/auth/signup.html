@@ -52,7 +52,7 @@
 
           <div>
             <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">كلمة المرور</label>
-            <input id="password" name="password" type="password" th:value="*{password}" placeholder="كلمة المرور"
+            <input id="password" name="password" type="password" placeholder="كلمة المرور"
                    autocomplete="new-password"
                    class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
                    th:classappend="${fieldErrors['password']} ? 'border-red-400' : ''">
@@ -61,7 +61,7 @@
 
           <div>
             <label for="confirmPassword" class="block text-xs font-bold text-slate-700 mb-1.5 text-end">تأكيد كلمة المرور</label>
-            <input id="confirmPassword" name="confirmPassword" type="password" th:value="*{confirmPassword}" placeholder="تأكيد كلمة المرور"
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="تأكيد كلمة المرور"
                    autocomplete="new-password"
                    class="clinicos-signup-field w-full px-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-slate-800 transition-all placeholder:text-slate-400"
                    th:classappend="${fieldErrors['confirmPassword']} ? 'border-red-400' : ''">

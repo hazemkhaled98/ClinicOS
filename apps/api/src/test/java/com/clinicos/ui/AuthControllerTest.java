@@ -84,6 +84,75 @@ class AuthControllerTest {
     }
 
     @Test
+    void duplicateEmailMapsToEmailFieldError() {
+        when(signupService.signUp(any(SignupRequest.class)))
+                .thenThrow(new SignupConflictException(Field.EMAIL, "dup"));
+
+        String view = controller.signup(form(), model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString()
+                .contains("البريد الإلكتروني مستخدم بالفعل");
+    }
+
+    @Test
+    void duplicateClinicSlugMapsToClinicNameFieldError() {
+        when(signupService.signUp(any(SignupRequest.class)))
+                .thenThrow(new SignupConflictException(Field.CLINIC_SLUG, "dup"));
+
+        String view = controller.signup(form(), model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString()
+                .contains("اسم العيادة مستخدم بالفعل");
+    }
+
+    @Test
+    void blankClinicNameIsRejected() {
+        AuthController.SignupForm form = form();
+        form.setClinicName(null);
+
+        String view = controller.signup(form, model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString().contains("اسم العيادة مطلوب");
+    }
+
+    @Test
+    void blankFullNameIsRejected() {
+        AuthController.SignupForm form = form();
+        form.setFullName("   ");
+
+        String view = controller.signup(form, model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString().contains("الاسم الكامل مطلوب");
+    }
+
+    @Test
+    void blankUsernameIsRejected() {
+        AuthController.SignupForm form = form();
+        form.setUsername(null);
+
+        String view = controller.signup(form, model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString().contains("اسم المستخدم مطلوب");
+    }
+
+    @Test
+    void blankPasswordWithFilledConfirmIsSafeAndReportsPasswordError() {
+        AuthController.SignupForm form = form();
+        form.setPassword(null);
+        form.setConfirmPassword("correct-password");
+
+        String view = controller.signup(form, model);
+
+        assertThat(view).isEqualTo("auth/signup");
+        assertThat(model.getAttribute("fieldErrors")).asString().contains("كلمة المرور مطلوبة");
+    }
+
+    @Test
     void successfulSignupLogsActivityAndRedirectsWithClinicSlug() {
         when(signupService.signUp(any(SignupRequest.class))).thenReturn(
                 new SignupResult(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "myclinic"));

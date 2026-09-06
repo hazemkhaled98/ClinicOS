@@ -145,6 +145,32 @@ class TenantSessionFilterTest {
         assertThat(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).isEqualTo(membershipB);
     }
 
+    @Test
+    void primingFailureDoesNotBurnOneShotGuarantee() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID clinicId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        authenticate(userId);
+        when(membershipLookupService.findByUserId(userId))
+                .thenReturn(List.of(new Membership(membershipId, clinicId, "Clinic", "owner")));
+        when(permissionsService.accessFor(membershipId))
+                .thenThrow(new IllegalArgumentException("boom"))
+                .thenReturn(new MembershipAccess(membershipId, "owner", Set.of("emp")));
+
+        MockHttpSession session = new MockHttpSession();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setSession(session);
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+        assertThat(session.getAttribute(SessionKeys.CLINIC_ID)).isNull();
+        assertThat(session.getAttribute(SessionKeys.PRIMING_ATTEMPTED)).isNull();
+
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+        assertThat(session.getAttribute(SessionKeys.CLINIC_ID)).isEqualTo(clinicId);
+        assertThat(session.getAttribute(SessionKeys.ROLE_CODE)).isEqualTo("owner");
+    }
+
     private static void authenticate(UUID userId) {
         authenticate(userId, UUID.randomUUID());
     }

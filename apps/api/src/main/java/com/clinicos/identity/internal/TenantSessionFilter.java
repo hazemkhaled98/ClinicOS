@@ -140,6 +140,7 @@ public class TenantSessionFilter extends OncePerRequestFilter {
                 | IllegalArgumentException e) {
             log.error("Failed to prime clinic session: clinic={} membership={} user={}",
                     membership.clinicId(), membership.membershipId(), user.getId(), e);
+            session.removeAttribute(SessionKeys.PRIMING_ATTEMPTED);
         } finally {
             TenantContext.clear();
         }
