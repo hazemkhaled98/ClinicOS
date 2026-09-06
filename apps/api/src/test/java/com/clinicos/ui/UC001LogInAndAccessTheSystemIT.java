@@ -72,8 +72,6 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
     private void assertLandedInApp() {
         page.locator(".clinicos-nav-item").first().waitFor();
         assertThat(page.url()).doesNotContain("/login");
-        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
-                page.locator(".clinicos-nav-item").first()).isVisible();
     }
 
     private void login(String username, String password, String clinicCode) {

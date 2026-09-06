@@ -111,6 +111,16 @@ class HelloViewTest {
                 .isEqualTo("employees");
     }
 
+    @Test
+    void staysOnWelcomeWhenClinicBoundButNoTargetResolves() {
+        VaadinSession.getCurrent().setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, UUID.randomUUID());
+
+        UI.getCurrent().navigate(HelloView.class);
+
+        assertThat(UI.getCurrent().getInternals().getActiveViewLocation().getPath()).isEmpty();
+        assertThat(_get(UI.getCurrent(), HelloView.class)).isNotNull();
+    }
+
     private static void sessionPermissions(String roleCode, Set<String> codes) {
         VaadinSession session = VaadinSession.getCurrent();
         session.setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, UUID.randomUUID());

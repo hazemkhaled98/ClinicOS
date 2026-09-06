@@ -23,6 +23,7 @@
 :root {
   --c-primary: #0a2e29;
   --c-primary-50pct: color-mix(in srgb, var(--c-primary) 50%, transparent);
+  --c-primary-text: #17786a;
   --c-on-primary: #ffffff;
 
   --c-canvas: #f4f7f6;
@@ -81,7 +82,7 @@
 :root {
   --lumo-primary-color: var(--c-primary);
   --lumo-primary-color-50pct: var(--c-primary-50pct);
-  --lumo-primary-text-color: var(--c-primary);
+  --lumo-primary-text-color: var(--c-primary-text);
   --lumo-base-color: var(--c-surface);
   --lumo-body-text-color: var(--c-ink);
   --lumo-secondary-text-color: var(--c-ink-muted);

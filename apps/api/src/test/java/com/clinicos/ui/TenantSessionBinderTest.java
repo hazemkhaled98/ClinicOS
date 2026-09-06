@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -121,6 +122,53 @@ class TenantSessionBinderTest {
 
         verify(membershipLookupService, never()).findByUserId(any());
         assertThat(TenantContext.get()).isEmpty();
+    }
+
+    @Test
+    void leavesSessionUnprimedWhenAuthenticatedUserHasZeroMemberships() throws Exception {
+        UUID userId = UUID.randomUUID();
+        securityContext(userId);
+        when(membershipLookupService.findByUserId(userId)).thenReturn(List.of());
+
+        VaadinSession session = mock(VaadinSession.class);
+        when(session.getAttribute(TenantSessionBinder.SESSION_CLINIC_ID)).thenReturn(null);
+
+        registeredHandler().handleRequest(session, mock(VaadinRequest.class), mock(VaadinResponse.class));
+
+        verify(session, never()).setAttribute(eq(TenantSessionBinder.SESSION_CLINIC_ID), any());
+        verify(session, never()).setAttribute(eq(TenantSessionBinder.SESSION_MEMBERSHIP_ID), any());
+        verify(session, never()).setAttribute(eq(TenantSessionBinder.SESSION_ROLE_CODE), any());
+        verify(session, never()).setAttribute(eq(TenantSessionBinder.SESSION_PERMISSIONS), any());
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+        verify(permissionsService, never()).accessFor(any());
+        assertThat(TenantContext.get()).isEmpty();
+    }
+
+    @Test
+    void autoSelectsFirstMembershipWhenMoreThanOneReturned() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID firstMembershipId = UUID.randomUUID();
+        UUID firstClinicId = UUID.randomUUID();
+        securityContext(userId);
+        when(membershipLookupService.findByUserId(userId)).thenReturn(List.of(
+                new Membership(firstMembershipId, firstClinicId, "عيادة الأمل", "owner"),
+                new Membership(UUID.randomUUID(), UUID.randomUUID(), "عيادة الشفاء", "manager")));
+        when(permissionsService.accessFor(firstMembershipId)).thenReturn(
+                new MembershipAccess(firstMembershipId, "owner", Set.of("emp", "quick")));
+
+        VaadinSession session = mock(VaadinSession.class);
+        when(session.getAttribute(TenantSessionBinder.SESSION_CLINIC_ID)).thenReturn(null, firstClinicId);
+
+        registeredHandler().handleRequest(session, mock(VaadinRequest.class), mock(VaadinResponse.class));
+
+        verify(session).setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, firstClinicId);
+        verify(session).setAttribute(TenantSessionBinder.SESSION_MEMBERSHIP_ID, firstMembershipId);
+        ArgumentCaptor<UUID> clinicCaptor = ArgumentCaptor.forClass(UUID.class);
+        ArgumentCaptor<UUID> membershipCaptor = ArgumentCaptor.forClass(UUID.class);
+        verify(activityLogService, times(1)).log(clinicCaptor.capture(), membershipCaptor.capture(),
+                eq("login"), eq("session"));
+        assertThat(clinicCaptor.getAllValues()).containsExactly(firstClinicId);
+        assertThat(membershipCaptor.getAllValues()).containsExactly(firstMembershipId);
     }
 
     private void securityContext(UUID userId) {

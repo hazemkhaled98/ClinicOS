@@ -300,7 +300,8 @@ ClinicOS is a data-dense clinic back-office built on Vaadin Flow and Spring Boot
 ## Colors
 
 ### Primary & Brand
-- **Deep Teal Primary** (`{colors.primary}` — #0a2e29): the single structural accent, reserved for primary CTAs, active states, and focus signals. This is the only colour that signals a primary action or interaction state. It doubles as `{colors.dark-drawer-start}` — the drawer's own background gradient now sets the site's accent color.
+- **Deep Teal Primary** (`{colors.primary}` — #0a2e29): the single structural accent, reserved for primary CTAs and active states. It doubles as `{colors.dark-drawer-start}` — the drawer's own background gradient now sets the site's accent color. Because it sits visually at the same weight as body ink (#16201d), it is never used for primary-colored text or focus signals.
+- **Primary Text** (`{colors.primary-text}` — #17786a): the teal used when primary appears as text, links, accent labels, or focus-ring colour — a step lighter than the deep drawer-teal so it stays legible against body ink.
 - **Primary at 50%** (`{colors.primary-50pct}` — #859794): used for disabled states or secondary visual hierarchy within a primary context.
 - **On Primary** (`{colors.on-primary}` — #ffffff): white text/icons on the teal primary.
 
@@ -428,7 +429,7 @@ This app's `theme.json` imports `typography, color, spacing, badge, utility` fro
 |---|---|---|
 | `primary` (#0a2e29) | `--lumo-primary-color` | Primary accent for buttons, active states, focus rings |
 | `primary` at 50% (#859794) | `--lumo-primary-color-50pct` | Used for disabled/secondary contexts |
-| `primary` (#0a2e29) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
+| `primary-text` (#17786a) | `--lumo-primary-text-color` | Primary-colored text (links, accent labels, focus rings) — NOT text-on-primary-background; that's white and comes from `on-primary` directly wherever a component needs it |
 | `canvas` (#f4f7f6) | `--lumo-tint-5pct` | Page/container background context |
 | `surface` (#ffffff) | `--lumo-base-color` | Card and input surfaces |
 | `hairline` (#e1e8e5) | `--lumo-shade-5pct` | Border and divider color |
