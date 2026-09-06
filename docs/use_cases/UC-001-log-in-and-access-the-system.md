@@ -18,7 +18,7 @@
 1. The staff member opens the application and is shown the login screen.
 2. The staff member enters their clinic code (the clinic's slug, shown after sign-up), username, and password.
 3. The system verifies the credentials against the active accounts for that clinic.
-4. If the staff member holds active memberships at more than one clinic, the system shows a clinic picker and the staff member selects which clinic to work in for this session. Under the current per-clinic-account schema (BR-005) an account belongs to exactly one clinic, so this step always auto-selects that single clinic today — the picker's multi-clinic branch is kept for a future use case that lets one person hold memberships across clinics.
+4. The clinic scope is fixed at authentication: the credential key is `(clinic_slug, username)` (BR-005), and every account belongs to exactly one clinic, so the session is bound to that single clinic — there is no clinic-picker step.
 5. The system starts a session for the staff member and remembers it on the device.
 6. The system determines which sections of the application the staff member's role is allowed to see.
 7. The system opens the first section the staff member is permitted to use and shows the navigation menu for their role.

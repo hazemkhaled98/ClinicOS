@@ -99,9 +99,9 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private Div createNav() {
         VaadinSession session = VaadinSession.getCurrent();
-        String roleCode = session == null ? null : (String) session.getAttribute(ClinicPickerView.SESSION_ROLE_CODE);
+        String roleCode = session == null ? null : (String) session.getAttribute(TenantSessionBinder.SESSION_ROLE_CODE);
         @SuppressWarnings("unchecked")
-        List<String> codes = session == null ? null : (List<String>) session.getAttribute(ClinicPickerView.SESSION_PERMISSIONS);
+        List<String> codes = session == null ? null : (List<String>) session.getAttribute(TenantSessionBinder.SESSION_PERMISSIONS);
 
         nav = new Div();
         nav.addClassName("clinicos-nav");

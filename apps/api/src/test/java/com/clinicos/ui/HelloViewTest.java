@@ -1,6 +1,5 @@
 package com.clinicos.ui;
 
-import static com.github.mvysny.kaributesting.v10.LocatorJ._find;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,6 +16,7 @@ import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.server.VaadinSession;
 
 class HelloViewTest {
@@ -40,12 +40,21 @@ class HelloViewTest {
 
     @Test
     void showsFallbackHeadingWhenClinicBoundButNoPermissions() {
-        VaadinSession.getCurrent().setAttribute(ClinicPickerView.SESSION_CLINIC_ID, UUID.randomUUID());
+        VaadinSession.getCurrent().setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, UUID.randomUUID());
 
         HelloView view = new HelloView();
 
         H1 heading = _get(view, H1.class);
         assertThat(heading.getText()).isEqualTo("ClinicOS");
+    }
+
+    @Test
+    void showsEmptyStateWhenNoClinicInSession() {
+        UI.getCurrent().navigate(HelloView.class);
+
+        assertThat(_get(_get(UI.getCurrent(), HelloView.class), Paragraph.class,
+                spec -> spec.withClasses("clinicos-empty-state-message")).getText())
+                .isEqualTo("لا توجد عيادات مسجلة. لا تملك صلاحية الدخول إلى أي عيادة.");
     }
 
     @Test
@@ -96,15 +105,16 @@ class HelloViewTest {
     void navigateToFirstSectionAfterLogin() {
         sessionPermissions("manager", Set.of("emp", "quick"));
 
-        HelloView view = new HelloView();
+        UI.getCurrent().navigate(HelloView.class);
 
-        assertThat(_find(view, H1.class)).isEmpty();
+        assertThat(UI.getCurrent().getInternals().getActiveViewLocation().getPath())
+                .isEqualTo("employees");
     }
 
     private static void sessionPermissions(String roleCode, Set<String> codes) {
         VaadinSession session = VaadinSession.getCurrent();
-        session.setAttribute(ClinicPickerView.SESSION_CLINIC_ID, UUID.randomUUID());
-        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, roleCode);
-        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, List.copyOf(codes));
+        session.setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, UUID.randomUUID());
+        session.setAttribute(TenantSessionBinder.SESSION_ROLE_CODE, roleCode);
+        session.setAttribute(TenantSessionBinder.SESSION_PERMISSIONS, List.copyOf(codes));
     }
 }

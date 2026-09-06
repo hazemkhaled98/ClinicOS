@@ -20,7 +20,7 @@
 ```
 com.clinicos
 ├── shared         (OPEN) — tenant context, jOOQ metamodel
-├── identity       (CLOSED) — clinics, users, memberships, roles, permissions, login, clinic picker (UC-001)
+├── identity       (CLOSED) — clinics, users, memberships, roles, permissions, login (UC-001)
 ├── clinicconfig   (CLOSED) — clinic settings, evaluation weights, incentive tiers (UC-002 settings half)
 ├── staff          (CLOSED) — employees, tasks, attendance, daily records (UC-003, UC-002 roster half)
 ├── evaluation     (CLOSED) — scoring engine, overrides, frozen snapshots (UC-004, UC-005)
@@ -63,7 +63,7 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 - V1–V8: schema, tables, triggers
 - V9: RLS policies + `app_rw` role (created **without password**)
 - V10: cross-cutting triggers (frozen snapshot, return ceiling, append-only ledger, cross-tenant FK guard)
-- V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for the clinic picker (replaced the originally-planned privileged auth role)
+- V11: `app_user.username citext unique`, username-keyed `SECURITY DEFINER` credentials lookup + `app_user_memberships_lookup` for session priming (membership → permissions + login activity log; replaced the originally-planned privileged auth role)
 - V12: seeds `permission` codes and legacy default `role_permission` sets
 - V13: `signup_clinic_with_owner` — `SECURITY DEFINER` self-service sign-up (clinic + owner atomically, before a tenant exists; the only door for `app_rw` to create a clinic)
 - V14: `app_user.clinic_id` NOT NULL + `unique (clinic_id, username)` — usernames are per-clinic, not global; auth key becomes (clinic_slug, username) via `app_user_credentials_lookup_by_clinic_username`; sign-up returns the clinic slug (the login screen's clinic code)

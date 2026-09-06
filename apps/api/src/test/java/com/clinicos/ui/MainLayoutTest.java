@@ -178,8 +178,8 @@ class MainLayoutTest {
 
     private static void sessionPermissions(String roleCode, Set<String> codes) {
         VaadinSession session = VaadinSession.getCurrent();
-        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, roleCode);
-        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, List.copyOf(codes));
+        session.setAttribute(TenantSessionBinder.SESSION_ROLE_CODE, roleCode);
+        session.setAttribute(TenantSessionBinder.SESSION_PERMISSIONS, List.copyOf(codes));
     }
 
     private static List<String> navLabels(MainLayout layout) {
@@ -203,10 +203,10 @@ class MainLayoutTest {
         assertThat(navLabels(before)).isNotEmpty();
 
         VaadinSession session = VaadinSession.getCurrent();
-        session.setAttribute(ClinicPickerView.SESSION_CLINIC_ID, null);
-        session.setAttribute(ClinicPickerView.SESSION_MEMBERSHIP_ID, null);
-        session.setAttribute(ClinicPickerView.SESSION_ROLE_CODE, null);
-        session.setAttribute(ClinicPickerView.SESSION_PERMISSIONS, null);
+        session.setAttribute(TenantSessionBinder.SESSION_CLINIC_ID, null);
+        session.setAttribute(TenantSessionBinder.SESSION_MEMBERSHIP_ID, null);
+        session.setAttribute(TenantSessionBinder.SESSION_ROLE_CODE, null);
+        session.setAttribute(TenantSessionBinder.SESSION_PERMISSIONS, null);
         SecurityContextHolder.clearContext();
 
         MainLayout after = new MainLayout(authenticationContext);

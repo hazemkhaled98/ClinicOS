@@ -69,6 +69,13 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
         return String.format("http://localhost:%d/", port);
     }
 
+    private void assertLandedInApp() {
+        page.locator(".clinicos-nav-item").first().waitFor();
+        assertThat(page.url()).doesNotContain("/login");
+        com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+                page.locator(".clinicos-nav-item").first()).isVisible();
+    }
+
     private void login(String username, String password, String clinicCode) {
         TextFieldElement.getByLabel(page, "كود العيادة").setValue(clinicCode);
         TextFieldElement.getByLabel(page, "اسم المستخدم").setValue(username);
@@ -138,8 +145,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
 
             login(username, rawPassword, clinicSlug);
 
-            page.waitForURL(url -> !url.contains("/login"));
-            assertThat(page.url()).doesNotContain("/login");
+            assertLandedInApp();
         }
 
         @Test
@@ -165,16 +171,14 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
 
             login(username, rawPassword, slugA);
 
-            page.waitForURL(url -> !url.contains("/login"));
-            assertThat(page.url()).doesNotContain("/login");
+            assertLandedInApp();
 
             page.locator(".clinicos-logout").click();
             page.waitForURL(url -> url.contains("/login"));
 
             login(username, rawPassword, slugB);
 
-            page.waitForURL(url -> !url.contains("/login"));
-            assertThat(page.url()).doesNotContain("/login");
+            assertLandedInApp();
         }
 
         private void login(String username, String password, String clinicCode) {
@@ -237,8 +241,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
 
             login(username, rawPassword, prefilledClinicCode);
 
-            page.waitForURL(url -> !url.contains("/login"));
-            assertThat(page.url()).doesNotContain("/login");
+            assertLandedInApp();
         }
     }
 
@@ -254,7 +257,7 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBasePlaywrightIT {
             String clinicSlug = seedUserWithClinic(username, rawPassword);
 
             login(username, rawPassword, clinicSlug);
-            page.waitForURL(url -> !url.contains("/login"));
+            assertLandedInApp();
 
             page.locator(".clinicos-logout").click();
 
