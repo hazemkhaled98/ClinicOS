@@ -95,6 +95,11 @@
     background-color: var(--color-teal-950);
   }
 
+  .clinicos-btn:focus-visible {
+    outline: 2px solid var(--color-teal-600);
+    outline-offset: 2px;
+  }
+
   .clinicos-btn--secondary {
     background-color: #ffffff;
     border-color: var(--color-neutral-200);
@@ -184,8 +189,7 @@
 
   .clinicos-table th {
     background-color: var(--color-neutral-50);
-    color: var(--color-teal-900);
-    opacity: 0.7;
+    color: color-mix(in srgb, var(--color-teal-900) 70%, transparent);
     font-size: var(--text-micro);
     font-weight: 600;
     border-bottom: 1px solid var(--color-neutral-200);

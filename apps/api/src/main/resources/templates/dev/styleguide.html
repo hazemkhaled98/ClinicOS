@@ -7,9 +7,9 @@
   <section class="mb-10">
     <h2 class="text-lg font-bold text-teal-900 mb-4">الأزرار</h2>
     <div class="flex items-center gap-3">
-      <button class="clinicos-btn">إجراء أساسي</button>
-      <button class="clinicos-btn clinicos-btn--secondary">إجراء ثانوي</button>
-      <button class="clinicos-btn clinicos-btn--danger">حذف</button>
+      <button type="button" class="clinicos-btn">إجراء أساسي</button>
+      <button type="button" class="clinicos-btn clinicos-btn--secondary">إجراء ثانوي</button>
+      <button type="button" class="clinicos-btn clinicos-btn--danger">حذف</button>
     </div>
   </section>
 
@@ -17,12 +17,12 @@
     <h2 class="text-lg font-bold text-teal-900 mb-4">الحقول</h2>
     <div class="flex flex-wrap gap-6 max-w-xl">
       <div class="flex-1 min-w-48">
-        <label class="clinicos-label mb-1">اسم المريض</label>
-        <input type="text" class="clinicos-input" placeholder="اكتب الاسم">
+        <label for="styleguide-patient-name" class="clinicos-label mb-1">اسم المريض</label>
+        <input id="styleguide-patient-name" type="text" class="clinicos-input" placeholder="اكتب الاسم">
       </div>
       <div class="flex-1 min-w-48">
-        <label class="clinicos-label mb-1">رقم الهاتف</label>
-        <input type="text" class="clinicos-input clinicos-input--error" value="01000000">
+        <label for="styleguide-phone" class="clinicos-label mb-1">رقم الهاتف</label>
+        <input id="styleguide-phone" type="text" class="clinicos-input clinicos-input--error" value="01000000">
       </div>
     </div>
   </section>
