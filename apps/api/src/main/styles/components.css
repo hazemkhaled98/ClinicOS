@@ -53,12 +53,12 @@
   }
 
   .clinicos-nav-item:hover {
-    color: #ffffff;
+    color: var(--color-surface-elevated);
     background: rgba(255, 255, 255, 0.08);
   }
 
   .clinicos-nav-item--active {
-    color: #ffffff;
+    color: var(--color-surface-elevated);
     background: rgba(16, 185, 129, 0.16);
     border-inline-start: 3px solid rgba(16, 185, 129, 0.9);
     padding-inline-start: calc(0.875rem - 3px);
@@ -75,5 +75,179 @@
     font-size: 0.875rem;
     font-weight: 500;
     transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .clinicos-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 0.625rem;
+    padding-inline: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    background-color: var(--color-teal-900);
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn:hover:not(:disabled) {
+    background-color: var(--color-teal-950);
+  }
+
+  .clinicos-btn:active {
+    box-shadow: var(--shadow-inset);
+  }
+
+  .clinicos-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .clinicos-btn:focus-visible {
+    outline: 2px solid var(--color-teal-600);
+    outline-offset: 2px;
+  }
+
+  .clinicos-btn--secondary {
+    background-color: var(--color-surface-elevated);
+    border-color: var(--color-neutral-200);
+    color: var(--color-teal-900);
+  }
+
+  .clinicos-btn--secondary:hover:not(:disabled) {
+    background-color: var(--color-surface);
+  }
+
+  .clinicos-btn--danger {
+    background-color: var(--color-danger-50);
+    border-color: var(--color-danger-600);
+    color: var(--color-danger-600);
+  }
+
+  .clinicos-btn--danger:hover:not(:disabled) {
+    background-color: var(--color-danger-600);
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn--danger:focus-visible {
+    outline-color: var(--color-danger-600);
+  }
+
+  .clinicos-input {
+    display: block;
+    width: 100%;
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.75rem;
+    padding-block: 0.625rem;
+    padding-inline: 0.875rem;
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease;
+  }
+
+  .clinicos-input:focus-visible {
+    outline: none;
+    border: 1.5px solid var(--color-teal-900);
+  }
+
+  .clinicos-input--error {
+    border-color: var(--color-danger-600);
+  }
+
+  .clinicos-input--error:focus-visible {
+    border-color: var(--color-danger-600);
+  }
+
+  .clinicos-label {
+    display: block;
+    font-size: var(--text-label);
+    font-weight: 600;
+    color: var(--color-teal-900);
+  }
+
+  .clinicos-chip {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding-inline: 0.5rem;
+    border-radius: 9999px;
+    font-size: var(--text-micro);
+    font-weight: 600;
+  }
+
+  .clinicos-chip--success {
+    background-color: var(--color-success-50);
+    color: var(--color-success-600);
+  }
+
+  .clinicos-chip--warning {
+    background-color: var(--color-warning-50);
+    color: var(--color-warning-600);
+  }
+
+  .clinicos-chip--danger {
+    background-color: var(--color-danger-50);
+    color: var(--color-danger-600);
+  }
+
+  .clinicos-chip--info {
+    background-color: var(--color-info-50);
+    color: var(--color-info-600);
+  }
+
+  .clinicos-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .clinicos-table th {
+    background-color: var(--color-neutral-50);
+    color: color-mix(in srgb, var(--color-teal-900) 70%, transparent);
+    font-size: var(--text-micro);
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-neutral-200);
+  }
+
+  .clinicos-table--dense th,
+  .clinicos-table--dense td {
+    padding-block: 4px;
+    padding-inline: 8px;
+  }
+
+  .clinicos-table--comfortable th,
+  .clinicos-table--comfortable td {
+    padding-block: 8px;
+    padding-inline: 12px;
+  }
+
+  .clinicos-table-numeric {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .clinicos-card {
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.75rem;
+  }
+
+  .clinicos-card--popover {
+    box-shadow: 0 4px 12px rgba(10, 46, 41, 0.06);
+  }
+
+  .clinicos-card--modal {
+    box-shadow: 0 12px 32px rgba(10, 46, 41, 0.12);
+  }
+
+  .clinicos-empty-state {
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }
