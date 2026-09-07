@@ -96,6 +96,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 |---|---|---|
 | 0 — Scaffolding | done | |
 | 1 — UC-001 Login + Phase 1b sign-up | done | PR #5 merged; UI migrated to Thymeleaf/HTMX on `refactor/thymeleaf-htmx` (see Phase 1 migration note) |
+| 1c — Design system reconciliation | in progress | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
 | 2 — UC-002 Employees/roles | not started | |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |
