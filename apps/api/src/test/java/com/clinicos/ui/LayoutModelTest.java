@@ -24,7 +24,8 @@ class LayoutModelTest {
     void roleDisplayNameMapsKnownRolesAndDefaultsOthers() {
         assertThat(LayoutModel.roleDisplayName("owner")).isEqualTo("المالك");
         assertThat(LayoutModel.roleDisplayName("manager")).isEqualTo("مدير");
-        assertThat(LayoutModel.roleDisplayName("receptionist")).isEqualTo("مستخدم");
+        assertThat(LayoutModel.roleDisplayName("assistant")).isEqualTo("مساعد");
+        assertThat(LayoutModel.roleDisplayName("receptionist")).isEqualTo("موظف استقبال");
         assertThat(LayoutModel.roleDisplayName(null)).isEqualTo("مستخدم");
     }
 

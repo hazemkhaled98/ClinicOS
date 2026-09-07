@@ -90,5 +90,32 @@
       <p class="text-sm text-on-surface-variant">لا توجد بيانات لعرضها حالياً.</p>
     </div>
   </section>
+
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-teal-900 mb-4">تبويبات لوحة التحكم</h2>
+    <div class="flex flex-wrap items-center gap-1.5">
+      <button type="button" class="clinicos-admin-tab clinicos-admin-tab--active">الإعدادات</button>
+      <button type="button" class="clinicos-admin-tab clinicos-admin-tab--disabled">المستخدمون</button>
+      <button type="button" class="clinicos-admin-tab clinicos-admin-tab--disabled">المهام</button>
+    </div>
+  </section>
+
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-teal-900 mb-4">صف الموظف (تحرير سطري)</h2>
+    <div class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-employee-row">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-base">م</span>
+      <span class="font-bold text-teal-900 min-w-32">محمود سمير</span>
+      <select class="clinicos-input w-36"><option>مساعد</option></select>
+      <input type="text" class="clinicos-input w-32" value="5000.00">
+      <button type="button" class="clinicos-btn">حفظ</button>
+    </div>
+  </section>
+
+  <section class="mb-10">
+    <h2 class="text-lg font-bold text-teal-900 mb-4">تنبيه بألوان الخطر (في سياق النموذج)</h2>
+    <div class="max-w-xl rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+      اسم الموظف مطلوب المرتب الأساسي غير صحيح
+    </div>
+  </section>
 </body>
 </html>

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head(${section.title})}"></head>
-<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false"
-      th:attr="hx-headers='{\&quot;X-CSRF-TOKEN\&quot;:\&quot;' + ${_csrf.token} + '\&quot;}'">
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
   <main class="w-full min-h-screen flex flex-col bg-surface">
     <header th:replace="~{fragments/topbar :: topbar}"></header>
     <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full clinicos-section">

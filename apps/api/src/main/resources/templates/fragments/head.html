@@ -2,7 +2,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title th:text="${pageTitle}">عيادتي</title>
+  <meta th:name="_csrf" th:content="${_csrf.token}" name="_csrf" content="">
   <link rel="stylesheet" th:href="@{/css/app.css}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    document.addEventListener('htmx:configRequest', function (e) {
+      e.detail.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    });
+  </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>

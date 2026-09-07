@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>لوحة التحكم</title>
+</head>
+<body>
+<nav th:fragment="adminTabs(active)" class="flex flex-wrap gap-2 mb-8" aria-label="تبويبات لوحة التحكم">
+  <a th:href="${active == 'overview'} ? '#' : '/admin-dashboard/overview'"
+     th:classappend="${active == 'overview'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'overview'} ? 'page' : null">نظرة عامة</a>
+  <a th:href="${active == 'staff'} ? '#' : '/admin-dashboard/staff'"
+     th:classappend="${active == 'staff'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'staff'} ? 'page' : null">ملف الموظف</a>
+  <a th:href="${active == 'tasks'} ? '#' : '/admin-dashboard/tasks'"
+     th:classappend="${active == 'tasks'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'tasks'} ? 'page' : null">المهام</a>
+  <a th:href="${active == 'settings'} ? '#' : '/admin-dashboard/settings'"
+     th:classappend="${active == 'settings'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'settings'} ? 'page' : null">الإعدادات</a>
+  <a th:href="${active == 'users'} ? '#' : '/admin-dashboard/users'"
+     th:classappend="${active == 'users'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'users'} ? 'page' : null">المستخدمون</a>
+  <a th:href="${active == 'goals'} ? '#' : '/admin-dashboard/goals'"
+     th:classappend="${active == 'goals'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'goals'} ? 'page' : null">الأهداف والتحفيز</a>
+  <a th:href="${active == 'activity'} ? '#' : '/admin-dashboard/activity'"
+     th:classappend="${active == 'activity'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'activity'} ? 'page' : null">سجل النشاط</a>
+  <a th:href="${active == 'permissions'} ? '#' : '/admin-dashboard/permissions'"
+     th:classappend="${active == 'permissions'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
+     class="clinicos-admin-tab" aria-current="${active == 'permissions'} ? 'page' : null">الصلاحيات</a>
+</nav>
+</body>
+</html>

@@ -60,6 +60,8 @@ public class LayoutModel {
         return switch (roleCode) {
             case "owner" -> "المالك";
             case "manager" -> "مدير";
+            case "assistant" -> "مساعد";
+            case "receptionist" -> "موظف استقبال";
             default -> "مستخدم";
         };
     }
