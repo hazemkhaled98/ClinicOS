@@ -147,7 +147,7 @@
 
   .clinicos-label {
     display: block;
-    font-size: 12px;
+    font-size: var(--text-label);
     font-weight: 600;
     color: var(--color-teal-900);
   }

@@ -52,6 +52,7 @@
   --text-metric--line-height: 32px;
   --text-micro: 11px;
   --text-micro--line-height: 14px;
+  --text-label: 12px;
 
   --shadow-drawer: 0 8px 40px rgba(10, 46, 41, 0.12);
   --shadow-auth: 0 24px 60px rgba(10, 46, 41, 0.18);
