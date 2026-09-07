@@ -3,6 +3,7 @@
   --font-display: "Noto Sans Arabic", "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --color-surface: #f6faf8;
+  --color-surface-elevated: #ffffff;
   --color-on-surface: #161d1b;
   --color-on-surface-variant: #414846;
 
@@ -48,12 +49,10 @@
   --color-info-600: #2563eb;
   --color-info-50: #eff6ff;
 
-  --text-metric: 28px;
-  --text-metric--line-height: 32px;
   --text-micro: 11px;
-  --text-micro--line-height: 14px;
   --text-label: 12px;
 
+  --shadow-inset: inset 0 2px 4px rgb(0 0 0 / 0.15);
   --shadow-drawer: 0 8px 40px rgba(10, 46, 41, 0.12);
   --shadow-auth: 0 24px 60px rgba(10, 46, 41, 0.18);
 }

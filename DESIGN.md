@@ -2,6 +2,7 @@
 name: ClinicOS
 colors:
   surface: '#f6faf8'
+  surface-elevated: '#ffffff'
   on-surface: '#161d1b'
   on-surface-variant: '#414846'
   teal-950: '#071f1c'
@@ -61,10 +62,6 @@ typography:
     fontFamily: Noto Sans Arabic
     fontSize: text-micro
     fontWeight: '500'
-  numeric-metric:
-    fontFamily: Noto Sans Arabic
-    fontSize: text-metric
-    fontWeight: '700'
 rounded:
   sm: 8px
   md: 12px
@@ -145,7 +142,7 @@ The design uses moderate corner radii to project approachability and visual refi
 ## Components
 
 ### Buttons
-- **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring.
+- **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring (`--shadow-inset`).
 - **Secondary Action**: Background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29`. Hover applies background `#f6faf8`.
 - **Destructive Action**: Background `bg-danger-50`, border 1px solid `border-danger-600`, text `text-danger-600`.
 

@@ -53,12 +53,12 @@
   }
 
   .clinicos-nav-item:hover {
-    color: #ffffff;
+    color: var(--color-surface-elevated);
     background: rgba(255, 255, 255, 0.08);
   }
 
   .clinicos-nav-item--active {
-    color: #ffffff;
+    color: var(--color-surface-elevated);
     background: rgba(16, 185, 129, 0.16);
     border-inline-start: 3px solid rgba(16, 185, 129, 0.9);
     padding-inline-start: calc(0.875rem - 3px);
@@ -88,11 +88,20 @@
     font-weight: 600;
     transition: background-color 0.15s ease, border-color 0.15s ease;
     background-color: var(--color-teal-900);
-    color: #ffffff;
+    color: var(--color-surface-elevated);
   }
 
-  .clinicos-btn:hover {
+  .clinicos-btn:hover:not(:disabled) {
     background-color: var(--color-teal-950);
+  }
+
+  .clinicos-btn:active {
+    box-shadow: var(--shadow-inset);
+  }
+
+  .clinicos-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .clinicos-btn:focus-visible {
@@ -101,12 +110,12 @@
   }
 
   .clinicos-btn--secondary {
-    background-color: #ffffff;
+    background-color: var(--color-surface-elevated);
     border-color: var(--color-neutral-200);
     color: var(--color-teal-900);
   }
 
-  .clinicos-btn--secondary:hover {
+  .clinicos-btn--secondary:hover:not(:disabled) {
     background-color: var(--color-surface);
   }
 
@@ -116,19 +125,24 @@
     color: var(--color-danger-600);
   }
 
-  .clinicos-btn--danger:hover {
+  .clinicos-btn--danger:hover:not(:disabled) {
     background-color: var(--color-danger-600);
-    color: #ffffff;
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn--danger:focus-visible {
+    outline-color: var(--color-danger-600);
   }
 
   .clinicos-input {
     display: block;
     width: 100%;
-    background-color: #ffffff;
+    background-color: var(--color-surface-elevated);
     border: 1px solid var(--color-neutral-200);
     border-radius: 0.75rem;
     padding-block: 0.625rem;
     padding-inline: 0.875rem;
+    font-size: 0.875rem;
     transition: border-color 0.15s ease;
   }
 
@@ -212,9 +226,9 @@
   }
 
   .clinicos-card {
-    background-color: #ffffff;
+    background-color: var(--color-surface-elevated);
     border: 1px solid var(--color-neutral-200);
-    border-radius: 1rem;
+    border-radius: 0.75rem;
   }
 
   .clinicos-card--popover {
@@ -226,7 +240,7 @@
   }
 
   .clinicos-empty-state {
-    background-color: #ffffff;
+    background-color: var(--color-surface-elevated);
     border: 1px solid var(--color-neutral-200);
     border-radius: 1rem;
     padding: 2.5rem;

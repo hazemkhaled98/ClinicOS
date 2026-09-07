@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,8 +29,6 @@ class CssHygieneTest {
             "\\b(left|right|padding-left|padding-right|margin-left|margin-right|border-left|border-right)\\s*:");
 
     private static final Pattern HEX_LITERAL = Pattern.compile("#[0-9a-fA-F]{3,8}\\b");
-
-    private static final Set<String> ALLOWED_UNTOKENIZED_HEX = Set.of("#ffffff", "#fff");
 
     @Test
     void noCssFileUsesPhysicalDirectionProperty() throws IOException {
@@ -54,11 +51,10 @@ class CssHygieneTest {
             Matcher matcher = HEX_LITERAL.matcher(content);
             while (matcher.find()) {
                 String hex = matcher.group();
-                boolean allowed = ALLOWED_UNTOKENIZED_HEX.contains(hex.toLowerCase(Locale.ROOT));
                 boolean tokenized = tokensContent.toLowerCase(Locale.ROOT).contains(hex.toLowerCase(Locale.ROOT));
-                assertThat(allowed || tokenized)
+                assertThat(tokenized)
                         .withFailMessage(() -> css + " uses hex literal " + hex
-                                + " which is neither defined in tokens.css nor in ALLOWED_UNTOKENIZED_HEX")
+                                + " which is not defined in tokens.css")
                         .isTrue();
             }
         }

@@ -17,8 +17,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Enforces the ClinicOS UI hard rule (CLAUDE.md): a Thymeleaf template ships
- * zero inline {@code <style>} blocks, zero inline {@code <script>} bodies,
- * and zero {@code on*=} attributes. {@code fragments/head.html} is the only
+ * zero inline {@code <style>} blocks, zero inline {@code style=} attributes,
+ * zero inline {@code <script>} bodies, and zero {@code on*=} attributes.
+ * {@code fragments/head.html} is the only
  * file allowed to declare {@code <link>}/{@code <script src>} tags; every
  * other template must be pure markup that consumes the shared stylesheet and
  * behaviour scripts.
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 class TemplateHygieneTest {
 
     private static final Pattern STYLE_BLOCK = Pattern.compile("<style[\\s>]", Pattern.CASE_INSENSITIVE);
+    private static final Pattern STYLE_ATTRIBUTE = Pattern.compile("\\sstyle\\s*=\\s*[\"']", Pattern.CASE_INSENSITIVE);
     private static final Pattern INLINE_SCRIPT_BODY = Pattern.compile(
             "<script(?![^>]*\\bsrc=)[^>]*>\\s*\\S", Pattern.CASE_INSENSITIVE);
     private static final Pattern ON_ATTRIBUTE = Pattern.compile(
@@ -54,6 +56,7 @@ class TemplateHygieneTest {
             throw new UncheckedIOException(e);
         }
         return STYLE_BLOCK.matcher(content).find()
+                || STYLE_ATTRIBUTE.matcher(content).find()
                 || INLINE_SCRIPT_BODY.matcher(content).find()
                 || ON_ATTRIBUTE.matcher(content).find();
     }
