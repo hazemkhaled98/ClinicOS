@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
@@ -36,6 +37,7 @@ class AdminControllerTest {
     private LayoutModel layoutModel;
     private EmployeeService employeeService;
     private ActivityLogService activityLogService;
+    private ClinicSettingsService clinicSettingsService;
     private AdminController controller;
     private Model model;
 
@@ -44,7 +46,8 @@ class AdminControllerTest {
         layoutModel = mock(LayoutModel.class);
         employeeService = mock(EmployeeService.class);
         activityLogService = mock(ActivityLogService.class);
-        controller = new AdminController(layoutModel, employeeService, activityLogService);
+        clinicSettingsService = mock(ClinicSettingsService.class);
+        controller = new AdminController(layoutModel, employeeService, activityLogService, clinicSettingsService);
         model = new ExtendedModelMap();
     }
 
@@ -58,6 +61,10 @@ class AdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         when(employeeService.list(CLINIC)).thenReturn(List.of());
+        var settings = new ClinicSettingsService.ClinicSettings(
+                java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+        when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
 
         String view = controller.settings(session, model);
 
@@ -65,6 +72,9 @@ class AdminControllerTest {
         assertThat(model.getAttribute("layout")).isNotNull();
         assertThat(model.getAttribute("employees")).isEqualTo(List.of());
         assertThat(model.getAttribute("addForm")).isEqualTo(AdminController.EmployeeForm.empty());
+        assertThat(model.getAttribute("settings")).isEqualTo(settings);
+        assertThat(model.getAttribute("weights")).isEqualTo(List.of());
+        assertThat(model.getAttribute("tiers")).isEqualTo(List.of());
     }
 
     @Test

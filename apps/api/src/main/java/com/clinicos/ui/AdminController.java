@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
@@ -38,12 +39,14 @@ public class AdminController {
     private final LayoutModel layoutModel;
     private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
+    private final ClinicSettingsService clinicSettingsService;
 
     public AdminController(LayoutModel layoutModel, EmployeeService employeeService,
-            ActivityLogService activityLogService) {
+            ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService) {
         this.layoutModel = layoutModel;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
+        this.clinicSettingsService = clinicSettingsService;
     }
 
     @GetMapping("/admin-dashboard")
@@ -58,6 +61,10 @@ public class AdminController {
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("section", NavSectionResolver.sectionByRoute("admin-dashboard"));
+        var clinicSettings = clinicSettingsService.get(clinicId(session));
+        model.addAttribute("settings", clinicSettings);
+        model.addAttribute("weights", clinicSettings.weights());
+        model.addAttribute("tiers", clinicSettings.tiers());
         renderCard(model, session, Map.of(), null, null, EmployeeForm.empty());
         return "admin/settings";
     }

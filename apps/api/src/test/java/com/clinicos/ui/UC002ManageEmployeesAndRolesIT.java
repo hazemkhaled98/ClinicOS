@@ -100,6 +100,9 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             openAdminSettings();
 
             page().getByText("👥 الموظفون").waitFor();
+            page().getByText("⚙️ أوزان مكونات التقييم").waitFor();
+            page().getByText("🕐 دوام العيادة").waitFor();
+            page().getByText("🏅 شرائح الحافز").waitFor();
             page().getByPlaceholder("اسم الموظف").fill("محمود سمير");
             page().getByPlaceholder("المرتب").last().fill("5000");
             page().getByPlaceholder("الحافز").last().fill("1500");
