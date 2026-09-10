@@ -2,7 +2,6 @@ package com.clinicos.ui;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +52,7 @@ public class ClinicSettingsController {
         List<CategoryWeight> weights = new ArrayList<>();
         for (Category category : Category.values()) {
             String raw = params.get("weight-" + category.code());
-            BigDecimal parsed = parseAmount(raw, "weights", fieldErrors, "أوزان مكونات التقييم غير صحيحة");
+            BigDecimal parsed = FormParsing.parseAmount(raw, "weights", fieldErrors, "أوزان مكونات التقييم غير صحيحة");
             weights.add(new CategoryWeight(category, parsed));
         }
         if (fieldErrors.isEmpty()) {
@@ -73,7 +72,7 @@ public class ClinicSettingsController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        BigDecimal volumeTarget = parseAmount(params.get("volumeTarget"), "volumeTarget",
+        BigDecimal volumeTarget = FormParsing.parseAmount(params.get("volumeTarget"), "volumeTarget",
                 fieldErrors, "هدف الفواتير الشهري غير صحيح");
         if (fieldErrors.isEmpty()) {
             try {
@@ -92,13 +91,13 @@ public class ClinicSettingsController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        LocalTime shiftStart = parseTime(params.get("defaultShiftStart"), "shift", fieldErrors);
-        LocalTime shiftEnd = parseTime(params.get("defaultShiftEnd"), "shift", fieldErrors);
-        Integer grace = parseInt(params.get("lateGraceMinutes"), "lateGraceMinutes", fieldErrors,
+        LocalTime shiftStart = FormParsing.parseTime(params.get("defaultShiftStart"), "shift", fieldErrors);
+        LocalTime shiftEnd = FormParsing.parseTime(params.get("defaultShiftEnd"), "shift", fieldErrors);
+        Integer grace = FormParsing.parseInt(params.get("lateGraceMinutes"), "lateGraceMinutes", fieldErrors,
                 "مهلة التأخير غير صحيحة");
-        Integer workingDays = parseInt(params.get("workingDaysPerMonth"), "workingDaysPerMonth",
+        Integer workingDays = FormParsing.parseInt(params.get("workingDaysPerMonth"), "workingDaysPerMonth",
                 fieldErrors, "أيام العمل الشهرية غير صحيحة");
-        Integer academyScore = parseInt(params.get("academyPassScore"), "academyPassScore",
+        Integer academyScore = FormParsing.parseInt(params.get("academyPassScore"), "academyPassScore",
                 fieldErrors, "درجة النجاح غير صحيحة");
         if (fieldErrors.isEmpty()) {
             try {
@@ -121,9 +120,9 @@ public class ClinicSettingsController {
         List<Tier> tiers = new ArrayList<>();
         for (int i = 0; params.containsKey("tierName" + i); i++) {
             String name = params.get("tierName" + i);
-            BigDecimal minScore = parseAmount(params.get("tierMinScore" + i), "tiers", fieldErrors,
+            BigDecimal minScore = FormParsing.parseAmount(params.get("tierMinScore" + i), "tiers", fieldErrors,
                     "قيم الشرائح غير صحيحة");
-            BigDecimal pct = parseAmount(params.get("tierPct" + i), "tiers", fieldErrors,
+            BigDecimal pct = FormParsing.parseAmount(params.get("tierPct" + i), "tiers", fieldErrors,
                     "قيم الشرائح غير صحيحة");
             tiers.add(new Tier(name == null ? "" : name.trim(), minScore, pct));
         }
@@ -176,39 +175,4 @@ public class ClinicSettingsController {
                 .stripTrailingZeros().toPlainString();
     }
 
-    private static BigDecimal parseAmount(String value, String key, Map<String, String> errors, String message) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return new BigDecimal(value.trim());
-        } catch (NumberFormatException e) {
-            errors.put(key, message);
-            return null;
-        }
-    }
-
-    private static Integer parseInt(String value, String key, Map<String, String> errors, String message) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return Integer.valueOf(value.trim());
-        } catch (NumberFormatException e) {
-            errors.put(key, message);
-            return null;
-        }
-    }
-
-    private static LocalTime parseTime(String value, String key, Map<String, String> errors) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return LocalTime.parse(value);
-        } catch (DateTimeParseException e) {
-            errors.put(key, "وقت غير صحيح");
-        }
-        return null;
-    }
 }

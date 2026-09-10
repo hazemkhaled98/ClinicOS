@@ -2,7 +2,6 @@ package com.clinicos.ui;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -170,14 +169,14 @@ public class AdminController {
                     fieldErrors.put("staffRole", e.getMessage());
                 }
             }
-            BigDecimal parsedBasePay = parseAmount(basePay, "basePay", fieldErrors, "المرتب الأساسي غير صحيح");
-            BigDecimal parsedMaxIncentive = parseAmount(maxIncentive, "maxIncentive", fieldErrors,
+            BigDecimal parsedBasePay = FormParsing.parseAmount(basePay, "basePay", fieldErrors, "المرتب الأساسي غير صحيح");
+            BigDecimal parsedMaxIncentive = FormParsing.parseAmount(maxIncentive, "maxIncentive", fieldErrors,
                     "الحافز الكامل غير صحيح");
             LocalTime parsedShiftStart = null;
             LocalTime parsedShiftEnd = null;
             if (isCustomShift) {
-                parsedShiftStart = parseTime(shiftStart, "shift", fieldErrors);
-                parsedShiftEnd = parseTime(shiftEnd, "shift", fieldErrors);
+                parsedShiftStart = FormParsing.parseTime(shiftStart, "shift", fieldErrors);
+                parsedShiftEnd = FormParsing.parseTime(shiftEnd, "shift", fieldErrors);
             }
             return new EmployeeRequest(
                     name == null ? "" : name.trim(),
@@ -191,27 +190,4 @@ public class AdminController {
         }
     }
 
-    private static BigDecimal parseAmount(String value, String key, Map<String, String> errors, String message) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return new BigDecimal(value.trim());
-        } catch (NumberFormatException e) {
-            errors.put(key, message);
-            return null;
-        }
-    }
-
-    private static LocalTime parseTime(String value, String key, Map<String, String> errors) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return LocalTime.parse(value);
-        } catch (DateTimeParseException e) {
-            errors.put(key, "وقت غير صحيح");
-            return null;
-        }
-    }
 }
