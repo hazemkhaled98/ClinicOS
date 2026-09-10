@@ -5,7 +5,7 @@
 </head>
 <body>
 <div th:fragment="tasksCard(tasks, taskErrors, taskErrorScope)"
-     id="tasks-card" class="mt-10 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+     id="tasks-card" class="mt-10 p-6 sm:p-8 clinicos-card">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">📋 المهام</h2>
     <p class="text-sm text-on-surface-variant">تعريف المهام اليومية والأسبوعية لكل دور في العيادة.</p>
@@ -28,7 +28,8 @@
       </div>
       <div class="flex items-center gap-2 me-auto">
         <button class="clinicos-btn text-xs"
-                @click="$dispatch('edit-task', {id: '${task.id()}', name: '${task.name()}', dimension: '${task.dimension()}', frequency: '${task.frequency()}', roleCode: '${task.roleCode()}'}); showEditModal = true">تعديل</button>
+                th:attr="data-task-id=${task.id()}, data-task-name=${task.name()}, data-task-dimension=${task.dimension()}, data-task-frequency=${task.frequency()}, data-task-role=${task.roleCode()}"
+                @click="$dispatch('edit-task', { id: $el.dataset.taskId, name: $el.dataset.taskName, dimension: $el.dataset.taskDimension, frequency: $el.dataset.taskFrequency, roleCode: $el.dataset.taskRole })">تعديل</button>
         <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
               hx-target="#tasks-card" hx-swap="outerHTML"
               hx-confirm="هل أنت متأكد من حذف هذه المهمة؟">

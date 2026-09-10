@@ -220,7 +220,6 @@
   .clinicos-admin-tab--disabled {
     opacity: 0.5;
     cursor: default;
-    pointer-events: none;
   }
 
   .clinicos-employee-row {
