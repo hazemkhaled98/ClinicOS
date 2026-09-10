@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ public class UserAdminController {
     private final UserAdminService userAdminService;
     private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
+    private final Argon2PasswordEncoder passwordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 
     public UserAdminController(LayoutModel layoutModel, UserAdminService userAdminService,
             EmployeeService employeeService, ActivityLogService activityLogService) {
@@ -61,7 +63,7 @@ public class UserAdminController {
         if (fieldErrors.isEmpty()) {
             try {
                 userAdminService.create(clinicId, new UserCreateRequest(
-                        form.username().trim(), form.fullName().trim(), form.email(), form.passwordHash()));
+                        form.username().trim(), form.fullName().trim(), form.email(), passwordEncoder.encode(form.password())));
                 activityLogService.log(clinicId, membershipId(session), "user.create", "user");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("username", e.getMessage());
@@ -72,13 +74,13 @@ public class UserAdminController {
     }
 
     @PostMapping("/admin-dashboard/users/{userId}/password")
-    public String changePassword(@PathVariable UUID userId, @RequestParam String newPasswordHash,
+    public String changePassword(@PathVariable UUID userId, @RequestParam String newPassword,
             HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.changePassword(clinicId, userId, newPasswordHash);
+        userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
         activityLogService.log(clinicId, membershipId(session), "user.password_change", "user");
         renderCard(model, clinicId, Map.of(), null, UserForm.empty());
         return "admin/users :: usersCard";
@@ -158,12 +160,12 @@ public class UserAdminController {
         if (form.fullName() == null || form.fullName().isBlank()) {
             errors.put("fullName", "الاسم الكامل مطلوب");
         }
-        if (form.passwordHash() == null || form.passwordHash().isBlank()) {
+        if (form.password() == null || form.password().isBlank()) {
             errors.put("password", "كلمة المرور مطلوبة");
         }
     }
 
-    public record UserForm(String username, String fullName, String email, String passwordHash) {
+    public record UserForm(String username, String fullName, String email, String password) {
         static UserForm empty() {
             return new UserForm("", "", "", "");
         }
