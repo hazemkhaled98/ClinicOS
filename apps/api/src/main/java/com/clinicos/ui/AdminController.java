@@ -64,6 +64,7 @@ public class AdminController {
         var clinicSettings = clinicSettingsService.get(clinicId(session));
         model.addAttribute("settings", clinicSettings);
         model.addAttribute("weights", clinicSettings.weights());
+        model.addAttribute("weightsSum", ClinicSettingsController.sumWeights(clinicSettings.weights()));
         model.addAttribute("tiers", clinicSettings.tiers());
         renderCard(model, session, Map.of(), null, null, EmployeeForm.empty());
         return "admin/settings";

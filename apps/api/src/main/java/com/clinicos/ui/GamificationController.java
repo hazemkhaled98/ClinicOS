@@ -1,0 +1,125 @@
+package com.clinicos.ui;
+
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.clinicos.clinicconfig.api.GamificationService;
+import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
+import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.shared.ActivityLogService;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+public class GamificationController {
+
+    private final LayoutModel layoutModel;
+    private final GamificationService gamificationService;
+    private final ActivityLogService activityLogService;
+
+    public GamificationController(LayoutModel layoutModel, GamificationService gamificationService,
+            ActivityLogService activityLogService) {
+        this.layoutModel = layoutModel;
+        this.gamificationService = gamificationService;
+        this.activityLogService = activityLogService;
+    }
+
+    @GetMapping("/admin-dashboard/goals")
+    public String goals(HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        UUID clinicId = clinicId(session);
+        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
+        model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
+        model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
+        model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
+        return "admin/gamification-page";
+    }
+
+    @PostMapping("/admin-dashboard/goals/settings")
+    public String updateSettings(
+            @RequestParam(defaultValue = "false") boolean showLevelRing,
+            @RequestParam(defaultValue = "false") boolean showStreaks,
+            @RequestParam(defaultValue = "false") boolean showBadges,
+            @RequestParam(defaultValue = "false") boolean showWeeklyGoals,
+            @RequestParam(defaultValue = "false") boolean showLeaderboard,
+            @RequestParam(defaultValue = "false") boolean showReward,
+            HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        UUID clinicId = clinicId(session);
+        gamificationService.updateSettings(clinicId, new GamificationSettings(
+                showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward));
+        activityLogService.log(clinicId, membershipId(session), "gamification.settings", "gamification_settings");
+        renderPage(model, clinicId);
+        return "admin/gamification :: settingsCard";
+    }
+
+    @PostMapping("/admin-dashboard/goals/goals")
+    public String updateGoals(
+            @RequestParam String[] titles,
+            @RequestParam String[] targets,
+            HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        UUID clinicId = clinicId(session);
+        for (int i = 0; i < titles.length && i < 3; i++) {
+            int slot = i + 1;
+            String title = titles[i];
+            int target = 0;
+            try {
+                target = Integer.parseInt(targets[i]);
+            } catch (NumberFormatException ignored) {
+            }
+            gamificationService.updateGoal(clinicId, slot, title, target);
+        }
+        activityLogService.log(clinicId, membershipId(session), "gamification.goals", "weekly_goal");
+        renderPage(model, clinicId);
+        return "admin/gamification :: goalsCard";
+    }
+
+    @PostMapping("/admin-dashboard/goals/thresholds")
+    public String updateThresholds(
+            @RequestParam String[] names,
+            @RequestParam String[] thresholds,
+            HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        UUID clinicId = clinicId(session);
+        for (int i = 0; i < names.length; i++) {
+            int threshold = 0;
+            try {
+                threshold = Integer.parseInt(thresholds[i]);
+            } catch (NumberFormatException ignored) {
+            }
+            gamificationService.updateThreshold(clinicId, names[i], threshold);
+        }
+        activityLogService.log(clinicId, membershipId(session), "gamification.thresholds", "badge_threshold");
+        renderPage(model, clinicId);
+        return "admin/gamification :: thresholdsCard";
+    }
+
+    private void renderPage(Model model, UUID clinicId) {
+        model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
+        model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
+        model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
+    }
+
+    private static UUID clinicId(HttpSession session) {
+        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
+    }
+
+    private static UUID membershipId(HttpSession session) {
+        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
+    }
+}

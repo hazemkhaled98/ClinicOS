@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>المهام</title>
+</head>
+<body>
+<div th:fragment="tasksCard(tasks, taskErrors, taskErrorScope)"
+     id="tasks-card" class="mt-10 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">📋 المهام</h2>
+    <p class="text-sm text-on-surface-variant">تعريف المهام اليومية والأسبوعية لكل دور في العيادة.</p>
+  </div>
+
+  <div th:if="${taskErrorScope == 'add'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+    <span th:each="err : ${taskErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <th:block th:if="${#lists.isEmpty(tasks)}">
+      <p class="py-6 text-center text-sm text-on-surface-variant">لا توجد مهام معرفة بعد.</p>
+    </th:block>
+
+    <div th:each="task : ${tasks}"
+         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4">
+      <div class="flex flex-col">
+        <span class="font-bold text-teal-900" th:text="${task.name()}">مهنة</span>
+        <span class="text-xs text-on-surface-variant" th:text="${task.dimension()} + ' · ' + ${task.frequency()} + ' · ' + ${task.roleCode()}">fanni · daily · assistant</span>
+      </div>
+      <div class="flex items-center gap-2 me-auto">
+        <button class="clinicos-btn text-xs"
+                @click="$dispatch('edit-task', {id: '${task.id()}', name: '${task.name()}', dimension: '${task.dimension()}', frequency: '${task.frequency()}', roleCode: '${task.roleCode()}'}); showEditModal = true">تعديل</button>
+        <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
+              hx-target="#tasks-card" hx-swap="outerHTML"
+              hx-confirm="هل أنت متأكد من حذف هذه المهمة؟">
+          <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">حذف</button>
+        </form>
+      </div>
+    </div>
+
+    <hr class="my-4 border-dashed border-neutral-300"/>
+
+    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4">
+      <h3 class="font-bold text-teal-900 mb-3">إضافة مهمة جديدة</h3>
+      <form class="flex flex-wrap items-end gap-3" hx-post="/admin-dashboard/tasks"
+            hx-target="#tasks-card" hx-swap="outerHTML">
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          اسم المهمة
+          <input type="text" name="name" class="clinicos-input w-48" required>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          البُعد
+          <select name="dimension" class="clinicos-input w-28">
+            <option value="fanni">فني</option>
+            <option value="solooki">سلوكي</option>
+            <option value="ibda3">إبداعي</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          التكرار
+          <select name="frequency" class="clinicos-input w-28">
+            <option value="daily">يومي</option>
+            <option value="weekly">أسبوعي</option>
+            <option value="monthly">شهري</option>
+            <option value="custom">مخصص</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الدور
+          <select name="roleCode" class="clinicos-input w-32">
+            <option value="assistant">مساعد</option>
+            <option value="receptionist">موظف استقبال</option>
+          </select>
+        </label>
+        <button type="submit" class="clinicos-btn">+ إضافة مهمة</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

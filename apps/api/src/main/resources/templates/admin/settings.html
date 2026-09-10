@@ -12,7 +12,7 @@
       <div id="employees-card"
            th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeErrors}, ${employeeErrorScope}, ${employeeErrorRow}, ${addForm})}">
       </div>
-      <div th:replace="~{admin/clinic-settings :: weightsCard(${settings}, null, ${weights})}"></div>
+      <div th:replace="~{admin/clinic-settings :: weightsCard(${settings}, null, ${weights}, ${weightsSum})}"></div>
       <div th:replace="~{admin/clinic-settings :: volumeCard(${settings}, null)}"></div>
       <div th:replace="~{admin/clinic-settings :: dutyCard(${settings}, null)}"></div>
       <div th:replace="~{admin/clinic-settings :: tiersCard(${settings}, null, ${tiers})}"></div>

@@ -6,11 +6,14 @@ import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
 import static com.clinicos.shared.jooq.tables.EvaluationWeight.EVALUATION_WEIGHT;
 import static com.clinicos.shared.jooq.tables.IncentiveTier.INCENTIVE_TIER;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
+import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
+import static com.clinicos.shared.jooq.tables.RolePermission.ROLE_PERMISSION;
 import static org.jooq.impl.DSL.val;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -40,8 +43,11 @@ public final class TestFixtures {
                 .values(name, slug)
                 .returningResult(CLINIC.ID)
                 .fetchOne(CLINIC.ID);
-        dsl.insertInto(CLINIC_SETTINGS, CLINIC_SETTINGS.CLINIC_ID)
-                .values(id)
+        dsl.insertInto(CLINIC_SETTINGS, CLINIC_SETTINGS.CLINIC_ID, CLINIC_SETTINGS.DEFAULT_SHIFT_START,
+                CLINIC_SETTINGS.DEFAULT_SHIFT_END, CLINIC_SETTINGS.LATE_GRACE_MINUTES,
+                CLINIC_SETTINGS.WORKING_DAYS_PER_MONTH, CLINIC_SETTINGS.VOLUME_TARGET,
+                CLINIC_SETTINGS.ACADEMY_PASS_SCORE)
+                .values(id, LocalTime.of(9, 0), LocalTime.of(17, 0), 15, 26, new BigDecimal("20000"), 70)
                 .execute();
         dsl.insertInto(EVALUATION_WEIGHT, EVALUATION_WEIGHT.CLINIC_ID, EVALUATION_WEIGHT.CATEGORY, EVALUATION_WEIGHT.WEIGHT)
                 .values(id, EvalCategory.completion, new BigDecimal("18"))
@@ -109,5 +115,27 @@ public final class TestFixtures {
                         .where(ROLE.CODE.eq(roleCode)))
                 .returningResult(MEMBERSHIP.ID)
                 .fetchOne(MEMBERSHIP.ID);
+    }
+
+    public static void seedRolePermissionDefaults(Connection connection, UUID clinicId) {
+        DSLContext dsl = DSL.using(connection, SQLDialect.POSTGRES);
+        String[] fullCatalog = {
+                "emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit",
+                "tray", "issue", "procs", "myprocs", "manage", "orders", "receive", "returns",
+                "suppliers", "dash", "profit", "analytics", "waste", "doctors", "supAnalysis",
+                "received", "itemAnalysis", "approvals", "ledger"};
+        seedRolePermissions(dsl, clinicId, "owner", fullCatalog);
+        seedRolePermissions(dsl, clinicId, "manager", fullCatalog);
+        seedRolePermissions(dsl, clinicId, "assistant", "emp", "tray", "issue", "procs", "myprocs", "manage");
+        seedRolePermissions(dsl, clinicId, "receptionist", "emp", "orders", "receive", "returns", "suppliers", "ledger");
+    }
+
+    private static void seedRolePermissions(DSLContext dsl, UUID clinicId, String roleCode, String... permissionCodes) {
+        dsl.insertInto(ROLE_PERMISSION, ROLE_PERMISSION.ROLE_ID, ROLE_PERMISSION.PERMISSION_ID, ROLE_PERMISSION.CLINIC_ID)
+                .select(DSL.select(ROLE.ID, PERMISSION.ID, val(clinicId))
+                        .from(ROLE, PERMISSION)
+                        .where(ROLE.CODE.eq(roleCode))
+                        .and(PERMISSION.CODE.in(permissionCodes)))
+                .execute();
     }
 }

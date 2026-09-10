@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>الأهداف والتحفيز</title>
+</head>
+<body>
+<div th:fragment="settingsCard(settings)"
+     id="settings-card" class="mt-10 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">⚙️ إعدادات التحفيز</h2>
+    <p class="text-sm text-on-surface-variant">تفعيل أو تعطيل مكونات نظام التحفيز.</p>
+  </div>
+  <form class="flex flex-wrap gap-4" hx-post="/admin-dashboard/goals/settings" hx-target="#settings-card" hx-swap="outerHTML">
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showLevelRing" value="true" class="accent-teal-600" th:checked="${settings.showLevelRing()}">
+      حلقة المستوى
+    </label>
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showStreaks" value="true" class="accent-teal-600" th:checked="${settings.showStreaks()}">
+      السلاسل
+    </label>
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showBadges" value="true" class="accent-teal-600" th:checked="${settings.showBadges()}">
+      الشارات
+    </label>
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showWeeklyGoals" value="true" class="accent-teal-600" th:checked="${settings.showWeeklyGoals()}">
+      الأهداف الأسبوعية
+    </label>
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showLeaderboard" value="true" class="accent-teal-600" th:checked="${settings.showLeaderboard()}">
+      لوحة الصدارة
+    </label>
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer">
+      <input type="checkbox" name="showReward" value="true" class="accent-teal-600" th:checked="${settings.showReward()}">
+      المكافآت
+    </label>
+    <button type="submit" class="clinicos-btn">حفظ</button>
+  </form>
+</div>
+
+<div th:fragment="goalsCard(goals)"
+     id="goals-card" class="mt-6 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🎯 أهداف أسبوعية</h2>
+    <p class="text-sm text-on-surface-variant">تحديد 3 أهداف أسبوعية معروضة للموظفين.</p>
+  </div>
+  <form class="flex flex-col gap-3" hx-post="/admin-dashboard/goals/goals" hx-target="#goals-card" hx-swap="outerHTML">
+    <th:block th:each="goal, stat : ${goals}">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-sm text-on-surface-variant font-bold" th:text="'هدف ' + (${stat.index} + 1)">هدف 1</span>
+        <input type="text" name="titles" class="clinicos-input w-48" th:value="${goal.title()}" placeholder="اسم الهدف">
+        <input type="number" name="targets" class="clinicos-input w-24" th:value="${goal.target()}" min="0" placeholder="الهدف">
+        <span class="text-xs text-on-surface-variant">مرة/أسبوع</span>
+      </div>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(goals)}">
+      <div class="flex flex-wrap items-center gap-3" th:each="i : ${1, 2, 3}">
+        <span class="text-sm text-on-surface-variant font-bold" th:text="'هدف ' + ${i}">هدف 1</span>
+        <input type="text" name="titles" class="clinicos-input w-48" placeholder="اسم الهدف">
+        <input type="number" name="targets" class="clinicos-input w-24" min="0" placeholder="الهدف">
+        <span class="text-xs text-on-surface-variant">مرة/أسبوع</span>
+      </div>
+    </th:block>
+    <button type="submit" class="clinicos-btn self-start">حفظ الأهداف</button>
+  </form>
+</div>
+
+<div th:fragment="thresholdsCard(thresholds)"
+     id="thresholds-card" class="mt-6 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🏆 شروط الشارات</h2>
+    <p class="text-sm text-on-surface-variant">عدد المهام المطلوب إنجازها للحصول على كل شارة.</p>
+  </div>
+  <form class="flex flex-col gap-3" hx-post="/admin-dashboard/goals/thresholds" hx-target="#thresholds-card" hx-swap="outerHTML">
+    <th:block th:each="t : ${thresholds}">
+      <div class="flex items-center gap-3">
+        <input type="hidden" name="names" th:value="${t.name()}">
+        <span class="text-sm text-on-surface-variant font-bold w-32" th:text="${t.name()}">شارة</span>
+        <input type="number" name="thresholds" class="clinicos-input w-24" th:value="${t.threshold()}" min="0">
+        <span class="text-xs text-on-surface-variant">مهنة</span>
+      </div>
+    </th:block>
+    <th:block th:if="${#lists.isEmpty(thresholds)}">
+      <div class="flex items-center gap-3" th:each="name : ${'المهام اليومية,الإنجازات,التفوق'.split(',')}">
+        <input type="hidden" name="names" th:value="${name}">
+        <span class="text-sm text-on-surface-variant font-bold w-32" th:text="${name}">شارة</span>
+        <input type="number" name="thresholds" class="clinicos-input w-24" min="0" value="10">
+        <span class="text-xs text-on-surface-variant">مهنة</span>
+      </div>
+    </th:block>
+    <button type="submit" class="clinicos-btn self-start">حفظ الشروط</button>
+  </form>
+</div>
+</body>
+</html>

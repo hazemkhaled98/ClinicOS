@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>المستخدمون</title>
+</head>
+<body>
+<div th:fragment="usersCard(users, employees, userErrors, userErrorScope, addForm)"
+     id="users-card" class="mt-10 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 clinicos-card">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👤 المستخدمون</h2>
+    <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وربط الحسابات بالموظفين.</p>
+  </div>
+
+  <div th:if="${userErrorScope == 'add'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+    <span th:each="err : ${userErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <th:block th:if="${#lists.isEmpty(users)}">
+      <p class="py-6 text-center text-sm text-on-surface-variant">لا يوجد مستخدمون بعد. أضف أول مستخدم من النموذج أدناه.</p>
+    </th:block>
+
+    <div th:each="user : ${users}"
+         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4">
+      <span class="w-10 h-10 shrink-0 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-base"
+            th:text="${#strings.substring(user.fullName(), 0, 1)}">أ</span>
+      <div class="flex flex-col">
+        <span class="font-bold text-teal-900" th:text="${user.fullName()}">أحمد</span>
+        <span class="text-xs text-on-surface-variant" th:text="${user.username()}">@ahmed</span>
+      </div>
+      <span class="px-2 py-0.5 rounded-full text-xs font-bold"
+            th:classappend="${user.status() == 'active'} ? 'bg-emerald-100 text-emerald-700' : 'bg-danger-50 text-danger-600'"
+            th:text="${user.status() == 'active'} ? 'نشط' : 'معلق'">نشط</span>
+      <span class="text-xs text-on-surface-variant px-2 py-0.5 bg-neutral-100 rounded-full"
+            th:text="${user.roleCode()}">owner</span>
+
+      <div class="flex items-center gap-2 me-auto">
+        <form th:if="${user.status() == 'active'}"
+              th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/suspend'"
+              hx-target="#users-card" hx-swap="outerHTML"
+              hx-confirm="هل أنت متأكد من تعليق هذا المستخدم؟">
+          <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">تعليق</button>
+        </form>
+        <form th:if="${user.status() == 'suspended'}"
+              th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/reactivate'"
+              hx-target="#users-card" hx-swap="outerHTML">
+          <button type="submit" class="clinicos-btn text-xs">تفعيل</button>
+        </form>
+      </div>
+    </div>
+
+    <hr class="my-4 border-dashed border-neutral-300"/>
+
+    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4">
+      <h3 class="font-bold text-teal-900 mb-3">إضافة مستخدم جديد</h3>
+      <form class="flex flex-wrap items-center gap-3" hx-post="/admin-dashboard/users"
+            hx-target="#users-card" hx-swap="outerHTML">
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          اسم المستخدم
+          <input type="text" name="username" class="clinicos-input w-36" th:value="${addForm.username()}" required>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الاسم الكامل
+          <input type="text" name="fullName" class="clinicos-input w-40" th:value="${addForm.fullName()}" required>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          البريد الإلكتروني
+          <input type="email" name="email" class="clinicos-input w-48" th:value="${addForm.email()}">
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          كلمة المرور
+          <input type="password" name="passwordHash" class="clinicos-input w-36" required>
+        </label>
+        <button type="submit" class="clinicos-btn">+ إضافة مستخدم</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

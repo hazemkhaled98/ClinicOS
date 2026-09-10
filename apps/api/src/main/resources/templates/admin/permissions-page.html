@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('الصلاحيات')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full clinicos-section">
+      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker">عيادتي</p>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">الصلاحيات</h1>
+      <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">تحديد صلاحيات كل دور في العيادة</p>
+      <nav th:replace="~{fragments/admin-tabs :: adminTabs('permissions')}"></nav>
+      <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap})}"></div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+</body>
+</html>

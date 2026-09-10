@@ -97,7 +97,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 0 — Scaffolding | done | |
 | 1 — UC-001 Login + Phase 1b sign-up | done | PR #5 merged; UI migrated to Thymeleaf/HTMX on `refactor/thymeleaf-htmx` (see Phase 1 migration note) |
 | 1c — Design system reconciliation | in progress | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
-| 2 — UC-002 Employees/roles | not started | |
+| 2 — UC-002 Employees/roles | in progress | Slices 2a–2e: V16 user-admin functions, V17 tenant-scoped role_permission, V18 gamification tables, service interfaces + implementations, UI controllers + templates, unit + IT tests |
 | 3 — UC-003 Daily work/attendance | not started | |
 | 4 — UC-004/005 Evaluation | not started | |
 | 5 — UC-006 Prep checklists | not started | |
@@ -164,8 +164,8 @@ BR-G04, BR-G05 (unlock), BR-G06, BR-G07.
 
 Admin subtabs `الإعدادات` (employees, evaluation weights summing to 100, working days, attendance rules) and `المستخدمون` (accounts, password change, activate/suspend, link account↔employee). Tables: `employee`, `clinic_settings`, `evaluation_weight`, `incentive_tier`, `membership`, `membership_permission`, `performance_override`.
 
-- [ ] Admin subtabs `الإعدادات` and `المستخدمون` with all CRUD operations
-- [ ] Owner-only `الصلاحيات` matrix — main-app permission keys mapped onto `permission` rows; 19 inventory area keys arrive with Phase 7 but grid is built here
+- [x] Admin subtabs `الإعدادات` and `المستخدمون` with all CRUD operations
+- [x] Owner-only `الصلاحيات` matrix — main-app permission keys mapped onto `permission` rows; 19 inventory area keys arrive with Phase 7 but grid is built here
 
 ### Phase 3 — UC-003 Record daily work and attendance
 

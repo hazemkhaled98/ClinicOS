@@ -1,0 +1,130 @@
+package com.clinicos.ui;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
+
+import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.shared.ActivityLogService;
+import com.clinicos.ui.nav.NavSectionResolver;
+import com.clinicos.staff.api.TaskDefinitionService;
+import com.clinicos.staff.api.TaskDefinitionService.TaskDefinition;
+import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
+
+import jakarta.servlet.http.HttpSession;
+
+class TaskDefinitionControllerTest {
+
+    private static final UUID CLINIC = UUID.randomUUID();
+    private static final UUID MEMBERSHIP = UUID.randomUUID();
+
+    private LayoutModel layoutModel;
+    private TaskDefinitionService taskDefinitionService;
+    private ActivityLogService activityLogService;
+    private TaskDefinitionController controller;
+    private Model model;
+
+    @BeforeEach
+    void setUp() {
+        layoutModel = mock(LayoutModel.class);
+        taskDefinitionService = mock(TaskDefinitionService.class);
+        activityLogService = mock(ActivityLogService.class);
+        controller = new TaskDefinitionController(layoutModel, taskDefinitionService, activityLogService);
+        model = new ExtendedModelMap();
+    }
+
+    @Test
+    void tasksRendersPageForAdmin() {
+        HttpSession session = session();
+        allowDashboard();
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.tasks(session, model);
+
+        assertThat(view).isEqualTo("admin/tasks-page");
+        assertThat(model.getAttribute("tasks")).isEqualTo(List.of());
+    }
+
+    @Test
+    void tasksRedirectsHomeWithoutPermission() {
+        HttpSession session = session();
+        denyDashboard();
+
+        String view = controller.tasks(session, model);
+
+        assertThat(view).isEqualTo("redirect:/");
+    }
+
+    @Test
+    void createTaskLogsActivityAndReturnsCard() {
+        HttpSession session = session();
+        allowDashboard();
+        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", "assistant");
+        when(taskDefinitionService.create(eq(CLINIC), any(TaskDefinitionRequest.class))).thenReturn(created);
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(created));
+
+        String view = controller.createTask(
+                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.create", "task_definition");
+    }
+
+    @Test
+    void createTaskValidatesEmptyName() {
+        HttpSession session = session();
+        allowDashboard();
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.createTask(
+                new TaskDefinitionController.TaskForm("", "fanni", "daily", "assistant"), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        verify(taskDefinitionService, never()).create(any(), any());
+    }
+
+    @Test
+    void deleteTaskLogsActivity() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID taskId = UUID.randomUUID();
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        controller.deleteTask(taskId, session, model);
+
+        verify(taskDefinitionService).delete(CLINIC, taskId);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.delete", "task_definition");
+    }
+
+    private void allowDashboard() {
+        when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
+                .thenReturn(new LayoutModel.LayoutData(
+                        List.of(NavSectionResolver.sectionByRoute("admin-dashboard")),
+                        "أحمد", "المالك", "19 مايو 2026", "admin-dashboard"));
+    }
+
+    private void denyDashboard() {
+        when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مدير", "19 مايو 2026", "admin-dashboard"));
+    }
+
+    private static HttpSession session() {
+        HttpSession session = mock(HttpSession.class);
+        when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
+        when(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(MEMBERSHIP);
+        return session;
+    }
+}

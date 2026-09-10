@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
@@ -151,6 +152,7 @@ public class ClinicSettingsController {
         var settings = clinicSettingsService.get(clinicId);
         model.addAttribute("settings", settings);
         model.addAttribute("weights", fieldErrors.isEmpty() ? settings.weights() : submittedWeights);
+        model.addAttribute("weightsSum", sumWeights(fieldErrors.isEmpty() ? settings.weights() : submittedWeights));
         model.addAttribute("weightErrors", fieldErrors.isEmpty() ? null : fieldErrors);
         return "admin/clinic-settings :: weightsCard";
     }
@@ -162,6 +164,14 @@ public class ClinicSettingsController {
         model.addAttribute("tiers", fieldErrors.isEmpty() ? settings.tiers() : submittedTiers);
         model.addAttribute("tierErrors", fieldErrors.isEmpty() ? null : fieldErrors);
         return "admin/clinic-settings :: tiersCard";
+    }
+
+    static String sumWeights(List<ClinicSettingsService.CategoryWeight> weights) {
+        return weights == null ? "0" : weights.stream()
+                .map(ClinicSettingsService.CategoryWeight::weight)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .stripTrailingZeros().toPlainString();
     }
 
     private static UUID clinicId(HttpSession session) {
