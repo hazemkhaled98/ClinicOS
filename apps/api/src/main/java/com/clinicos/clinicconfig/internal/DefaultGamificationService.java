@@ -30,30 +30,29 @@ public class DefaultGamificationService implements GamificationService {
     @Override
     public GamificationSettings get(UUID clinicId) {
         return transactionTemplate.execute(status -> {
-            var row = dsl.selectFrom(GAMIFICATION_SETTINGS)
-                    .where(GAMIFICATION_SETTINGS.CLINIC_ID.eq(clinicId))
+            var row = dsl.insertInto(GAMIFICATION_SETTINGS)
+                    .set(GAMIFICATION_SETTINGS.CLINIC_ID, clinicId)
+                    .set(GAMIFICATION_SETTINGS.SHOW_LEVEL_RING, true)
+                    .set(GAMIFICATION_SETTINGS.SHOW_STREAKS, true)
+                    .set(GAMIFICATION_SETTINGS.SHOW_BADGES, true)
+                    .set(GAMIFICATION_SETTINGS.SHOW_WEEKLY_GOALS, true)
+                    .set(GAMIFICATION_SETTINGS.SHOW_LEADERBOARD, false)
+                    .set(GAMIFICATION_SETTINGS.SHOW_REWARD, true)
+                    .onConflict(GAMIFICATION_SETTINGS.CLINIC_ID)
+                    .doUpdate()
+                    .setNonKeyToExcluded()
+                    .returning()
                     .fetchOne();
             if (row == null) {
-                dsl.insertInto(GAMIFICATION_SETTINGS)
-                        .set(GAMIFICATION_SETTINGS.CLINIC_ID, clinicId)
-                        .set(GAMIFICATION_SETTINGS.SHOW_LEVEL_RING, true)
-                        .set(GAMIFICATION_SETTINGS.SHOW_STREAKS, true)
-                        .set(GAMIFICATION_SETTINGS.SHOW_BADGES, true)
-                        .set(GAMIFICATION_SETTINGS.SHOW_WEEKLY_GOALS, true)
-                        .set(GAMIFICATION_SETTINGS.SHOW_LEADERBOARD, false)
-                        .set(GAMIFICATION_SETTINGS.SHOW_REWARD, true)
-                        .onConflict(GAMIFICATION_SETTINGS.CLINIC_ID)
-                        .doNothing()
-                        .execute();
-                return new GamificationSettings(true, true, true, true, false, true);
+                return dsl.selectFrom(GAMIFICATION_SETTINGS)
+                        .where(GAMIFICATION_SETTINGS.CLINIC_ID.eq(clinicId))
+                        .fetchOne(r -> new GamificationSettings(
+                                r.getShowLevelRing(), r.getShowStreaks(), r.getShowBadges(),
+                                r.getShowWeeklyGoals(), r.getShowLeaderboard(), r.getShowReward()));
             }
             return new GamificationSettings(
-                    row.getShowLevelRing(),
-                    row.getShowStreaks(),
-                    row.getShowBadges(),
-                    row.getShowWeeklyGoals(),
-                    row.getShowLeaderboard(),
-                    row.getShowReward());
+                    row.getShowLevelRing(), row.getShowStreaks(), row.getShowBadges(),
+                    row.getShowWeeklyGoals(), row.getShowLeaderboard(), row.getShowReward());
         });
     }
 
@@ -85,11 +84,17 @@ public class DefaultGamificationService implements GamificationService {
 
     @Override
     public void updateGoal(UUID clinicId, int slot, String title, int target) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("اسم الهدف مطلوب");
+        }
+        if (target < 0) {
+            throw new IllegalArgumentException("الهدف لا يمكن أن يكون سالباً");
+        }
         transactionTemplate.executeWithoutResult(status ->
                 dsl.insertInto(WEEKLY_GOAL)
                         .set(WEEKLY_GOAL.CLINIC_ID, clinicId)
                         .set(WEEKLY_GOAL.SLOT, slot)
-                        .set(WEEKLY_GOAL.TITLE, title != null ? title : "")
+                        .set(WEEKLY_GOAL.TITLE, title.trim())
                         .set(WEEKLY_GOAL.TARGET, target)
                         .onConflict(WEEKLY_GOAL.CLINIC_ID, WEEKLY_GOAL.SLOT)
                         .doUpdate()
@@ -108,10 +113,16 @@ public class DefaultGamificationService implements GamificationService {
 
     @Override
     public void updateThreshold(UUID clinicId, String name, int threshold) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("اسم الشارة مطلوب");
+        }
+        if (threshold < 0) {
+            throw new IllegalArgumentException("العتبة لا يمكن أن تكون سالبة");
+        }
         transactionTemplate.executeWithoutResult(status ->
                 dsl.insertInto(BADGE_THRESHOLD)
                         .set(BADGE_THRESHOLD.CLINIC_ID, clinicId)
-                        .set(BADGE_THRESHOLD.NAME, name)
+                        .set(BADGE_THRESHOLD.NAME, name.trim())
                         .set(BADGE_THRESHOLD.THRESHOLD, threshold)
                         .onConflict(BADGE_THRESHOLD.CLINIC_ID, BADGE_THRESHOLD.NAME)
                         .doUpdate()

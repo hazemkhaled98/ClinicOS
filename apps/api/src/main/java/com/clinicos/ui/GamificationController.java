@@ -77,6 +77,9 @@ public class GamificationController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
+        if (titles.length != targets.length) {
+            errors.put("targets", "عدد الأهداف والأسماء غير متطابق");
+        }
         int[] parsedTargets = new int[titles.length];
         for (int i = 0; i < titles.length && i < 3; i++) {
             try {
@@ -87,10 +90,14 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            for (int i = 0; i < titles.length && i < 3; i++) {
-                gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
+            try {
+                for (int i = 0; i < titles.length && i < 3; i++) {
+                    gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
+                }
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
+            } catch (IllegalArgumentException e) {
+                errors.put("goals", e.getMessage());
             }
-            activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
         }
         model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
@@ -117,10 +124,14 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            for (int i = 0; i < names.length; i++) {
-                gamificationService.updateThreshold(clinicId, names[i], parsedThresholds[i]);
+            try {
+                for (int i = 0; i < names.length; i++) {
+                    gamificationService.updateThreshold(clinicId, names[i], parsedThresholds[i]);
+                }
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.thresholds", "badge_threshold");
+            } catch (IllegalArgumentException e) {
+                errors.put("thresholds", e.getMessage());
             }
-            activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.thresholds", "badge_threshold");
         }
         model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);

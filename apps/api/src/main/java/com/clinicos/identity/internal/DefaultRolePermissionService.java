@@ -40,6 +40,9 @@ public class DefaultRolePermissionService implements RolePermissionService {
 
     @Override
     public void setPermissions(UUID clinicId, String roleCode, Set<String> permissionCodes) {
+        if (permissionCodes == null || permissionCodes.isEmpty()) {
+            throw new IllegalArgumentException("يجب تحديد صلاحية واحدة على الأقل");
+        }
         transactionTemplate.executeWithoutResult(status -> {
             UUID roleId = dsl.select(ROLE.ID)
                     .from(ROLE)

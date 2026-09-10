@@ -87,7 +87,11 @@ public class PermissionsController {
             error = e.getMessage();
         }
         model.addAttribute("permissionError", error);
-        model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
+        try {
+            model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
+        } catch (Exception e) {
+            model.addAttribute("rolePermissionMap", Map.of());
+        }
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         return "admin/permissions :: permissionsCard";
     }
