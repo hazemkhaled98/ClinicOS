@@ -109,6 +109,56 @@ class TaskDefinitionControllerTest {
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.delete", "task_definition");
     }
 
+    @Test
+    void updateTaskLogsActivityAndReturnsCard() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID taskId = UUID.randomUUID();
+        TaskDefinition updated = new TaskDefinition(taskId, "تنظيف", "fanni", "daily", "assistant");
+        when(taskDefinitionService.update(eq(CLINIC), eq(taskId), any(TaskDefinitionRequest.class))).thenReturn(updated);
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateTask(taskId,
+                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.update", "task_definition");
+        assertThat(model.getAttribute("taskErrorScope")).isNull();
+    }
+
+    @Test
+    void updateTaskValidatesEmptyName() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID taskId = UUID.randomUUID();
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updateTask(taskId,
+                new TaskDefinitionController.TaskForm("", "fanni", "daily", "assistant"), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        assertThat(((Map<?, ?>) model.getAttribute("taskErrors")).containsKey("name")).isTrue();
+        verify(taskDefinitionService, never()).update(any(), any(), any());
+    }
+
+    @Test
+    void updateTaskServiceErrorReturnsCard() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID taskId = UUID.randomUUID();
+        when(taskDefinitionService.update(eq(CLINIC), eq(taskId), any(TaskDefinitionRequest.class)))
+                .thenThrow(new IllegalArgumentException("المهمة غير موجودة"));
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updateTask(taskId,
+                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        assertThat(model.getAttribute("taskErrorScope")).isEqualTo("edit");
+        assertThat(((Map<?, ?>) model.getAttribute("taskErrors")).get("task")).isEqualTo("المهمة غير موجودة");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
     private void allowDashboard() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
                 .thenReturn(new LayoutModel.LayoutData(

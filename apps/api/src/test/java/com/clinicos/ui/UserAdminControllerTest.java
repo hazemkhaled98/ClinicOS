@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.List;
 import java.util.Map;
@@ -146,6 +147,74 @@ class UserAdminControllerTest {
 
         verify(userAdminService).assignRole(CLINIC, membershipId, "manager");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.assign_role", "user");
+    }
+
+    @Test
+    void changePasswordBlankPasswordReportsError() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID userId = UUID.randomUUID();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.changePassword(userId, "  ", session, model);
+
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).containsKey("user")).isFalse();
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).containsKey("password")).isTrue();
+        verify(userAdminService, never()).changePassword(any(), any(), any());
+    }
+
+    @Test
+    void changePasswordServiceErrorReturnsUserKey() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID userId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("المستخدم غير موجود"))
+                .when(userAdminService).changePassword(eq(CLINIC), eq(userId), any());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.changePassword(userId, "newpass", session, model);
+
+        assertThat(model.getAttribute("userErrorScope")).isEqualTo("password");
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).get("user")).isEqualTo("المستخدم غير موجود");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void linkEmployeeServiceErrorReturnsUserKey() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID membershipId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("الموظف غير موجود"))
+                .when(userAdminService).linkEmployee(CLINIC, membershipId, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.linkEmployee(membershipId, employeeId, session, model);
+
+        assertThat(model.getAttribute("userErrorScope")).isEqualTo("link");
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).get("user")).isEqualTo("الموظف غير موجود");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void createUserDuplicateUsernameReportsError() {
+        HttpSession session = session();
+        allowDashboard();
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class)))
+                .thenThrow(new IllegalArgumentException("اسم المستخدم موجود مسبقاً"));
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.createUser(
+                new UserAdminController.UserForm("ahmed", "أحمد", "a@b.com", "hash123"), session, model);
+
+        assertThat(view).isEqualTo("admin/users :: usersCard");
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).get("username"))
+                .isEqualTo("اسم المستخدم موجود مسبقاً");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     private void allowDashboard() {

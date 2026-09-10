@@ -166,6 +166,24 @@ class AdminControllerTest {
     }
 
     @Test
+    void archiveEmployeeServiceErrorReturnsCard() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        when(employeeService.archive(CLINIC, employeeId))
+                .thenThrow(new IllegalArgumentException("الموظف غير موجود"));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("employeeErrorScope")).isEqualTo("archive");
+        assertThat(((Map<?, ?>) model.getAttribute("employeeErrors")).get("employee"))
+                .isEqualTo("الموظف غير موجود");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
     void malformedAmountReportsArabicErrorAndSkipsService() {
         HttpSession session = session();
         allowDashboard();
