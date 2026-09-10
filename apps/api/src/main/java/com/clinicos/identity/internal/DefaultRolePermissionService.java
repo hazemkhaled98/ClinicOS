@@ -56,13 +56,14 @@ public class DefaultRolePermissionService implements RolePermissionService {
                         .from(PERMISSION)
                         .where(PERMISSION.CODE.eq(code))
                         .fetchOne(PERMISSION.ID);
-                if (permId != null) {
-                    dsl.insertInto(ROLE_PERMISSION)
-                            .set(ROLE_PERMISSION.ROLE_ID, roleId)
-                            .set(ROLE_PERMISSION.PERMISSION_ID, permId)
-                            .set(ROLE_PERMISSION.CLINIC_ID, clinicId)
-                            .execute();
+                if (permId == null) {
+                    throw new IllegalArgumentException("الصلاحية غير موجودة: " + code);
                 }
+                dsl.insertInto(ROLE_PERMISSION)
+                        .set(ROLE_PERMISSION.ROLE_ID, roleId)
+                        .set(ROLE_PERMISSION.PERMISSION_ID, permId)
+                        .set(ROLE_PERMISSION.CLINIC_ID, clinicId)
+                        .execute();
             }
         });
     }

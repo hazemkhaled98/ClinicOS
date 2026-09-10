@@ -39,8 +39,13 @@
   </form>
 </div>
 
-<div th:fragment="goalsCard(goals)"
+<div th:fragment="goalsCard(goals, goalErrors)"
      id="goals-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+  <th:block th:if="${goalErrors != null and !#maps.isEmpty(goalErrors)}">
+    <div class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+      <span th:each="err : ${goalErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    </div>
+  </th:block>
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🎯 أهداف أسبوعية</h2>
     <p class="text-sm text-on-surface-variant">تحديد 3 أهداف أسبوعية معروضة للموظفين.</p>
@@ -66,8 +71,13 @@
   </form>
 </div>
 
-<div th:fragment="thresholdsCard(thresholds)"
+<div th:fragment="thresholdsCard(thresholds, thresholdErrors)"
      id="thresholds-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+  <th:block th:if="${thresholdErrors != null and !#maps.isEmpty(thresholdErrors)}">
+    <div class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+      <span th:each="err : ${thresholdErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    </div>
+  </th:block>
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🏆 شروط الشارات</h2>
     <p class="text-sm text-on-surface-variant">عدد المهام المطلوب إنجازها للحصول على كل شارة.</p>

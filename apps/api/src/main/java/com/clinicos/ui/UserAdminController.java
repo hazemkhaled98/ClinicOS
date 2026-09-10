@@ -80,9 +80,19 @@ public class UserAdminController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
-        activityLogService.log(clinicId, membershipId(session), "user.password_change", "user");
-        renderCard(model, clinicId, Map.of(), null, UserForm.empty());
+        Map<String, String> fieldErrors = new HashMap<>();
+        if (newPassword == null || newPassword.isBlank()) {
+            fieldErrors.put("password", "كلمة المرور مطلوبة");
+        }
+        if (fieldErrors.isEmpty()) {
+            try {
+                userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
+                activityLogService.log(clinicId, membershipId(session), "user.password_change", "user");
+            } catch (RuntimeException e) {
+                fieldErrors.put("password", e.getMessage());
+            }
+        }
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "password", UserForm.empty());
         return "admin/users :: usersCard";
     }
 
@@ -92,9 +102,14 @@ public class UserAdminController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.suspend(clinicId, userId);
-        activityLogService.log(clinicId, membershipId(session), "user.suspend", "user");
-        renderCard(model, clinicId, Map.of(), null, UserForm.empty());
+        Map<String, String> fieldErrors = new HashMap<>();
+        try {
+            userAdminService.suspend(clinicId, userId);
+            activityLogService.log(clinicId, membershipId(session), "user.suspend", "user");
+        } catch (RuntimeException e) {
+            fieldErrors.put("password", e.getMessage());
+        }
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "suspend", UserForm.empty());
         return "admin/users :: usersCard";
     }
 
@@ -104,9 +119,14 @@ public class UserAdminController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.reactivate(clinicId, userId);
-        activityLogService.log(clinicId, membershipId(session), "user.reactivate", "user");
-        renderCard(model, clinicId, Map.of(), null, UserForm.empty());
+        Map<String, String> fieldErrors = new HashMap<>();
+        try {
+            userAdminService.reactivate(clinicId, userId);
+            activityLogService.log(clinicId, membershipId(session), "user.reactivate", "user");
+        } catch (RuntimeException e) {
+            fieldErrors.put("password", e.getMessage());
+        }
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "reactivate", UserForm.empty());
         return "admin/users :: usersCard";
     }
 
@@ -117,9 +137,14 @@ public class UserAdminController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.assignRole(clinicId, membershipId, roleCode);
-        activityLogService.log(clinicId, membershipId(session), "user.assign_role", "user");
-        renderCard(model, clinicId, Map.of(), null, UserForm.empty());
+        Map<String, String> fieldErrors = new HashMap<>();
+        try {
+            userAdminService.assignRole(clinicId, membershipId, roleCode);
+            activityLogService.log(clinicId, membershipId(session), "user.assign_role", "user");
+        } catch (RuntimeException e) {
+            fieldErrors.put("password", e.getMessage());
+        }
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "role", UserForm.empty());
         return "admin/users :: usersCard";
     }
 
@@ -130,9 +155,14 @@ public class UserAdminController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
-        userAdminService.linkEmployee(clinicId, membershipId, employeeId);
-        activityLogService.log(clinicId, membershipId(session), "user.link_employee", "user");
-        renderCard(model, clinicId, Map.of(), null, UserForm.empty());
+        Map<String, String> fieldErrors = new HashMap<>();
+        try {
+            userAdminService.linkEmployee(clinicId, membershipId, employeeId);
+            activityLogService.log(clinicId, membershipId(session), "user.link_employee", "user");
+        } catch (RuntimeException e) {
+            fieldErrors.put("password", e.getMessage());
+        }
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "link", UserForm.empty());
         return "admin/users :: usersCard";
     }
 
@@ -140,9 +170,18 @@ public class UserAdminController {
             String errorScope, UserForm addForm) {
         model.addAttribute("users", userAdminService.list(clinicId));
         model.addAttribute("employees", employeeService.list(clinicId));
-        model.addAttribute("userErrors", fieldErrors);
+        model.addAttribute("userErrors", fieldErrors == null ? Map.of() : fieldErrors);
         model.addAttribute("userErrorScope", errorScope);
         model.addAttribute("addForm", addForm);
+        model.addAttribute("roleNames", roleNames());
+    }
+
+    private static Map<String, String> roleNames() {
+        return Map.of(
+                "owner", LayoutModel.roleDisplayName("owner"),
+                "manager", LayoutModel.roleDisplayName("manager"),
+                "assistant", LayoutModel.roleDisplayName("assistant"),
+                "receptionist", LayoutModel.roleDisplayName("receptionist"));
     }
 
     private static UUID clinicId(HttpSession session) {

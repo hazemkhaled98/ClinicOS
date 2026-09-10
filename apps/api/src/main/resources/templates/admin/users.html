@@ -11,7 +11,7 @@
     <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وربط الحسابات بالموظفين.</p>
   </div>
 
-  <div th:if="${userErrorScope == 'add'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+  <div th:if="${!userErrors.isEmpty()}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
     <span th:each="err : ${userErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
   </div>
 
@@ -32,7 +32,7 @@
             th:classappend="${user.status() == 'active'} ? 'bg-emerald-100 text-emerald-700' : 'bg-danger-50 text-danger-600'"
             th:text="${user.status() == 'active'} ? 'نشط' : 'معلق'">نشط</span>
       <span class="text-xs text-on-surface-variant px-2 py-0.5 bg-neutral-100 rounded-full"
-            th:text="${user.roleCode()}">owner</span>
+            th:text="${roleNames[user.roleCode()]}">owner</span>
 
       <div class="flex items-center gap-2 me-auto">
         <form th:if="${user.status() == 'active'}"

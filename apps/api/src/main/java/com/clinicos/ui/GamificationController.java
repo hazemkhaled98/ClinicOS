@@ -1,5 +1,6 @@
 package com.clinicos.ui;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -72,17 +73,23 @@ public class GamificationController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
+        Map<String, String> errors = new HashMap<>();
+        int[] parsedTargets = new int[titles.length];
         for (int i = 0; i < titles.length && i < 3; i++) {
-            int slot = i + 1;
-            String title = titles[i];
-            int target = 0;
             try {
-                target = Integer.parseInt(targets[i]);
-            } catch (NumberFormatException ignored) {
+                parsedTargets[i] = Integer.parseInt(targets[i]);
+            } catch (NumberFormatException e) {
+                errors.put("targets", "قيمة الهدف يجب أن تكون رقماً");
+                break;
             }
-            gamificationService.updateGoal(clinicId, slot, title, target);
         }
-        activityLogService.log(clinicId, membershipId(session), "gamification.goals", "weekly_goal");
+        if (errors.isEmpty()) {
+            for (int i = 0; i < titles.length && i < 3; i++) {
+                gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
+            }
+            activityLogService.log(clinicId, membershipId(session), "gamification.goals", "weekly_goal");
+        }
+        model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
         return "admin/gamification :: goalsCard";
     }
@@ -96,15 +103,23 @@ public class GamificationController {
             return "redirect:/";
         }
         UUID clinicId = clinicId(session);
+        Map<String, String> errors = new HashMap<>();
+        int[] parsedThresholds = new int[names.length];
         for (int i = 0; i < names.length; i++) {
-            int threshold = 0;
             try {
-                threshold = Integer.parseInt(thresholds[i]);
-            } catch (NumberFormatException ignored) {
+                parsedThresholds[i] = Integer.parseInt(thresholds[i]);
+            } catch (NumberFormatException e) {
+                errors.put("thresholds", "عدد المهام يجب أن يكون رقماً");
+                break;
             }
-            gamificationService.updateThreshold(clinicId, names[i], threshold);
         }
-        activityLogService.log(clinicId, membershipId(session), "gamification.thresholds", "badge_threshold");
+        if (errors.isEmpty()) {
+            for (int i = 0; i < names.length; i++) {
+                gamificationService.updateThreshold(clinicId, names[i], parsedThresholds[i]);
+            }
+            activityLogService.log(clinicId, membershipId(session), "gamification.thresholds", "badge_threshold");
+        }
+        model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);
         return "admin/gamification :: thresholdsCard";
     }

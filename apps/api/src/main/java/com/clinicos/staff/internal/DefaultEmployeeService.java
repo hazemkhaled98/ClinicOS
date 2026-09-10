@@ -44,6 +44,7 @@ public class DefaultEmployeeService implements EmployeeService {
         validate(request);
         return transactionTemplate.execute(status -> {
             UUID id = UUID.randomUUID();
+            var hiredAt = request.hiredAt() != null ? request.hiredAt() : LocalDate.now();
             dsl.insertInto(EMPLOYEE)
                     .set(EMPLOYEE.ID, id)
                     .set(EMPLOYEE.CLINIC_ID, clinicId)
@@ -54,13 +55,13 @@ public class DefaultEmployeeService implements EmployeeService {
                     .set(EMPLOYEE.SHIFT_START, request.customShift() ? request.shiftStart() : null)
                     .set(EMPLOYEE.SHIFT_END, request.customShift() ? request.shiftEnd() : null)
                     .set(EMPLOYEE.CUSTOM_SHIFT, request.customShift())
-                    .set(EMPLOYEE.HIRED_AT, request.hiredAt() != null ? request.hiredAt() : LocalDate.now())
+                    .set(EMPLOYEE.HIRED_AT, hiredAt)
                     .execute();
             return new Employee(id, request.name(), request.staffRole(), request.basePay(),
                     request.maxIncentive(),
                     request.customShift() ? request.shiftStart() : null,
                     request.customShift() ? request.shiftEnd() : null,
-                    request.customShift(), request.hiredAt(), null);
+                    request.customShift(), hiredAt, null);
         });
     }
 

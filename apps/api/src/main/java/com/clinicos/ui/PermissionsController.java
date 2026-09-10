@@ -40,6 +40,7 @@ public class PermissionsController {
         UUID clinicId = clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
+        model.addAttribute("permissionError", (String) null);
         return "admin/permissions-page";
     }
 
@@ -52,8 +53,14 @@ public class PermissionsController {
         }
         UUID clinicId = clinicId(session);
         Set<String> codes = permissionCodes != null ? Set.of(permissionCodes) : Set.of();
-        rolePermissionService.setPermissions(clinicId, roleCode, codes);
-        activityLogService.log(clinicId, membershipId(session), "permissions.update", "role_permission");
+        String error = null;
+        try {
+            rolePermissionService.setPermissions(clinicId, roleCode, codes);
+            activityLogService.log(clinicId, membershipId(session), "permissions.update", "role_permission");
+        } catch (IllegalArgumentException e) {
+            error = e.getMessage();
+        }
+        model.addAttribute("permissionError", error);
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         return "admin/permissions :: permissionsCard";
     }

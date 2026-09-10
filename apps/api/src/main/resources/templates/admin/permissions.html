@@ -11,6 +11,8 @@
     <p class="text-sm text-on-surface-variant">تحديد ما يمكن لكل دور الوصول إليه. الدور «المالك» يحصل على كل الصلاحيات تلقائياً.</p>
   </div>
 
+  <div th:if="${permissionError != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert" th:text="${permissionError}"></div>
+
   <div x-data="{ activeRole: 'owner' }">
     <div class="flex flex-wrap gap-2 mb-6">
       <button type="button" class="clinicos-admin-tab" :class="activeRole === 'owner' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'owner'">المالك</button>
