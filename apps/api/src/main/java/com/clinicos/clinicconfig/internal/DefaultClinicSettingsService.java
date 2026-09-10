@@ -82,7 +82,7 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
             fieldErrors.put("academyPassScore", "درجة النجاح في الأكاديمية يجب أن تكون بين 0 و 100");
         }
         throwIfAny(fieldErrors);
-        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+        int updated = transactionTemplate.execute(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.DEFAULT_SHIFT_START, defaultShiftStart)
                 .set(CLINIC_SETTINGS.DEFAULT_SHIFT_END, defaultShiftEnd)
                 .set(CLINIC_SETTINGS.LATE_GRACE_MINUTES, lateGraceMinutes)
@@ -90,6 +90,9 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
                 .set(CLINIC_SETTINGS.ACADEMY_PASS_SCORE, academyPassScore)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
+        if (updated == 0) {
+            throw new IllegalArgumentException("إعدادات العيادة غير موجودة");
+        }
     }
 
     @Override
@@ -99,10 +102,13 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
             fieldErrors.put("volumeTarget", "هدف الفواتير الشهري لا يمكن أن يكون سالباً");
         }
         throwIfAny(fieldErrors);
-        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+        int updated = transactionTemplate.execute(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.VOLUME_TARGET, volumeTarget)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
+        if (updated == 0) {
+            throw new IllegalArgumentException("إعدادات العيادة غير موجودة");
+        }
     }
 
     @Override

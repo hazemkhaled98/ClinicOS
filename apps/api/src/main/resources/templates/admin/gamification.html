@@ -43,7 +43,7 @@
      id="goals-card" class="mt-6 p-6 sm:p-8 clinicos-card">
   <th:block th:if="${goalErrors != null and !#maps.isEmpty(goalErrors)}">
     <div class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-      <span th:each="err : ${goalErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+      <span th:each="err : ${goalErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
     </div>
   </th:block>
   <div class="flex flex-col gap-2 mb-6">
@@ -75,7 +75,7 @@
      id="thresholds-card" class="mt-6 p-6 sm:p-8 clinicos-card">
   <th:block th:if="${thresholdErrors != null and !#maps.isEmpty(thresholdErrors)}">
     <div class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-      <span th:each="err : ${thresholdErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+      <span th:each="err : ${thresholdErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
     </div>
   </th:block>
   <div class="flex flex-col gap-2 mb-6">
@@ -92,7 +92,7 @@
       </div>
     </th:block>
     <th:block th:if="${#lists.isEmpty(thresholds)}">
-      <div class="flex items-center gap-3" th:each="name : ${'المهام اليومية,الإنجازات,التفوق'.split(',')}">
+      <div class="flex items-center gap-3" th:each="name : ${'نجم الأسبوع,الأكثر إنجازاً,مبدع,ملتزم,متميز'.split(',')}">
         <input type="hidden" name="names" th:value="${name}">
         <span class="text-sm text-on-surface-variant font-bold w-32" th:text="${name}">شارة</span>
         <input type="number" name="thresholds" class="clinicos-input w-24" min="0" value="10">

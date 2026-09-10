@@ -9,6 +9,12 @@
     document.addEventListener('htmx:configRequest', function (e) {
       e.detail.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     });
+    document.addEventListener('htmx:responseError', function (e) {
+      alert('حدث خطأ في الخادم. يرجى المحاولة مرة أخرى.');
+    });
+    document.addEventListener('htmx:sendError', function (e) {
+      alert('تعذر الاتصال بالخادم. يرجى التحقق من الاتصال.');
+    });
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>

@@ -3,6 +3,7 @@ package com.clinicos.identity.internal;
 import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
 import static com.clinicos.shared.jooq.tables.RolePermission.ROLE_PERMISSION;
+import static org.jooq.impl.DSL.val;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,24 +48,22 @@ public class DefaultRolePermissionService implements RolePermissionService {
             if (roleId == null) {
                 throw new IllegalArgumentException("الدور غير موجود: " + roleCode);
             }
+            long found = dsl.selectCount()
+                    .from(PERMISSION)
+                    .where(PERMISSION.CODE.in(permissionCodes))
+                    .fetchOneInto(Long.class);
+            if (found != permissionCodes.size()) {
+                throw new IllegalArgumentException("إحدى الصلاحيات غير موجودة");
+            }
             dsl.deleteFrom(ROLE_PERMISSION)
                     .where(ROLE_PERMISSION.ROLE_ID.eq(roleId))
                     .and(ROLE_PERMISSION.CLINIC_ID.eq(clinicId))
                     .execute();
-            for (String code : permissionCodes) {
-                UUID permId = dsl.select(PERMISSION.ID)
-                        .from(PERMISSION)
-                        .where(PERMISSION.CODE.eq(code))
-                        .fetchOne(PERMISSION.ID);
-                if (permId == null) {
-                    throw new IllegalArgumentException("الصلاحية غير موجودة: " + code);
-                }
-                dsl.insertInto(ROLE_PERMISSION)
-                        .set(ROLE_PERMISSION.ROLE_ID, roleId)
-                        .set(ROLE_PERMISSION.PERMISSION_ID, permId)
-                        .set(ROLE_PERMISSION.CLINIC_ID, clinicId)
-                        .execute();
-            }
+            dsl.insertInto(ROLE_PERMISSION, ROLE_PERMISSION.ROLE_ID, ROLE_PERMISSION.PERMISSION_ID, ROLE_PERMISSION.CLINIC_ID)
+                    .select(dsl.select(val(roleId), PERMISSION.ID, val(clinicId))
+                            .from(PERMISSION)
+                            .where(PERMISSION.CODE.in(permissionCodes)))
+                    .execute();
         });
     }
 

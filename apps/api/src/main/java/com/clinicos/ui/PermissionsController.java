@@ -1,6 +1,5 @@
 package com.clinicos.ui;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -13,13 +12,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.RolePermissionService;
-import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class PermissionsController {
+
+    private static final Map<String, String> PERMISSION_LABELS = Map.ofEntries(
+            Map.entry("emp", "الموظفين"),
+            Map.entry("quick", "الوصول السريع"),
+            Map.entry("ceo", "لوحة التحكم"),
+            Map.entry("tasksTab", "تبويب المهام"),
+            Map.entry("acadVerify", "التحقق الأكاديمي"),
+            Map.entry("acadEdit", "تعديل الأكاديمي"),
+            Map.entry("tray", "الصينية"),
+            Map.entry("issue", "الإصدار"),
+            Map.entry("procs", "الإجراءات"),
+            Map.entry("myprocs", "إجراءاتي"),
+            Map.entry("manage", "الإدارة"),
+            Map.entry("orders", "الطلبات"),
+            Map.entry("receive", "الاستلام"),
+            Map.entry("returns", "المرتجعات"),
+            Map.entry("suppliers", "الموردون"),
+            Map.entry("dash", "لوحة القيادة"),
+            Map.entry("profit", "الربحية"),
+            Map.entry("analytics", "التحليلات"),
+            Map.entry("waste", "الهدر"),
+            Map.entry("doctors", "الأطباء"),
+            Map.entry("supAnalysis", "تحليل الموردين"),
+            Map.entry("received", "المستلم"),
+            Map.entry("itemAnalysis", "تحليل الأصناف"),
+            Map.entry("approvals", "الاعتمادات"),
+            Map.entry("ledger", "دفتر الأستاذ"));
 
     private final LayoutModel layoutModel;
     private final RolePermissionService rolePermissionService;
@@ -37,9 +62,10 @@ public class PermissionsController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
+        model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("permissionError", (String) null);
         return "admin/permissions-page";
     }
@@ -51,17 +77,18 @@ public class PermissionsController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Set<String> codes = permissionCodes != null ? Set.of(permissionCodes) : Set.of();
         String error = null;
         try {
             rolePermissionService.setPermissions(clinicId, roleCode, codes);
-            activityLogService.log(clinicId, membershipId(session), "permissions.update", "role_permission");
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "permissions.update", "role_permission");
         } catch (IllegalArgumentException e) {
             error = e.getMessage();
         }
         model.addAttribute("permissionError", error);
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
+        model.addAttribute("permissionLabels", PERMISSION_LABELS);
         return "admin/permissions :: permissionsCard";
     }
 
@@ -71,13 +98,5 @@ public class PermissionsController {
                 Collectors.groupingBy(RolePermissionService.RolePermissionRow::roleCode,
                         Collectors.mapping(RolePermissionService.RolePermissionRow::permissionCode,
                                 Collectors.toSet())));
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
-    }
-
-    private static UUID membershipId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
 }

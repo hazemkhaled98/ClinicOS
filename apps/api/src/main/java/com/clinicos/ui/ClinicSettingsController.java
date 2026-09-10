@@ -20,7 +20,6 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.CategoryWeight;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidationException;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
-import com.clinicos.identity.api.SessionKeys;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -28,12 +27,10 @@ import jakarta.servlet.http.HttpSession;
  * The four clinic-settings cards under the admin settings tab (screen 39 cards
  * 2-3 plus the clause-addendum duty and tier cards). Each card posts its own
  * HTMX form and re-renders only its fragment; the page GET
- * ({@link AdminController#settings}) supplies the initial {@code settings}
- * aggregate plus null error maps for every card.
- *
- * <p>Model attributes shared with {@code admin/settings} and
- * {@code admin/clinic-settings}: {@code settings}, {@code weightErrors},
- * {@code volumeErrors}, {@code dutyErrors}, {@code tierErrors}.
+ * ({@link AdminController#settings}) supplies the {@code settings} aggregate;
+ * the settings template passes null error maps to each card fragment. POST
+ * handlers re-render one card fragment with error attributes bound to the
+ * fragment parameters.
  */
 @Controller
 public class ClinicSettingsController {
@@ -61,12 +58,12 @@ public class ClinicSettingsController {
         }
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateWeights(clinicId(session), weights);
+                clinicSettingsService.updateWeights(AdminAccess.clinicId(session), weights);
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        return renderWeightsCard(model, clinicId(session), weights, fieldErrors);
+        return renderWeightsCard(model, AdminAccess.clinicId(session), weights, fieldErrors);
     }
 
     @PostMapping("/admin-dashboard/settings/volume")
@@ -80,7 +77,7 @@ public class ClinicSettingsController {
                 fieldErrors, "هدف الفواتير الشهري غير صحيح");
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateVolumeTarget(clinicId(session), volumeTarget);
+                clinicSettingsService.updateVolumeTarget(AdminAccess.clinicId(session), volumeTarget);
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -105,7 +102,7 @@ public class ClinicSettingsController {
                 fieldErrors, "درجة النجاح غير صحيحة");
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateDuty(clinicId(session), shiftStart, shiftEnd,
+                clinicSettingsService.updateDuty(AdminAccess.clinicId(session), shiftStart, shiftEnd,
                         grace, workingDays, academyScore);
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
@@ -132,17 +129,22 @@ public class ClinicSettingsController {
         }
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateTiers(clinicId(session), tiers);
+                clinicSettingsService.updateTiers(AdminAccess.clinicId(session), tiers);
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        return renderTiersCard(model, clinicId(session), tiers, fieldErrors);
+        return renderTiersCard(model, AdminAccess.clinicId(session), tiers, fieldErrors);
     }
 
     private String renderCard(Model model, HttpSession session, String errorAttr,
             Map<String, String> fieldErrors, String cardFragment) {
-        model.addAttribute("settings", clinicSettingsService.get(clinicId(session)));
+        try {
+            model.addAttribute("settings", clinicSettingsService.get(AdminAccess.clinicId(session)));
+        } catch (IllegalArgumentException e) {
+            model.addAttribute(errorAttr, Map.of("settings", e.getMessage()));
+            return "admin/clinic-settings :: " + cardFragment;
+        }
         model.addAttribute(errorAttr, fieldErrors.isEmpty() ? null : fieldErrors);
         return "admin/clinic-settings :: " + cardFragment;
     }
@@ -172,10 +174,6 @@ public class ClinicSettingsController {
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .stripTrailingZeros().toPlainString();
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
     }
 
     private static BigDecimal parseAmount(String value, String key, Map<String, String> errors, String message) {

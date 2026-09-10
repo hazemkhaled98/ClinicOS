@@ -13,39 +13,30 @@
 
   <div th:if="${permissionError != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert" th:text="${permissionError}"></div>
 
-  <div x-data="{ activeRole: 'owner' }">
-    <div class="flex flex-wrap gap-2 mb-6">
-      <button type="button" class="clinicos-admin-tab" :class="activeRole === 'owner' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'owner'">المالك</button>
-      <button type="button" class="clinicos-admin-tab" :class="activeRole === 'manager' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'manager'">مدير</button>
-      <button type="button" class="clinicos-admin-tab" :class="activeRole === 'assistant' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'assistant'">مساعد</button>
-      <button type="button" class="clinicos-admin-tab" :class="activeRole === 'receptionist' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'receptionist'">موظف استقبال</button>
-    </div>
-
-    <div x-show="activeRole === 'owner'" class="p-4 bg-teal-50 rounded-xl">
-      <p class="text-sm text-teal-700 font-bold">المالك يحصل على كل الصلاحيات تلقائياً ولا يمكن تغيير ذلك.</p>
-    </div>
-
-    <form th:each="roleCode : ${'manager,assistant,receptionist'.split(',')}"
-          th:id="'perm-form-' + ${roleCode}"
-          hx-post="/admin-dashboard/permissions"
-          hx-target="#permissions-card" hx-swap="outerHTML"
-          x-show="activeRole === '${roleCode}'">
-      <input type="hidden" name="roleCode" th:value="${roleCode}">
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer"
-               th:each="perm : ${'emp,quick,ceo,tasksTab,acadVerify,acadEdit,tray,issue,procs,myprocs,manage,orders,receive,returns,suppliers,dash,profit,analytics,waste,doctors,supAnalysis,received,itemAnalysis,approvals,ledger'.split(',')}">
-          <input type="checkbox" name="permissionCodes" th:value="${perm}"
-                 class="accent-teal-600"
-                 th:checked="${rolePermissionMap[__${roleCode}__] != null and rolePermissionMap[__${roleCode}__].contains(__${perm}__)}"
-                 hx-trigger="change"
-                 hx-post="/admin-dashboard/permissions"
-                 hx-target="#permissions-card" hx-swap="outerHTML"
-                 hx-include="closest form">
-          <span th:text="${perm}">perm</span>
-        </label>
-      </div>
-    </form>
+  <div x-show="activeRole === 'owner'" class="p-4 bg-teal-50 rounded-xl">
+    <p class="text-sm text-teal-700 font-bold">المالك يحصل على كل الصلاحيات تلقائياً ولا يمكن تغيير ذلك.</p>
   </div>
+
+  <form th:each="roleCode : ${'manager,assistant,receptionist'.split(',')}"
+        th:id="'perm-form-' + ${roleCode}"
+        hx-post="/admin-dashboard/permissions"
+        hx-target="#permissions-card" hx-swap="outerHTML"
+        x-show="activeRole === '${roleCode}'">
+    <input type="hidden" name="roleCode" th:value="${roleCode}">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer"
+             th:each="perm : ${'emp,quick,ceo,tasksTab,acadVerify,acadEdit,tray,issue,procs,myprocs,manage,orders,receive,returns,suppliers,dash,profit,analytics,waste,doctors,supAnalysis,received,itemAnalysis,approvals,ledger'.split(',')}">
+        <input type="checkbox" name="permissionCodes" th:value="${perm}"
+               class="accent-teal-600"
+               th:checked="${rolePermissionMap[__${roleCode}__] != null and rolePermissionMap[__${roleCode}__].contains(__${perm}__)}"
+               hx-trigger="change"
+               hx-post="/admin-dashboard/permissions"
+               hx-target="#permissions-card" hx-swap="outerHTML"
+               hx-include="closest form">
+        <span th:text="${permissionLabels[perm] != null ? permissionLabels[perm] : perm}">perm</span>
+      </label>
+    </div>
+  </form>
 </div>
 </body>
 </html>

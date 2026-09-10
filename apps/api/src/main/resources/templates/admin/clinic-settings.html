@@ -13,7 +13,7 @@
   </div>
 
   <div th:if="${weightErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${weightErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${weightErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <form class="flex flex-col gap-4" th:attr="hx-post='/admin-dashboard/settings/weights'" hx-target="#weights-card" hx-swap="outerHTML">
@@ -45,13 +45,13 @@
   </div>
 
   <div th:if="${volumeErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${volumeErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${volumeErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <form class="flex flex-wrap items-end gap-3" th:attr="hx-post='/admin-dashboard/settings/volume'" hx-target="#volume-card" hx-swap="outerHTML">
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       الهدف الشهري (ج.م)
-      <input type="text" inputmode="decimal" name="volumeTarget" placeholder="20000"
+      <input type="number" min="0" step="0.01" name="volumeTarget" placeholder="20000"
              class="clinicos-input w-40" th:value="${settings.volumeTarget() != null ? settings.volumeTarget() : ''}">
     </label>
     <button type="submit" class="clinicos-btn">حفظ الهدف</button>
@@ -66,7 +66,7 @@
   </div>
 
   <div th:if="${dutyErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${dutyErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${dutyErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <form class="flex flex-wrap items-end gap-3" th:attr="hx-post='/admin-dashboard/settings/duty'" hx-target="#duty-card" hx-swap="outerHTML">
@@ -107,7 +107,7 @@
   </div>
 
   <div th:if="${tierErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${tierErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${tierErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <form class="flex flex-col gap-3" th:attr="hx-post='/admin-dashboard/settings/tiers'" hx-target="#tiers-card" hx-swap="outerHTML">

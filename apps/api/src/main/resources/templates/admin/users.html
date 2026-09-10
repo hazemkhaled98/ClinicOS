@@ -12,7 +12,7 @@
   </div>
 
   <div th:if="${!userErrors.isEmpty()}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${userErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${userErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <div class="flex flex-col gap-3">
@@ -21,7 +21,7 @@
     </th:block>
 
     <div th:each="user : ${users}"
-         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4">
+         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-employee-row">
       <span class="w-10 h-10 shrink-0 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-base"
             th:text="${#strings.substring(user.fullName(), 0, 1)}">أ</span>
       <div class="flex flex-col">

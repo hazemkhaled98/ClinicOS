@@ -12,7 +12,7 @@
   </div>
 
   <div th:if="${taskErrorScope == 'add'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${taskErrors.values()}" th:text="${err} + ' '" th:remove="tag"></span>
+    <span th:each="err : ${taskErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <div class="flex flex-col gap-3">
@@ -21,15 +21,12 @@
     </th:block>
 
     <div th:each="task : ${tasks}"
-         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4">
+         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-employee-row">
       <div class="flex flex-col">
         <span class="font-bold text-teal-900" th:text="${task.name()}">مهنة</span>
         <span class="text-xs text-on-surface-variant" th:text="${task.dimension()} + ' · ' + ${task.frequency()} + ' · ' + ${task.roleCode()}">fanni · daily · assistant</span>
       </div>
       <div class="flex items-center gap-2 me-auto">
-        <button class="clinicos-btn text-xs"
-                th:attr="data-task-id=${task.id()}, data-task-name=${task.name()}, data-task-dimension=${task.dimension()}, data-task-frequency=${task.frequency()}, data-task-role=${task.roleCode()}"
-                @click="$dispatch('edit-task', { id: $el.dataset.taskId, name: $el.dataset.taskName, dimension: $el.dataset.taskDimension, frequency: $el.dataset.taskFrequency, roleCode: $el.dataset.taskRole })">تعديل</button>
         <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
               hx-target="#tasks-card" hx-swap="outerHTML"
               hx-confirm="هل أنت متأكد من حذف هذه المهمة؟">

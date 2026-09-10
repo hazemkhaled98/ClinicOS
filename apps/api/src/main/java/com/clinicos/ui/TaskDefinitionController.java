@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.TaskDefinitionService;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
@@ -21,6 +22,8 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class TaskDefinitionController {
+
+    private static final Logger log = LoggerFactory.getLogger(TaskDefinitionController.class);
 
     private final LayoutModel layoutModel;
     private final TaskDefinitionService taskDefinitionService;
@@ -38,7 +41,7 @@ public class TaskDefinitionController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("tasks", taskDefinitionService.list(clinicId));
         model.addAttribute("taskErrors", Map.of());
@@ -51,14 +54,14 @@ public class TaskDefinitionController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         validate(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.create(clinicId, new TaskDefinitionRequest(
                         form.name().trim(), form.dimension(), form.frequency(), form.roleCode()));
-                activityLogService.log(clinicId, membershipId(session), "task.create", "task_definition");
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.create", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
             }
@@ -73,14 +76,14 @@ public class TaskDefinitionController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         validate(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.update(clinicId, taskId, new TaskDefinitionRequest(
                         form.name().trim(), form.dimension(), form.frequency(), form.roleCode()));
-                activityLogService.log(clinicId, membershipId(session), "task.update", "task_definition");
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.update", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
             }
@@ -94,14 +97,17 @@ public class TaskDefinitionController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
+        Map<String, String> fieldErrors = new HashMap<>();
         try {
             taskDefinitionService.delete(clinicId, taskId);
-            activityLogService.log(clinicId, membershipId(session), "task.delete", "task_definition");
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.delete", "task_definition");
         } catch (IllegalArgumentException e) {
-            // already deleted
+            // not found / already archived / RLS-hidden
+            log.warn("deleteTask failed: task {} clinic {}", taskId, clinicId, e);
+            fieldErrors.put("task", e.getMessage());
         }
-        renderCard(model, clinicId, Map.of(), null);
+        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "delete");
         return "admin/tasks :: tasksCard";
     }
 
@@ -109,14 +115,6 @@ public class TaskDefinitionController {
         model.addAttribute("tasks", taskDefinitionService.list(clinicId));
         model.addAttribute("taskErrors", fieldErrors);
         model.addAttribute("taskErrorScope", errorScope);
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
-    }
-
-    private static UUID membershipId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
 
     private static void validate(TaskForm form, Map<String, String> errors) {

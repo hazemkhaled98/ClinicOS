@@ -1,8 +1,8 @@
 -- Gamification tables (slice 2e).
 --
 -- Three clinic-scoped tables: visibility settings, weekly goals, badge
--- thresholds. All follow the standard clinic_id RLS pattern (V9 loop adds
--- them to direct_tables via V18).
+-- thresholds. RLS enabled here with the same tenant_isolation policy shape
+-- as V9's loop (the V9 array predates these tables).
 
 -- 1. Settings: one row per clinic.
 create table gamification_settings (

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.GamificationService;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
-import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class GamificationController {
+
+    private static final Logger log = LoggerFactory.getLogger(GamificationController.class);
 
     private final LayoutModel layoutModel;
     private final GamificationService gamificationService;
@@ -36,7 +39,7 @@ public class GamificationController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
         model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
@@ -56,10 +59,10 @@ public class GamificationController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         gamificationService.updateSettings(clinicId, new GamificationSettings(
                 showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward));
-        activityLogService.log(clinicId, membershipId(session), "gamification.settings", "gamification_settings");
+        activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.settings", "gamification_settings");
         renderPage(model, clinicId);
         return "admin/gamification :: settingsCard";
     }
@@ -72,12 +75,12 @@ public class GamificationController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
         int[] parsedTargets = new int[titles.length];
         for (int i = 0; i < titles.length && i < 3; i++) {
             try {
-                parsedTargets[i] = Integer.parseInt(targets[i]);
+                parsedTargets[i] = (i < targets.length) ? Integer.parseInt(targets[i]) : 0;
             } catch (NumberFormatException e) {
                 errors.put("targets", "قيمة الهدف يجب أن تكون رقماً");
                 break;
@@ -87,7 +90,7 @@ public class GamificationController {
             for (int i = 0; i < titles.length && i < 3; i++) {
                 gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
             }
-            activityLogService.log(clinicId, membershipId(session), "gamification.goals", "weekly_goal");
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
         }
         model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
@@ -102,12 +105,12 @@ public class GamificationController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
         int[] parsedThresholds = new int[names.length];
         for (int i = 0; i < names.length; i++) {
             try {
-                parsedThresholds[i] = Integer.parseInt(thresholds[i]);
+                parsedThresholds[i] = (i < thresholds.length) ? Integer.parseInt(thresholds[i]) : 0;
             } catch (NumberFormatException e) {
                 errors.put("thresholds", "عدد المهام يجب أن يكون رقماً");
                 break;
@@ -117,7 +120,7 @@ public class GamificationController {
             for (int i = 0; i < names.length; i++) {
                 gamificationService.updateThreshold(clinicId, names[i], parsedThresholds[i]);
             }
-            activityLogService.log(clinicId, membershipId(session), "gamification.thresholds", "badge_threshold");
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.thresholds", "badge_threshold");
         }
         model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);
@@ -128,13 +131,5 @@ public class GamificationController {
         model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
         model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
         model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
-    }
-
-    private static UUID membershipId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
 }

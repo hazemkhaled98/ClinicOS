@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.shared.ActivityLogService;
@@ -22,6 +23,8 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UserAdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserAdminController.class);
 
     private final LayoutModel layoutModel;
     private final UserAdminService userAdminService;
@@ -42,7 +45,7 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("users", userAdminService.list(clinicId));
         model.addAttribute("employees", employeeService.list(clinicId));
@@ -57,14 +60,14 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         validate(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 userAdminService.create(clinicId, new UserCreateRequest(
                         form.username().trim(), form.fullName().trim(), form.email(), passwordEncoder.encode(form.password())));
-                activityLogService.log(clinicId, membershipId(session), "user.create", "user");
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("username", e.getMessage());
             }
@@ -79,7 +82,7 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         if (newPassword == null || newPassword.isBlank()) {
             fieldErrors.put("password", "كلمة المرور مطلوبة");
@@ -87,9 +90,12 @@ public class UserAdminController {
         if (fieldErrors.isEmpty()) {
             try {
                 userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
-                activityLogService.log(clinicId, membershipId(session), "user.password_change", "user");
-            } catch (RuntimeException e) {
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.password_change", "user");
+            } catch (IllegalArgumentException e) {
                 fieldErrors.put("password", e.getMessage());
+            } catch (RuntimeException e) {
+                log.error("changePassword failed for user {} clinic {}", userId, clinicId, e);
+                fieldErrors.put("password", "فشلت تغيير كلمة المرور");
             }
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "password", UserForm.empty());
@@ -101,13 +107,16 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         try {
             userAdminService.suspend(clinicId, userId);
-            activityLogService.log(clinicId, membershipId(session), "user.suspend", "user");
-        } catch (RuntimeException e) {
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.suspend", "user");
+        } catch (IllegalArgumentException e) {
             fieldErrors.put("password", e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("suspend failed for user {} clinic {}", userId, clinicId, e);
+            fieldErrors.put("password", "فشلت تعطيل المستخدم");
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "suspend", UserForm.empty());
         return "admin/users :: usersCard";
@@ -118,13 +127,16 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         try {
             userAdminService.reactivate(clinicId, userId);
-            activityLogService.log(clinicId, membershipId(session), "user.reactivate", "user");
-        } catch (RuntimeException e) {
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.reactivate", "user");
+        } catch (IllegalArgumentException e) {
             fieldErrors.put("password", e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("reactivate failed for user {} clinic {}", userId, clinicId, e);
+            fieldErrors.put("password", "فشلت إعادة تفعيل المستخدم");
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "reactivate", UserForm.empty());
         return "admin/users :: usersCard";
@@ -136,13 +148,16 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         try {
             userAdminService.assignRole(clinicId, membershipId, roleCode);
-            activityLogService.log(clinicId, membershipId(session), "user.assign_role", "user");
-        } catch (RuntimeException e) {
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.assign_role", "user");
+        } catch (IllegalArgumentException e) {
             fieldErrors.put("password", e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("assignRole failed for membership {} clinic {}", membershipId, clinicId, e);
+            fieldErrors.put("password", "فشلت تعيين الدور");
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "role", UserForm.empty());
         return "admin/users :: usersCard";
@@ -154,13 +169,16 @@ public class UserAdminController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = clinicId(session);
+        UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         try {
             userAdminService.linkEmployee(clinicId, membershipId, employeeId);
-            activityLogService.log(clinicId, membershipId(session), "user.link_employee", "user");
-        } catch (RuntimeException e) {
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.link_employee", "user");
+        } catch (IllegalArgumentException e) {
             fieldErrors.put("password", e.getMessage());
+        } catch (RuntimeException e) {
+            log.error("linkEmployee failed for membership {} clinic {}", membershipId, clinicId, e);
+            fieldErrors.put("password", "فشلت ربط الموظف");
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "link", UserForm.empty());
         return "admin/users :: usersCard";
@@ -182,14 +200,6 @@ public class UserAdminController {
                 "manager", LayoutModel.roleDisplayName("manager"),
                 "assistant", LayoutModel.roleDisplayName("assistant"),
                 "receptionist", LayoutModel.roleDisplayName("receptionist"));
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
-    }
-
-    private static UUID membershipId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
 
     private static void validate(UserForm form, Map<String, String> errors) {

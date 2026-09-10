@@ -34,6 +34,17 @@ public class DefaultGamificationService implements GamificationService {
                     .where(GAMIFICATION_SETTINGS.CLINIC_ID.eq(clinicId))
                     .fetchOne();
             if (row == null) {
+                dsl.insertInto(GAMIFICATION_SETTINGS)
+                        .set(GAMIFICATION_SETTINGS.CLINIC_ID, clinicId)
+                        .set(GAMIFICATION_SETTINGS.SHOW_LEVEL_RING, true)
+                        .set(GAMIFICATION_SETTINGS.SHOW_STREAKS, true)
+                        .set(GAMIFICATION_SETTINGS.SHOW_BADGES, true)
+                        .set(GAMIFICATION_SETTINGS.SHOW_WEEKLY_GOALS, true)
+                        .set(GAMIFICATION_SETTINGS.SHOW_LEADERBOARD, false)
+                        .set(GAMIFICATION_SETTINGS.SHOW_REWARD, true)
+                        .onConflict(GAMIFICATION_SETTINGS.CLINIC_ID)
+                        .doNothing()
+                        .execute();
                 return new GamificationSettings(true, true, true, true, false, true);
             }
             return new GamificationSettings(

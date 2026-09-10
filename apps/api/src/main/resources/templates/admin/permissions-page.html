@@ -9,7 +9,15 @@
       <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">الصلاحيات</h1>
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">تحديد صلاحيات كل دور في العيادة</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('permissions')}"></nav>
-      <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap})}"></div>
+      <div x-data="{ activeRole: 'owner' }">
+        <div class="flex flex-wrap gap-2 mb-6">
+          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'owner' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'owner'">المالك</button>
+          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'manager' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'manager'">مدير</button>
+          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'assistant' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'assistant'">مساعد</button>
+          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'receptionist' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'receptionist'">موظف استقبال</button>
+        </div>
+        <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap})}"></div>
+      </div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

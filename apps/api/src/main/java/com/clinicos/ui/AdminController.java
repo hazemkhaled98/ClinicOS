@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
-import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
@@ -35,6 +36,8 @@ import jakarta.servlet.http.HttpSession;
  */
 @Controller
 public class AdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
     private final LayoutModel layoutModel;
     private final EmployeeService employeeService;
@@ -61,7 +64,7 @@ public class AdminController {
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         model.addAttribute("section", NavSectionResolver.sectionByRoute("admin-dashboard"));
-        var clinicSettings = clinicSettingsService.get(clinicId(session));
+        var clinicSettings = clinicSettingsService.get(AdminAccess.clinicId(session));
         model.addAttribute("settings", clinicSettings);
         model.addAttribute("weights", clinicSettings.weights());
         model.addAttribute("weightsSum", ClinicSettingsController.sumWeights(clinicSettings.weights()));
@@ -79,8 +82,8 @@ public class AdminController {
         EmployeeRequest request = form.toRequest(fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
-                employeeService.create(clinicId(session), request);
-                activityLogService.log(clinicId(session), membershipId(session), "employee.create", "employee");
+                employeeService.create(AdminAccess.clinicId(session), request);
+                activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.create", "employee");
             } catch (EmployeeValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -99,12 +102,13 @@ public class AdminController {
         EmployeeRequest request = form.toRequest(fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
-                employeeService.update(clinicId(session), employeeId, request);
-                activityLogService.log(clinicId(session), membershipId(session), "employee.update", "employee");
+                employeeService.update(AdminAccess.clinicId(session), employeeId, request);
+                activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.update", "employee");
             } catch (EmployeeValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             } catch (IllegalArgumentException e) {
-                // row vanished (archived concurrently) -- re-render clean card
+                log.warn("updateEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
+                fieldErrors.put("employee", e.getMessage());
             }
         }
         renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "edit", employeeId, form);
@@ -116,13 +120,16 @@ public class AdminController {
         if (!canAccessDashboard(session)) {
             return "redirect:/";
         }
+        Map<String, String> fieldErrors = new HashMap<>();
         try {
-            employeeService.archive(clinicId(session), employeeId);
-            activityLogService.log(clinicId(session), membershipId(session), "employee.archive", "employee");
+            employeeService.archive(AdminAccess.clinicId(session), employeeId);
+            activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
         } catch (IllegalArgumentException e) {
-            // already archived -- re-render clean card
+            // not found / already archived / RLS-hidden -- re-render clean card
+            log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
+            fieldErrors.put("employee", e.getMessage());
         }
-        renderCard(model, session, Map.of(), null, null, EmployeeForm.empty());
+        renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive", null, EmployeeForm.empty());
         return "admin/employees :: employeesCard";
     }
 
@@ -134,19 +141,11 @@ public class AdminController {
 
     private void renderCard(Model model, HttpSession session, Map<String, String> fieldErrors,
             String errorScope, UUID errorRow, EmployeeForm addForm) {
-        model.addAttribute("employees", employeeService.list(clinicId(session)));
+        model.addAttribute("employees", employeeService.list(AdminAccess.clinicId(session)));
         model.addAttribute("employeeErrors", fieldErrors);
         model.addAttribute("employeeErrorScope", errorScope);
         model.addAttribute("employeeErrorRow", errorRow);
         model.addAttribute("addForm", addForm);
-    }
-
-    private static UUID clinicId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.CLINIC_ID);
-    }
-
-    private static UUID membershipId(HttpSession session) {
-        return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
 
     public record EmployeeForm(String name, String staffRoleCode, String basePay, String maxIncentive,
