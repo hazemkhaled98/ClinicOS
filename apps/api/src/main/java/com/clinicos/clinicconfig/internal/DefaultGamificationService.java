@@ -59,12 +59,7 @@ public class DefaultGamificationService implements GamificationService {
                         .set(GAMIFICATION_SETTINGS.SHOW_REWARD, settings.showReward())
                         .onConflict(GAMIFICATION_SETTINGS.CLINIC_ID)
                         .doUpdate()
-                        .set(GAMIFICATION_SETTINGS.SHOW_LEVEL_RING, settings.showLevelRing())
-                        .set(GAMIFICATION_SETTINGS.SHOW_STREAKS, settings.showStreaks())
-                        .set(GAMIFICATION_SETTINGS.SHOW_BADGES, settings.showBadges())
-                        .set(GAMIFICATION_SETTINGS.SHOW_WEEKLY_GOALS, settings.showWeeklyGoals())
-                        .set(GAMIFICATION_SETTINGS.SHOW_LEADERBOARD, settings.showLeaderboard())
-                        .set(GAMIFICATION_SETTINGS.SHOW_REWARD, settings.showReward())
+                        .setNonKeyToExcluded()
                         .execute());
     }
 
@@ -87,8 +82,7 @@ public class DefaultGamificationService implements GamificationService {
                         .set(WEEKLY_GOAL.TARGET, target)
                         .onConflict(WEEKLY_GOAL.CLINIC_ID, WEEKLY_GOAL.SLOT)
                         .doUpdate()
-                        .set(WEEKLY_GOAL.TITLE, title != null ? title : "")
-                        .set(WEEKLY_GOAL.TARGET, target)
+                        .setNonKeyToExcluded()
                         .execute());
     }
 
@@ -110,7 +104,7 @@ public class DefaultGamificationService implements GamificationService {
                         .set(BADGE_THRESHOLD.THRESHOLD, threshold)
                         .onConflict(BADGE_THRESHOLD.CLINIC_ID, BADGE_THRESHOLD.NAME)
                         .doUpdate()
-                        .set(BADGE_THRESHOLD.THRESHOLD, threshold)
+                        .setNonKeyToExcluded()
                         .execute());
     }
 }

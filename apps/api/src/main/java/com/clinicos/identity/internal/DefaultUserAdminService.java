@@ -39,14 +39,7 @@ public class DefaultUserAdminService implements UserAdminService {
                                 .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
                         .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
                         .where(APP_USER.CLINIC_ID.eq(clinicId))
-                        .fetch(r -> new UserSummary(
-                                r.get(APP_USER.ID),
-                                r.get(APP_USER.USERNAME),
-                                r.get(APP_USER.FULL_NAME),
-                                r.get(APP_USER.EMAIL),
-                                r.get(APP_USER.STATUS),
-                                r.get(ROLE.CODE),
-                                r.get(MEMBERSHIP.ID))));
+                        .fetch(this::toSummary));
     }
 
     @Override
@@ -59,10 +52,19 @@ public class DefaultUserAdminService implements UserAdminService {
             } catch (DuplicateKeyException e) {
                 throw new IllegalArgumentException("اسم المستخدم موجود مسبقاً في هذه العيادة");
             }
-            return list(clinicId).stream()
-                    .filter(u -> u.id().equals(userId))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("فشل إنشاء المستخدم"));
+            UserSummary summary = dsl.select(
+                            APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
+                            APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID)
+                    .from(APP_USER)
+                    .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
+                            .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
+                    .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
+                    .where(APP_USER.ID.eq(userId))
+                    .fetchOne(this::toSummary);
+            if (summary == null) {
+                throw new IllegalArgumentException("فشل إنشاء المستخدم");
+            }
+            return summary;
         });
     }
 
@@ -70,11 +72,6 @@ public class DefaultUserAdminService implements UserAdminService {
     public void changePassword(UUID clinicId, UUID userId, String newPasswordHash) {
         transactionTemplate.executeWithoutResult(status ->
                 setUserPassword(dsl.configuration(), clinicId, userId, newPasswordHash));
-    }
-
-    @Override
-    public void resetPassword(UUID clinicId, UUID userId, String newPasswordHash) {
-        changePassword(clinicId, userId, newPasswordHash);
     }
 
     @Override
@@ -122,5 +119,16 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }
         });
+    }
+
+    private UserSummary toSummary(org.jooq.Record r) {
+        return new UserSummary(
+                r.get(APP_USER.ID),
+                r.get(APP_USER.USERNAME),
+                r.get(APP_USER.FULL_NAME),
+                r.get(APP_USER.EMAIL),
+                r.get(APP_USER.STATUS),
+                r.get(ROLE.CODE),
+                r.get(MEMBERSHIP.ID));
     }
 }
