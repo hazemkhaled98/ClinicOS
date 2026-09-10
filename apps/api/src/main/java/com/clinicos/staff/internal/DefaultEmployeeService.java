@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -42,27 +43,31 @@ public class DefaultEmployeeService implements EmployeeService {
     @Override
     public Employee create(UUID clinicId, EmployeeRequest request) {
         validate(request);
-        return transactionTemplate.execute(status -> {
-            UUID id = UUID.randomUUID();
-            var hiredAt = request.hiredAt() != null ? request.hiredAt() : LocalDate.now();
-            dsl.insertInto(EMPLOYEE)
-                    .set(EMPLOYEE.ID, id)
-                    .set(EMPLOYEE.CLINIC_ID, clinicId)
-                    .set(EMPLOYEE.NAME, request.name())
-                    .set(EMPLOYEE.STAFF_ROLE, toDbRole(request.staffRole()))
-                    .set(EMPLOYEE.BASE_PAY, request.basePay() != null ? request.basePay() : BigDecimal.ZERO)
-                    .set(EMPLOYEE.MAX_INCENTIVE, request.maxIncentive() != null ? request.maxIncentive() : BigDecimal.ZERO)
-                    .set(EMPLOYEE.SHIFT_START, request.customShift() ? request.shiftStart() : null)
-                    .set(EMPLOYEE.SHIFT_END, request.customShift() ? request.shiftEnd() : null)
-                    .set(EMPLOYEE.CUSTOM_SHIFT, request.customShift())
-                    .set(EMPLOYEE.HIRED_AT, hiredAt)
-                    .execute();
-            return new Employee(id, request.name(), request.staffRole(), request.basePay(),
-                    request.maxIncentive(),
-                    request.customShift() ? request.shiftStart() : null,
-                    request.customShift() ? request.shiftEnd() : null,
-                    request.customShift(), hiredAt, null);
-        });
+        try {
+            return transactionTemplate.execute(status -> {
+                UUID id = UUID.randomUUID();
+                var hiredAt = request.hiredAt() != null ? request.hiredAt() : LocalDate.now();
+                dsl.insertInto(EMPLOYEE)
+                        .set(EMPLOYEE.ID, id)
+                        .set(EMPLOYEE.CLINIC_ID, clinicId)
+                        .set(EMPLOYEE.NAME, request.name())
+                        .set(EMPLOYEE.STAFF_ROLE, toDbRole(request.staffRole()))
+                        .set(EMPLOYEE.BASE_PAY, request.basePay() != null ? request.basePay() : BigDecimal.ZERO)
+                        .set(EMPLOYEE.MAX_INCENTIVE, request.maxIncentive() != null ? request.maxIncentive() : BigDecimal.ZERO)
+                        .set(EMPLOYEE.SHIFT_START, request.customShift() ? request.shiftStart() : null)
+                        .set(EMPLOYEE.SHIFT_END, request.customShift() ? request.shiftEnd() : null)
+                        .set(EMPLOYEE.CUSTOM_SHIFT, request.customShift())
+                        .set(EMPLOYEE.HIRED_AT, hiredAt)
+                        .execute();
+                return new Employee(id, request.name(), request.staffRole(), request.basePay(),
+                        request.maxIncentive(),
+                        request.customShift() ? request.shiftStart() : null,
+                        request.customShift() ? request.shiftEnd() : null,
+                        request.customShift(), hiredAt, null);
+            });
+        } catch (DuplicateKeyException e) {
+            throw new IllegalArgumentException("اسم الموظف موجود مسبقاً");
+        }
     }
 
     @Override
@@ -135,6 +140,8 @@ public class DefaultEmployeeService implements EmployeeService {
         }
         if (request.customShift() && (request.shiftStart() == null || request.shiftEnd() == null)) {
             fieldErrors.put("shift", "الشفت المخصص يتطلب وقت بداية ونهاية");
+        } else if (request.customShift() && request.shiftStart().isAfter(request.shiftEnd())) {
+            fieldErrors.put("shift", "وقت بداية الشفت يجب أن يسبق وقت النهاية");
         }
         if (!fieldErrors.isEmpty()) {
             throw new EmployeeValidationException(fieldErrors);

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,8 +21,6 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UserAdminController {
-
-    private static final Logger log = LoggerFactory.getLogger(UserAdminController.class);
 
     private final LayoutModel layoutModel;
     private final UserAdminService userAdminService;
@@ -92,10 +88,7 @@ public class UserAdminController {
                 userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.password_change", "user");
             } catch (IllegalArgumentException e) {
-                fieldErrors.put("password", e.getMessage());
-            } catch (RuntimeException e) {
-                log.error("changePassword failed for user {} clinic {}", userId, clinicId, e);
-                fieldErrors.put("password", "فشلت تغيير كلمة المرور");
+                fieldErrors.put("user", e.getMessage());
             }
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "password", UserForm.empty());
@@ -113,10 +106,7 @@ public class UserAdminController {
             userAdminService.suspend(clinicId, userId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.suspend", "user");
         } catch (IllegalArgumentException e) {
-            fieldErrors.put("password", e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("suspend failed for user {} clinic {}", userId, clinicId, e);
-            fieldErrors.put("password", "فشلت تعطيل المستخدم");
+            fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "suspend", UserForm.empty());
         return "admin/users :: usersCard";
@@ -133,10 +123,7 @@ public class UserAdminController {
             userAdminService.reactivate(clinicId, userId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.reactivate", "user");
         } catch (IllegalArgumentException e) {
-            fieldErrors.put("password", e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("reactivate failed for user {} clinic {}", userId, clinicId, e);
-            fieldErrors.put("password", "فشلت إعادة تفعيل المستخدم");
+            fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "reactivate", UserForm.empty());
         return "admin/users :: usersCard";
@@ -154,10 +141,7 @@ public class UserAdminController {
             userAdminService.assignRole(clinicId, membershipId, roleCode);
             activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.assign_role", "user");
         } catch (IllegalArgumentException e) {
-            fieldErrors.put("password", e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("assignRole failed for membership {} clinic {}", membershipId, clinicId, e);
-            fieldErrors.put("password", "فشلت تعيين الدور");
+            fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "role", UserForm.empty());
         return "admin/users :: usersCard";
@@ -175,10 +159,7 @@ public class UserAdminController {
             userAdminService.linkEmployee(clinicId, membershipId, employeeId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.link_employee", "user");
         } catch (IllegalArgumentException e) {
-            fieldErrors.put("password", e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("linkEmployee failed for membership {} clinic {}", membershipId, clinicId, e);
-            fieldErrors.put("password", "فشلت ربط الموظف");
+            fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "link", UserForm.empty());
         return "admin/users :: usersCard";

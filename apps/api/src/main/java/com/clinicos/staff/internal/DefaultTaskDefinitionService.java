@@ -67,7 +67,12 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
             }
             var record = dsl.selectFrom(TASK_DEFINITION)
                     .where(TASK_DEFINITION.ID.eq(taskId))
+                    .and(TASK_DEFINITION.CLINIC_ID.eq(clinicId))
+                    .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
                     .fetchOne();
+            if (record == null) {
+                throw new IllegalArgumentException("المهمة غير موجودة");
+            }
             return toTask(record);
         });
     }

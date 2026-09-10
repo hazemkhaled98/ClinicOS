@@ -136,7 +136,7 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
             fieldErrors.putIfAbsent("weights", "يجب تحديد وزن لكل مكونات التقييم الستة");
         }
         if (sum.compareTo(HUNDRED) != 0) {
-            fieldErrors.put("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100");
+            fieldErrors.putIfAbsent("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100");
         }
         throwIfAny(fieldErrors);
         transactionTemplate.executeWithoutResult(status -> {
