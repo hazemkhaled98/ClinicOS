@@ -11,7 +11,7 @@
     <p class="text-sm text-on-surface-variant">تعريف المهام اليومية والأسبوعية لكل دور في العيادة.</p>
   </div>
 
-  <div th:if="${taskErrorScope == 'add'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+  <div th:if="${taskErrorScope == 'add' or taskErrorScope == 'edit'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
     <span th:each="err : ${taskErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
@@ -22,17 +22,45 @@
 
     <div th:each="task : ${tasks}"
          class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-employee-row">
-      <div class="flex flex-col">
-        <span class="font-bold text-teal-900" th:text="${task.name()}">مهنة</span>
-        <span class="text-xs text-on-surface-variant" th:text="${task.dimension()} + ' · ' + ${task.frequency()} + ' · ' + ${task.roleCode()}">fanni · daily · assistant</span>
-      </div>
-      <div class="flex items-center gap-2 me-auto">
-        <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
-              hx-target="#tasks-card" hx-swap="outerHTML"
-              hx-confirm="هل أنت متأكد من حذف هذه المهمة؟">
-          <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">حذف</button>
-        </form>
-      </div>
+      <form class="flex flex-wrap items-center gap-3 grow"
+            th:attr="hx-post='/admin-dashboard/tasks/' + ${task.id()}"
+            hx-target="#tasks-card" hx-swap="outerHTML">
+        <div class="flex flex-col">
+          <input type="text" name="name" class="clinicos-input w-48 font-bold text-teal-900"
+                 th:value="${task.name()}" required>
+          <span class="text-xs text-on-surface-variant" th:text="${task.dimension()} + ' · ' + ${task.frequency()} + ' · ' + ${task.roleCode()}">fanni · daily · assistant</span>
+        </div>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          البُعد
+          <select name="dimension" class="clinicos-input w-28">
+            <option value="fanni" th:selected="${task.dimension() == 'fanni'}">فني</option>
+            <option value="solooki" th:selected="${task.dimension() == 'solooki'}">سلوكي</option>
+            <option value="ibda3" th:selected="${task.dimension() == 'ibda3'}">إبداعي</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          التكرار
+          <select name="frequency" class="clinicos-input w-28">
+            <option value="daily" th:selected="${task.frequency() == 'daily'}">يومي</option>
+            <option value="weekly" th:selected="${task.frequency() == 'weekly'}">أسبوعي</option>
+            <option value="monthly" th:selected="${task.frequency() == 'monthly'}">شهري</option>
+            <option value="custom" th:selected="${task.frequency() == 'custom'}">مخصص</option>
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الدور
+          <select name="roleCode" class="clinicos-input w-32">
+            <option value="assistant" th:selected="${task.roleCode() == 'assistant'}">مساعد</option>
+            <option value="receptionist" th:selected="${task.roleCode() == 'receptionist'}">موظف استقبال</option>
+          </select>
+        </label>
+        <button type="submit" class="clinicos-btn me-auto">حفظ</button>
+      </form>
+      <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
+            hx-target="#tasks-card" hx-swap="outerHTML"
+            hx-confirm="هل أنت متأكد من حذف هذه المهمة؟">
+        <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">حذف</button>
+      </form>
     </div>
 
     <hr class="my-4 border-dashed border-neutral-300"/>
