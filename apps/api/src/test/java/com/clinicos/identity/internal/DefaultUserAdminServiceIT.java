@@ -53,6 +53,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(users).hasSize(1);
         assertThat(users.get(0).username()).startsWith("ahmed-");
         assertThat(users.get(0).fullName()).isEqualTo("أحمد");
+        assertThat(users.get(0).employeeId()).isNull();
     }
 
     @Test
@@ -94,10 +95,60 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
                 "suspend-" + UUID.randomUUID(), "معلق", null, "hash"));
         UUID userId = userAdminService.list(clinicA).get(0).id();
 
-        userAdminService.suspend(clinicA, userId);
+        userAdminService.suspend(clinicA, userId, UUID.randomUUID());
 
         List<UserSummary> users = userAdminService.list(clinicA);
         assertThat(users.get(0).status()).isEqualTo("suspended");
+    }
+
+    @Test
+    void suspendSelfThrows() {
+        TenantContext.set(clinicA);
+        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                "self-" + UUID.randomUUID(), "ذاتي", null, "hash"));
+        UUID userId = userAdminService.list(clinicA).get(0).id();
+        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
+
+        assertThatThrownBy(() -> userAdminService.suspend(clinicA, userId, membershipId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("الخاص");
+    }
+
+    @Test
+    void suspendOwnerThrows() {
+        TenantContext.set(clinicA);
+        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                "owner-" + UUID.randomUUID(), "مالك", null, "hash"));
+        UUID userId = userAdminService.list(clinicA).get(0).id();
+        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
+        userAdminService.assignRole(clinicA, membershipId, "owner");
+
+        assertThatThrownBy(() -> userAdminService.suspend(clinicA, userId, UUID.randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("المالك");
+    }
+
+    @Test
+    void listShowsLinkedEmployeeId() throws Exception {
+        TenantContext.set(clinicA);
+        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                "emp-" + UUID.randomUUID(), "مربوط", null, "hash"));
+        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
+        UUID employeeId;
+        try (Connection connection = superuser()) {
+            try (var statement = connection.prepareStatement(
+                    "insert into employee (clinic_id, name, staff_role, base_pay, max_incentive) values (?, ?, 'assistant', 5000, 1500) returning id")) {
+                statement.setObject(1, clinicA);
+                statement.setString(2, "محمود سمير");
+                try (var rs = statement.executeQuery()) {
+                    rs.next();
+                    employeeId = rs.getObject(1, UUID.class);
+                }
+            }
+        }
+        userAdminService.linkEmployee(clinicA, membershipId, employeeId);
+
+        assertThat(userAdminService.list(clinicA).get(0).employeeId()).isEqualTo(employeeId);
     }
 
     @Test
@@ -106,7 +157,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
                 "react-" + UUID.randomUUID(), "معاد", null, "hash"));
         UUID userId = userAdminService.list(clinicA).get(0).id();
-        userAdminService.suspend(clinicA, userId);
+        userAdminService.suspend(clinicA, userId, UUID.randomUUID());
 
         userAdminService.reactivate(clinicA, userId);
 

@@ -1,5 +1,6 @@
 package com.clinicos.ui;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.RolePermissionService;
+import com.clinicos.identity.api.UserAdminService;
+import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 
 import jakarta.servlet.http.HttpSession;
@@ -48,12 +51,14 @@ public class PermissionsController {
 
     private final LayoutModel layoutModel;
     private final RolePermissionService rolePermissionService;
+    private final UserAdminService userAdminService;
     private final ActivityLogService activityLogService;
 
     public PermissionsController(LayoutModel layoutModel, RolePermissionService rolePermissionService,
-            ActivityLogService activityLogService) {
+            UserAdminService userAdminService, ActivityLogService activityLogService) {
         this.layoutModel = layoutModel;
         this.rolePermissionService = rolePermissionService;
+        this.userAdminService = userAdminService;
         this.activityLogService = activityLogService;
     }
 
@@ -67,6 +72,7 @@ public class PermissionsController {
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("permissionError", (String) null);
+        model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
         return "admin/permissions-page";
     }
 
@@ -93,7 +99,17 @@ public class PermissionsController {
             model.addAttribute("rolePermissionMap", Map.of());
         }
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
+        model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
+        if (error == null) {
+            Toasts.success(model, "تم حفظ الصلاحيات");
+        } else {
+            Toasts.error(model, error);
+        }
         return "admin/permissions :: permissionsCard";
+    }
+
+    private static Map<String, List<UserSummary>> usersByRole(List<UserSummary> users) {
+        return users.stream().collect(Collectors.groupingBy(UserSummary::roleCode));
     }
 
     private static Map<String, Set<String>> toMap(

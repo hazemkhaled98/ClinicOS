@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 
 import com.clinicos.identity.api.RolePermissionService;
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.identity.api.UserAdminService;
+import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.ui.nav.NavSectionResolver;
 
@@ -31,6 +33,7 @@ class PermissionsControllerTest {
 
     private LayoutModel layoutModel;
     private RolePermissionService rolePermissionService;
+    private UserAdminService userAdminService;
     private ActivityLogService activityLogService;
     private PermissionsController controller;
     private Model model;
@@ -39,8 +42,9 @@ class PermissionsControllerTest {
     void setUp() {
         layoutModel = mock(LayoutModel.class);
         rolePermissionService = mock(RolePermissionService.class);
+        userAdminService = mock(UserAdminService.class);
         activityLogService = mock(ActivityLogService.class);
-        controller = new PermissionsController(layoutModel, rolePermissionService, activityLogService);
+        controller = new PermissionsController(layoutModel, rolePermissionService, userAdminService, activityLogService);
         model = new ExtendedModelMap();
     }
 
@@ -49,11 +53,13 @@ class PermissionsControllerTest {
         HttpSession session = session();
         allowDashboard();
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.permissions(session, model);
 
         assertThat(view).isEqualTo("admin/permissions-page");
         assertThat(model.getAttribute("rolePermissionMap")).isNotNull();
+        assertThat(model.getAttribute("usersByRole")).isEqualTo(Map.of());
     }
 
     @Test
@@ -71,11 +77,14 @@ class PermissionsControllerTest {
         HttpSession session = session();
         allowDashboard();
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
 
         controller.updatePermissions("manager", new String[]{"emp", "quick"}, session, model);
 
         verify(rolePermissionService).setPermissions(CLINIC, "manager", Set.of("emp", "quick"));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "permissions.update", "role_permission");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("usersByRole")).isEqualTo(Map.of());
     }
 
     @Test
@@ -83,10 +92,25 @@ class PermissionsControllerTest {
         HttpSession session = session();
         allowDashboard();
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
 
         controller.updatePermissions("assistant", null, session, model);
 
         verify(rolePermissionService).setPermissions(CLINIC, "assistant", Set.of());
+    }
+
+    @Test
+    void usersByRoleGroupsUsersByRoleCode() {
+        HttpSession session = session();
+        allowDashboard();
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+        UserSummary assistant = new UserSummary(UUID.randomUUID(), "ehab", "إيهاب", "e@b.com", "active", "assistant", UUID.randomUUID(), null);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(assistant));
+
+        controller.permissions(session, model);
+
+        var usersByRole = (Map<String, List<UserSummary>>) model.getAttribute("usersByRole");
+        assertThat(usersByRole.get("assistant")).containsExactly(assistant);
     }
 
     private void allowDashboard() {

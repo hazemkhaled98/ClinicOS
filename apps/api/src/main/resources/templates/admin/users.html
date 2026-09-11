@@ -5,10 +5,11 @@
 </head>
 <body>
 <div th:fragment="usersCard(users, employees, userErrors, userErrorScope, addForm)"
-     id="users-card" class="mt-10 p-6 sm:p-8 clinicos-card">
+     id="users-card" class="mt-10 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👤 المستخدمون</h2>
-    <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وربط الحسابات بالموظفين.</p>
+    <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور والأدوار وربط الحسابات بالموظفين.</p>
   </div>
 
   <div th:if="${!userErrors.isEmpty()}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
@@ -21,7 +22,7 @@
     </th:block>
 
     <div th:each="user : ${users}"
-         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-employee-row">
+         class="rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-4 clinicos-user-row">
       <span class="w-10 h-10 shrink-0 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-base"
             th:text="${#strings.substring(user.fullName(), 0, 1)}">أ</span>
       <div class="flex flex-col">
@@ -31,11 +32,34 @@
       <span class="px-2 py-0.5 rounded-full text-xs font-bold"
             th:classappend="${user.status() == 'active'} ? 'bg-emerald-100 text-emerald-700' : 'bg-danger-50 text-danger-600'"
             th:text="${user.status() == 'active'} ? 'نشط' : 'معلق'">نشط</span>
-      <span class="text-xs text-on-surface-variant px-2 py-0.5 bg-neutral-100 rounded-full"
-            th:text="${roleNames[user.roleCode()]}">owner</span>
+
+      <form class="flex flex-col gap-1 text-xs text-on-surface-variant"
+            th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/role'"
+            hx-target="#users-card" hx-swap="outerHTML" hx-trigger="change">
+        <span>الدور</span>
+        <input type="hidden" name="membershipId" th:value="${user.membershipId()}">
+        <select name="roleCode" class="clinicos-input w-36">
+          <option value="manager" th:selected="${user.roleCode() == 'manager'}">مدير</option>
+          <option value="assistant" th:selected="${user.roleCode() == 'assistant'}">مساعد</option>
+          <option value="receptionist" th:selected="${user.roleCode() == 'receptionist'}">موظف استقبال</option>
+        </select>
+      </form>
+
+      <form class="flex flex-col gap-1 text-xs text-on-surface-variant"
+            th:attr="hx-post='/admin-dashboard/users/memberships/' + ${user.membershipId()} + '/link-employee'"
+            hx-target="#users-card" hx-swap="outerHTML" hx-trigger="change">
+        <span>الموظف</span>
+        <select name="employeeId" class="clinicos-input w-40" aria-label="ربط الموظف">
+          <option value="" disabled th:selected="${user.employeeId() == null}">— اختر موظفاً —</option>
+          <option th:each="emp : ${employees}" th:value="${emp.id()}"
+                  th:selected="${user.employeeId() != null and emp.id().equals(user.employeeId())}"
+                  th:text="${emp.name()}">موظف</option>
+        </select>
+      </form>
 
       <div class="flex items-center gap-2 me-auto">
-        <form th:if="${user.status() == 'active'}"
+        <span th:if="${user.roleCode() == 'owner'}" class="clinicos-chip clinicos-chip--success">صلاحيات كاملة – لا تُحذف</span>
+        <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId)}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/suspend'"
               hx-target="#users-card" hx-swap="outerHTML"
               hx-confirm="هل أنت متأكد من تعليق هذا المستخدم؟">
@@ -51,7 +75,7 @@
 
     <hr class="my-4 border-dashed border-neutral-300"/>
 
-    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4">
+    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4" x-data="{ emp: ${addForm.createEmployee} ? true : false }">
       <h3 class="font-bold text-teal-900 mb-3">إضافة مستخدم جديد</h3>
       <form class="flex flex-wrap items-center gap-3" hx-post="/admin-dashboard/users"
             hx-target="#users-card" hx-swap="outerHTML">
@@ -71,6 +95,55 @@
           كلمة المرور
           <input type="password" name="password" class="clinicos-input w-36" required>
         </label>
+        <label class="flex items-center gap-1 text-sm text-on-surface-variant cursor-pointer">
+          <input type="checkbox" name="createEmployee" value="true" class="accent-teal-600" x-model="emp">
+          الحساب ده موظف
+        </label>
+
+        <div x-show="!emp" class="flex flex-wrap items-center gap-3">
+          <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+            الدور في العيادة
+            <select name="roleCode" class="clinicos-input w-36">
+              <option value="manager" th:selected="${addForm.roleCode() == 'manager'}">مدير</option>
+              <option value="assistant" th:selected="${addForm.roleCode() == 'assistant'}">مساعد</option>
+              <option value="receptionist" th:selected="${addForm.roleCode() == 'receptionist'}">موظف استقبال</option>
+            </select>
+          </label>
+        </div>
+
+        <div x-show="emp" x-data="{ shift: ${addForm.customShift} ? true : false }" class="flex flex-wrap items-center gap-3">
+          <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+            المسمى الوظيفي
+            <select name="staffRoleCode" class="clinicos-input w-36">
+              <option value="assistant" th:selected="${addForm.staffRoleCode() == 'assistant'}">مساعد</option>
+              <option value="receptionist" th:selected="${addForm.staffRoleCode() == 'receptionist'}">موظف استقبال</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+            المرتب الأساسي
+            <input type="text" inputmode="decimal" name="basePay" placeholder="المرتب"
+                   class="clinicos-input w-32" th:value="${addForm.basePay()}">
+          </label>
+          <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+            الحافز الكامل
+            <input type="text" inputmode="decimal" name="maxIncentive" placeholder="الحافز"
+                   class="clinicos-input w-32" th:value="${addForm.maxIncentive()}">
+          </label>
+          <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+            <label class="flex items-center gap-1 cursor-pointer">
+              <input type="checkbox" name="customShift" class="accent-teal-600" x-model="shift">
+              شفت مخصص
+            </label>
+            <div class="flex items-center gap-2" x-show="shift">
+              <input type="time" name="shiftStart" aria-label="بداية الشفت" class="clinicos-input w-32"
+                     th:value="${addForm.shiftStart()}">
+              <span>إلى</span>
+              <input type="time" name="shiftEnd" aria-label="نهاية الشفت" class="clinicos-input w-32"
+                     th:value="${addForm.shiftEnd()}">
+            </div>
+          </div>
+        </div>
+
         <button type="submit" class="clinicos-btn">+ إضافة مستخدم</button>
       </form>
     </div>

@@ -61,7 +61,7 @@ public class GamificationController {
         gamificationService.updateSettings(clinicId, new GamificationSettings(
                 showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward));
         activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.settings", "gamification_settings");
-        model.addAttribute("toastMessage", "تم حفظ إعدادات التحفيز");
+        Toasts.success(model, "تم حفظ إعدادات التحفيز");
         renderPage(model, clinicId);
         return "admin/gamification :: settingsCard";
     }
@@ -106,7 +106,7 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            model.addAttribute("toastMessage", "تم حفظ الأهداف الأسبوعية");
+            Toasts.success(model, "تم حفظ الأهداف الأسبوعية");
         }
         model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
@@ -143,7 +143,7 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            model.addAttribute("toastMessage", "تم حفظ شروط الشارات");
+            Toasts.success(model, "تم حفظ شروط الشارات");
         }
         model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);

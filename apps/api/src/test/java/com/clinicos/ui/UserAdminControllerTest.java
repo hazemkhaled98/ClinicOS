@@ -24,6 +24,8 @@ import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
+import com.clinicos.staff.api.EmployeeService.Employee;
+import com.clinicos.staff.api.EmployeeService.StaffRole;
 import com.clinicos.ui.nav.NavSectionResolver;
 
 import jakarta.servlet.http.HttpSession;
@@ -78,17 +80,18 @@ class UserAdminControllerTest {
     void createUserLogsActivityAndReturnsCard() {
         HttpSession session = session();
         allowDashboard();
-        UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "owner", UUID.randomUUID());
+        UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "owner", UUID.randomUUID(), null);
         when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.createUser(
-                new UserAdminController.UserForm("ahmed", "أحمد", "a@b.com", "hash123"), session, model);
+                UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123"), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.create", "user");
         assertThat(model.getAttribute("userErrorScope")).isNull();
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
     @Test
@@ -99,7 +102,7 @@ class UserAdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.createUser(
-                new UserAdminController.UserForm("", "أحمد", "a@b.com", "hash123"), session, model);
+                UserAdminController.UserForm.of("", "أحمد", "a@b.com", "hash123"), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("userErrors")).isInstanceOf(Map.class);
@@ -117,8 +120,27 @@ class UserAdminControllerTest {
 
         controller.suspend(userId, session, model);
 
-        verify(userAdminService).suspend(CLINIC, userId);
+        verify(userAdminService).suspend(CLINIC, userId, MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.suspend", "user");
+    }
+
+    @Test
+    void suspendGuardViolationReportsErrorAndSkipsLog() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID userId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("يمكنك تعليق حسابك الخاص"))
+                .when(userAdminService).suspend(CLINIC, userId, MEMBERSHIP);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.suspend(userId, session, model);
+
+        assertThat(model.getAttribute("userErrorScope")).isEqualTo("suspend");
+        assertThat(((Map<?, ?>) model.getAttribute("userErrors")).get("user"))
+                .isEqualTo("يمكنك تعليق حسابك الخاص");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     @Test
@@ -209,12 +231,37 @@ class UserAdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.createUser(
-                new UserAdminController.UserForm("ahmed", "أحمد", "a@b.com", "hash123"), session, model);
+                UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123"), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(((Map<?, ?>) model.getAttribute("userErrors")).get("username"))
                 .isEqualTo("اسم المستخدم موجود مسبقاً");
         verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void createUserWithEmployeeCreatesLinksAndAssignsRole() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID membershipId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "assistant", membershipId, null);
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
+        Employee employee = new Employee(employeeId, "أحمد سمير", StaffRole.ASSISTANT,
+                new java.math.BigDecimal("5000"), new java.math.BigDecimal("1500"), null, null, false, null, null);
+        when(employeeService.create(eq(CLINIC), any())).thenReturn(employee);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
+        when(employeeService.list(CLINIC)).thenReturn(List.of(employee));
+
+        var form = new UserAdminController.UserForm("ahmed", "أحمد سمير", "a@b.com", "hash123",
+                true, null, "assistant", "5000", "1500", false, "", "");
+        String view = controller.createUser(form, session, model);
+
+        assertThat(view).isEqualTo("admin/users :: usersCard");
+        verify(employeeService).create(eq(CLINIC), any());
+        verify(userAdminService).linkEmployee(CLINIC, membershipId, employeeId);
+        verify(userAdminService).assignRole(CLINIC, membershipId, "assistant");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
     private void allowDashboard() {

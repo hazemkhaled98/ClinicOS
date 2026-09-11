@@ -62,9 +62,13 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ الأوزان");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return renderWeightsCard(model, AdminAccess.clinicId(session), weights, fieldErrors);
     }
-
     @PostMapping("/admin-dashboard/settings/volume")
     public String updateVolumeTarget(@RequestParam Map<String, String> params,
             HttpSession session, Model model) {
@@ -80,6 +84,11 @@ public class ClinicSettingsController {
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
+        }
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ الهدف الشهري");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
         }
         return renderCard(model, session, "volumeErrors", fieldErrors, "volumeCard");
     }
@@ -107,6 +116,11 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ الدوام");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return renderCard(model, session, "dutyErrors", fieldErrors, "dutyCard");
     }
 
@@ -133,6 +147,11 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ الشرائح");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return renderTiersCard(model, AdminAccess.clinicId(session), tiers, fieldErrors);
     }
 
@@ -142,6 +161,7 @@ public class ClinicSettingsController {
             model.addAttribute("settings", clinicSettingsService.get(AdminAccess.clinicId(session)));
         } catch (IllegalArgumentException e) {
             model.addAttribute(errorAttr, Map.of("settings", e.getMessage()));
+            Toasts.error(model, e.getMessage());
             return "admin/clinic-settings :: " + cardFragment;
         }
         model.addAttribute(errorAttr, fieldErrors.isEmpty() ? null : fieldErrors);

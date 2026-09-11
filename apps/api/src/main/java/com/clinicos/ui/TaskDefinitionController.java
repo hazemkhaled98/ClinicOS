@@ -67,6 +67,11 @@ public class TaskDefinitionController {
             }
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "add");
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تمت إضافة المهمة");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return "admin/tasks :: tasksCard";
     }
 
@@ -89,6 +94,11 @@ public class TaskDefinitionController {
             }
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "edit");
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ المهمة");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return "admin/tasks :: tasksCard";
     }
 
@@ -108,6 +118,11 @@ public class TaskDefinitionController {
             fieldErrors.put("task", e.getMessage());
         }
         renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "delete");
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حذف المهمة");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return "admin/tasks :: tasksCard";
     }
 

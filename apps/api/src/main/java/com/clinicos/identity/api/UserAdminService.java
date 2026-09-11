@@ -12,7 +12,7 @@ public interface UserAdminService {
 
     void changePassword(UUID clinicId, UUID userId, String newPasswordHash);
 
-    void suspend(UUID clinicId, UUID userId);
+    void suspend(UUID clinicId, UUID userId, UUID actorMembershipId);
 
     void reactivate(UUID clinicId, UUID userId);
 
@@ -27,7 +27,8 @@ public interface UserAdminService {
             String email,
             String status,
             String roleCode,
-            UUID membershipId) {
+            UUID membershipId,
+            UUID employeeId) {
     }
 
     record UserCreateRequest(

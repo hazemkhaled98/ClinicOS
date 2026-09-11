@@ -71,7 +71,6 @@ class AdminControllerTest {
         assertThat(view).isEqualTo("admin/settings");
         assertThat(model.getAttribute("layout")).isNotNull();
         assertThat(model.getAttribute("employees")).isEqualTo(List.of());
-        assertThat(model.getAttribute("addForm")).isEqualTo(AdminController.EmployeeForm.empty());
         assertThat(model.getAttribute("settings")).isEqualTo(settings);
         assertThat(model.getAttribute("weights")).isEqualTo(List.of());
         assertThat(model.getAttribute("tiers")).isEqualTo(List.of());
@@ -89,38 +88,6 @@ class AdminControllerTest {
     }
 
     @Test
-    void createEmployeeLogsActivityAndReturnsCard() {
-        HttpSession session = session();
-        allowDashboard();
-        Employee created = employee("محمود", StaffRole.ASSISTANT);
-        when(employeeService.create(eq(CLINIC), any(EmployeeRequest.class))).thenReturn(created);
-        when(employeeService.list(CLINIC)).thenReturn(List.of(created));
-
-        String view = controller.createEmployee(new AdminController.EmployeeForm(
-                "محمود", "assistant", "5000", "1500", false, "", ""), session, model);
-
-        assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.create", "employee");
-        assertThat(model.getAttribute("employeeErrorScope")).isNull();
-    }
-
-    @Test
-    void createEmployeeRerendersCardWithErrors() {
-        HttpSession session = session();
-        allowDashboard();
-        when(employeeService.create(eq(CLINIC), any(EmployeeRequest.class)))
-                .thenThrow(new EmployeeValidationException(Map.of("name", "اسم الموظف مطلوب")));
-        when(employeeService.list(CLINIC)).thenReturn(List.of());
-
-        String view = controller.createEmployee(new AdminController.EmployeeForm(
-                "", "assistant", "5000", "1500", false, "", ""), session, model);
-
-        assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        assertThat(model.getAttribute("employeeErrorScope")).isEqualTo("add");
-        assertThat(model.getAttribute("employeeErrors")).isEqualTo(Map.of("name", "اسم الموظف مطلوب"));
-    }
-
-    @Test
     void updateEmployeeLogsActivity() {
         HttpSession session = session();
         allowDashboard();
@@ -134,6 +101,8 @@ class AdminControllerTest {
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.update", "employee");
         assertThat(model.getAttribute("employeeErrorScope")).isNull();
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ بيانات الموظف");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
     @Test
@@ -181,37 +150,7 @@ class AdminControllerTest {
         assertThat(((Map<?, ?>) model.getAttribute("employeeErrors")).get("employee"))
                 .isEqualTo("الموظف غير موجود");
         verify(activityLogService, never()).log(any(), any(), any(), any());
-    }
-
-    @Test
-    void malformedAmountReportsArabicErrorAndSkipsService() {
-        HttpSession session = session();
-        allowDashboard();
-        when(employeeService.list(CLINIC)).thenReturn(List.of());
-
-        String view = controller.createEmployee(new AdminController.EmployeeForm(
-                "محمود", "assistant", "abc", "1500", false, "", ""), session, model);
-
-        assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        assertThat(model.getAttribute("employeeErrorScope")).isEqualTo("add");
-        assertThat(model.getAttribute("employeeErrors"))
-                .isEqualTo(Map.of("basePay", "المرتب الأساسي غير صحيح"));
-        verify(employeeService, never()).create(any(), any());
-    }
-
-    @Test
-    void unknownRoleCodeReportsArabicError() {
-        HttpSession session = session();
-        allowDashboard();
-        when(employeeService.list(CLINIC)).thenReturn(List.of());
-
-        String view = controller.createEmployee(new AdminController.EmployeeForm(
-                "محمود", "doctor", null, null, false, "", ""), session, model);
-
-        assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        assertThat(model.getAttribute("employeeErrors"))
-                .isEqualTo(Map.of("staffRole", "المسمى الوظيفي غير معروف: doctor"));
-        verify(employeeService, never()).create(any(), any());
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
     }
 
     private void allowDashboard() {

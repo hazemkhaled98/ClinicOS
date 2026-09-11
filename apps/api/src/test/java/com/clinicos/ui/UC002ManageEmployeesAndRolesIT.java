@@ -89,7 +89,7 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
     class EmployeeRoster {
 
         @Test
-        @DisplayName("Adding an employee renders a row and re-displays it after reload")
+        @DisplayName("Adding an employee via the Users tab renders a row and re-displays it after reload")
         void addEmployeePersists() throws Exception {
             String username = "owner-" + uniqueSuffix();
             String rawPassword = "correct-horse-battery-staple";
@@ -97,25 +97,15 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
 
             page().navigate(getUrl() + "login");
             login(username, rawPassword, clinicSlug);
+
+            addEmployeeWithAccount("محمود سمير");
             openAdminSettings();
 
-            page().getByText("👥 الموظفون").waitFor();
-            page().getByText("⚙️ أوزان مكونات التقييم").waitFor();
-            page().getByText("🕐 دوام العيادة").waitFor();
-            page().getByText("🏅 شرائح الحافز").waitFor();
-            page().getByPlaceholder("اسم الموظف").fill("محمود سمير");
-            page().getByPlaceholder("المرتب").last().fill("5000");
-            page().getByPlaceholder("الحافز").last().fill("1500");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة موظف")).click();
-
-            page().locator(".clinicos-employee-row").last().waitFor();
-            PlaywrightAssertions.assertThat(
-                    page().locator(".clinicos-employee-row").last().getByText("محمود سمير")).isVisible();
+            PlaywrightAssertions.assertThat(employeeRow("محمود سمير")).isVisible();
 
             page().reload();
             page().locator(".clinicos-employee-row").last().waitFor();
-            PlaywrightAssertions.assertThat(
-                    page().locator(".clinicos-employee-row").last().getByText("محمود سمير")).isVisible();
+            PlaywrightAssertions.assertThat(employeeRow("محمود سمير")).isVisible();
         }
 
         @Test
@@ -127,28 +117,21 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
 
             page().navigate(getUrl() + "login");
             login(username, rawPassword, clinicSlug);
+            addEmployeeWithAccount("محمود سمير");
             openAdminSettings();
 
-            page().getByPlaceholder("اسم الموظف").fill("محمود سمير");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة موظف")).click();
-            page().locator(".clinicos-employee-row").last().waitFor();
-
-            page().locator(".clinicos-employee-row").last()
-                    .locator("select[name=staffRoleCode]").selectOption("receptionist");
-            page().locator(".clinicos-employee-row").last()
-                    .locator("input[name=basePay]").fill("5200");
-            page().locator(".clinicos-employee-row").last()
-                    .locator("input[name=maxIncentive]").fill("2000");
+            var row = employeeRow("محمود سمير");
+            row.locator("select[name=staffRoleCode]").selectOption("receptionist");
+            row.locator("input[name=basePay]").fill("5200");
+            row.locator("input[name=maxIncentive]").fill("2000");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ")).last().click();
 
-            page().locator(".clinicos-employee-row").last().waitFor();
-            assertThat(page().locator(".clinicos-employee-row").last()
+            employeeRow("محمود سمير").waitFor();
+            assertThat(employeeRow("محمود سمير")
                     .locator("select[name=staffRoleCode]").inputValue()).isEqualTo("receptionist");
-            String payValue = page().locator(".clinicos-employee-row").last()
-                    .locator("input[name=basePay]").inputValue();
+            String payValue = employeeRow("محمود سمير").locator("input[name=basePay]").inputValue();
             assertThat(payValue.replace(".00", "")).isEqualTo("5200");
-            String incValue = page().locator(".clinicos-employee-row").last()
-                    .locator("input[name=maxIncentive]").inputValue();
+            String incValue = employeeRow("محمود سمير").locator("input[name=maxIncentive]").inputValue();
             assertThat(incValue.replace(".00", "")).isEqualTo("2000");
         }
 
@@ -161,19 +144,62 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
 
             page().navigate(getUrl() + "login");
             login(username, rawPassword, clinicSlug);
+            addEmployeeWithAccount("محمود سمير");
             openAdminSettings();
 
-            page().getByPlaceholder("اسم الموظف").fill("محمود سمير");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة موظف")).click();
-            page().locator(".clinicos-employee-row").last().waitFor();
-
             page().onDialog(dialog -> dialog.accept());
-            page().locator(".clinicos-employee-row").last()
+            employeeRow("محمود سمير")
                     .locator("button[aria-label='حذف الموظف']").click();
 
-            PlaywrightAssertions.assertThat(
-                    page().getByText("لا يوجد موظفون بعد. أضف أول موظف من النموذج أدناه.")).isVisible();
+            PlaywrightAssertions.assertThat(page().getByText("لا يوجد موظفون بعد")).isVisible();
             assertThat(page().locator(".clinicos-employee-row").count()).isZero();
+        }
+
+        @Test
+        @DisplayName("The owner account has no suspend control and shows the management badge")
+        void ownerHasNoSuspendControl() throws Exception {
+            String username = "owner-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicSlug = seedOwnerWithClinic(username, rawPassword);
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+            openAdminUsers();
+
+            page().getByText("صلاحيات كاملة – لا تُحذف").waitFor();
+            PlaywrightAssertions.assertThat(page().getByText("صلاحيات كاملة – لا تُحذف")).hasCount(1);
+            assertThat(page().locator(".clinicos-employee-row", new Page.LocatorOptions()
+                    .setHasText("صلاحيات كاملة – لا تُحذف"))
+                    .locator("button:has-text('تعليق')").count()).isZero();
+        }
+
+        private void openAdminSettings() {
+            page().navigate(getUrl() + "admin-dashboard/settings");
+            page().getByText("⚙️ أوزان مكونات التقييم").waitFor();
+        }
+
+        private void openAdminUsers() {
+            page().navigate(getUrl() + "admin-dashboard/users");
+            page().getByText("إضافة مستخدم جديد").waitFor();
+        }
+
+        private void addEmployeeWithAccount(String fullName) {
+            openAdminUsers();
+            page().getByLabel("اسم المستخدم").fill("emp-" + uniqueSuffix());
+            page().getByLabel("الاسم الكامل").fill(fullName);
+            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            page().getByLabel("الحساب ده موظف").check();
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+            userRow(fullName).waitFor();
+        }
+
+        private com.microsoft.playwright.Locator employeeRow(String name) {
+            return page().locator(".clinicos-employee-row", new Page.LocatorOptions().setHasText(name)).last();
+        }
+
+        private com.microsoft.playwright.Locator userRow(String name) {
+            return page().locator(".clinicos-user-row", new Page.LocatorOptions().setHas(
+                    page().locator("span.font-bold.text-teal-900", new Page.LocatorOptions().setHasText(name)))).last();
         }
     }
 

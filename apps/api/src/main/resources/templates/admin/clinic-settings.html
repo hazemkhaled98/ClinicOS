@@ -6,7 +6,8 @@
 <body>
 
 <div th:fragment="weightsCard(settings, weightErrors, weights, weightsSum)"
-     id="weights-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+     id="weights-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">⚙️ أوزان مكونات التقييم</h2>
     <p class="text-sm text-on-surface-variant">نسب مساهمة كل مكوّن في نتيجة التقييم الشهري. مجموع الأوزان يجب أن يساوي 100.</p>
@@ -38,7 +39,8 @@
 </div>
 
 <div th:fragment="volumeCard(settings, volumeErrors)"
-     id="volume-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+     id="volume-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🎯 هدف الفواتير الشهري</h2>
     <p class="text-sm text-on-surface-variant">إجمالي فواتير العمليات التجميليّة المستهدفة شهرياً.</p>
@@ -59,7 +61,8 @@
 </div>
 
 <div th:fragment="dutyCard(settings, dutyErrors)"
-     id="duty-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+     id="duty-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🕐 دوام العيادة</h2>
     <p class="text-sm text-on-surface-variant">الافتراضات المطبّقة على موظف بلا شفت مخصّص، وفي احتساب الحضور والانضباط.</p>
@@ -100,7 +103,8 @@
 </div>
 
 <div th:fragment="tiersCard(settings, tierErrors, tiers)"
-     id="tiers-card" class="mt-6 p-6 sm:p-8 clinicos-card">
+     id="tiers-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🏅 شرائح الحافز</h2>
     <p class="text-sm text-on-surface-variant">كل موظف ضمن شريحة حسب نتيجته النهائية؛ حافزه الشهري = الحافز الكامل × نسبة الشريحة.</p>

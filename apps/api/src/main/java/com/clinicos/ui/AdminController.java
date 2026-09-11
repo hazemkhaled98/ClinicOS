@@ -28,9 +28,10 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * Admin dashboard (ceo) area. The settings tab hosts the employee roster as
- * inline-editable HTMX rows: save posts the row back, archive deletes it, the
- * add form at the bottom creates a new employee. Each mutation re-renders the
- * whole employee card fragment ({@code admin/employees :: employeesCard}) and
+ * inline-editable HTMX rows: save posts the row back, archive deletes it.
+ * New employee records are created from the Users tab (onboarding): this
+ * controller only edits the roster. Each mutation re-renders the whole
+ * employee card fragment ({@code admin/employees :: employeesCard}) and
  * writes an activity-log entry.
  */
 @Controller
@@ -68,30 +69,11 @@ public class AdminController {
         model.addAttribute("weights", clinicSettings.weights());
         model.addAttribute("weightsSum", ClinicSettingsController.sumWeights(clinicSettings.weights()));
         model.addAttribute("tiers", clinicSettings.tiers());
-        renderCard(model, session, Map.of(), null, null, EmployeeForm.empty());
+        renderCard(model, session, Map.of(), null, null);
         return "admin/settings";
     }
 
-    @PostMapping("/admin-dashboard/settings/employees")
-    public String createEmployee(EmployeeForm form, HttpSession session, Model model) {
-        if (!canAccessDashboard(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> fieldErrors = new HashMap<>();
-        EmployeeRequest request = form.toRequest(fieldErrors);
-        if (fieldErrors.isEmpty()) {
-            try {
-                employeeService.create(AdminAccess.clinicId(session), request);
-                activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.create", "employee");
-            } catch (EmployeeValidationException e) {
-                fieldErrors.putAll(e.fieldErrors());
-            }
-        }
-        renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "add", null, form);
-        return "admin/employees :: employeesCard";
-    }
-
-    @PostMapping("/admin-dashboard/settings/employees/{employeeId}")
+@PostMapping("/admin-dashboard/settings/employees/{employeeId}")
     public String updateEmployee(@PathVariable UUID employeeId, EmployeeForm form,
             HttpSession session, Model model) {
         if (!canAccessDashboard(session)) {
@@ -110,7 +92,12 @@ public class AdminController {
                 fieldErrors.put("employee", e.getMessage());
             }
         }
-        renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "edit", employeeId, form);
+        renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "edit", employeeId);
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ بيانات الموظف");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return "admin/employees :: employeesCard";
     }
 
@@ -128,7 +115,12 @@ public class AdminController {
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
             fieldErrors.put("employee", e.getMessage());
         }
-        renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive", null, EmployeeForm.empty());
+renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive", null);
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم أرشفة الموظف");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
         return "admin/employees :: employeesCard";
     }
 
@@ -139,12 +131,11 @@ public class AdminController {
     }
 
     private void renderCard(Model model, HttpSession session, Map<String, String> fieldErrors,
-            String errorScope, UUID errorRow, EmployeeForm addForm) {
+            String errorScope, UUID errorRow) {
         model.addAttribute("employees", employeeService.list(AdminAccess.clinicId(session)));
         model.addAttribute("employeeErrors", fieldErrors);
         model.addAttribute("employeeErrorScope", errorScope);
         model.addAttribute("employeeErrorRow", errorRow);
-        model.addAttribute("addForm", addForm);
     }
 
     public record EmployeeForm(String name, String staffRoleCode, String basePay, String maxIncentive,

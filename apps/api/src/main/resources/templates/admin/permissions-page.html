@@ -16,10 +16,11 @@
           <button type="button" class="clinicos-admin-tab" :class="activeRole === 'assistant' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'assistant'">مساعد</button>
           <button type="button" class="clinicos-admin-tab" :class="activeRole === 'receptionist' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'receptionist'">موظف استقبال</button>
         </div>
-        <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap})}"></div>
+        <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap}, ${usersByRole})}"></div>
       </div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
 </body>
 </html>

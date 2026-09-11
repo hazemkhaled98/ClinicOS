@@ -4,20 +4,21 @@
 <title>الموظفون</title>
 </head>
 <body>
-<div th:fragment="employeesCard(employees, employeeErrors, employeeErrorScope, employeeErrorRow, addForm)"
-     id="employees-card" class="mt-10 p-6 sm:p-8 clinicos-card">
+<div th:fragment="employeesCard(employees, employeeErrors, employeeErrorScope, employeeErrorRow)"
+     id="employees-card" class="mt-10 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👥 الموظفون</h2>
     <p class="text-sm text-on-surface-variant">بيانات شغل الموظفين (التوصيف/المرتب/الحافز/الشفت). الحسابات وكلمات المرور في تبويب «المستخدمون».</p>
   </div>
 
-  <div th:if="${employeeErrorScope == 'add' or employeeErrorScope == 'archive'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
+  <div th:if="${employeeErrorScope == 'archive'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
     <span th:each="err : ${employeeErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <div class="flex flex-col gap-3">
     <th:block th:if="${#lists.isEmpty(employees)}">
-      <p class="py-6 text-center text-sm text-on-surface-variant">لا يوجد موظفون بعد. أضف أول موظف من النموذج أدناه.</p>
+      <p class="py-6 text-center text-sm text-on-surface-variant">لا يوجد موظفون بعد. بتظهر البيانات هنا لما تدخل موظف جديد من تبويب «المستخدمون».</p>
     </th:block>
 
     <div th:each="employee : ${employees}"
@@ -80,49 +81,7 @@
       </button>
     </div>
 
-    <hr class="my-4 border-dashed border-neutral-300"/>
-
-    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4 flex flex-wrap items-center gap-3" x-data="{ shift: ${addForm.customShift} ? true : false }">
-      <form class="flex flex-wrap items-center gap-3 grow" hx-post="/admin-dashboard/settings/employees"
-            hx-target="#employees-card" hx-swap="outerHTML">
-        <input type="hidden" name="existingAdd" value="false">
-        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
-          اسم الموظف
-          <input type="text" name="name" class="clinicos-input w-40" th:value="${addForm.name}"
-                 placeholder="اسم الموظف" required>
-        </label>
-        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
-          المسمى الوظيفي
-          <select name="staffRoleCode" class="clinicos-input w-36">
-            <option value="assistant" th:selected="${addForm.staffRoleCode == 'assistant'}">مساعد</option>
-            <option value="receptionist" th:selected="${addForm.staffRoleCode == 'receptionist'}">موظف استقبال</option>
-          </select>
-        </label>
-        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
-          المرتب الأساسي
-          <input type="text" inputmode="decimal" name="basePay" placeholder="المرتب"
-                 class="clinicos-input w-32" th:value="${addForm.basePay}">
-        </label>
-        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
-          الحافز الكامل
-          <input type="text" inputmode="decimal" name="maxIncentive" placeholder="الحافز"
-                 class="clinicos-input w-32" th:value="${addForm.maxIncentive}">
-        </label>
-        <div class="flex items-center gap-2 text-xs text-on-surface-variant">
-          <label class="flex items-center gap-1 cursor-pointer">
-            <input type="checkbox" name="customShift" class="accent-teal-600" x-model="shift">
-            شفت مخصص
-          </label>
-          <div class="flex items-center gap-2" x-show="shift">
-            <input type="time" name="shiftStart" aria-label="بداية الشفت" class="clinicos-input w-32" th:value="${addForm.shiftStart}">
-            <span>إلى</span>
-            <input type="time" name="shiftEnd" aria-label="نهاية الشفت" class="clinicos-input w-32" th:value="${addForm.shiftEnd}">
-          </div>
-        </div>
-        <button type="submit" class="clinicos-btn">+ إضافة موظف</button>
-      </form>
-    </div>
-    <p class="mt-3 text-xs text-on-surface-variant">بعد إضافة الموظف، اعمله حساب دخول من تبويب «المستخدمون» واربطه بيه.</p>
+    <p class="mt-3 text-xs text-on-surface-variant">موظفين جداد بيتضافوا من تبويب «المستخدمون» لما بتعمل حساب دخول وتحدد «الحساب ده موظف».</p>
   </div>
 </div>
 </body>

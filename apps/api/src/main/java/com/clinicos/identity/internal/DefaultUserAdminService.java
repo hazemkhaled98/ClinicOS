@@ -33,7 +33,7 @@ public class DefaultUserAdminService implements UserAdminService {
         return transactionTemplate.execute(status ->
                 dsl.select(
                                 APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
-                                APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID)
+                                APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID, MEMBERSHIP.EMPLOYEE_ID)
                         .from(APP_USER)
                         .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
                                 .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
@@ -52,10 +52,10 @@ public class DefaultUserAdminService implements UserAdminService {
             } catch (DuplicateKeyException e) {
                 throw new IllegalArgumentException("اسم المستخدم موجود مسبقاً في هذه العيادة");
             }
-            UserSummary summary = dsl.select(
-                            APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
-                            APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID)
-                    .from(APP_USER)
+UserSummary summary = dsl.select(
+                        APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
+                        APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID, MEMBERSHIP.EMPLOYEE_ID)
+                .from(APP_USER)
                     .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
                             .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
                     .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
@@ -75,9 +75,27 @@ public class DefaultUserAdminService implements UserAdminService {
     }
 
     @Override
-    public void suspend(UUID clinicId, UUID userId) {
-        transactionTemplate.executeWithoutResult(status ->
-                setUserStatus(dsl.configuration(), clinicId, userId, "suspended"));
+    public void suspend(UUID clinicId, UUID userId, UUID actorMembershipId) {
+        transactionTemplate.executeWithoutResult(status -> {
+            org.jooq.Record target = dsl.select(MEMBERSHIP.ID, ROLE.CODE)
+                    .from(APP_USER)
+                    .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
+                            .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
+                    .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
+                    .where(APP_USER.ID.eq(userId))
+                    .and(APP_USER.CLINIC_ID.eq(clinicId))
+                    .fetchOne();
+            if (target == null) {
+                throw new IllegalArgumentException("المستخدم غير موجود");
+            }
+            if (target.get(MEMBERSHIP.ID).equals(actorMembershipId)) {
+                throw new IllegalArgumentException("لا يمكنك تعليق حسابك الخاص");
+            }
+            if ("owner".equals(target.get(ROLE.CODE))) {
+                throw new IllegalArgumentException("تعليق حساب المالك من صلاحيات إدارة النظام فقط");
+            }
+            setUserStatus(dsl.configuration(), clinicId, userId, "suspended");
+        });
     }
 
     @Override
@@ -129,6 +147,7 @@ public class DefaultUserAdminService implements UserAdminService {
                 r.get(APP_USER.EMAIL),
                 r.get(APP_USER.STATUS),
                 r.get(ROLE.CODE),
-                r.get(MEMBERSHIP.ID));
+                r.get(MEMBERSHIP.ID),
+                r.get(MEMBERSHIP.EMPLOYEE_ID));
     }
 }
