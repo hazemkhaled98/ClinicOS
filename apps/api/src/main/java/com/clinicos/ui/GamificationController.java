@@ -80,8 +80,12 @@ public class GamificationController {
         }
         int[] parsedTargets = new int[titles.length];
         for (int i = 0; i < titles.length && i < 3; i++) {
+            String target = (i < targets.length) ? targets[i] : "";
+            if (target.isBlank()) {
+                continue;
+            }
             try {
-                parsedTargets[i] = (i < targets.length) ? Integer.parseInt(targets[i]) : 0;
+                parsedTargets[i] = Integer.parseInt(target);
             } catch (NumberFormatException e) {
                 errors.put("targets", "قيمة الهدف يجب أن تكون رقماً");
                 break;
@@ -90,6 +94,9 @@ public class GamificationController {
         if (errors.isEmpty()) {
             try {
                 for (int i = 0; i < titles.length && i < 3; i++) {
+                    if (titles[i] == null || titles[i].isBlank()) {
+                        continue;
+                    }
                     gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
                 }
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
@@ -138,8 +145,8 @@ public class GamificationController {
 
     private void renderPage(Model model, UUID clinicId) {
         GamificationSettings settings = gamificationService.get(clinicId);
-        model.addAttribute("gamificationSettings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
-        model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
-        model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
+        model.addAttribute("settings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
+        model.addAttribute("goals", gamificationService.getGoals(clinicId));
+        model.addAttribute("thresholds", gamificationService.getThresholds(clinicId));
     }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,9 +58,9 @@ class GamificationControllerTest {
         String view = controller.goals(session, model);
 
         assertThat(view).isEqualTo("admin/gamification-page");
-        assertThat(model.getAttribute("gamificationSettings")).isEqualTo(settings);
-        assertThat(model.getAttribute("weeklyGoals")).isEqualTo(List.of());
-        assertThat(model.getAttribute("badgeThresholds")).isEqualTo(List.of());
+        assertThat(model.getAttribute("settings")).isEqualTo(settings);
+        assertThat(model.getAttribute("goals")).isEqualTo(List.of());
+        assertThat(model.getAttribute("thresholds")).isEqualTo(List.of());
     }
 
     @Test
@@ -101,6 +102,22 @@ class GamificationControllerTest {
         verify(gamificationService).updateGoal(CLINIC, 2, "مهارة2", 20);
         verify(gamificationService).updateGoal(CLINIC, 3, "مهارة3", 30);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.goals", "weekly_goal");
+    }
+
+    @Test
+    void updateGoalsSkipsBlankTitleRows() {
+        HttpSession session = session();
+        allowDashboard();
+        when(gamificationService.get(CLINIC)).thenReturn(new GamificationSettings(true, true, true, true, false, true));
+        when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
+        when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
+
+        controller.updateGoals(new String[]{"مهارة1", "", ""}, new String[]{"10", "", ""}, session, model);
+
+        verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
+        verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(2), any(), org.mockito.ArgumentMatchers.anyInt());
+        verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(3), any(), org.mockito.ArgumentMatchers.anyInt());
+        assertThat(model.getAttribute("goalErrors")).isEqualTo(Map.of());
     }
 
     @Test

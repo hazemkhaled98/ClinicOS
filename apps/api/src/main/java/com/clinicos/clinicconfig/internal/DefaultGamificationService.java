@@ -39,8 +39,7 @@ public class DefaultGamificationService implements GamificationService {
                     .set(GAMIFICATION_SETTINGS.SHOW_LEADERBOARD, false)
                     .set(GAMIFICATION_SETTINGS.SHOW_REWARD, true)
                     .onConflict(GAMIFICATION_SETTINGS.CLINIC_ID)
-                    .doUpdate()
-                    .setNonKeyToExcluded()
+                    .doNothing()
                     .returning()
                     .fetchOne();
             if (row == null) {

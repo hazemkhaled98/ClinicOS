@@ -95,7 +95,7 @@
       <div class="flex items-center gap-3" th:each="name : ${'نجم الأسبوع,الأكثر إنجازاً,مبدع,ملتزم,متميز'.split(',')}">
         <input type="hidden" name="names" th:value="${name}">
         <span class="text-sm text-on-surface-variant font-bold w-32" th:text="${name}">شارة</span>
-        <input type="number" name="thresholds" class="clinicos-input w-24" min="0" value="10">
+        <input type="number" name="thresholds" class="clinicos-input w-24" min="0" value="0">
         <span class="text-xs text-on-surface-variant">مهنة</span>
       </div>
     </th:block>

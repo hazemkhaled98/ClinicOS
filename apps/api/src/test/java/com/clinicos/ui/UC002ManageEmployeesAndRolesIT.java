@@ -176,4 +176,90 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             assertThat(page().locator(".clinicos-employee-row").count()).isZero();
         }
     }
+
+    @Nested
+    @DisplayName("Step: Goals & gamification tab")
+    class GoalsAndGamification {
+
+        @Test
+        @DisplayName("Saving each card persists values and survives reload")
+        void savingCardsPersistsAcrossReload() throws Exception {
+            String username = "owner-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicSlug = seedOwnerWithClinic(username, rawPassword);
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+            page().navigate(getUrl() + "admin-dashboard/goals");
+            dumpThresholds("initial-load");
+
+            page().locator("input[name=showLeaderboard]").check();
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ")).first().click();
+            page().locator("#settings-card input[name=showLeaderboard]").waitFor();
+            assertThat(page().locator("input[name=showLeaderboard]").isChecked()).isTrue();
+
+            page().locator("input[name=titles]").first().fill("مهارة التبسم");
+            page().locator("input[name=targets]").first().fill("12");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ الأهداف")).click();
+            page().locator("#goals-card input[name=titles]").first().waitFor();
+            assertThat(page().locator("input[name=titles]").first().inputValue()).isEqualTo("مهارة التبسم");
+            assertThat(page().locator("input[name=targets]").first().inputValue()).isEqualTo("12");
+
+            badgeThresholdInput("نجم الأسبوع").fill("7");
+            var thrResponse = page().waitForResponse(r -> r.url().contains("thresholds"),
+                    () -> page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ الشروط")).click());
+            String thrBody;
+            try {
+                thrBody = "[" + thrResponse.status() + "] " + thrResponse.text();
+            } catch (Exception e) {
+                thrBody = "[" + thrResponse.status() + "] ERR " + e + " url=" + thrResponse.url();
+            }
+            System.out.println("== [POST /thresholds] " + thrBody);
+            page().locator("#thresholds-card input[name=thresholds]").first().waitFor();
+            dumpThresholds("after-save-fragment");
+            assertThat(badgeThresholdValue("نجم الأسبوع")).isEqualTo("7");
+
+            page().reload();
+            dumpThresholds("after-reload");
+            dumpDbOrder(clinicSlug, "reload-raw");
+            dumpDbOrder(clinicSlug, "reload-raw-again");
+            page().navigate(getUrl() + "admin-dashboard/goals");
+            dumpThresholds("after-2nd-navigation");
+            assertThat(page().locator("input[name=showLeaderboard]").isChecked()).isTrue();
+            assertThat(page().locator("input[name=titles]").first().inputValue()).isEqualTo("مهارة التبسم");
+            assertThat(page().locator("input[name=targets]").first().inputValue()).isEqualTo("12");
+            assertThat(badgeThresholdValue("نجم الأسبوع")).isEqualTo("7");
+        }
+
+        private void dumpDbOrder(String slug, String label) throws Exception {
+            try (Connection connection = DriverManager.getConnection(
+                    PostgresTestSupport.POSTGRES.getJdbcUrl(),
+                    PostgresTestSupport.POSTGRES.getUsername(),
+                    PostgresTestSupport.POSTGRES.getPassword())) {
+                var rows = connection.createStatement().executeQuery(
+                        "select b.name, b.threshold from badge_threshold b join clinic c on c.id = b.clinic_id where c.slug = '" + slug + "' order by b.name asc");
+                StringBuilder sb = new StringBuilder();
+                while (rows.next()) {
+                    sb.append(rows.getString(1)).append('=').append(rows.getInt(2)).append(',');
+                }
+                System.out.println("== [db:" + label + "] " + sb);
+            }
+        }
+
+        private com.microsoft.playwright.Locator badgeThresholdInput(String badgeName) {
+            return page().locator("#thresholds-card form > div:has(input[name=names][value='" + badgeName + "'])")
+                    .locator("input[name=thresholds]");
+        }
+
+        private String badgeThresholdValue(String badgeName) {
+            return badgeThresholdInput(badgeName).inputValue();
+        }
+
+        private void dumpThresholds(String label) {
+            String dump = page().evalOnSelectorAll("#thresholds-card form > div",
+                    "els => els.map(e => { const r = e.querySelector('input[name=names]'); const t = e.querySelector('input[name=thresholds]'); return r ? r.value + '=' + (t ? t.value : '?') : '??'; })")
+                    .toString();
+            System.out.println("== [" + label + "] " + dump + " :: docOrderFirst=" + page().locator("input[name=thresholds]").first().inputValue());
+        }
+    }
 }
