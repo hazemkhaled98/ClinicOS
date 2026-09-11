@@ -15,6 +15,30 @@
     document.addEventListener('htmx:sendError', function (e) {
       alert('تعذر الاتصال بالخادم. يرجى التحقق من الاتصال.');
     });
+    var toastTimer = null;
+    window.toastShow = function (message, type) {
+      var el = document.getElementById('toast-root');
+      if (!el) return;
+      var colors = {
+        success: 'bg-teal-700 text-white',
+        error: 'bg-danger-600 text-white',
+        info: 'bg-neutral-700 text-white'
+      };
+      el.className = 'fixed top-6 start-6 z-50 rounded-xl px-4 py-3 text-sm font-bold shadow-lg transition-opacity duration-300 '
+        + (colors[type] || colors.success);
+      el.textContent = message;
+      el.classList.remove('hidden');
+      el.style.opacity = '1';
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        el.style.opacity = '0';
+        setTimeout(function () { el.classList.add('hidden'); }, 300);
+      }, type === 'error' ? 3500 : 2000);
+    };
+    document.body.addEventListener('showToast', function (e) {
+      var d = e.detail || {};
+      window.toastShow(d.message, d.type);
+    });
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>
