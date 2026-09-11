@@ -48,6 +48,7 @@ public class UserAdminController {
         model.addAttribute("addForm", UserForm.empty());
         model.addAttribute("userErrors", Map.of());
         model.addAttribute("userErrorScope", (String) null);
+        model.addAttribute("roleNames", roleNames());
         return "admin/users-page";
     }
 

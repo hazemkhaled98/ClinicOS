@@ -60,7 +60,7 @@
       </div>
     </th:block>
     <th:block th:if="${#lists.isEmpty(goals)}">
-      <div class="flex flex-wrap items-center gap-3" th:each="i : ${1, 2, 3}">
+      <div class="flex flex-wrap items-center gap-3" th:each="i : ${#numbers.sequence(1, 3)}">
         <span class="text-sm text-on-surface-variant font-bold" th:text="'هدف ' + ${i}">هدف 1</span>
         <input type="text" name="titles" class="clinicos-input w-48" placeholder="اسم الهدف">
         <input type="number" name="targets" class="clinicos-input w-24" min="0" placeholder="الهدف">

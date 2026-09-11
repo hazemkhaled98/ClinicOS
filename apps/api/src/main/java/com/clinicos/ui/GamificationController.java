@@ -41,9 +41,7 @@ public class GamificationController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
-        model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
-        model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
+        renderPage(model, clinicId);
         return "admin/gamification-page";
     }
 
@@ -139,7 +137,8 @@ public class GamificationController {
     }
 
     private void renderPage(Model model, UUID clinicId) {
-        model.addAttribute("gamificationSettings", gamificationService.get(clinicId));
+        GamificationSettings settings = gamificationService.get(clinicId);
+        model.addAttribute("gamificationSettings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
         model.addAttribute("weeklyGoals", gamificationService.getGoals(clinicId));
         model.addAttribute("badgeThresholds", gamificationService.getThresholds(clinicId));
     }
