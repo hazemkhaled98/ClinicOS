@@ -16,7 +16,6 @@ import com.clinicos.clinicconfig.api.GamificationService;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
 import com.clinicos.shared.ActivityLogService;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -54,7 +53,7 @@ public class GamificationController {
             @RequestParam(defaultValue = "false") boolean showWeeklyGoals,
             @RequestParam(defaultValue = "false") boolean showLeaderboard,
             @RequestParam(defaultValue = "false") boolean showReward,
-            HttpSession session, Model model, HttpServletResponse response) {
+            HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
@@ -62,7 +61,7 @@ public class GamificationController {
         gamificationService.updateSettings(clinicId, new GamificationSettings(
                 showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward));
         activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.settings", "gamification_settings");
-        triggerSaved(response, "تم حفظ إعدادات التحفيز");
+        model.addAttribute("toastMessage", "تم حفظ إعدادات التحفيز");
         renderPage(model, clinicId);
         return "admin/gamification :: settingsCard";
     }
@@ -71,7 +70,7 @@ public class GamificationController {
     public String updateGoals(
             @RequestParam String[] titles,
             @RequestParam String[] targets,
-            HttpSession session, Model model, HttpServletResponse response) {
+            HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
@@ -107,7 +106,7 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            triggerSaved(response, "تم حفظ الأهداف الأسبوعية");
+            model.addAttribute("toastMessage", "تم حفظ الأهداف الأسبوعية");
         }
         model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
@@ -118,7 +117,7 @@ public class GamificationController {
     public String updateThresholds(
             @RequestParam String[] names,
             @RequestParam String[] thresholds,
-            HttpSession session, Model model, HttpServletResponse response) {
+            HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
@@ -144,7 +143,7 @@ public class GamificationController {
             }
         }
         if (errors.isEmpty()) {
-            triggerSaved(response, "تم حفظ شروط الشارات");
+            model.addAttribute("toastMessage", "تم حفظ شروط الشارات");
         }
         model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);
@@ -156,10 +155,5 @@ public class GamificationController {
         model.addAttribute("settings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
         model.addAttribute("goals", gamificationService.getGoals(clinicId));
         model.addAttribute("thresholds", gamificationService.getThresholds(clinicId));
-    }
-
-    private void triggerSaved(HttpServletResponse response, String message) {
-        response.setHeader("HX-Trigger",
-                "{\"showToast\":{\"message\":\"" + message + "\",\"type\":\"success\"}}");
     }
 }

@@ -2,11 +2,8 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +24,6 @@ import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.ui.nav.NavSectionResolver;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 class GamificationControllerTest {
@@ -38,7 +34,6 @@ class GamificationControllerTest {
     private LayoutModel layoutModel;
     private GamificationService gamificationService;
     private ActivityLogService activityLogService;
-    private HttpServletResponse response;
     private GamificationController controller;
     private Model model;
 
@@ -47,7 +42,6 @@ class GamificationControllerTest {
         layoutModel = mock(LayoutModel.class);
         gamificationService = mock(GamificationService.class);
         activityLogService = mock(ActivityLogService.class);
-        response = mock(HttpServletResponse.class);
         controller = new GamificationController(layoutModel, gamificationService, activityLogService);
         model = new ExtendedModelMap();
     }
@@ -88,11 +82,11 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateSettings(true, false, true, false, false, true, session, model, response);
+        controller.updateSettings(true, false, true, false, false, true, session, model);
 
         verify(gamificationService).updateSettings(eq(CLINIC), any(GamificationSettings.class));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.settings", "gamification_settings");
-        verify(response).setHeader(eq("HX-Trigger"), contains("showToast"));
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ إعدادات التحفيز");
     }
 
     @Test
@@ -103,13 +97,13 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateGoals(new String[]{"مهارة1", "مهارة2", "مهارة3"}, new String[]{"10", "20", "30"}, session, model, response);
+        controller.updateGoals(new String[]{"مهارة1", "مهارة2", "مهارة3"}, new String[]{"10", "20", "30"}, session, model);
 
         verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
         verify(gamificationService).updateGoal(CLINIC, 2, "مهارة2", 20);
         verify(gamificationService).updateGoal(CLINIC, 3, "مهارة3", 30);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.goals", "weekly_goal");
-        verify(response).setHeader(eq("HX-Trigger"), contains("showToast"));
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الأهداف الأسبوعية");
     }
 
     @Test
@@ -120,13 +114,13 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateGoals(new String[]{"مهارة1", "", ""}, new String[]{"10", "", ""}, session, model, response);
+        controller.updateGoals(new String[]{"مهارة1", "", ""}, new String[]{"10", "", ""}, session, model);
 
         verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
         verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(2), any(), org.mockito.ArgumentMatchers.anyInt());
         verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(3), any(), org.mockito.ArgumentMatchers.anyInt());
         assertThat(model.getAttribute("goalErrors")).isEqualTo(Map.of());
-        verify(response).setHeader(eq("HX-Trigger"), contains("showToast"));
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الأهداف الأسبوعية");
     }
 
     @Test
@@ -137,23 +131,23 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateThresholds(new String[]{"شارة1", "شارة2"}, new String[]{"5", "15"}, session, model, response);
+        controller.updateThresholds(new String[]{"شارة1", "شارة2"}, new String[]{"5", "15"}, session, model);
 
         verify(gamificationService).updateThreshold(CLINIC, "شارة1", 5);
         verify(gamificationService).updateThreshold(CLINIC, "شارة2", 15);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.thresholds", "badge_threshold");
-        verify(response).setHeader(eq("HX-Trigger"), contains("showToast"));
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ شروط الشارات");
     }
 
     @Test
-    void updateGoalsSkipsHeaderWhenTargetsInvalid() {
+    void updateGoalsSkipsToastWhenTargetsInvalid() {
         HttpSession session = session();
         allowDashboard();
 
-        controller.updateGoals(new String[]{"مهارة1"}, new String[]{"abc"}, session, model, response);
+        controller.updateGoals(new String[]{"مهارة1"}, new String[]{"abc"}, session, model);
 
         assertThat((Map<?, ?>) model.getAttribute("goalErrors")).isNotEmpty();
-        verify(response, never()).setHeader(eq("HX-Trigger"), anyString());
+        assertThat(model.getAttribute("toastMessage")).isNull();
     }
 
     private void allowDashboard() {

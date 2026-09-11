@@ -35,9 +35,12 @@
         setTimeout(function () { el.classList.add('hidden'); }, 300);
       }, type === 'error' ? 3500 : 2000);
     };
-    document.body.addEventListener('showToast', function (e) {
-      var d = e.detail || {};
-      window.toastShow(d.message, d.type);
+    document.body.addEventListener('htmx:afterSwap', function () {
+      var el = document.querySelector('[data-toast]');
+      if (el) {
+        window.toastShow(el.getAttribute('data-toast'), el.getAttribute('data-toast-type') || 'success');
+        el.removeAttribute('data-toast');
+      }
     });
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
