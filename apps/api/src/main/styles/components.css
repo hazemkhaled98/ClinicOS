@@ -89,6 +89,7 @@
     transition: background-color 0.15s ease, border-color 0.15s ease;
     background-color: var(--color-teal-900);
     color: var(--color-surface-elevated);
+    cursor: pointer;
   }
 
   .clinicos-btn:hover:not(:disabled) {
@@ -208,6 +209,7 @@
     font-size: 0.875rem;
     font-weight: 600;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
   }
 
   .clinicos-admin-tab--active {
