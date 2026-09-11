@@ -5,7 +5,7 @@
       th:attr="hx-headers='{\&quot;X-CSRF-TOKEN\&quot;:\&quot;' + ${_csrf.token} + '\&quot;}'">
   <main class="w-full min-h-screen flex flex-col bg-surface">
     <header th:replace="~{fragments/topbar :: topbar}"></header>
-    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full">
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto">
       <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">ClinicOS</h1>
     </section>
   </main>
