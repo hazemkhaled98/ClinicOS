@@ -17,7 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
+import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
+import com.clinicos.identity.api.UserAdminService.UserValidationException;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -80,12 +82,41 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     void createDuplicateUsernameThrows() {
         TenantContext.set(clinicA);
         String uname = "dup-" + UUID.randomUUID();
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+        userAdminService.create(clinicA, new UserCreateRequest(
                 uname, "أول", null, "hash"));
 
         assertThatThrownBy(() -> userAdminService.create(clinicA,
-                new com.clinicos.identity.api.UserAdminService.UserCreateRequest(uname, "ثاني", null, "hash")))
-                .isInstanceOf(IllegalArgumentException.class);
+                new UserCreateRequest(uname, "ثاني", null, "hash")))
+                .isInstanceOf(UserValidationException.class)
+                .satisfies(e -> assertThat(((UserValidationException) e).fieldErrors()).containsKey("username"));
+    }
+
+    @Test
+    void createDuplicateBlankEmailLeavesConnectionUsable() {
+        TenantContext.set(clinicA);
+        String empSuffix = "emp-" + UUID.randomUUID();
+        userAdminService.create(clinicA, new UserCreateRequest(
+                empSuffix, "أول", "", "hash"));
+
+        assertThatThrownBy(() -> userAdminService.create(clinicA,
+                new UserCreateRequest("dup-email-" + UUID.randomUUID(), "ثاني", "", "hash")))
+                .isInstanceOf(UserValidationException.class)
+                .satisfies(e -> assertThat(((UserValidationException) e).fieldErrors()).containsKey("email"));
+
+        userAdminService.create(clinicA, new UserCreateRequest(
+                "after-" + UUID.randomUUID(), "بعد الخطأ", null, "hash"));
+        assertThat(userAdminService.list(clinicA)).hasSize(2);
+    }
+
+    @Test
+    void createDuplicateNullEmailSucceedsBothUsers() {
+        TenantContext.set(clinicA);
+        userAdminService.create(clinicA, new UserCreateRequest(
+                "null-email-1-" + UUID.randomUUID(), "أول", null, "hash"));
+        userAdminService.create(clinicA, new UserCreateRequest(
+                "null-email-2-" + UUID.randomUUID(), "ثاني", null, "hash"));
+
+        assertThat(userAdminService.list(clinicA)).hasSize(2);
     }
 
     @Test

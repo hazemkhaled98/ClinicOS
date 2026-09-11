@@ -7,7 +7,9 @@ import static com.clinicos.shared.jooq.Routines.createClinicUser;
 import static com.clinicos.shared.jooq.Routines.setUserPassword;
 import static com.clinicos.shared.jooq.Routines.setUserStatus;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -45,22 +47,32 @@ public class DefaultUserAdminService implements UserAdminService {
     @Override
     public UserSummary create(UUID clinicId, UserCreateRequest request) {
         return transactionTemplate.execute(status -> {
+            Map<String, String> fieldErrors = new HashMap<>();
+            if (usernameExists(clinicId, request.username())) {
+                fieldErrors.put("username", "اسم المستخدم موجود مسبقاً في هذه العيادة");
+            }
+            if (request.email() != null && emailExists(clinicId, request.email())) {
+                fieldErrors.put("email", "البريد الإلكتروني مستخدم بالفعل في هذه العيادة");
+            }
+            if (!fieldErrors.isEmpty()) {
+                throw new UserValidationException(fieldErrors);
+            }
             UUID userId;
             try {
                 userId = createClinicUser(dsl.configuration(), clinicId,
                         request.username(), request.fullName(), request.passwordHash(), request.email());
             } catch (DuplicateKeyException e) {
-                throw new IllegalArgumentException("اسم المستخدم موجود مسبقاً في هذه العيادة");
+                throw conflictByConstraint(e);
             }
 UserSummary summary = dsl.select(
                         APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
                         APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID, MEMBERSHIP.EMPLOYEE_ID)
                 .from(APP_USER)
-                    .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
-                            .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
-                    .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
-                    .where(APP_USER.ID.eq(userId))
-                    .fetchOne(this::toSummary);
+                .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
+                        .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
+                .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
+                .where(APP_USER.ID.eq(userId))
+                .fetchOne(this::toSummary);
             if (summary == null) {
                 throw new IllegalArgumentException("فشل إنشاء المستخدم");
             }
@@ -137,6 +149,24 @@ UserSummary summary = dsl.select(
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }
         });
+    }
+
+    private static UserValidationException conflictByConstraint(DuplicateKeyException e) {
+        String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+        if (message != null && message.contains("idx_app_user_email_when_not_null")) {
+            return new UserValidationException(Map.of("email", "البريد الإلكتروني مستخدم بالفعل في هذه العيادة"));
+        }
+        return new UserValidationException(Map.of("username", "اسم المستخدم موجود مسبقاً في هذه العيادة"));
+    }
+
+    private boolean usernameExists(UUID clinicId, String username) {
+        return dsl.fetchCount(APP_USER, APP_USER.CLINIC_ID.eq(clinicId)
+                .and(APP_USER.USERNAME.eq(username))) > 0;
+    }
+
+    private boolean emailExists(UUID clinicId, String email) {
+        return dsl.fetchCount(APP_USER, APP_USER.CLINIC_ID.eq(clinicId)
+                .and(APP_USER.EMAIL.eq(email))) > 0;
     }
 
     private UserSummary toSummary(org.jooq.Record r) {

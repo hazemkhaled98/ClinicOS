@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.identity.api.UserAdminService;
+import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
@@ -43,13 +45,16 @@ public class AdminController {
     private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
     private final ClinicSettingsService clinicSettingsService;
+    private final UserAdminService userAdminService;
 
     public AdminController(LayoutModel layoutModel, EmployeeService employeeService,
-            ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService) {
+            ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService,
+            UserAdminService userAdminService) {
         this.layoutModel = layoutModel;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
         this.clinicSettingsService = clinicSettingsService;
+        this.userAdminService = userAdminService;
     }
 
     @GetMapping("/admin-dashboard")
@@ -92,6 +97,14 @@ public class AdminController {
                 fieldErrors.put("employee", e.getMessage());
             }
         }
+        RoleChange roleChange = resolveRoleChange(session, employeeId, form.roleCode());
+        if (fieldErrors.isEmpty() && roleChange != null) {
+            try {
+                userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode());
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("role", e.getMessage());
+            }
+        }
         renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "edit", employeeId);
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم حفظ بيانات الموظف");
@@ -132,17 +145,47 @@ renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive"
 
     private void renderCard(Model model, HttpSession session, Map<String, String> fieldErrors,
             String errorScope, UUID errorRow) {
-        model.addAttribute("employees", employeeService.list(AdminAccess.clinicId(session)));
+        UUID clinicId = AdminAccess.clinicId(session);
+        model.addAttribute("employees", employeeService.list(clinicId));
+        model.addAttribute("employeeRoles", employeeRoles(userAdminService.list(clinicId)));
         model.addAttribute("employeeErrors", fieldErrors);
         model.addAttribute("employeeErrorScope", errorScope);
         model.addAttribute("employeeErrorRow", errorRow);
     }
 
-    public record EmployeeForm(String name, String staffRoleCode, String basePay, String maxIncentive,
+    private static Map<UUID, UserSummary> employeeRoles(java.util.List<UserSummary> users) {
+        Map<UUID, UserSummary> roles = new HashMap<>();
+        for (UserSummary user : users) {
+            if (user.employeeId() != null) {
+                roles.put(user.employeeId(), user);
+            }
+        }
+        return roles;
+    }
+
+    private record RoleChange(UUID membershipId, String roleCode) {
+    }
+
+    private RoleChange resolveRoleChange(HttpSession session, UUID employeeId, String roleCode) {
+        if (roleCode == null || roleCode.isBlank()) {
+            return null;
+        }
+        for (UserSummary user : userAdminService.list(AdminAccess.clinicId(session))) {
+            if (employeeId.equals(user.employeeId())) {
+                if ("owner".equals(user.roleCode()) || user.roleCode().equals(roleCode)) {
+                    return null;
+                }
+                return new RoleChange(user.membershipId(), roleCode);
+            }
+        }
+        return null;
+    }
+
+    public record EmployeeForm(String name, String staffRoleCode, String roleCode, String basePay, String maxIncentive,
             Boolean customShift, String shiftStart, String shiftEnd) {
 
         static EmployeeForm empty() {
-            return new EmployeeForm("", "assistant", "", "", false, "", "");
+            return new EmployeeForm("", "assistant", null, "", "", false, "", "");
         }
 
         EmployeeRequest toRequest(Map<String, String> fieldErrors) {

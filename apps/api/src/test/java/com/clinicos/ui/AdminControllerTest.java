@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.identity.api.UserAdminService;
+import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
@@ -38,6 +40,7 @@ class AdminControllerTest {
     private EmployeeService employeeService;
     private ActivityLogService activityLogService;
     private ClinicSettingsService clinicSettingsService;
+    private UserAdminService userAdminService;
     private AdminController controller;
     private Model model;
 
@@ -47,7 +50,8 @@ class AdminControllerTest {
         employeeService = mock(EmployeeService.class);
         activityLogService = mock(ActivityLogService.class);
         clinicSettingsService = mock(ClinicSettingsService.class);
-        controller = new AdminController(layoutModel, employeeService, activityLogService, clinicSettingsService);
+        userAdminService = mock(UserAdminService.class);
+        controller = new AdminController(layoutModel, employeeService, activityLogService, clinicSettingsService, userAdminService);
         model = new ExtendedModelMap();
     }
 
@@ -96,7 +100,7 @@ class AdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         String view = controller.updateEmployee(updated.id(), new AdminController.EmployeeForm(
-                "محمود", "assistant", "5200", "2000", false, "", ""), session, model);
+                "محمود", "assistant", null, "5200", "2000", false, "", ""), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.update", "employee");
@@ -114,7 +118,7 @@ class AdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.updateEmployee(UUID.randomUUID(), new AdminController.EmployeeForm(
-                "محمود", "assistant", "5200", "2000", false, "", ""), session, model);
+                "محمود", "assistant", null, "5200", "2000", false, "", ""), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(activityLogService, never()).log(any(), any(), any(), any());
@@ -151,6 +155,60 @@ class AdminControllerTest {
                 .isEqualTo("الموظف غير موجود");
         verify(activityLogService, never()).log(any(), any(), any(), any());
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
+    }
+
+    @Test
+    void updateEmployeeWithChangedRoleAssignsRole() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
+        Employee updated = new Employee(employeeId, "محمود", StaffRole.ASSISTANT, null, null, null, null, false, null, null);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateEmployee(employeeId, new AdminController.EmployeeForm(
+                "محمود", "assistant", "manager", "5200", "2000", false, "", ""), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        verify(userAdminService).assignRole(CLINIC, membershipId, "manager");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ بيانات الموظف");
+    }
+
+    @Test
+    void updateEmployeeOwnerRowNeverAssignsRole() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        UserSummary summary = new UserSummary(UUID.randomUUID(), "owner", "المالك", null, "active", "owner", membershipId, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
+        Employee updated = new Employee(employeeId, "المالك", StaffRole.ASSISTANT, null, null, null, null, false, null, null);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateEmployee(employeeId, new AdminController.EmployeeForm(
+                "المالك", "assistant", "manager", "5200", "2000", false, "", ""), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        verify(userAdminService, never()).assignRole(any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeWithoutRoleSelectSkipsAssignRole() {
+        HttpSession session = session();
+        allowDashboard();
+        Employee updated = employee("محمود", StaffRole.ASSISTANT);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        controller.updateEmployee(updated.id(), new AdminController.EmployeeForm(
+                "محمود", "assistant", null, "5200", "2000", false, "", ""), session, model);
+
+        verify(userAdminService, never()).assignRole(any(), any(), any());
     }
 
     private void allowDashboard() {

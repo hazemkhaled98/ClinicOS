@@ -10,7 +10,7 @@
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub" th:text="${section.subtitle}">التحليلات التشغيلية والإدارية</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('settings')}"></nav>
       <div id="employees-card"
-           th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeErrors}, ${employeeErrorScope}, ${employeeErrorRow})}">
+           th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeRoles}, ${employeeErrors}, ${employeeErrorScope}, ${employeeErrorRow})}">
       </div>
       <div th:replace="~{admin/clinic-settings :: weightsCard(${settings}, null, ${weights}, ${weightsSum})}"></div>
       <div th:replace="~{admin/clinic-settings :: volumeCard(${settings}, null)}"></div>

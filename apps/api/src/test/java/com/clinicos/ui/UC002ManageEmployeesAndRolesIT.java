@@ -188,9 +188,56 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             page().getByLabel("اسم المستخدم").fill("emp-" + uniqueSuffix());
             page().getByLabel("الاسم الكامل").fill(fullName);
             page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
-            page().getByLabel("الحساب ده موظف").check();
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
             userRow(fullName).waitFor();
+        }
+
+        @Test
+        @DisplayName("Adding a duplicate username shows an Arabic error, not a 500")
+        void duplicateUsernameShowsArabicError() throws Exception {
+            String username = "owner-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicSlug = seedOwnerWithClinic(username, rawPassword);
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+            openAdminUsers();
+
+            String duplicatedUsername = "dup-" + uniqueSuffix();
+            page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
+            page().getByLabel("الاسم الكامل").fill("حساب أول");
+            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+            userRow("حساب أول").waitFor();
+
+            page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
+            page().getByLabel("الاسم الكامل").fill("حساب ثاني");
+            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+
+            page().getByRole(AriaRole.ALERT).waitFor();
+            PlaywrightAssertions.assertThat(page().getByRole(AriaRole.ALERT)
+                    .getByText("اسم المستخدم موجود مسبقاً في هذه العيادة")).isVisible();
+            PlaywrightAssertions.assertThat(page().locator("#users-card")).isVisible();
+            assertThat(page().locator(".clinicos-user-row").count()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("Two users leaving email blank both succeed (no 500 on the empty-email collision)")
+        void twoBlankEmailUsersBothSucceed() throws Exception {
+            String username = "owner-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicSlug = seedOwnerWithClinic(username, rawPassword);
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+
+            addEmployeeWithAccount("بدون بريد أول");
+            addEmployeeWithAccount("بدون بريد ثاني");
+
+            PlaywrightAssertions.assertThat(userRow("بدون بريد أول")).isVisible();
+            PlaywrightAssertions.assertThat(userRow("بدون بريد ثاني")).isVisible();
+            assertThat(page().locator(".clinicos-user-row").count()).isEqualTo(3);
         }
 
         private com.microsoft.playwright.Locator employeeRow(String name) {

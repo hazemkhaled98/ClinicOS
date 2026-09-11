@@ -10,7 +10,7 @@
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">إدارة الحسابات وكلمات المرور والأدوار</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('users')}"></nav>
       <div id="users-card"
-           th:replace="~{admin/users :: usersCard(${users}, ${employees}, ${userErrors}, ${userErrorScope}, ${addForm})}">
+           th:replace="~{admin/users :: usersCard(${users}, ${userErrors}, ${userErrorScope}, ${addForm})}">
       </div>
     </section>
   </main>

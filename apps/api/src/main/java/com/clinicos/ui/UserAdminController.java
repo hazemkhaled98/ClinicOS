@@ -1,14 +1,12 @@
 package com.clinicos.ui;
 
-import java.math.BigDecimal;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +22,7 @@ import com.clinicos.staff.api.EmployeeService.Employee;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
 import com.clinicos.staff.api.EmployeeService.EmployeeValidationException;
 import com.clinicos.staff.api.EmployeeService.StaffRole;
+import com.clinicos.identity.api.UserAdminService.UserValidationException;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -34,14 +33,16 @@ public class UserAdminController {
     private final UserAdminService userAdminService;
     private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
+    private final TransactionTemplate transactionTemplate;
     private final Argon2PasswordEncoder passwordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 
     public UserAdminController(LayoutModel layoutModel, UserAdminService userAdminService,
-            EmployeeService employeeService, ActivityLogService activityLogService) {
+            EmployeeService employeeService, ActivityLogService activityLogService, TransactionTemplate transactionTemplate) {
         this.layoutModel = layoutModel;
         this.userAdminService = userAdminService;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @GetMapping("/admin-dashboard/users")
@@ -56,7 +57,6 @@ public class UserAdminController {
     }
 
     @PostMapping("/admin-dashboard/users")
-    @Transactional
     public String createUser(UserForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
@@ -64,32 +64,23 @@ public class UserAdminController {
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         validate(form, fieldErrors);
-        String membershipRoleCode = null;
-        EmployeeRequest employeeRequest = null;
-        if (fieldErrors.isEmpty()) {
-            if (Boolean.TRUE.equals(form.createEmployee())) {
-                membershipRoleCode = form.staffRoleCode();
-                employeeRequest = toEmployeeRequest(form, fieldErrors);
-            } else {
-                membershipRoleCode = form.roleCode();
-            }
-        }
         if (fieldErrors.isEmpty()) {
             try {
-                UserSummary created = userAdminService.create(clinicId, new UserCreateRequest(
-                        form.username().trim(), form.fullName().trim(), form.email(), passwordEncoder.encode(form.password())));
-                if (employeeRequest != null) {
-                    Employee employee = employeeService.create(clinicId, employeeRequest);
+                String email = form.email() == null || form.email().isBlank() ? null : form.email().trim();
+                transactionTemplate.executeWithoutResult(status -> {
+                    UserSummary created = userAdminService.create(clinicId, new UserCreateRequest(
+                            form.username().trim(), form.fullName().trim(), email, passwordEncoder.encode(form.password())));
+                    Employee employee = employeeService.create(clinicId, new EmployeeRequest(
+                            form.fullName().trim(), StaffRole.ASSISTANT, null, null, null, null, false, null));
                     userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id());
-                }
-                if (membershipRoleCode != null && !"receptionist".equals(membershipRoleCode)) {
-                    userAdminService.assignRole(clinicId, created.membershipId(), membershipRoleCode);
-                }
+                });
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");
-            } catch (IllegalArgumentException e) {
-                fieldErrors.put("username", e.getMessage());
+            } catch (UserValidationException e) {
+                fieldErrors.putAll(e.fieldErrors());
             } catch (EmployeeValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("username", e.getMessage());
             }
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
@@ -201,51 +192,14 @@ public class UserAdminController {
         return "admin/users :: usersCard";
     }
 
-    @PostMapping("/admin-dashboard/users/memberships/{membershipId}/link-employee")
-    public String linkEmployee(@PathVariable UUID membershipId, @RequestParam(required = false) UUID employeeId,
-            HttpSession session, Model model) {
-        if (!AdminAccess.canDashboard(layoutModel, session)) {
-            return "redirect:/";
-        }
-        UUID clinicId = AdminAccess.clinicId(session);
-        Map<String, String> fieldErrors = new HashMap<>();
-        if (employeeId != null) {
-            try {
-                userAdminService.linkEmployee(clinicId, membershipId, employeeId);
-                activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.link_employee", "user");
-            } catch (IllegalArgumentException e) {
-                fieldErrors.put("user", e.getMessage());
-            }
-        }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "link", UserForm.empty());
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم ربط الموظف");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
-        return "admin/users :: usersCard";
-    }
-
     private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, Map<String, String> fieldErrors,
             String errorScope, UserForm addForm) {
-        java.util.List<Employee> employees = employeeService.list(clinicId);
         model.addAttribute("users", userAdminService.list(clinicId));
-        model.addAttribute("employees", employees);
         model.addAttribute("currentMembershipId", currentMembershipId);
-        model.addAttribute("employeeNames", employeeNames(employees));
         model.addAttribute("userErrors", fieldErrors == null ? Map.of() : fieldErrors);
         model.addAttribute("userErrorScope", errorScope);
         model.addAttribute("addForm", addForm);
         model.addAttribute("roleNames", roleNames());
-    }
-
-    private static Map<UUID, String> employeeNames(java.util.List<Employee> employees) {
-        Map<UUID, String> names = new HashMap<>();
-        for (Employee employee : employees) {
-            names.put(employee.id(), employee.name());
-        }
-        return names;
     }
 
     private static Map<String, String> roleNames() {
@@ -268,43 +222,14 @@ public class UserAdminController {
         }
     }
 
-    private static EmployeeRequest toEmployeeRequest(UserForm form, Map<String, String> errors) {
-        StaffRole role = null;
-        if (form.staffRoleCode() == null || form.staffRoleCode().isBlank()) {
-            errors.put("staffRole", "المسمى الوظيفي مطلوب");
-        } else {
-            try {
-                role = StaffRole.fromCode(form.staffRoleCode());
-            } catch (IllegalArgumentException e) {
-                errors.put("staffRole", e.getMessage());
-            }
-        }
-        boolean isCustomShift = Boolean.TRUE.equals(form.customShift());
-        BigDecimal basePay = FormParsing.parseAmount(form.basePay(), "basePay", errors, "المرتب الأساسي غير صحيح");
-        BigDecimal maxIncentive = FormParsing.parseAmount(form.maxIncentive(), "maxIncentive", errors,
-                "الحافز الكامل غير صحيح");
-        LocalTime shiftStart = null;
-        LocalTime shiftEnd = null;
-        if (isCustomShift) {
-            shiftStart = FormParsing.parseTime(form.shiftStart(), "shift", errors);
-            shiftEnd = FormParsing.parseTime(form.shiftEnd(), "shift", errors);
-        }
-        return new EmployeeRequest(form.fullName().trim(), role, basePay, maxIncentive, shiftStart, shiftEnd,
-                isCustomShift, null);
-    }
-
-    public record UserForm(String username, String fullName, String email, String password,
-            Boolean createEmployee, String roleCode, String staffRoleCode,
-            String basePay, String maxIncentive, Boolean customShift,
-            String shiftStart, String shiftEnd) {
+    public record UserForm(String username, String fullName, String email, String password) {
 
         static UserForm empty() {
             return of("", "", "", "");
         }
 
         static UserForm of(String username, String fullName, String email, String password) {
-            return new UserForm(username, fullName, email, password, false, "receptionist",
-                    "assistant", "", "", false, "", "");
+            return new UserForm(username, fullName, email, password);
         }
     }
 }
