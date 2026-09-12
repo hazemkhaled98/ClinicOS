@@ -76,6 +76,35 @@ class PermissionsControllerTest {
     }
 
     @Test
+    void ownerSeesAllManageableRoleCodes() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("owner");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        controller.permissions(session, model);
+
+        String[] expected = {"owner", "manager", "assistant", "receptionist"};
+        assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
+                .containsExactlyInAnyOrder(expected);
+    }
+
+    @Test
+    void managerSeesOnlyLowerRoleCodes() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("manager");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        controller.permissions(session, model);
+
+        assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
+                .containsExactlyInAnyOrder("assistant", "receptionist");
+    }
+
+    @Test
     void updatePermissionsLogsActivity() {
         HttpSession session = session();
         allowDashboard();
@@ -86,7 +115,7 @@ class PermissionsControllerTest {
                 PermissionsController.PermissionsForm.of("manager", "emp", "quick"), Validated.of(PermissionsController.PermissionsForm.of("manager", "emp", "quick")), session, model);
 
         assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
-        verify(rolePermissionService).setPermissions(CLINIC, "manager",
+        verify(rolePermissionService).setPermissions(CLINIC, MEMBERSHIP, "manager",
                 java.util.Set.of("emp", "quick"));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "permissions.update", "role_permission");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الصلاحيات");
@@ -106,7 +135,7 @@ class PermissionsControllerTest {
         assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("الدور مطلوب");
-        verify(rolePermissionService, never()).setPermissions(any(), any(), any());
+        verify(rolePermissionService, never()).setPermissions(any(), any(), any(), any());
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
@@ -115,7 +144,7 @@ class PermissionsControllerTest {
         HttpSession session = session();
         allowDashboard();
         doThrow(new IllegalArgumentException("الدور المحدد غير موجود"))
-                .when(rolePermissionService).setPermissions(eq(CLINIC), eq("manager"), any());
+                .when(rolePermissionService).setPermissions(eq(CLINIC), eq(MEMBERSHIP), eq("manager"), any());
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
 

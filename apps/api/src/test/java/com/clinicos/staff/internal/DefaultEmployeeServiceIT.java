@@ -144,6 +144,19 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void failedSaveLeavesNoRowBehind() {
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> employeeService.create(clinicA,
+                request("محمود", "-1", null, null, null, false)))
+                .isInstanceOf(EmployeeValidationException.class);
+        assertThatThrownBy(() -> employeeService.create(clinicA,
+                request("محمود", null, null, LocalTime.of(9, 0), null, true)))
+                .isInstanceOf(EmployeeValidationException.class);
+
+        assertThat(employeeService.list(clinicA)).isEmpty();
+    }
+
+    @Test
     void rejectsBlankNameNegativePayAndPartialCustomShift() {
         TenantContext.set(clinicA);
         assertThrows(EmployeeValidationException.class,

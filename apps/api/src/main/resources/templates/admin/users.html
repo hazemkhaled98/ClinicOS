@@ -32,13 +32,13 @@
 
       <div class="flex items-center gap-2 me-auto">
         <span th:if="${user.roleCode() == 'owner'}" class="clinicos-chip clinicos-chip--success">صلاحيات كاملة – لا تُحذف</span>
-        <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId)}"
+        <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId) and (actorRole == 'owner' or user.roleCode() == 'assistant' or user.roleCode() == 'receptionist')}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/suspend'"
               hx-target="#users-card" hx-swap="outerHTML"
               hx-confirm="هل أنت متأكد من تعليق هذا المستخدم؟">
           <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">تعليق</button>
         </form>
-        <form th:if="${user.status() == 'suspended'}"
+        <form th:if="${user.status() == 'suspended' and user.roleCode() != 'owner' and (actorRole == 'owner' or user.roleCode() == 'assistant' or user.roleCode() == 'receptionist')}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/reactivate'"
               hx-target="#users-card" hx-swap="outerHTML">
           <button type="submit" class="clinicos-btn text-xs">تفعيل</button>

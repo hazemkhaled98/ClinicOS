@@ -105,7 +105,8 @@ public class AdminController {
         RoleChange roleChange = resolveRoleChange(session, employeeId, form.getRoleCode());
         if (fieldErrors.isEmpty() && roleChange != null) {
             try {
-                userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode());
+                userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode(),
+                        AdminAccess.membershipId(session));
             } catch (IllegalArgumentException e) {
                 log.warn("assignRole failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
                 fieldErrors.put("role", e.getMessage());
@@ -122,9 +123,13 @@ public class AdminController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
+        var linked = userAdminService.list(AdminAccess.clinicId(session)).stream()
+                .filter(user -> employeeId.equals(user.employeeId()))
+                .findFirst();
         try {
             employeeService.archive(AdminAccess.clinicId(session), employeeId);
             activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
+            linked.ifPresent(user -> suspendLinkedUser(user, session));
         } catch (IllegalArgumentException e) {
             // not found / already archived / RLS-hidden -- re-render clean card
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
@@ -135,6 +140,19 @@ public class AdminController {
         return "admin/employees :: employeesCard";
     }
 
+    private void suspendLinkedUser(UserSummary user, HttpSession session) {
+        UUID clinicId = AdminAccess.clinicId(session);
+        if ("owner".equals(user.roleCode())
+                || user.membershipId().equals(AdminAccess.membershipId(session))) {
+            return;
+        }
+        try {
+            userAdminService.suspend(clinicId, user.id(), AdminAccess.membershipId(session));
+        } catch (IllegalArgumentException e) {
+            log.warn("archive suspend skipped: user {} clinic {}", user.id(), clinicId, e);
+        }
+    }
+
     private boolean canAccessDashboard(HttpSession session) {
         return AdminAccess.canDashboard(layoutModel, session);
     }
@@ -143,6 +161,7 @@ public class AdminController {
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("employees", employeeService.list(clinicId));
         model.addAttribute("employeeRoles", employeeRoles(userAdminService.list(clinicId)));
+        model.addAttribute("actorRole", AdminAccess.roleCode(session));
     }
 
     private static Map<UUID, UserSummary> employeeRoles(java.util.List<UserSummary> users) {

@@ -172,7 +172,7 @@ class UserAdminControllerTest {
 
         controller.reactivate(userId, session, model);
 
-        verify(userAdminService).reactivate(CLINIC, userId);
+        verify(userAdminService).reactivate(CLINIC, userId, MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.reactivate", "user");
     }
 
@@ -186,7 +186,7 @@ class UserAdminControllerTest {
 
         controller.assignRole(UUID.randomUUID(), UserAdminController.AssignRoleForm.of("manager", membershipId), Validated.of(UserAdminController.AssignRoleForm.of("manager", membershipId)), session, model);
 
-        verify(userAdminService).assignRole(CLINIC, membershipId, "manager");
+        verify(userAdminService).assignRole(CLINIC, membershipId, "manager", MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.assign_role", "user");
     }
 
@@ -202,7 +202,7 @@ class UserAdminControllerTest {
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
-        verify(userAdminService, never()).assignRole(any(), any(), any());
+        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
     }
 
     @Test
@@ -218,7 +218,7 @@ class UserAdminControllerTest {
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
-        verify(userAdminService, never()).changePassword(any(), any(), any());
+        verify(userAdminService, never()).changePassword(any(), any(), any(), any());
     }
 
     @Test
@@ -227,7 +227,7 @@ class UserAdminControllerTest {
         allowDashboard();
         UUID userId = UUID.randomUUID();
         doThrow(new IllegalArgumentException("المستخدم غير موجود"))
-                .when(userAdminService).changePassword(eq(CLINIC), eq(userId), any());
+                .when(userAdminService).changePassword(eq(CLINIC), eq(userId), any(), eq(MEMBERSHIP));
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
@@ -256,7 +256,7 @@ class UserAdminControllerTest {
         assertThat(view).isEqualTo("admin/users :: usersCard");
         verify(employeeService).create(eq(CLINIC), any());
         verify(userAdminService).linkEmployee(CLINIC, membershipId, employeeId);
-        verify(userAdminService, never()).assignRole(any(), any(), any());
+        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 

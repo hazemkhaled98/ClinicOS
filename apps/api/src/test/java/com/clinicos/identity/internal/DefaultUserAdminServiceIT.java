@@ -120,16 +120,18 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void suspendThenListShowsSuspended() {
+    void suspendThenListShowsSuspended() throws Exception {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "suspend-" + UUID.randomUUID(), "معلق", null, "hash"));
-        UUID userId = userAdminService.list(clinicA).get(0).id();
+        UserSummary actor = createUser(clinicA, "suspend-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "suspend-target");
+        setRoleDirect(clinicA, target.membershipId(), "assistant");
 
-        userAdminService.suspend(clinicA, userId, UUID.randomUUID());
+        userAdminService.suspend(clinicA, target.id(), actor.membershipId());
 
         List<UserSummary> users = userAdminService.list(clinicA);
-        assertThat(users.get(0).status()).isEqualTo("suspended");
+        assertThat(users).filteredOn(u -> u.id().equals(target.id())).singleElement()
+                .extracting(UserSummary::status).isEqualTo("suspended");
     }
 
     @Test
@@ -146,15 +148,14 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void suspendOwnerThrows() {
+    void suspendOwnerThrows() throws Exception {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "owner-" + UUID.randomUUID(), "مالك", null, "hash"));
-        UUID userId = userAdminService.list(clinicA).get(0).id();
-        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
-        userAdminService.assignRole(clinicA, membershipId, "owner");
+        UserSummary actor = createUser(clinicA, "owner-test-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "owner-test-target");
+        setRoleDirect(clinicA, target.membershipId(), "owner");
 
-        assertThatThrownBy(() -> userAdminService.suspend(clinicA, userId, UUID.randomUUID()))
+        assertThatThrownBy(() -> userAdminService.suspend(clinicA, target.id(), actor.membershipId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("المالك");
     }
@@ -199,17 +200,156 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void reactivateRestoresActive() {
+    void reactivateRestoresActive() throws Exception {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "react-" + UUID.randomUUID(), "معاد", null, "hash"));
-        UUID userId = userAdminService.list(clinicA).get(0).id();
-        userAdminService.suspend(clinicA, userId, UUID.randomUUID());
+        UserSummary actor = createUser(clinicA, "react-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "react-target");
+        setRoleDirect(clinicA, target.membershipId(), "assistant");
+        userAdminService.suspend(clinicA, target.id(), actor.membershipId());
 
-        userAdminService.reactivate(clinicA, userId);
+        userAdminService.reactivate(clinicA, target.id(), actor.membershipId());
 
         List<UserSummary> users = userAdminService.list(clinicA);
-        assertThat(users.get(0).status()).isEqualTo("active");
+        assertThat(users).filteredOn(u -> u.id().equals(target.id())).singleElement()
+                .extracting(UserSummary::status).isEqualTo("active");
+    }
+
+    @Test
+    void managerCannotAssignManagerRole() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "hier-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "hier-target");
+
+        assertThatThrownBy(() -> userAdminService.assignRole(clinicA, target.membershipId(), "manager", actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+    }
+
+    @Test
+    void managerCannotDemoteSelf() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "self-demote");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+
+        assertThatThrownBy(() -> userAdminService.assignRole(clinicA, actor.membershipId(), "assistant", actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+    }
+
+    @Test
+    void managerCanAssignAssistantToReceptionist() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "assign-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "assign-target");
+
+        userAdminService.assignRole(clinicA, target.membershipId(), "assistant", actor.membershipId());
+
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(u -> u.id().equals(target.id())).singleElement()
+                .extracting(UserSummary::roleCode).isEqualTo("assistant");
+    }
+
+    @Test
+    void ownerCanAssignManagerRole() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "owner-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "owner");
+        UserSummary target = createUser(clinicA, "promote-target");
+
+        userAdminService.assignRole(clinicA, target.membershipId(), "manager", actor.membershipId());
+
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(u -> u.id().equals(target.id())).singleElement()
+                .extracting(UserSummary::roleCode).isEqualTo("manager");
+    }
+
+    @Test
+    void ownerRoleIsNeverAssignable() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "owner-grant-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "owner");
+        UserSummary target = createUser(clinicA, "owner-grant-target");
+
+        assertThatThrownBy(() -> userAdminService.assignRole(clinicA, target.membershipId(), "owner", actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("المالك");
+    }
+
+    @Test
+    void managerCannotSuspendOrReactivateManager() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "mgr-act");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary target = createUser(clinicA, "mgr-tgt");
+        setRoleDirect(clinicA, target.membershipId(), "manager");
+        UserSummary staff = createUser(clinicA, "staff-tgt");
+        setRoleDirect(clinicA, staff.membershipId(), "assistant");
+
+        assertThatThrownBy(() -> userAdminService.suspend(clinicA, target.id(), actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+        assertThatThrownBy(() -> userAdminService.reactivate(clinicA, target.id(), actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+
+        userAdminService.suspend(clinicA, staff.id(), actor.membershipId());
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(u -> u.id().equals(staff.id())).singleElement()
+                .extracting(UserSummary::status).isEqualTo("suspended");
+    }
+
+    @Test
+    void managerCannotChangeManagerOrOwnerPasswordButOwnAndLowerWork() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "pwd-actor");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary peer = createUser(clinicA, "pwd-peer");
+        setRoleDirect(clinicA, peer.membershipId(), "manager");
+        UserSummary owner = createUser(clinicA, "pwd-owner");
+        setRoleDirect(clinicA, owner.membershipId(), "owner");
+        UserSummary staff = createUser(clinicA, "pwd-staff");
+        setRoleDirect(clinicA, staff.membershipId(), "assistant");
+
+        assertThatThrownBy(() -> userAdminService.changePassword(clinicA, peer.id(), "hash-x", actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+        assertThatThrownBy(() -> userAdminService.changePassword(clinicA, owner.id(), "hash-x", actor.membershipId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+
+        userAdminService.changePassword(clinicA, actor.id(), "hash-self", actor.membershipId());
+        userAdminService.changePassword(clinicA, staff.id(), "hash-staff", actor.membershipId());
+    }
+
+    @Test
+    void ownerCanChangeAnyPassword() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary owner = createUser(clinicA, "pwd-owner-actor");
+        setRoleDirect(clinicA, owner.membershipId(), "owner");
+        UserSummary manager = createUser(clinicA, "pwd-mgr-target");
+        setRoleDirect(clinicA, manager.membershipId(), "manager");
+
+        userAdminService.changePassword(clinicA, manager.id(), "hash-new", owner.membershipId());
+    }
+
+    private UserSummary createUser(UUID clinicId, String suffix) {
+        return userAdminService.create(clinicId, new UserCreateRequest(
+                suffix + "-" + UUID.randomUUID(), "مستخدم", null, "hash"));
+    }
+
+    private static void setRoleDirect(UUID clinicId, UUID membershipId, String roleCode) throws Exception {
+        try (Connection connection = superuser()) {
+            try (var statement = connection.prepareStatement(
+                    "update membership m set role_id = r.id from role r where r.code = ? and m.id = ? and m.clinic_id = ?")) {
+                statement.setString(1, roleCode);
+                statement.setObject(2, membershipId);
+                statement.setObject(3, clinicId);
+                statement.executeUpdate();
+            }
+        }
     }
 
     private static Connection superuser() throws Exception {
