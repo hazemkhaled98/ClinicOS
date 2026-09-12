@@ -90,6 +90,9 @@ public class AdminController {
         }
         Map<String, String> fieldErrors = new HashMap<>();
         fieldErrors.putAll(FormErrors.of(binding));
+        if (!isManageableBy(AdminAccess.roleCode(session), linkedUser(session, employeeId))) {
+            fieldErrors.put("employee", "لا يمكنك تعديل بيانات هذا الموظف");
+        }
         EmployeeRequest request = toRequest(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
@@ -126,6 +129,12 @@ public class AdminController {
         var linked = userAdminService.list(AdminAccess.clinicId(session)).stream()
                 .filter(user -> employeeId.equals(user.employeeId()))
                 .findFirst();
+        if (!isManageableBy(AdminAccess.roleCode(session), linked.orElse(null))) {
+            fieldErrors.put("employee", "لا يمكنك أرشفة هذا الموظف");
+            renderCard(model, session);
+            Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
+            return "admin/employees :: employeesCard";
+        }
         try {
             employeeService.archive(AdminAccess.clinicId(session), employeeId);
             activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
@@ -159,9 +168,29 @@ public class AdminController {
 
     private void renderCard(Model model, HttpSession session) {
         UUID clinicId = AdminAccess.clinicId(session);
-        model.addAttribute("employees", employeeService.list(clinicId));
-        model.addAttribute("employeeRoles", employeeRoles(userAdminService.list(clinicId)));
-        model.addAttribute("actorRole", AdminAccess.roleCode(session));
+        Map<UUID, UserSummary> employeeRoles = employeeRoles(userAdminService.list(clinicId));
+        String actorRole = AdminAccess.roleCode(session);
+        var employees = employeeService.list(clinicId).stream()
+                .filter(employee -> isManageableBy(actorRole, employeeRoles.get(employee.id())))
+                .toList();
+        model.addAttribute("employees", employees);
+        model.addAttribute("employeeRoles", employeeRoles);
+        model.addAttribute("actorRole", actorRole);
+    }
+
+    private UserSummary linkedUser(HttpSession session, UUID employeeId) {
+        return userAdminService.list(AdminAccess.clinicId(session)).stream()
+                .filter(user -> employeeId.equals(user.employeeId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static boolean isManageableBy(String actorRole, UserSummary linkedUser) {
+        if ("owner".equals(actorRole) || linkedUser == null) {
+            return true;
+        }
+        String employeeRole = linkedUser.roleCode();
+        return !"owner".equals(employeeRole) && !"manager".equals(employeeRole);
     }
 
     private static Map<UUID, UserSummary> employeeRoles(java.util.List<UserSummary> users) {
