@@ -51,7 +51,6 @@ public class DefaultEmployeeService implements EmployeeService {
                         .set(EMPLOYEE.ID, id)
                         .set(EMPLOYEE.CLINIC_ID, clinicId)
                         .set(EMPLOYEE.NAME, request.name())
-                        .set(EMPLOYEE.STAFF_ROLE, toDbRole(request.staffRole()))
                         .set(EMPLOYEE.BASE_PAY, request.basePay() != null ? request.basePay() : BigDecimal.ZERO)
                         .set(EMPLOYEE.MAX_INCENTIVE, request.maxIncentive() != null ? request.maxIncentive() : BigDecimal.ZERO)
                         .set(EMPLOYEE.SHIFT_START, request.customShift() ? request.shiftStart() : null)
@@ -59,7 +58,7 @@ public class DefaultEmployeeService implements EmployeeService {
                         .set(EMPLOYEE.CUSTOM_SHIFT, request.customShift())
                         .set(EMPLOYEE.HIRED_AT, hiredAt)
                         .execute();
-                return new Employee(id, request.name(), request.staffRole(), request.basePay(),
+                return new Employee(id, request.name(), request.basePay(),
                         request.maxIncentive(),
                         request.customShift() ? request.shiftStart() : null,
                         request.customShift() ? request.shiftEnd() : null,
@@ -76,7 +75,6 @@ public class DefaultEmployeeService implements EmployeeService {
         return transactionTemplate.execute(status -> {
             int updated = dsl.update(EMPLOYEE)
                     .set(EMPLOYEE.NAME, request.name())
-                    .set(EMPLOYEE.STAFF_ROLE, toDbRole(request.staffRole()))
                     .set(EMPLOYEE.BASE_PAY, request.basePay() != null ? request.basePay() : BigDecimal.ZERO)
                     .set(EMPLOYEE.MAX_INCENTIVE, request.maxIncentive() != null ? request.maxIncentive() : BigDecimal.ZERO)
                     .set(EMPLOYEE.SHIFT_START, request.customShift() ? request.shiftStart() : null)
@@ -129,9 +127,6 @@ public class DefaultEmployeeService implements EmployeeService {
         if (request.name() == null || request.name().isBlank()) {
             fieldErrors.put("name", "اسم الموظف مطلوب");
         }
-        if (request.staffRole() == null) {
-            fieldErrors.put("staffRole", "المسمى الوظيفي مطلوب");
-        }
         if (request.basePay() != null && request.basePay().signum() < 0) {
             fieldErrors.put("basePay", "المرتب الأساسي لا يمكن أن يكون سالباً");
         }
@@ -152,7 +147,6 @@ public class DefaultEmployeeService implements EmployeeService {
         return new Employee(
                 record.getId(),
                 record.getName(),
-                fromDbRole(record.getStaffRole()),
                 record.getBasePay(),
                 record.getMaxIncentive(),
                 record.getShiftStart(),
@@ -160,19 +154,5 @@ public class DefaultEmployeeService implements EmployeeService {
                 record.getCustomShift(),
                 record.getHiredAt(),
                 record.getArchivedAt());
-    }
-
-    private static com.clinicos.shared.jooq.enums.StaffRole toDbRole(StaffRole role) {
-        return switch (role) {
-            case ASSISTANT -> com.clinicos.shared.jooq.enums.StaffRole.assistant;
-            case RECEPTIONIST -> com.clinicos.shared.jooq.enums.StaffRole.receptionist;
-        };
-    }
-
-    private static StaffRole fromDbRole(com.clinicos.shared.jooq.enums.StaffRole role) {
-        return switch (role) {
-            case assistant -> StaffRole.ASSISTANT;
-            case receptionist -> StaffRole.RECEPTIONIST;
-        };
     }
 }

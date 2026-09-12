@@ -181,27 +181,17 @@ renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive"
         return null;
     }
 
-    public record EmployeeForm(String name, String staffRoleCode, String roleCode, String basePay, String maxIncentive,
+    public record EmployeeForm(String name, String roleCode, String basePay, String maxIncentive,
             Boolean customShift, String shiftStart, String shiftEnd) {
 
         static EmployeeForm empty() {
-            return new EmployeeForm("", "assistant", null, "", "", false, "", "");
+            return new EmployeeForm("", null, "", "", false, "", "");
         }
 
         EmployeeRequest toRequest(Map<String, String> fieldErrors) {
             boolean isCustomShift = Boolean.TRUE.equals(customShift);
             if (name == null || name.isBlank()) {
                 fieldErrors.put("name", "اسم الموظف مطلوب");
-            }
-            com.clinicos.staff.api.EmployeeService.StaffRole role = null;
-            if (staffRoleCode == null || staffRoleCode.isBlank()) {
-                fieldErrors.put("staffRole", "المسمى الوظيفي مطلوب");
-            } else {
-                try {
-                    role = com.clinicos.staff.api.EmployeeService.StaffRole.fromCode(staffRoleCode);
-                } catch (IllegalArgumentException e) {
-                    fieldErrors.put("staffRole", e.getMessage());
-                }
             }
             BigDecimal parsedBasePay = FormParsing.parseAmount(basePay, "basePay", fieldErrors, "المرتب الأساسي غير صحيح");
             BigDecimal parsedMaxIncentive = FormParsing.parseAmount(maxIncentive, "maxIncentive", fieldErrors,
@@ -214,7 +204,6 @@ renderCard(model, session, fieldErrors, fieldErrors.isEmpty() ? null : "archive"
             }
             return new EmployeeRequest(
                     name == null ? "" : name.trim(),
-                    role,
                     parsedBasePay,
                     parsedMaxIncentive,
                     parsedShiftStart,

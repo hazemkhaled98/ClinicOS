@@ -9,7 +9,7 @@
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👥 الموظفون</h2>
-    <p class="text-sm text-on-surface-variant">بيانات شغل الموظفين (التوصيف/المرتب/الحافز/الشفت) والدور في العيادة. الحسابات وكلمات المرور في تبويب «المستخدمون».</p>
+    <p class="text-sm text-on-surface-variant">بيانات شغل الموظفين (المرتب/الحافز/الشفت) والدور في العيادة. الحسابات وكلمات المرور في تبويب «المستخدمون».</p>
   </div>
 
   <div th:if="${employeeErrorScope == 'archive'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
@@ -47,13 +47,6 @@
         </th:block>
         <span th:if="${employeeRoles[employee.id()] != null and employeeRoles[employee.id()].roleCode() == 'owner'}"
               class="clinicos-chip clinicos-chip--success">صلاحيات كاملة</span>
-        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
-          المسمى الوظيفي
-          <select name="staffRoleCode" class="clinicos-input w-36">
-            <option value="assistant" th:selected="${employee.staffRole().code() == 'assistant'}">مساعد</option>
-            <option value="receptionist" th:selected="${employee.staffRole().code() == 'receptionist'}">موظف استقبال</option>
-          </select>
-        </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           المرتب الأساسي
           <input type="text" inputmode="decimal" name="basePay" placeholder="المرتب"

@@ -7,7 +7,7 @@ Single source of truth for business rules across all use cases. Global IDs assig
 | BR-G01 | Inactive account cannot log in even with correct password. | UC-001 BR-001 |
 | BR-G02 | Every app section (employee records, evaluation, tasks, prep, academy, inventory, admin dashboard) shown/hidden per logged-in staff role and permissions. | UC-001 BR-002 |
 | BR-G03 | Owner account gets every section automatically, overriding any other role setting. | UC-001 BR-003 |
-| BR-G04 | Employee role is either assistant or receptionist; role determines task list, academy curriculum, inventory areas. | UC-002 BR-001, UC-008 BR-001 |
+| BR-G04 | An employee's role is their clinic membership role (member → role); it drives permissions, the task list, academy curriculum and inventory areas. | UC-002 BR-001, UC-008 BR-001 |
 | BR-G05 | Any calendar month before the current one is closed and its evaluation frozen (write-once) once calculated; only unlocking clears the freeze. | UC-002 BR-002, UC-004 BR-001 |
 | BR-G06 | Manager's manual override for an evaluation category only raises the computed score, never lowers it (floor, not ceiling). | UC-002 BR-003 |
 | BR-G07 | Monthly incentive is a percentage of max incentive, keyed to performance tier (excellent / very good / good / needs improvement) from final score. | UC-002 BR-004 |

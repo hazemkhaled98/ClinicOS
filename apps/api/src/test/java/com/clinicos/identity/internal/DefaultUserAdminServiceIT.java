@@ -168,7 +168,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         UUID employeeId;
         try (Connection connection = superuser()) {
             try (var statement = connection.prepareStatement(
-                    "insert into employee (clinic_id, name, staff_role, base_pay, max_incentive) values (?, ?, 'assistant', 5000, 1500) returning id")) {
+                    "insert into employee (clinic_id, name, base_pay, max_incentive) values (?, ?, 5000, 1500) returning id")) {
                 statement.setObject(1, clinicA);
                 statement.setString(2, "محمود سمير");
                 try (var rs = statement.executeQuery()) {

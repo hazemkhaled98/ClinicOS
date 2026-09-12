@@ -70,7 +70,6 @@ PK `(clinic_id, category)`. `category` is `eval_category` enum (completion, fann
 | id | uuid | PK |
 | clinic_id | uuid | FK clinic, not null |
 | name | text | not null |
-| staff_role | staff_role enum (assistant, receptionist) | not null |
 | base_pay | numeric(10,2) | not null, >= 0 |
 | max_incentive | numeric(10,2) | not null, >= 0 |
 | shift_start / shift_end | time | nullable |

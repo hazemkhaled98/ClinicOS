@@ -14,10 +14,9 @@ import java.util.UUID;
  * guarantee a tenant is bound before invoking (TenantSessionFilter does for
  * HTTP requests, tests seed it explicitly).
  *
- * <p>BR-G04: an employee's role is either {@link StaffRole#ASSISTANT assistant}
- * or {@link StaffRole#RECEPTIONIST receptionist}; it determines which task
- * list, academy curriculum and inventory areas the staff member sees.
- * {@link StaffRole#fromCode(String)} rejects anything else.
+ * <p>BR-G04: an employee's role is their clinic membership role
+ * (membership → role); it drives permissions, the task list, academy
+ * curriculum and inventory areas.
  */
 public interface EmployeeService {
 
@@ -32,7 +31,6 @@ public interface EmployeeService {
     record Employee(
             UUID id,
             String name,
-            StaffRole staffRole,
             BigDecimal basePay,
             BigDecimal maxIncentive,
             LocalTime shiftStart,
@@ -44,43 +42,12 @@ public interface EmployeeService {
 
     record EmployeeRequest(
             String name,
-            StaffRole staffRole,
             BigDecimal basePay,
             BigDecimal maxIncentive,
             LocalTime shiftStart,
             LocalTime shiftEnd,
             boolean customShift,
             LocalDate hiredAt) {
-    }
-
-    enum StaffRole {
-        ASSISTANT("assistant", "مساعد"),
-        RECEPTIONIST("receptionist", "موظف استقبال");
-
-        private final String code;
-        private final String arabicName;
-
-        StaffRole(String code, String arabicName) {
-            this.code = code;
-            this.arabicName = arabicName;
-        }
-
-        public String code() {
-            return code;
-        }
-
-        public String arabicName() {
-            return arabicName;
-        }
-
-        public static StaffRole fromCode(String code) {
-            for (StaffRole role : values()) {
-                if (role.code.equals(code)) {
-                    return role;
-                }
-            }
-            throw new IllegalArgumentException("المسمى الوظيفي غير معروف: " + code);
-        }
     }
 
     /**

@@ -22,6 +22,8 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class PermissionsController {
 
+    private static final List<String> ROLE_CODES = List.of("owner", "manager", "assistant", "receptionist");
+
     private static final Map<String, String> PERMISSION_LABELS = Map.ofEntries(
             Map.entry("emp", "الموظفين"),
             Map.entry("quick", "الوصول السريع"),
@@ -69,6 +71,8 @@ public class PermissionsController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
+        model.addAttribute("roleCodes", ROLE_CODES);
+        model.addAttribute("roleNames", roleNames());
         model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("permissionError", (String) null);
@@ -98,6 +102,7 @@ public class PermissionsController {
         } catch (Exception e) {
             model.addAttribute("rolePermissionMap", Map.of());
         }
+        model.addAttribute("roleCodes", ROLE_CODES);
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
         if (error == null) {
@@ -106,6 +111,10 @@ public class PermissionsController {
             Toasts.error(model, error);
         }
         return "admin/permissions :: permissionsCard";
+    }
+
+    private static Map<String, String> roleNames() {
+        return ROLE_CODES.stream().collect(Collectors.toMap(code -> code, LayoutModel::roleDisplayName));
     }
 
     private static Map<String, List<UserSummary>> usersByRole(List<UserSummary> users) {

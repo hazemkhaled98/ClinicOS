@@ -21,7 +21,6 @@ import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
 import com.clinicos.staff.api.EmployeeService.EmployeeValidationException;
-import com.clinicos.staff.api.EmployeeService.StaffRole;
 import com.clinicos.identity.api.UserAdminService.UserValidationException;
 
 import jakarta.servlet.http.HttpSession;
@@ -71,7 +70,7 @@ public class UserAdminController {
                     UserSummary created = userAdminService.create(clinicId, new UserCreateRequest(
                             form.username().trim(), form.fullName().trim(), email, passwordEncoder.encode(form.password())));
                     Employee employee = employeeService.create(clinicId, new EmployeeRequest(
-                            form.fullName().trim(), StaffRole.ASSISTANT, null, null, null, null, false, null));
+                            form.fullName().trim(), null, null, null, null, false, null));
                     userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id());
                 });
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");

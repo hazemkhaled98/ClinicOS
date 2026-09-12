@@ -11,10 +11,12 @@
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('permissions')}"></nav>
       <div x-data="{ activeRole: 'owner' }">
         <div class="flex flex-wrap gap-2 mb-6">
-          <button type="button" class="clinicos-admin-tab clinicos-admin-tab--active" @click="activeRole = 'owner'">المالك</button>
-          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'manager' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'manager'">مدير</button>
-          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'assistant' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'assistant'">مساعد</button>
-          <button type="button" class="clinicos-admin-tab" :class="activeRole === 'receptionist' &amp;&amp; 'clinicos-admin-tab--active'" @click="activeRole = 'receptionist'">موظف استقبال</button>
+          <button type="button" class="clinicos-admin-tab"
+                  th:each="roleCode : ${roleCodes}"
+                  th:attr="data-role=${roleCode}"
+                  @click="activeRole = $el.dataset.role"
+                  :class="activeRole === $el.dataset.role ? 'clinicos-admin-tab--active' : ''"
+                  th:text="${roleNames.get(roleCode)}">دور</button>
         </div>
         <div th:replace="~{admin/permissions :: permissionsCard(${rolePermissionMap}, ${usersByRole})}"></div>
       </div>

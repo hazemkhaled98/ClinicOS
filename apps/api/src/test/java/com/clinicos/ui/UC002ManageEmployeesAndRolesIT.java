@@ -121,14 +121,14 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             openAdminSettings();
 
             var row = employeeRow("محمود سمير");
-            row.locator("select[name=staffRoleCode]").selectOption("receptionist");
+            row.locator("select[name=roleCode]").selectOption("receptionist");
             row.locator("input[name=basePay]").fill("5200");
             row.locator("input[name=maxIncentive]").fill("2000");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ")).last().click();
 
             employeeRow("محمود سمير").waitFor();
             assertThat(employeeRow("محمود سمير")
-                    .locator("select[name=staffRoleCode]").inputValue()).isEqualTo("receptionist");
+                    .locator("select[name=roleCode]").inputValue()).isEqualTo("receptionist");
             String payValue = employeeRow("محمود سمير").locator("input[name=basePay]").inputValue();
             assertThat(payValue.replace(".00", "")).isEqualTo("5200");
             String incValue = employeeRow("محمود سمير").locator("input[name=maxIncentive]").inputValue();

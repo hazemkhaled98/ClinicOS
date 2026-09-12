@@ -24,9 +24,9 @@ insert into membership (clinic_id, user_id, role_id)
 select '22222222-2222-2222-2222-222222222222', 'aaaaaaaa-0000-0000-0000-000000000002', id from role where code = 'owner';
 
 -- Same employee name in both clinics -- must not collide (no cross-clinic unique constraint).
-insert into employee (id, clinic_id, name, staff_role, base_pay, max_incentive) values
-    ('bbbbbbbb-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Sara Ahmed', 'assistant', 4000, 1000),
-    ('bbbbbbbb-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Sara Ahmed', 'assistant', 4200, 1100);
+insert into employee (id, clinic_id, name, base_pay, max_incentive) values
+    ('bbbbbbbb-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Sara Ahmed', 4000, 1000),
+    ('bbbbbbbb-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Sara Ahmed', 4200, 1100);
 
 -- Same task name in both clinics.
 insert into task_definition (id, clinic_id, staff_role, name, dimension, frequency, display_order) values

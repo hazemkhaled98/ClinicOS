@@ -28,7 +28,6 @@ import com.clinicos.identity.api.UserAdminService.UserValidationException;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
-import com.clinicos.staff.api.EmployeeService.StaffRole;
 import com.clinicos.ui.nav.NavSectionResolver;
 
 import jakarta.servlet.http.HttpSession;
@@ -89,7 +88,7 @@ class UserAdminControllerTest {
         allowDashboard();
         UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "owner", UUID.randomUUID(), null);
         when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
-        when(employeeService.create(eq(CLINIC), any())).thenReturn(new Employee(UUID.randomUUID(), "أحمد", StaffRole.ASSISTANT,
+        when(employeeService.create(eq(CLINIC), any())).thenReturn(new Employee(UUID.randomUUID(), "أحمد",
                 null, null, null, null, false, null, null));
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
@@ -220,7 +219,7 @@ class UserAdminControllerTest {
         UUID employeeId = UUID.randomUUID();
         UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "receptionist", membershipId, null);
         when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
-        Employee employee = new Employee(employeeId, "أحمد", StaffRole.ASSISTANT,
+        Employee employee = new Employee(employeeId, "أحمد",
                 null, null, null, null, false, null, null);
         when(employeeService.create(eq(CLINIC), any())).thenReturn(employee);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
