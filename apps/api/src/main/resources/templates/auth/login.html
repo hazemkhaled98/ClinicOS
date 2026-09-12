@@ -33,7 +33,7 @@
             <div class="relative">
               <input id="clinic" name="clinic" type="text" th:value="${clinic}" placeholder="كود العيادة"
                      required
-                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400">
+                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-[1.5px] focus:border-teal-900 text-neutral-800 transition-all placeholder:text-neutral-400">
             </div>
           </div>
 
@@ -42,7 +42,7 @@
             <div class="relative">
               <input id="username" name="username" type="text" placeholder="اسم المستخدم"
                      required autocomplete="username"
-                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400">
+                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-[1.5px] focus:border-teal-900 text-neutral-800 transition-all placeholder:text-neutral-400">
             </div>
           </div>
 
@@ -51,15 +51,15 @@
             <div class="relative">
               <input id="password" name="password" type="password" placeholder="كلمة المرور"
                      required autocomplete="current-password"
-                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-teal-900 focus:ring-2 focus:ring-teal-900/10 text-neutral-800 transition-all placeholder:text-neutral-400">
+                     class="w-full px-4 py-3.5 text-sm rounded-xl border border-neutral-200 bg-neutral-50/50 focus:bg-white focus:outline-none focus:border-[1.5px] focus:border-teal-900 text-neutral-800 transition-all placeholder:text-neutral-400">
             </div>
           </div>
 
           <div class="pt-2">
             <button type="submit"
-                    class="cursor-pointer w-full py-3.5 px-6 rounded-xl bg-teal-900 hover:bg-teal-850 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-teal-900/20 transition-all flex items-center justify-center gap-2 group">
+                    class="w-full py-3.5 px-6 rounded-xl bg-teal-900 hover:bg-teal-950 active:scale-[0.99] motion-reduce:active:scale-100 text-white font-bold text-sm shadow-lg shadow-teal-900/20 transition-all flex items-center justify-center gap-2 group">
               <span>دخول</span>
-              <svg class="w-4 h-4 text-emerald-500 rotate-180 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-emerald-500 rotate-180 group-hover:scale-110 motion-reduce:group-hover:scale-100 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
               </svg>
             </button>
@@ -75,7 +75,7 @@
 
         <p class="text-neutral-600 text-xs mt-6 text-center">
           ليس لديك حساب؟
-          <a th:href="@{/signup}" class="cursor-pointer font-bold text-teal-700 hover:text-teal-800">أنشئ عيادة جديدة</a>
+          <a th:href="@{/signup}" class="font-bold text-teal-700 hover:text-teal-800">أنشئ عيادة جديدة</a>
         </p>
       </div>
     </section>
@@ -142,7 +142,7 @@
 
       <div class="w-full flex items-center justify-between text-xs text-neutral-400 border-t border-neutral-200/80 pt-6">
         <div class="font-medium">الإصدار 3.2.0</div>
-        <div>© 2025 عيادتي ClinicOS · جميع الحقوق محفوظة</div>
+        <div>© 2026 عيادتي ClinicOS · جميع الحقوق محفوظة</div>
       </div>
     </section>
   </main>
