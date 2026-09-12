@@ -32,6 +32,12 @@ replay_pid*
 skills-lock.json
 docs/plans/
 
+# Local agent/tooling state
+.agents/
+.mcp.json
+.serena/
+skills-lock.json
+
 # Maven
 target/
 
