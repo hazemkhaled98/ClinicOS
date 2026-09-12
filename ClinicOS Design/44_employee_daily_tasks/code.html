@@ -1,0 +1,367 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>مهامي اليوم — تسجيل الموظف | عيادتي ClinicOS</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              950: '#071f1c',
+              900: '#0a2e29',
+              850: '#0d3832',
+              800: '#114a42',
+              700: '#17655a',
+              600: '#1f8375',
+              500: '#2a9d8f',
+              300: '#5eead4',
+              100: '#ccfbf1',
+              50: '#f0fdfa',
+            },
+            surface: '#f6faf8',
+            'on-surface': '#161d1b',
+            'on-surface-variant': '#414846'
+          },
+          fontFamily: {
+            sans: ['Tajawal', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Font: Tajawal -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
+<style data-purpose="custom-tokens">
+    :root {
+      --color-surface: #f6faf8;
+      --color-surface-elevated: #ffffff;
+      --color-on-surface: #161d1b;
+      --color-on-surface-variant: #414846;
+      --color-neutral-900: #0f172a;
+      --color-neutral-700: #334155;
+      --color-neutral-600: #475569;
+      --color-neutral-400: #94a3b8;
+      --color-neutral-300: #cbd5e1;
+      --color-neutral-200: #e2e8f0;
+      --color-neutral-100: #f1f5f9;
+      --color-neutral-50: #f8fafc;
+      --color-teal-950: #071f1c;
+      --color-teal-900: #0a2e29;
+      --color-teal-850: #0d3832;
+      --color-teal-800: #114a42;
+      --color-teal-700: #17655a;
+      --color-teal-600: #1f8375;
+      --color-teal-500: #2a9d8f;
+      --color-teal-300: #5eead4;
+      --color-teal-100: #ccfbf1;
+      --color-emerald-700: #047857;
+      --color-emerald-600: #059669;
+      --color-emerald-200: #a7f3d0;
+      --color-emerald-50: #ecfdf5;
+      --color-danger-600: #b23b30;
+      --color-danger-50: #fdf2f2;
+      --color-success-600: #1f7a4d;
+      --color-success-50: #e8f5ed;
+      --color-warning-600: #b87900;
+      --color-warning-50: #fef7e6;
+      --color-info-600: #2563eb;
+      --color-info-50: #eff6ff;
+      --text-micro: 0.75rem;
+      --text-label: 0.8125rem;
+    }
+  </style>
+<style data-purpose="custom-typography">
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+  </style>
+<style data-purpose="custom-components">
+    .clinicos-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding-block: 0.625rem;
+      padding-inline: 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid transparent;
+      font-weight: 600;
+      background-color: var(--color-teal-900);
+      color: var(--color-surface-elevated);
+      cursor: pointer;
+    }
+    .clinicos-btn--secondary {
+      background-color: var(--color-surface-elevated);
+      border-color: var(--color-neutral-200);
+      color: var(--color-teal-900);
+    }
+    .clinicos-btn--danger {
+      background-color: var(--color-danger-50);
+      border-color: var(--color-danger-600);
+      color: var(--color-danger-600);
+    }
+    .clinicos-input {
+      display: block;
+      width: 100%;
+      background-color: var(--color-surface-elevated);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: 0.75rem;
+      padding-block: 0.625rem;
+      padding-inline: 0.875rem;
+      font-size: 0.875rem;
+    }
+    .clinicos-input:focus-visible {
+      outline: none;
+      border: 1.5px solid var(--color-teal-900);
+    }
+    .clinicos-card {
+      background-color: var(--color-surface-elevated);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: 0.75rem;
+    }
+    .clinicos-chip {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding-inline: 0.5rem;
+      border-radius: 9999px;
+      font-size: var(--text-micro);
+      font-weight: 600;
+    }
+    .clinicos-chip--success {
+      background-color: var(--color-success-50);
+      color: var(--color-success-600);
+    }
+    .clinicos-chip--warning {
+      background-color: var(--color-warning-50);
+      color: var(--color-warning-600);
+    }
+    .clinicos-chip--danger {
+      background-color: var(--color-danger-50);
+      color: var(--color-danger-600);
+    }
+    .clinicos-chip--info {
+      background-color: var(--color-info-50);
+      color: var(--color-info-600);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-surface text-on-surface antialiased flex selection:bg-teal-500 selection:text-white">
+<main class="w-full min-h-screen flex flex-col bg-surface">
+<!-- BEGIN: Topbar -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-100 shadow-sm" data-purpose="app-topbar">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 text-on-surface-variant text-sm font-medium bg-neutral-100 px-3.5 py-1.5 rounded-full border border-neutral-200">
+<svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="tracking-wide">الأحد، 6 سبتمبر</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-left hidden sm:block">
+<div class="flex items-center justify-end gap-1.5 text-xs text-teal-700 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>تسجيل الموظف</span>
+</div>
+<div class="text-sm font-bold text-on-surface">عيادتي <span class="text-on-surface-variant font-normal">·</span> محمود سمير</div>
+</div>
+<button class="relative p-2 text-on-surface-variant hover:text-teal-800 hover:bg-neutral-100 rounded-xl transition" title="الإشعارات">
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white"></span>
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button aria-label="القائمة" class="p-2 rounded-xl border border-neutral-200 text-on-surface-variant hover:bg-neutral-100 hover:text-teal-900 transition">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: Topbar -->
+<section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto">
+<!-- BEGIN: يوم الموظف -->
+<div class="flex flex-col gap-6">
+<p class="text-xs font-bold text-emerald-600 mb-1">عيادتي</p>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight">مهامي اليوم</h1>
+<p class="mt-1 text-sm text-on-surface-variant">تسجيل الحضور والانصراف وتأكيد المهام وإرفاق صور الإثبات</p>
+
+<!-- BEGIN: بطاقة الحضور والانصراف -->
+<div class="clinicos-card p-5 sm:p-6">
+<div class="flex flex-wrap items-center gap-4">
+<div class="flex gap-3 flex-1 min-w-64">
+<div class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center bg-emerald-50 border border-emerald-200">
+<span class="text-[10.5px] text-on-surface-variant">الحضور</span>
+<span class="text-sm font-extrabold text-emerald-700">✔ 09:00</span>
+<span class="text-[10px] text-emerald-700">في الميعاد</span>
+</div>
+<div class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center bg-emerald-50 border border-emerald-200">
+<span class="text-[10.5px] text-on-surface-variant">الانصراف</span>
+<span class="text-sm font-extrabold text-emerald-700">✔ 17:00</span>
+<span class="text-[10px] text-emerald-700">ميعاد كامل</span>
+</div>
+</div>
+<span class="text-[10.5px] text-on-surface-variant whitespace-nowrap text-center leading-relaxed">
+⏰ 09:00<br>
+حتى 17:00<br>
+سماح 15د
+</span>
+</div>
+</div>
+<!-- END: بطاقة الحضور والانصراف -->
+
+<!-- BEGIN: مهام اليوم -->
+<div class="clinicos-card p-5 sm:p-6">
+<h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900 mb-4">🗒️ مهامي اليوم — تأكيد وإرفاق صور</h2>
+<div class="flex flex-col gap-2">
+
+<div class="mt-1">
+<div class="flex items-center gap-2 rounded-lg px-3 py-2 mb-1 bg-warning-50 border border-warning-600/40">
+<span class="text-sm">⚙️</span>
+<b class="text-sm text-warning-600">فني</b>
+</div>
+<!-- مهمة: منجزة -->
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100">
+<span class="text-emerald-700 font-bold text-xs whitespace-nowrap">✔ أكّدتها 09:15</span>
+<a class="block" href="#" aria-label="صورة الإثبات">
+<img alt="صورة الإثبات" class="block w-9 h-9 rounded-lg object-cover border border-neutral-200" src="data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23a7f3d0'/%3E%3Ctext x='18' y='24' font-size='16' text-anchor='middle' fill='%23047857'%3E📷%3C/text%3E%3C/svg%3E">
+</a>
+<a class="clinicos-btn clinicos-btn--danger text-xs p-0" href="#">
+<button class="text-xs px-2 py-1">إلغاء</button>
+</a>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">تعقيم غرفة الكشف</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle bg-teal-600">يومي</span>
+</span>
+</div>
+<!-- مهمة: موعدها دلوقتي -->
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+<div class="flex items-center gap-2">
+<label class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">📷 إرفاق</label>
+<button class="clinicos-btn clinicos-btn--secondary text-xs">✔ أكّدها</button>
+</div>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">تجهيز صيدلية الطوارئ</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle bg-teal-600">يومي</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 align-middle bg-warning-50 text-warning-600 border border-warning-600/40">🔔 موعدها دلوقتي</span>
+</span>
+</div>
+</div>
+
+<div class="mt-1">
+<div class="flex items-center gap-2 rounded-lg px-3 py-2 mb-1 bg-warning-50 border border-warning-600/40">
+<span class="text-sm">🤝</span>
+<b class="text-sm text-warning-600">سلوكي</b>
+</div>
+<!-- مهمة: متأخرة -->
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+<div class="flex items-center gap-2">
+<label class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">📷 إرفاق</label>
+<button class="clinicos-btn clinicos-btn--secondary text-xs">✔ أكّدها</button>
+</div>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">ترتيب ملفات المرضى</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle bg-info-600">أسبوعي</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 align-middle bg-danger-50 text-danger-600 border border-danger-600/40">⏰ فات موعدها</span>
+</span>
+</div>
+<!-- مهمة: عادية -->
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+<div class="flex items-center gap-2">
+<label class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">📷 إرفاق</label>
+<button class="clinicos-btn clinicos-btn--secondary text-xs">✔ أكّدها</button>
+</div>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">متابعة بريد العيادة</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle bg-teal-600">يومي</span>
+</span>
+</div>
+</div>
+
+<div class="mt-3">
+<div class="flex items-center gap-2 rounded-lg px-3 py-2 mb-1 bg-warning-50 border border-warning-600/40">
+<span class="text-sm">🔁</span>
+<b class="text-sm text-warning-600">مهام دورية</b>
+</div>
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+<span class="text-emerald-700 font-bold text-xs whitespace-nowrap">✔ أكّدتها 10:05</span>
+<a class="clinicos-btn clinicos-btn--danger text-xs p-0" href="#">
+<button class="text-xs px-2 py-1">إلغاء</button>
+</a>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">مراجعة الأدوية</span>
+<span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle bg-info-600">أسبوعي</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- END: مهام اليوم -->
+
+<!-- BEGIN: مهام مكلّفة -->
+<div class="clinicos-card p-5 sm:p-6">
+<h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900 mb-4">🎯 مهام مكلّفة ليك</h2>
+
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100">
+<div class="flex items-center gap-2">
+<label class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">📷 إرفاق</label>
+<button class="clinicos-btn clinicos-btn--secondary text-xs">✔ سلّمها</button>
+</div>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">تجهيز ملف الحجوزات</span>
+<span class="inline-block me-2 rounded-full text-[10px] font-bold px-2.5 py-0.5 align-middle clinicos-chip clinicos-chip--warning">مطلوبة منك</span>
+<span class="block mt-1 text-xs text-on-surface-variant">📅 تسليمها: 2026-09-12</span>
+</span>
+</div>
+
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100">
+<span class="text-emerald-700 font-bold text-xs whitespace-nowrap">✔ سُلّمت</span>
+<a class="block" href="#" aria-label="صورة الإثبات">
+<img alt="صورة الإثبات" class="block w-9 h-9 rounded-lg object-cover border border-neutral-200" src="data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23a7f3d0'/%3E%3Ctext x='18' y='24' font-size='16' text-anchor='middle' fill='%23047857'%3E📷%3C/text%3E%3C/svg%3E">
+</a>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">تقرير نهاية الأسبوع</span>
+<span class="inline-block me-2 rounded-full text-[10px] font-bold px-2.5 py-0.5 align-middle clinicos-chip clinicos-chip--success">سُلّمت بالفعل</span>
+<span class="block mt-1 text-xs text-on-surface-variant">📅 تسليمها: 2026-09-13</span>
+</span>
+</div>
+
+<div class="flex items-center gap-3 py-3 border-b border-neutral-100">
+<span class="inline-block w-4 h-4 rounded border border-neutral-300" aria-hidden="true"></span>
+<span class="flex-1">
+<span class="text-sm font-semibold text-teal-900">تنظيم عربة الطوارئ <span class="font-normal text-on-surface-variant">(منسوبة لزميلك)</span></span>
+<span class="inline-block me-2 rounded-full text-[10px] font-bold px-2.5 py-0.5 align-middle clinicos-chip clinicos-chip--danger">مش مطلوبة منك</span>
+<span class="block mt-1 text-xs text-on-surface-variant">📅 تسليمها: 2026-09-14</span>
+</span>
+</div>
+
+<form class="mt-4 pt-4 border-t border-dashed border-neutral-300 flex flex-wrap items-end gap-3">
+<label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+اقترح مهمة لنفسك
+<input type="text" name="name" class="clinicos-input min-w-48" placeholder="مثال: تنظيم أرشيف المستودع">
+</label>
+<label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+تسليمها
+<input type="date" name="dueDate" class="clinicos-input">
+</label>
+<button type="submit" class="clinicos-btn">اقترح للمدير</button>
+</form>
+</div>
+<!-- END: مهام مكلّفة -->
+
+</div>
+<!-- END: يوم الموظف -->
+</section>
+</main>
+</body>
+</html>
