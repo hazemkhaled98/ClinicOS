@@ -5,7 +5,7 @@ Features present in `index_original.html` but **not** covered by UC-001…UC-009
 | # | Legacy Feature | Schema Delta Needed | Notes |
 |---|----------------|---------------------|-------|
 | 1 | **Gamification**: level ring, streaks + record, badges, weekly goals, per-scope visibility toggles | `gamification_settings`, `badge_threshold`, `weekly_goal` | UC-002 step 6 configures thresholds; UC-005 steps 3–4 display them — **mandatory, not optional**. Decide at Phase 2 start whether to build or amend UC. |
-| 2 | **Working-days calendar & holidays** (clinic-wide or per-employee) | `clinic_holiday`, weekday mask on `clinic_settings` — currently only `working_days_per_month integer` | UC-003 A3 counts a missed *scheduled work day* as absent; BR-G29 paces volume target by working days elapsed — neither expressible from bare integer. **Mandatory**. Decide at Phase 3 start. |
+| 2 | **Working-days calendar & holidays** (clinic-wide or per-employee) | `clinic_holiday`, weekday mask on `clinic_settings` — currently only `working_days_per_month integer` | UC-003 A3 counts a missed *scheduled work day* as absent; BR-G29 paces volume target by working days elapsed — neither expressible from bare integer. **Mandatory**. Decide at Phase 3 start. **Built in Phase 3** (V20 migration + admin UI, slice 3a/3e). |
 | 3 | **Geofence attendance** (clinic coords + allowed radius) | lat/lng/radius on `clinic_settings` | Legacy shows map picker for clinic location + radius. |
 | 4 | **Manager daily note** (private or shown to employee), rejection reason on a returned task | columns on `daily_record` / `daily_task_completion` | The `🔔` nudge itself is **not** a gap — `notification` table already covers it. |
 | 5 | **Doctor as entity** (per-doctor analytics) | `doctor` table — currently `procedure_case.doctor_name text` | Legacy analytics group by doctor name string; a table enables referential integrity and richer analytics. |
@@ -16,6 +16,7 @@ Features present in `index_original.html` but **not** covered by UC-001…UC-009
 | 10 | **Image storage policy**, manual/auto purge, JSON backup + restore | retention policy on `attachment`, export job | Legacy PWA had manual cache purge + JSON export/import. |
 | 11 | **Reservations / holds on tray stock** | `stock_hold` | Legacy allows reserving tray items for upcoming procedures. |
 | 12 | **"Essential item" flag** on a prep checklist item (legacy shows `N أساسي`) | `prep_item.essential boolean` | Visual indicator in legacy prep runs. |
+| 13 | **Multi-photo per task** (before/after, multiple angles) | join table (e.g. `daily_task_completion_photo`) instead of the single `photo_id` FK column | `daily_task_completion` (V3) holds one `photo_id` per completion — a task can only ever have one proof photo, even when a manager wants multiple angles. |
 
 ---
 

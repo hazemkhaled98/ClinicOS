@@ -58,13 +58,9 @@
 1. The proposed task is marked pending until the manager approves or rejects it (see UC-004).
 2. Use case continues at step 7.
 
-### A5: Offline Recording
+### A5: Offline Recording — Not Applicable
 
-**Trigger:** The device has no confirmed connection to the shared cloud data (step 1)
-**Flow:**
-
-1. The system saves the entry on the device and queues it for automatic sync once the connection is confirmed.
-2. Use case continues at step 2.
+**Status:** Out of scope by decision (see `docs/roadmap.md`, "Offline mode" row and the UC-001 deviation note). ClinicOS is a server-rendered Thymeleaf app with no client-side offline queue — this flow does not exist and will not be implemented.
 
 ## Postconditions
 
@@ -75,7 +71,7 @@
 
 ### Failure Postconditions
 
-- The day's entry is not saved, or is queued locally pending connection.
+- The day's entry is not saved.
 
 ## Business Rules
 
