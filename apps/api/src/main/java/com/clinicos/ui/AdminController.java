@@ -3,6 +3,7 @@ package com.clinicos.ui;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -126,9 +127,7 @@ public class AdminController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        var linked = userAdminService.list(AdminAccess.clinicId(session)).stream()
-                .filter(user -> employeeId.equals(user.employeeId()))
-                .findFirst();
+        var linked = Optional.ofNullable(linkedUser(session, employeeId));
         if (!isManageableBy(AdminAccess.roleCode(session), linked.orElse(null))) {
             fieldErrors.put("employee", "لا يمكنك أرشفة هذا الموظف");
             renderCard(model, session);
