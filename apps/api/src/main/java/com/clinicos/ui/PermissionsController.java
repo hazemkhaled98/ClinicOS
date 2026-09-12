@@ -72,6 +72,7 @@ public class PermissionsController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
+        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
         renderPage(model, session);
         return "admin/permissions-page";
     }
