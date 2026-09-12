@@ -107,6 +107,7 @@ public class AdminController {
             try {
                 userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode());
             } catch (IllegalArgumentException e) {
+                log.warn("assignRole failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
                 fieldErrors.put("role", e.getMessage());
             }
         }

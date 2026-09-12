@@ -140,7 +140,11 @@ public class GamificationController {
 
     private void renderPage(Model model, UUID clinicId) {
         GamificationSettings settings = gamificationService.get(clinicId);
-        model.addAttribute("settings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
+        if (settings == null) {
+            log.warn("gamification settings missing for clinic {}", clinicId);
+            settings = new GamificationSettings(false, false, false, false, false, false);
+        }
+        model.addAttribute("settings", settings);
         model.addAttribute("goalForm", GoalsForm.from(gamificationService.getGoals(clinicId)));
         model.addAttribute("thresholdForm", ThresholdsForm.from(gamificationService.getThresholds(clinicId)));
     }

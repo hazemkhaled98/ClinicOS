@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +26,8 @@ import jakarta.validation.constraints.NotBlank;
 
 @Controller
 public class PermissionsController {
+
+    private static final Logger log = LoggerFactory.getLogger(PermissionsController.class);
 
     private static final List<String> ROLE_CODES = List.of("owner", "manager", "assistant", "receptionist");
 
@@ -109,6 +113,7 @@ public class PermissionsController {
         try {
             model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         } catch (Exception e) {
+            log.warn("listForClinic failed: clinic {}", clinicId, e);
             model.addAttribute("rolePermissionMap", Map.of());
         }
     }

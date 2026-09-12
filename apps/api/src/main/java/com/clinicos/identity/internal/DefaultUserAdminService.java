@@ -64,7 +64,7 @@ public class DefaultUserAdminService implements UserAdminService {
             } catch (DuplicateKeyException e) {
                 throw conflictByConstraint(e);
             }
-UserSummary summary = dsl.select(
+            UserSummary summary = dsl.select(
                         APP_USER.ID, APP_USER.USERNAME, APP_USER.FULL_NAME, APP_USER.EMAIL,
                         APP_USER.STATUS, ROLE.CODE, MEMBERSHIP.ID, MEMBERSHIP.EMPLOYEE_ID)
                 .from(APP_USER)
