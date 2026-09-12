@@ -79,7 +79,7 @@ public class AdminController {
         model.addAttribute("volumeForm", ClinicSettingsController.VolumeForm.from(clinicSettings.volumeTarget()));
         model.addAttribute("dutyForm", ClinicSettingsController.DutyForm.from(clinicSettings));
         model.addAttribute("tiersForm", ClinicSettingsController.TiersForm.from(clinicSettings.tiers()));
-        renderCard(model, session);
+        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
         return "admin/settings";
     }
 
@@ -89,9 +89,10 @@ public class AdminController {
         if (!canAccessDashboard(session)) {
             return "redirect:/";
         }
+        var users = userAdminService.list(AdminAccess.clinicId(session));
         Map<String, String> fieldErrors = new HashMap<>();
         fieldErrors.putAll(FormErrors.of(binding));
-        if (!isManageableBy(AdminAccess.roleCode(session), linkedUser(session, employeeId))) {
+        if (!isManageableBy(AdminAccess.roleCode(session), linkedUser(users, employeeId))) {
             fieldErrors.put("employee", "لا يمكنك تعديل بيانات هذا الموظف");
         }
         EmployeeRequest request = toRequest(form, fieldErrors);
@@ -106,7 +107,7 @@ public class AdminController {
                 fieldErrors.put("employee", e.getMessage());
             }
         }
-        RoleChange roleChange = resolveRoleChange(session, employeeId, form.getRoleCode());
+        RoleChange roleChange = resolveRoleChange(users, employeeId, form.getRoleCode());
         if (fieldErrors.isEmpty() && roleChange != null) {
             try {
                 userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode(),
@@ -116,7 +117,7 @@ public class AdminController {
                 fieldErrors.put("role", e.getMessage());
             }
         }
-        renderCard(model, session);
+        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
         Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات الموظف");
         return "admin/employees :: employeesCard";
     }
@@ -126,11 +127,12 @@ public class AdminController {
         if (!canAccessDashboard(session)) {
             return "redirect:/";
         }
+        var users = userAdminService.list(AdminAccess.clinicId(session));
         Map<String, String> fieldErrors = new HashMap<>();
-        var linked = Optional.ofNullable(linkedUser(session, employeeId));
+        var linked = Optional.ofNullable(linkedUser(users, employeeId));
         if (!isManageableBy(AdminAccess.roleCode(session), linked.orElse(null))) {
             fieldErrors.put("employee", "لا يمكنك أرشفة هذا الموظف");
-            renderCard(model, session);
+            renderCard(model, session, users);
             Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
             return "admin/employees :: employeesCard";
         }
@@ -146,7 +148,7 @@ public class AdminController {
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
             fieldErrors.put("employee", e.getMessage());
         }
-        renderCard(model, session);
+        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
         Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
         return "admin/employees :: employeesCard";
     }
@@ -170,9 +172,9 @@ public class AdminController {
         return AdminAccess.canDashboard(layoutModel, session);
     }
 
-    private void renderCard(Model model, HttpSession session) {
+    private void renderCard(Model model, HttpSession session, java.util.List<UserSummary> users) {
         UUID clinicId = AdminAccess.clinicId(session);
-        Map<UUID, UserSummary> employeeRoles = employeeRoles(userAdminService.list(clinicId));
+        Map<UUID, UserSummary> employeeRoles = employeeRoles(users);
         String actorRole = AdminAccess.roleCode(session);
         var employees = employeeService.list(clinicId).stream()
                 .filter(employee -> isManageableBy(actorRole, employeeRoles.get(employee.id())))
@@ -182,8 +184,8 @@ public class AdminController {
         model.addAttribute("actorRole", actorRole);
     }
 
-    private UserSummary linkedUser(HttpSession session, UUID employeeId) {
-        return userAdminService.list(AdminAccess.clinicId(session)).stream()
+    private static UserSummary linkedUser(java.util.List<UserSummary> users, UUID employeeId) {
+        return users.stream()
                 .filter(user -> employeeId.equals(user.employeeId()))
                 .findFirst()
                 .orElse(null);
@@ -210,11 +212,11 @@ public class AdminController {
     private record RoleChange(UUID membershipId, String roleCode) {
     }
 
-    private RoleChange resolveRoleChange(HttpSession session, UUID employeeId, String roleCode) {
+    private static RoleChange resolveRoleChange(java.util.List<UserSummary> users, UUID employeeId, String roleCode) {
         if (roleCode == null || roleCode.isBlank()) {
             return null;
         }
-        for (UserSummary user : userAdminService.list(AdminAccess.clinicId(session))) {
+        for (UserSummary user : users) {
             if (employeeId.equals(user.employeeId())) {
                 if ("owner".equals(user.roleCode()) || user.roleCode().equals(roleCode)) {
                     return null;
