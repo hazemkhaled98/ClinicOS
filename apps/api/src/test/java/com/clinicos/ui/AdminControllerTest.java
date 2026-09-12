@@ -18,6 +18,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
@@ -38,6 +39,7 @@ class AdminControllerTest {
     private EmployeeService employeeService;
     private ActivityLogService activityLogService;
     private ClinicSettingsService clinicSettingsService;
+    private WorkCalendarService workCalendarService;
     private UserAdminService userAdminService;
     private AdminController controller;
     private Model model;
@@ -48,9 +50,13 @@ class AdminControllerTest {
         employeeService = mock(EmployeeService.class);
         activityLogService = mock(ActivityLogService.class);
         clinicSettingsService = mock(ClinicSettingsService.class);
+        workCalendarService = mock(WorkCalendarService.class);
         userAdminService = mock(UserAdminService.class);
-        controller = new AdminController(layoutModel, employeeService, activityLogService, clinicSettingsService, userAdminService);
+        controller = new AdminController(layoutModel, employeeService, activityLogService,
+                clinicSettingsService, workCalendarService, userAdminService);
         model = new ExtendedModelMap();
+        when(workCalendarService.workingWeekdays(CLINIC)).thenReturn(List.of(6, 7, 1, 2, 3, 4));
+        when(workCalendarService.listHolidays(CLINIC)).thenReturn(List.of());
     }
 
     @Test

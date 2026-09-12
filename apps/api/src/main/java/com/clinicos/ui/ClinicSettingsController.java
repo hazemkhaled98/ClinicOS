@@ -1,7 +1,9 @@
 package com.clinicos.ui;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.AutoPopulatingList;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
@@ -19,6 +23,10 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.CategoryWeight;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidationException;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
+import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
+import com.clinicos.clinicconfig.api.WorkCalendarService.WorkCalendarValidationException;
+import com.clinicos.staff.api.EmployeeService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -33,10 +41,15 @@ public class ClinicSettingsController {
 
     private final LayoutModel layoutModel;
     private final ClinicSettingsService clinicSettingsService;
+    private final WorkCalendarService workCalendarService;
+    private final EmployeeService employeeService;
 
-    public ClinicSettingsController(LayoutModel layoutModel, ClinicSettingsService clinicSettingsService) {
+    public ClinicSettingsController(LayoutModel layoutModel, ClinicSettingsService clinicSettingsService,
+            WorkCalendarService workCalendarService, EmployeeService employeeService) {
         this.layoutModel = layoutModel;
         this.clinicSettingsService = clinicSettingsService;
+        this.workCalendarService = workCalendarService;
+        this.employeeService = employeeService;
     }
 
     @PostMapping("/admin-dashboard/settings/weights")
@@ -128,6 +141,106 @@ public class ClinicSettingsController {
                 : form;
         model.addAttribute("tiersForm", rendered);
         return "admin/clinic-settings :: tiersCard";
+    }
+
+    @PostMapping("/admin-dashboard/settings/calendar-weekdays")
+    public String updateWeekdays(WeekdaysForm form, HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        Map<String, String> fieldErrors = new HashMap<>();
+        List<Integer> weekdays = form.getWeekdays() == null ? List.of() : form.getWeekdays();
+        try {
+            workCalendarService.setWorkingWeekdays(AdminAccess.clinicId(session), weekdays);
+        } catch (WorkCalendarValidationException e) {
+            fieldErrors.putAll(e.fieldErrors());
+        } catch (IllegalArgumentException e) {
+            fieldErrors.put("weekdays", e.getMessage());
+        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ أيام العمل");
+        WeekdaysForm rendered = fieldErrors.isEmpty()
+                ? WeekdaysForm.from(workCalendarService.workingWeekdays(AdminAccess.clinicId(session)))
+                : form;
+        renderCalendarCard(model, session, rendered, new HolidayForm());
+        return "admin/clinic-settings :: calendarCard";
+    }
+
+    @PostMapping("/admin-dashboard/settings/holidays")
+    public String addHoliday(HolidayForm form, HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        Map<String, String> fieldErrors = new HashMap<>();
+        LocalDate date = parseDate(form.getDate(), "date", "تاريخ الإجازة غير صحيح", fieldErrors);
+        if (form.getName() == null || form.getName().isBlank()) {
+            fieldErrors.put("name", "اسم الإجازة مطلوب");
+        }
+        UUID employeeId = parseUuid(form.getEmployeeId(), fieldErrors);
+        if (fieldErrors.isEmpty()) {
+            try {
+                workCalendarService.addHoliday(AdminAccess.clinicId(session),
+                        new HolidayRequest(date, form.getName().trim(), employeeId));
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("holiday", e.getMessage());
+            }
+        }
+        Toasts.fromErrors(model, fieldErrors, "تمت إضافة الإجازة");
+        renderCalendarCard(model, session,
+                WeekdaysForm.from(workCalendarService.workingWeekdays(AdminAccess.clinicId(session))),
+                fieldErrors.isEmpty() ? new HolidayForm() : form);
+        return "admin/clinic-settings :: calendarCard";
+    }
+
+    @DeleteMapping("/admin-dashboard/settings/holidays/{holidayId}")
+    public String deleteHoliday(@PathVariable UUID holidayId, HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        Map<String, String> fieldErrors = new HashMap<>();
+        try {
+            workCalendarService.removeHoliday(AdminAccess.clinicId(session), holidayId);
+        } catch (IllegalArgumentException e) {
+            fieldErrors.put("holiday", e.getMessage());
+        }
+        Toasts.fromErrors(model, fieldErrors, "تم حذف الإجازة");
+        renderCalendarCard(model, session,
+                WeekdaysForm.from(workCalendarService.workingWeekdays(AdminAccess.clinicId(session))),
+                new HolidayForm());
+        return "admin/clinic-settings :: calendarCard";
+    }
+
+    private void renderCalendarCard(Model model, HttpSession session,
+            WeekdaysForm weekdaysForm, HolidayForm holidaysForm) {
+        UUID clinicId = AdminAccess.clinicId(session);
+        model.addAttribute("weekdaysForm", weekdaysForm);
+        model.addAttribute("holidaysForm", holidaysForm);
+        model.addAttribute("holidays", workCalendarService.listHolidays(clinicId));
+        model.addAttribute("employees", employeeService.list(clinicId));
+    }
+
+    private static LocalDate parseDate(String value, String key, String message, Map<String, String> fieldErrors) {
+        if (value == null || value.isBlank()) {
+            fieldErrors.put(key, message);
+            return null;
+        }
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            fieldErrors.put(key, message);
+            return null;
+        }
+    }
+
+    private static UUID parseUuid(String value, Map<String, String> fieldErrors) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException e) {
+            fieldErrors.put("employeeId", "الموظف المحدد غير صحيح");
+            return null;
+        }
     }
 
     private static Integer requiredInt(String raw, String field, String message, Map<String, String> fieldErrors) {
@@ -340,6 +453,60 @@ public class ClinicSettingsController {
             public void setIncentivePct(String incentivePct) {
                 this.incentivePct = incentivePct;
             }
+        }
+    }
+
+    public static class WeekdaysForm {
+        private List<Integer> weekdays = new ArrayList<>();
+
+        public List<Integer> getWeekdays() {
+            return weekdays;
+        }
+
+        public void setWeekdays(List<Integer> weekdays) {
+            this.weekdays = weekdays == null ? new ArrayList<>() : weekdays;
+        }
+
+        public boolean isChecked(int isoDay) {
+            return weekdays.contains(isoDay);
+        }
+
+        static WeekdaysForm from(List<Integer> saved) {
+            WeekdaysForm form = new WeekdaysForm();
+            if (saved != null) {
+                form.weekdays = new ArrayList<>(saved);
+            }
+            return form;
+        }
+    }
+
+    public static class HolidayForm {
+        private String date;
+        private String name;
+        private String employeeId;
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getEmployeeId() {
+            return employeeId;
+        }
+
+        public void setEmployeeId(String employeeId) {
+            this.employeeId = employeeId;
         }
     }
 }

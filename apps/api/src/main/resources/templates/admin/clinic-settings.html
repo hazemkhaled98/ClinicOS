@@ -90,6 +90,87 @@
   </form>
 </div>
 
+<div th:fragment="calendarCard(weekdaysForm, holidaysForm)"
+     id="calendar-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">📅 تقويم العمل</h2>
+    <p class="text-sm text-on-surface-variant">أيام العمل الأسبوعية والإجازات تحدد أيام الدوام، وتؤثر على احتساب الحضور والتقييم.</p>
+  </div>
+
+  <form class="flex flex-col gap-4" th:attr="hx-post='/admin-dashboard/settings/calendar-weekdays'" hx-target="#calendar-card" hx-swap="outerHTML">
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="text-xs text-on-surface-variant w-full">أيام العمل الأسبوعية</span>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="6" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(6)}"> السبت
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="7" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(7)}"> الأحد
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="1" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(1)}"> الاثنين
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="2" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(2)}"> الثلاثاء
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="3" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(3)}"> الأربعاء
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="4" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(4)}"> الخميس
+      </label>
+      <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <input type="checkbox" name="weekdays" value="5" class="accent-teal-600" th:checked="${weekdaysForm.isChecked(5)}"> الجمعة
+      </label>
+    </div>
+    <div class="flex items-center gap-3">
+      <button type="submit" class="clinicos-btn">حفظ أيام العمل</button>
+    </div>
+  </form>
+
+  <hr class="my-6 border-dashed border-neutral-300"/>
+
+  <div class="flex flex-col gap-3">
+    <div class="rounded-xl bg-teal-50 border border-teal-200 p-4">
+      <h3 class="font-bold text-teal-900 mb-3">إضافة إجازة</h3>
+      <form class="flex flex-wrap items-end gap-3" hx-post="/admin-dashboard/settings/holidays"
+            hx-target="#calendar-card" hx-swap="outerHTML">
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          التاريخ
+          <input type="date" name="date" class="clinicos-input" th:value="${holidaysForm.getDate()}">
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الاسم
+          <input type="text" name="name" placeholder="مثال: عيد الفطر" class="clinicos-input w-44"
+                 th:value="${holidaysForm.getName()}">
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          النطاق
+          <select name="employeeId" class="clinicos-input w-44">
+            <option value="" th:selected="${holidaysForm.getEmployeeId() == null or holidaysForm.getEmployeeId().isEmpty()}">كل العيادة</option>
+            <option th:each="emp : ${employees}" th:value="${emp.id()}" th:selected="${holidaysForm.getEmployeeId() == emp.id().toString()}"
+                    th:text="${emp.name()}">محمود</option>
+          </select>
+        </label>
+        <button type="submit" class="clinicos-btn">+ إضافة إجازة</button>
+      </form>
+    </div>
+
+    <p th:if="${#lists.isEmpty(holidays)}" class="py-4 text-center text-sm text-on-surface-variant">لا توجد إجازات مسجلة.</p>
+    <div th:each="holiday : ${holidays}" class="mt-1 rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-3">
+      <span class="text-sm font-bold text-teal-900" th:text="${holiday.name()}">عيد الفطر</span>
+      <span class="clinicos-chip" th:classappend="${holiday.employeeId() != null} ? ' clinicos-chip--info' : ' clinicos-chip--success'"
+            th:text="${holiday.employeeId() != null} ? 'موظف محدد' : 'كل العيادة'">كل العيادة</span>
+      <span class="text-sm text-on-surface-variant" th:text="${holiday.date()}">2026-03-20</span>
+      <form class="ms-auto" th:attr="hx-delete='/admin-dashboard/settings/holidays/' + ${holiday.id()}"
+            hx-target="#calendar-card" hx-swap="outerHTML"
+            hx-confirm="هل أنت متأكد من حذف هذه الإجازة؟">
+        <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">حذف</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div th:fragment="tiersCard(tiersForm)"
      id="tiers-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
