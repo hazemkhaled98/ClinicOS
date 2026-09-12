@@ -62,3 +62,6 @@ graphify-out/
 
 # Legacy app screenshots (reference only, not part of the build)
 Legacy Screenshots/
+
+# Session scratch files (briefs, logs) — not part of the build
+scratch/
