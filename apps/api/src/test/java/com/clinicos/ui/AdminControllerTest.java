@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,6 @@ import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
-import com.clinicos.staff.api.EmployeeService.EmployeeValidationException;
 import com.clinicos.ui.nav.NavSectionResolver;
 
 import jakarta.servlet.http.HttpSession;
@@ -77,6 +75,8 @@ class AdminControllerTest {
         assertThat(model.getAttribute("settings")).isEqualTo(settings);
         assertThat(model.getAttribute("weights")).isEqualTo(List.of());
         assertThat(model.getAttribute("tiers")).isEqualTo(List.of());
+        assertThat(model.getAttribute("weightsForm")).isNotNull();
+        assertThat(model.getAttribute("employeeRoles")).isNotNull();
     }
 
     @Test
@@ -98,12 +98,10 @@ class AdminControllerTest {
         when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
-        String view = controller.updateEmployee(updated.id(), new AdminController.EmployeeForm(
-                "محمود", null, "5200", "2000", false, "", ""), session, model);
+        String view = controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.update", "employee");
-        assertThat(model.getAttribute("employeeErrorScope")).isNull();
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ بيانات الموظف");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
@@ -116,11 +114,27 @@ class AdminControllerTest {
                 .thenThrow(new IllegalArgumentException("الموظف غير موجود"));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.updateEmployee(UUID.randomUUID(), new AdminController.EmployeeForm(
-                "محمود", null, "5200", "2000", false, "", ""), session, model);
+        String view = controller.updateEmployee(UUID.randomUUID(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
         verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeBlankNameIsRejectedBeforeService() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        Employee updated = employee("محمود");
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateEmployee(employeeId, form("   ", null), Validated.of(form("   ", null)), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("اسم الموظف مطلوب");
+        verify(employeeService, never()).update(any(), any(), any());
     }
 
     @Test
@@ -149,11 +163,9 @@ class AdminControllerTest {
         String view = controller.archiveEmployee(employeeId, session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        assertThat(model.getAttribute("employeeErrorScope")).isEqualTo("archive");
-        assertThat(((Map<?, ?>) model.getAttribute("employeeErrors")).get("employee"))
-                .isEqualTo("الموظف غير موجود");
-        verify(activityLogService, never()).log(any(), any(), any(), any());
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("الموظف غير موجود");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     @Test
@@ -168,8 +180,7 @@ class AdminControllerTest {
         when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
-        String view = controller.updateEmployee(employeeId, new AdminController.EmployeeForm(
-                "محمود", "manager", "5200", "2000", false, "", ""), session, model);
+        String view = controller.updateEmployee(employeeId, form("محمود", "manager"), Validated.of(form("محمود", "manager")), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(userAdminService).assignRole(CLINIC, membershipId, "manager");
@@ -188,10 +199,8 @@ class AdminControllerTest {
         when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
-        String view = controller.updateEmployee(employeeId, new AdminController.EmployeeForm(
-                "المالك", "manager", "5200", "2000", false, "", ""), session, model);
+        controller.updateEmployee(employeeId, form("المالك", "manager"), Validated.of(form("المالك", "manager")), session, model);
 
-        assertThat(view).isEqualTo("admin/employees :: employeesCard");
         verify(userAdminService, never()).assignRole(any(), any(), any());
     }
 
@@ -204,10 +213,13 @@ class AdminControllerTest {
         when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
-        controller.updateEmployee(updated.id(), new AdminController.EmployeeForm(
-                "محمود", null, "5200", "2000", false, "", ""), session, model);
+        controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
 
         verify(userAdminService, never()).assignRole(any(), any(), any());
+    }
+
+    private static AdminController.EmployeeForm form(String name, String roleCode) {
+        return AdminController.EmployeeForm.of(name, roleCode, "5200", "2000", false, "", "");
     }
 
     private void allowDashboard() {

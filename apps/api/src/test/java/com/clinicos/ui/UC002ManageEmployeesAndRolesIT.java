@@ -215,9 +215,8 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
 
-            page().getByRole(AriaRole.ALERT).waitFor();
-            PlaywrightAssertions.assertThat(page().getByRole(AriaRole.ALERT)
-                    .getByText("اسم المستخدم موجود مسبقاً في هذه العيادة")).isVisible();
+            page().getByText("اسم المستخدم موجود مسبقاً في هذه العيادة").waitFor();
+            PlaywrightAssertions.assertThat(page().getByText("اسم المستخدم موجود مسبقاً في هذه العيادة")).isVisible();
             PlaywrightAssertions.assertThat(page().locator("#users-card")).isVisible();
             assertThat(page().locator(".clinicos-user-row").count()).isEqualTo(2);
         }
@@ -271,12 +270,12 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             page().locator("#settings-card input[name=showLeaderboard]").waitFor();
             assertThat(page().locator("input[name=showLeaderboard]").isChecked()).isTrue();
 
-            page().locator("input[name=titles]").first().fill("مهارة التبسم");
-            page().locator("input[name=targets]").first().fill("12");
+            page().locator("input[name='goals[0].title']").fill("مهارة التبسم");
+            page().locator("input[name='goals[0].target']").fill("12");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ الأهداف")).click();
-            page().locator("#goals-card input[name=titles]").first().waitFor();
-            assertThat(page().locator("input[name=titles]").first().inputValue()).isEqualTo("مهارة التبسم");
-            assertThat(page().locator("input[name=targets]").first().inputValue()).isEqualTo("12");
+            page().locator("#goals-card input[name='goals[0].title']").waitFor();
+            assertThat(page().locator("input[name='goals[0].title']").inputValue()).isEqualTo("مهارة التبسم");
+            assertThat(page().locator("input[name='goals[0].target']").inputValue()).isEqualTo("12");
 
             badgeThresholdInput("نجم الأسبوع").fill("7");
             var thrResponse = page().waitForResponse(r -> r.url().contains("thresholds"),
@@ -288,7 +287,7 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
                 thrBody = "[" + thrResponse.status() + "] ERR " + e + " url=" + thrResponse.url();
             }
             System.out.println("== [POST /thresholds] " + thrBody);
-            page().locator("#thresholds-card input[name=thresholds]").first().waitFor();
+            page().locator("#thresholds-card input[name$='.threshold']").first().waitFor();
             dumpThresholds("after-save-fragment");
             assertThat(badgeThresholdValue("نجم الأسبوع")).isEqualTo("7");
 
@@ -299,8 +298,8 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             page().navigate(getUrl() + "admin-dashboard/goals");
             dumpThresholds("after-2nd-navigation");
             assertThat(page().locator("input[name=showLeaderboard]").isChecked()).isTrue();
-            assertThat(page().locator("input[name=titles]").first().inputValue()).isEqualTo("مهارة التبسم");
-            assertThat(page().locator("input[name=targets]").first().inputValue()).isEqualTo("12");
+            assertThat(page().locator("input[name='goals[0].title']").inputValue()).isEqualTo("مهارة التبسم");
+            assertThat(page().locator("input[name='goals[0].target']").inputValue()).isEqualTo("12");
             assertThat(badgeThresholdValue("نجم الأسبوع")).isEqualTo("7");
         }
 
@@ -320,8 +319,8 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
         }
 
         private com.microsoft.playwright.Locator badgeThresholdInput(String badgeName) {
-            return page().locator("#thresholds-card form > div:has(input[name=names][value='" + badgeName + "'])")
-                    .locator("input[name=thresholds]");
+            return page().locator("#thresholds-card form > div:has(input[name$='.name'][value='" + badgeName + "'])")
+                    .locator("input[name$='.threshold']");
         }
 
         private String badgeThresholdValue(String badgeName) {
@@ -330,9 +329,9 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
 
         private void dumpThresholds(String label) {
             String dump = page().evalOnSelectorAll("#thresholds-card form > div",
-                    "els => els.map(e => { const r = e.querySelector('input[name=names]'); const t = e.querySelector('input[name=thresholds]'); return r ? r.value + '=' + (t ? t.value : '?') : '??'; })")
+                    "els => els.map(e => { const r = e.querySelector('input[name$=\".name\"]'); const t = e.querySelector('input[name$=\".threshold\"]'); return r ? r.value + '=' + (t ? t.value : '?') : '??'; })")
                     .toString();
-            System.out.println("== [" + label + "] " + dump + " :: docOrderFirst=" + page().locator("input[name=thresholds]").first().inputValue());
+            System.out.println("== [" + label + "] " + dump + " :: docOrderFirst=" + page().locator("input[name$='.threshold']").first().inputValue());
         }
     }
 }

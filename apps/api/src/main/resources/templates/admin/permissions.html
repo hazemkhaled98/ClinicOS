@@ -12,8 +12,6 @@
     <p class="text-sm text-on-surface-variant">تحديد ما يمكن لكل دور الوصول إليه. الدور «المالك» يحصل على كل الصلاحيات تلقائياً.</p>
   </div>
 
-  <div th:if="${permissionError != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert" th:text="${permissionError}"></div>
-
   <th:block th:each="roleCode : ${roleCodes}">
     <div th:if="${roleCode == 'owner'}"
          th:attr="data-role=${roleCode}"

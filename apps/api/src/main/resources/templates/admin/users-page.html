@@ -9,8 +9,8 @@
       <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">المستخدمون</h1>
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">إدارة الحسابات وكلمات المرور والأدوار</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('users')}"></nav>
-      <div id="users-card"
-           th:replace="~{admin/users :: usersCard(${users}, ${userErrors}, ${userErrorScope}, ${addForm})}">
+<div id="users-card"
+         th:replace="~{admin/users :: usersCard(${users}, ${currentMembershipId}, ${addForm})}">
       </div>
     </section>
   </main>

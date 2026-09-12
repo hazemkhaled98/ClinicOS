@@ -10,8 +10,8 @@
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">ضبط إعدادات نظام التحفيز والأهداف الأسبوعية والشارات</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('goals')}"></nav>
       <div th:replace="~{admin/gamification :: settingsCard(${settings})}"></div>
-      <div th:replace="~{admin/gamification :: goalsCard(${goals}, ${goalErrors})}"></div>
-      <div th:replace="~{admin/gamification :: thresholdsCard(${thresholds}, ${thresholdErrors})}"></div>
+      <div th:replace="~{admin/gamification :: goalsCard(${goalForm})}"></div>
+      <div th:replace="~{admin/gamification :: thresholdsCard(${thresholdForm})}"></div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

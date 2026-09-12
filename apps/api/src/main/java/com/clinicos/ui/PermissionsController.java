@@ -1,5 +1,6 @@
 package com.clinicos.ui;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,9 +9,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.RolePermissionService;
 import com.clinicos.identity.api.UserAdminService;
@@ -18,6 +19,8 @@ import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 @Controller
 public class PermissionsController {
@@ -69,48 +72,48 @@ public class PermissionsController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        UUID clinicId = AdminAccess.clinicId(session);
-        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        model.addAttribute("roleCodes", ROLE_CODES);
-        model.addAttribute("roleNames", roleNames());
-        model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
-        model.addAttribute("permissionLabels", PERMISSION_LABELS);
-        model.addAttribute("permissionError", (String) null);
-        model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
+        renderPage(model, session);
         return "admin/permissions-page";
     }
 
     @PostMapping("/admin-dashboard/permissions")
-    public String updatePermissions(@RequestParam String roleCode,
-            @RequestParam(required = false) String[] permissionCodes,
+    public String updatePermissions(@Valid PermissionsForm form, BindingResult binding,
             HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
-        Set<String> codes = permissionCodes != null ? Set.of(permissionCodes) : Set.of();
-        String error = null;
-        try {
-            rolePermissionService.setPermissions(clinicId, roleCode, codes);
-            activityLogService.log(clinicId, AdminAccess.membershipId(session), "permissions.update", "role_permission");
-        } catch (IllegalArgumentException e) {
-            error = e.getMessage();
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.putAll(FormErrors.of(binding));
+        if (fieldErrors.isEmpty()) {
+            Set<String> codes = form.getPermissionCodes() != null ? Set.of(form.getPermissionCodes()) : Set.of();
+            try {
+                rolePermissionService.setPermissions(clinicId, form.getRoleCode(), codes);
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "permissions.update", "role_permission");
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("permissions", e.getMessage());
+            }
         }
-        model.addAttribute("permissionError", error);
+        renderPage(model, session);
+        if (fieldErrors.isEmpty()) {
+            Toasts.success(model, "تم حفظ الصلاحيات");
+        } else {
+            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
+        }
+        return "admin/permissions :: permissionsCard";
+    }
+
+    private void renderPage(Model model, HttpSession session) {
+        UUID clinicId = AdminAccess.clinicId(session);
+        model.addAttribute("roleCodes", ROLE_CODES);
+        model.addAttribute("roleNames", roleNames());
+        model.addAttribute("permissionLabels", PERMISSION_LABELS);
+        model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
         try {
             model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         } catch (Exception e) {
             model.addAttribute("rolePermissionMap", Map.of());
         }
-        model.addAttribute("roleCodes", ROLE_CODES);
-        model.addAttribute("permissionLabels", PERMISSION_LABELS);
-        model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
-        if (error == null) {
-            Toasts.success(model, "تم حفظ الصلاحيات");
-        } else {
-            Toasts.error(model, error);
-        }
-        return "admin/permissions :: permissionsCard";
     }
 
     private static Map<String, String> roleNames() {
@@ -127,5 +130,34 @@ public class PermissionsController {
                 Collectors.groupingBy(RolePermissionService.RolePermissionRow::roleCode,
                         Collectors.mapping(RolePermissionService.RolePermissionRow::permissionCode,
                                 Collectors.toSet())));
+    }
+
+    public static class PermissionsForm {
+        @NotBlank(message = "الدور مطلوب")
+        private String roleCode;
+        private String[] permissionCodes;
+
+        static PermissionsForm of(String roleCode, String... permissionCodes) {
+            PermissionsForm form = new PermissionsForm();
+            form.roleCode = roleCode;
+            form.permissionCodes = permissionCodes;
+            return form;
+        }
+
+        public String getRoleCode() {
+            return roleCode;
+        }
+
+        public void setRoleCode(String roleCode) {
+            this.roleCode = roleCode;
+        }
+
+        public String[] getPermissionCodes() {
+            return permissionCodes;
+        }
+
+        public void setPermissionCodes(String[] permissionCodes) {
+            this.permissionCodes = permissionCodes;
+        }
     }
 }

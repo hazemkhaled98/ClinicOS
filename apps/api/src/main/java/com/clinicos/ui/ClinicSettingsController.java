@@ -11,8 +11,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.AutoPopulatingList;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
@@ -25,11 +25,8 @@ import jakarta.servlet.http.HttpSession;
 /**
  * The four clinic-settings cards under the admin settings tab (screen 39 cards
  * 2-3 plus the clause-addendum duty and tier cards). Each card posts its own
- * HTMX form and re-renders only its fragment; the page GET
- * ({@link AdminController#settings}) supplies the {@code settings} aggregate;
- * the settings template passes null error maps to each card fragment. POST
- * handlers re-render one card fragment with error attributes bound to the
- * fragment parameters.
+ * HTMX form and re-renders only its fragment. Errors surface as toasts; the
+ * POST handlers re-render the card preserving submitted values.
  */
 @Controller
 public class ClinicSettingsController {
@@ -43,18 +40,12 @@ public class ClinicSettingsController {
     }
 
     @PostMapping("/admin-dashboard/settings/weights")
-    public String updateWeights(@RequestParam Map<String, String> params,
-            HttpSession session, Model model) {
+    public String updateWeights(WeightsForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        List<CategoryWeight> weights = new ArrayList<>();
-        for (Category category : Category.values()) {
-            String raw = params.get("weight-" + category.code());
-            BigDecimal parsed = FormParsing.parseAmount(raw, "weights", fieldErrors, "أوزان مكونات التقييم غير صحيحة");
-            weights.add(new CategoryWeight(category, parsed));
-        }
+        List<CategoryWeight> weights = toWeights(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 clinicSettingsService.updateWeights(AdminAccess.clinicId(session), weights);
@@ -67,16 +58,21 @@ public class ClinicSettingsController {
         } else {
             Toasts.error(model, String.join("؛ ", fieldErrors.values()));
         }
-        return renderWeightsCard(model, AdminAccess.clinicId(session), weights, fieldErrors);
+        WeightsForm rendered = fieldErrors.isEmpty()
+                ? WeightsForm.from(clinicSettingsService.get(AdminAccess.clinicId(session)).weights())
+                : form;
+        model.addAttribute("weightsForm", rendered);
+        model.addAttribute("weightsSum", sumWeights(weightsOf(rendered)));
+        return "admin/clinic-settings :: weightsCard";
     }
+
     @PostMapping("/admin-dashboard/settings/volume")
-    public String updateVolumeTarget(@RequestParam Map<String, String> params,
-            HttpSession session, Model model) {
+    public String updateVolumeTarget(VolumeForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        BigDecimal volumeTarget = FormParsing.parseAmount(params.get("volumeTarget"), "volumeTarget",
+        BigDecimal volumeTarget = FormParsing.parseAmount(form.getVolumeTarget(), "volumeTarget",
                 fieldErrors, "هدف الفواتير الشهري غير صحيح");
         if (fieldErrors.isEmpty()) {
             try {
@@ -90,24 +86,23 @@ public class ClinicSettingsController {
         } else {
             Toasts.error(model, String.join("؛ ", fieldErrors.values()));
         }
-        return renderCard(model, session, "volumeErrors", fieldErrors, "volumeCard");
+        model.addAttribute("volumeForm", form);
+        return "admin/clinic-settings :: volumeCard";
     }
 
     @PostMapping("/admin-dashboard/settings/duty")
-    public String updateDuty(@RequestParam Map<String, String> params,
-            HttpSession session, Model model) {
+    public String updateDuty(DutyForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        LocalTime shiftStart = FormParsing.parseTime(params.get("defaultShiftStart"), "shift", fieldErrors);
-        LocalTime shiftEnd = FormParsing.parseTime(params.get("defaultShiftEnd"), "shift", fieldErrors);
-        Integer grace = FormParsing.parseInt(params.get("lateGraceMinutes"), "lateGraceMinutes", fieldErrors,
-                "مهلة التأخير غير صحيحة");
-        Integer workingDays = FormParsing.parseInt(params.get("workingDaysPerMonth"), "workingDaysPerMonth",
-                fieldErrors, "أيام العمل الشهرية غير صحيحة");
-        Integer academyScore = FormParsing.parseInt(params.get("academyPassScore"), "academyPassScore",
-                fieldErrors, "درجة النجاح غير صحيحة");
+        LocalTime shiftStart = FormParsing.parseTime(form.getDefaultShiftStart(), "shift", fieldErrors);
+        LocalTime shiftEnd = FormParsing.parseTime(form.getDefaultShiftEnd(), "shift", fieldErrors);
+        Integer grace = requiredInt(form.getLateGraceMinutes(), "lateGraceMinutes", "مهلة التأخير غير صحيحة", fieldErrors);
+        Integer workingDays = requiredInt(form.getWorkingDaysPerMonth(), "workingDaysPerMonth",
+                "أيام العمل الشهرية غير صحيحة", fieldErrors);
+        Integer academyScore = requiredInt(form.getAcademyPassScore(), "academyPassScore",
+                "درجة النجاح غير صحيحة", fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 clinicSettingsService.updateDuty(AdminAccess.clinicId(session), shiftStart, shiftEnd,
@@ -121,25 +116,17 @@ public class ClinicSettingsController {
         } else {
             Toasts.error(model, String.join("؛ ", fieldErrors.values()));
         }
-        return renderCard(model, session, "dutyErrors", fieldErrors, "dutyCard");
+        model.addAttribute("dutyForm", form);
+        return "admin/clinic-settings :: dutyCard";
     }
 
     @PostMapping("/admin-dashboard/settings/tiers")
-    public String updateTiers(@RequestParam Map<String, String> params,
-            HttpSession session, Model model) {
+    public String updateTiers(TiersForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
-        List<Tier> tiers = new ArrayList<>();
-        for (int i = 0; params.containsKey("tierName" + i); i++) {
-            String name = params.get("tierName" + i);
-            BigDecimal minScore = FormParsing.parseAmount(params.get("tierMinScore" + i), "tiers", fieldErrors,
-                    "قيم الشرائح غير صحيحة");
-            BigDecimal pct = FormParsing.parseAmount(params.get("tierPct" + i), "tiers", fieldErrors,
-                    "قيم الشرائح غير صحيحة");
-            tiers.add(new Tier(name == null ? "" : name.trim(), minScore, pct));
-        }
+        List<Tier> tiers = toTiers(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
                 clinicSettingsService.updateTiers(AdminAccess.clinicId(session), tiers);
@@ -152,39 +139,59 @@ public class ClinicSettingsController {
         } else {
             Toasts.error(model, String.join("؛ ", fieldErrors.values()));
         }
-        return renderTiersCard(model, AdminAccess.clinicId(session), tiers, fieldErrors);
-    }
-
-    private String renderCard(Model model, HttpSession session, String errorAttr,
-            Map<String, String> fieldErrors, String cardFragment) {
-        try {
-            model.addAttribute("settings", clinicSettingsService.get(AdminAccess.clinicId(session)));
-        } catch (IllegalArgumentException e) {
-            model.addAttribute(errorAttr, Map.of("settings", e.getMessage()));
-            Toasts.error(model, e.getMessage());
-            return "admin/clinic-settings :: " + cardFragment;
-        }
-        model.addAttribute(errorAttr, fieldErrors.isEmpty() ? null : fieldErrors);
-        return "admin/clinic-settings :: " + cardFragment;
-    }
-
-    private String renderWeightsCard(Model model, UUID clinicId, List<CategoryWeight> submittedWeights,
-            Map<String, String> fieldErrors) {
-        var settings = clinicSettingsService.get(clinicId);
-        model.addAttribute("settings", settings);
-        model.addAttribute("weights", fieldErrors.isEmpty() ? settings.weights() : submittedWeights);
-        model.addAttribute("weightsSum", sumWeights(fieldErrors.isEmpty() ? settings.weights() : submittedWeights));
-        model.addAttribute("weightErrors", fieldErrors.isEmpty() ? null : fieldErrors);
-        return "admin/clinic-settings :: weightsCard";
-    }
-
-    private String renderTiersCard(Model model, UUID clinicId, List<Tier> submittedTiers,
-            Map<String, String> fieldErrors) {
-        var settings = clinicSettingsService.get(clinicId);
-        model.addAttribute("settings", settings);
-        model.addAttribute("tiers", fieldErrors.isEmpty() ? settings.tiers() : submittedTiers);
-        model.addAttribute("tierErrors", fieldErrors.isEmpty() ? null : fieldErrors);
+        TiersForm rendered = fieldErrors.isEmpty()
+                ? TiersForm.from(clinicSettingsService.get(AdminAccess.clinicId(session)).tiers())
+                : form;
+        model.addAttribute("tiersForm", rendered);
         return "admin/clinic-settings :: tiersCard";
+    }
+
+    private static Integer requiredInt(String raw, String field, String message, Map<String, String> fieldErrors) {
+        Integer parsed = FormParsing.parseInt(raw, field, fieldErrors, message);
+        if (parsed == null && !fieldErrors.containsKey(field)) {
+            fieldErrors.put(field, message);
+        }
+        return parsed == null ? 0 : parsed;
+    }
+
+    static List<CategoryWeight> toWeights(WeightsForm form, Map<String, String> fieldErrors) {
+        List<CategoryWeight> weights = new ArrayList<>();
+        for (WeightsForm.WeightRow row : form.weights) {
+            try {
+                weights.add(new CategoryWeight(Category.fromCode(row.category),
+                        FormParsing.parseAmount(row.weight, "weights", fieldErrors, "أوزان مكونات التقييم غير صحيحة")));
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("weights", e.getMessage());
+            }
+        }
+        return weights;
+    }
+
+    private static List<CategoryWeight> weightsOf(WeightsForm form) {
+        List<CategoryWeight> weights = new ArrayList<>();
+        for (WeightsForm.WeightRow row : form.weights) {
+            BigDecimal weight = null;
+            try {
+                weight = row.weight == null || row.weight.isBlank()
+                        ? null : new BigDecimal(row.weight);
+            } catch (NumberFormatException ignored) {
+            }
+            try {
+                weights.add(new CategoryWeight(Category.fromCode(row.category), weight));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return weights;
+    }
+
+    private static List<Tier> toTiers(TiersForm form, Map<String, String> fieldErrors) {
+        List<Tier> tiers = new ArrayList<>();
+        for (TiersForm.TierRow row : form.tiers) {
+            BigDecimal minScore = FormParsing.parseAmount(row.minScore, "tiers", fieldErrors, "قيم الشرائح غير صحيحة");
+            BigDecimal pct = FormParsing.parseAmount(row.incentivePct, "tiers", fieldErrors, "قيم الشرائح غير صحيحة");
+            tiers.add(new Tier(row.name == null ? "" : row.name.trim(), minScore, pct));
+        }
+        return tiers;
     }
 
     static String sumWeights(List<ClinicSettingsService.CategoryWeight> weights) {
@@ -195,4 +202,177 @@ public class ClinicSettingsController {
                 .stripTrailingZeros().toPlainString();
     }
 
+    public static class WeightsForm {
+        private AutoPopulatingList<WeightRow> weights = new AutoPopulatingList<>(WeightRow.class);
+
+        public List<WeightRow> getWeights() {
+            return weights;
+        }
+
+        public void setWeights(List<WeightRow> weights) {
+            this.weights = new AutoPopulatingList<>(weights, WeightRow.class);
+        }
+
+        static WeightsForm from(List<CategoryWeight> saved) {
+            WeightsForm form = new WeightsForm();
+            for (CategoryWeight categoryWeight : saved) {
+                WeightRow row = new WeightRow();
+                row.category = categoryWeight.category().code();
+                row.weight = categoryWeight.weight() == null ? "" : categoryWeight.weight().stripTrailingZeros().toPlainString();
+                form.weights.add(row);
+            }
+            return form;
+        }
+
+        public static class WeightRow {
+            private String category;
+            private String weight;
+
+            public String getCategory() {
+                return category;
+            }
+
+            public void setCategory(String category) {
+                this.category = category;
+            }
+
+            public String getWeight() {
+                return weight;
+            }
+
+            public void setWeight(String weight) {
+                this.weight = weight;
+            }
+        }
+    }
+
+    public static class VolumeForm {
+        private String volumeTarget;
+
+        public String getVolumeTarget() {
+            return volumeTarget;
+        }
+
+        public void setVolumeTarget(String volumeTarget) {
+            this.volumeTarget = volumeTarget;
+        }
+
+        static VolumeForm from(BigDecimal saved) {
+            VolumeForm form = new VolumeForm();
+            form.volumeTarget = saved == null ? "" : saved.stripTrailingZeros().toPlainString();
+            return form;
+        }
+    }
+
+    public static class DutyForm {
+        private String defaultShiftStart;
+        private String defaultShiftEnd;
+        private String lateGraceMinutes;
+        private String workingDaysPerMonth;
+        private String academyPassScore;
+
+        public String getDefaultShiftStart() {
+            return defaultShiftStart;
+        }
+
+        public void setDefaultShiftStart(String defaultShiftStart) {
+            this.defaultShiftStart = defaultShiftStart;
+        }
+
+        public String getDefaultShiftEnd() {
+            return defaultShiftEnd;
+        }
+
+        public void setDefaultShiftEnd(String defaultShiftEnd) {
+            this.defaultShiftEnd = defaultShiftEnd;
+        }
+
+        public String getLateGraceMinutes() {
+            return lateGraceMinutes;
+        }
+
+        public void setLateGraceMinutes(String lateGraceMinutes) {
+            this.lateGraceMinutes = lateGraceMinutes;
+        }
+
+        public String getWorkingDaysPerMonth() {
+            return workingDaysPerMonth;
+        }
+
+        public void setWorkingDaysPerMonth(String workingDaysPerMonth) {
+            this.workingDaysPerMonth = workingDaysPerMonth;
+        }
+
+        public String getAcademyPassScore() {
+            return academyPassScore;
+        }
+
+        public void setAcademyPassScore(String academyPassScore) {
+            this.academyPassScore = academyPassScore;
+        }
+
+        static DutyForm from(ClinicSettingsService.ClinicSettings settings) {
+            DutyForm form = new DutyForm();
+            form.defaultShiftStart = settings.defaultShiftStart() == null ? "" : settings.defaultShiftStart().toString();
+            form.defaultShiftEnd = settings.defaultShiftEnd() == null ? "" : settings.defaultShiftEnd().toString();
+            form.lateGraceMinutes = Integer.toString(settings.lateGraceMinutes());
+            form.workingDaysPerMonth = Integer.toString(settings.workingDaysPerMonth());
+            form.academyPassScore = Integer.toString(settings.academyPassScore());
+            return form;
+        }
+    }
+
+    public static class TiersForm {
+        private AutoPopulatingList<TierRow> tiers = new AutoPopulatingList<>(TierRow.class);
+
+        public List<TierRow> getTiers() {
+            return tiers;
+        }
+
+        public void setTiers(List<TierRow> tiers) {
+            this.tiers = new AutoPopulatingList<>(tiers, TierRow.class);
+        }
+
+        static TiersForm from(List<Tier> saved) {
+            TiersForm form = new TiersForm();
+            for (Tier tier : saved) {
+                TierRow row = new TierRow();
+                row.name = tier.name();
+                row.minScore = tier.minScore() == null ? "" : tier.minScore().stripTrailingZeros().toPlainString();
+                row.incentivePct = tier.incentivePct() == null ? "" : tier.incentivePct().stripTrailingZeros().toPlainString();
+                form.tiers.add(row);
+            }
+            return form;
+        }
+
+        public static class TierRow {
+            private String name;
+            private String minScore;
+            private String incentivePct;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getMinScore() {
+                return minScore;
+            }
+
+            public void setMinScore(String minScore) {
+                this.minScore = minScore;
+            }
+
+            public String getIncentivePct() {
+                return incentivePct;
+            }
+
+            public void setIncentivePct(String incentivePct) {
+                this.incentivePct = incentivePct;
+            }
+        }
+    }
 }

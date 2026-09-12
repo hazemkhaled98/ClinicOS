@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -76,8 +75,7 @@ class TaskDefinitionControllerTest {
         when(taskDefinitionService.create(eq(CLINIC), any(TaskDefinitionRequest.class))).thenReturn(created);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(created));
 
-        String view = controller.createTask(
-                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+        String view = controller.createTask(taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.create", "task_definition");
@@ -89,10 +87,10 @@ class TaskDefinitionControllerTest {
         allowDashboard();
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createTask(
-                new TaskDefinitionController.TaskForm("", "fanni", "daily", "assistant"), session, model);
+        String view = controller.createTask(taskForm("", "fanni", "daily", "assistant"), Validated.of(taskForm("", "fanni", "daily", "assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
         verify(taskDefinitionService, never()).create(any(), any());
     }
 
@@ -118,12 +116,11 @@ class TaskDefinitionControllerTest {
         when(taskDefinitionService.update(eq(CLINIC), eq(taskId), any(TaskDefinitionRequest.class))).thenReturn(updated);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(updated));
 
-        String view = controller.updateTask(taskId,
-                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.update", "task_definition");
-        assertThat(model.getAttribute("taskErrorScope")).isNull();
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
     @Test
@@ -133,11 +130,11 @@ class TaskDefinitionControllerTest {
         UUID taskId = UUID.randomUUID();
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.updateTask(taskId,
-                new TaskDefinitionController.TaskForm("", "fanni", "daily", "assistant"), session, model);
+        String view = controller.updateTask(taskId, taskForm("", "fanni", "daily", "assistant"), Validated.of(taskForm("", "fanni", "daily", "assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
-        assertThat(((Map<?, ?>) model.getAttribute("taskErrors")).containsKey("name")).isTrue();
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("اسم المهمة مطلوب");
         verify(taskDefinitionService, never()).update(any(), any(), any());
     }
 
@@ -150,13 +147,18 @@ class TaskDefinitionControllerTest {
                 .thenThrow(new IllegalArgumentException("المهمة غير موجودة"));
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.updateTask(taskId,
-                new TaskDefinitionController.TaskForm("تنظيف", "fanni", "daily", "assistant"), session, model);
+        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
-        assertThat(model.getAttribute("taskErrorScope")).isEqualTo("edit");
-        assertThat(((Map<?, ?>) model.getAttribute("taskErrors")).get("task")).isEqualTo("المهمة غير موجودة");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).isEqualTo("المهمة غير موجودة");
         verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    private static TaskDefinitionController.TaskForm taskForm(String name, String dimension,
+            String frequency, String roleCode) {
+        var form = TaskDefinitionController.TaskForm.of(name, dimension, frequency, roleCode);
+        return form;
     }
 
     private void allowDashboard() {

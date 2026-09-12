@@ -9,7 +9,7 @@
       <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">المهام</h1>
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">تعريف المهام لكل دور في العيادة</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('tasks')}"></nav>
-      <div th:replace="~{admin/tasks :: tasksCard(${tasks}, ${taskErrors}, ${taskErrorScope})}"></div>
+      <div th:replace="~{admin/tasks :: tasksCard(${tasks})}"></div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

@@ -3,13 +3,13 @@ package com.clinicos.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +18,9 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.identity.api.RolePermissionService;
+import com.clinicos.identity.api.RolePermissionService.RolePermissionRow;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.identity.api.UserAdminService;
-import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.ui.nav.NavSectionResolver;
 
@@ -52,14 +52,17 @@ class PermissionsControllerTest {
     void permissionsRendersPageForAdmin() {
         HttpSession session = session();
         allowDashboard();
-        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of(
+                new RolePermissionRow("manager", "emp"),
+                new RolePermissionRow("manager", "quick")));
 
         String view = controller.permissions(session, model);
 
         assertThat(view).isEqualTo("admin/permissions-page");
         assertThat(model.getAttribute("rolePermissionMap")).isNotNull();
-        assertThat(model.getAttribute("usersByRole")).isEqualTo(Map.of());
+        assertThat((java.util.Map<String, ?>) model.getAttribute("rolePermissionMap")).containsKey("manager");
+        assertThat(model.getAttribute("toastMessage")).isNull();
     }
 
     @Test
@@ -76,41 +79,67 @@ class PermissionsControllerTest {
     void updatePermissionsLogsActivity() {
         HttpSession session = session();
         allowDashboard();
-        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
 
-        controller.updatePermissions("manager", new String[]{"emp", "quick"}, session, model);
+        String view = controller.updatePermissions(
+                PermissionsController.PermissionsForm.of("manager", "emp", "quick"), Validated.of(PermissionsController.PermissionsForm.of("manager", "emp", "quick")), session, model);
 
-        verify(rolePermissionService).setPermissions(CLINIC, "manager", Set.of("emp", "quick"));
+        assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
+        verify(rolePermissionService).setPermissions(CLINIC, "manager",
+                java.util.Set.of("emp", "quick"));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "permissions.update", "role_permission");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الصلاحيات");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
-        assertThat(model.getAttribute("usersByRole")).isEqualTo(Map.of());
     }
 
     @Test
-    void updatePermissionsHandlesNullCodes() {
+    void updatePermissionsBlankRoleCodeIsRejected() {
         HttpSession session = session();
         allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updatePermissions(
+                PermissionsController.PermissionsForm.of(" ", "emp"), Validated.of(PermissionsController.PermissionsForm.of(" ", "emp")), session, model);
+
+        assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("الدور مطلوب");
+        verify(rolePermissionService, never()).setPermissions(any(), any(), any());
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void updatePermissionsServiceErrorReturnsToast() {
+        HttpSession session = session();
+        allowDashboard();
+        doThrow(new IllegalArgumentException("الدور المحدد غير موجود"))
+                .when(rolePermissionService).setPermissions(eq(CLINIC), eq("manager"), any());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updatePermissions(
+                PermissionsController.PermissionsForm.of("manager", "emp"), Validated.of(PermissionsController.PermissionsForm.of("manager", "emp")), session, model);
+
+        assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("الدور المحدد غير موجود");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void updatePermissionsListFailureRendersEmptyMap() {
+        HttpSession session = session();
+        allowDashboard();
+        when(rolePermissionService.listForClinic(CLINIC)).thenThrow(new RuntimeException("boom"));
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
 
-        controller.updatePermissions("assistant", null, session, model);
+        String view = controller.updatePermissions(
+                PermissionsController.PermissionsForm.of("manager"), Validated.of(PermissionsController.PermissionsForm.of("manager")), session, model);
 
-        verify(rolePermissionService).setPermissions(CLINIC, "assistant", Set.of());
-    }
-
-    @Test
-    void usersByRoleGroupsUsersByRoleCode() {
-        HttpSession session = session();
-        allowDashboard();
-        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
-        UserSummary assistant = new UserSummary(UUID.randomUUID(), "ehab", "إيهاب", "e@b.com", "active", "assistant", UUID.randomUUID(), null);
-        when(userAdminService.list(CLINIC)).thenReturn(List.of(assistant));
-
-        controller.permissions(session, model);
-
-        var usersByRole = (Map<String, List<UserSummary>>) model.getAttribute("usersByRole");
-        assertThat(usersByRole.get("assistant")).containsExactly(assistant);
+        assertThat(view).isEqualTo("admin/permissions :: permissionsCard");
+        assertThat((java.util.Map<?, ?>) model.getAttribute("rolePermissionMap")).isEmpty();
     }
 
     private void allowDashboard() {

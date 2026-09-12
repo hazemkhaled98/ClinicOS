@@ -1,4 +1,8 @@
 @layer components {
+  [x-cloak] {
+    display: none;
+  }
+
   .custom-gradient-bg {
     background-image: linear-gradient(
       135deg,

@@ -4,16 +4,12 @@
 <title>المهام</title>
 </head>
 <body>
-<div th:fragment="tasksCard(tasks, taskErrors, taskErrorScope)"
+<div th:fragment="tasksCard(tasks)"
      id="tasks-card" class="mt-10 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">📋 المهام</h2>
     <p class="text-sm text-on-surface-variant">تعريف المهام اليومية والأسبوعية لكل دور في العيادة.</p>
-  </div>
-
-  <div th:if="${taskErrorScope == 'add' or taskErrorScope == 'edit'}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${taskErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <div class="flex flex-col gap-3">

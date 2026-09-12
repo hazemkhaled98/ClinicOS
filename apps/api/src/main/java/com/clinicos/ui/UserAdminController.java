@@ -8,10 +8,10 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
@@ -24,6 +24,9 @@ import com.clinicos.staff.api.EmployeeService.EmployeeValidationException;
 import com.clinicos.identity.api.UserAdminService.UserValidationException;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Controller
 public class UserAdminController {
@@ -51,26 +54,26 @@ public class UserAdminController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        renderCard(model, clinicId, AdminAccess.membershipId(session), Map.of(), null, UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
         return "admin/users-page";
     }
 
     @PostMapping("/admin-dashboard/users")
-    public String createUser(UserForm form, HttpSession session, Model model) {
+    public String createUser(@Valid UserForm form, BindingResult binding, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
-        validate(form, fieldErrors);
+        fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
-                String email = form.email() == null || form.email().isBlank() ? null : form.email().trim();
+                String email = blankToNull(form.getEmail());
                 transactionTemplate.executeWithoutResult(status -> {
                     UserSummary created = userAdminService.create(clinicId, new UserCreateRequest(
-                            form.username().trim(), form.fullName().trim(), email, passwordEncoder.encode(form.password())));
+                            form.getUsername().trim(), form.getFullName().trim(), email, passwordEncoder.encode(form.getPassword())));
                     Employee employee = employeeService.create(clinicId, new EmployeeRequest(
-                            form.fullName().trim(), null, null, null, null, false, null));
+                            form.getFullName().trim(), null, null, null, null, false, null));
                     userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id());
                 });
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");
@@ -82,8 +85,7 @@ public class UserAdminController {
                 fieldErrors.put("username", e.getMessage());
             }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "add", form);
+        renderCard(model, clinicId, AdminAccess.membershipId(session), form);
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم إضافة المستخدم");
         } else {
@@ -93,26 +95,23 @@ public class UserAdminController {
     }
 
     @PostMapping("/admin-dashboard/users/{userId}/password")
-    public String changePassword(@PathVariable UUID userId, @RequestParam String newPassword,
-            HttpSession session, Model model) {
+    public String changePassword(@PathVariable UUID userId, @Valid PasswordForm form,
+            BindingResult binding, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
-        if (newPassword == null || newPassword.isBlank()) {
-            fieldErrors.put("password", "كلمة المرور مطلوبة");
-        }
+        fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
-                userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(newPassword));
+                userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(form.getNewPassword()));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.password_change", "user");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("user", e.getMessage());
             }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "password", UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم تغيير كلمة المرور");
         } else {
@@ -134,8 +133,7 @@ public class UserAdminController {
         } catch (IllegalArgumentException e) {
             fieldErrors.put("user", e.getMessage());
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "suspend", UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم تعليق المستخدم");
         } else {
@@ -157,8 +155,7 @@ public class UserAdminController {
         } catch (IllegalArgumentException e) {
             fieldErrors.put("user", e.getMessage());
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "reactivate", UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم تفعيل المستخدم");
         } else {
@@ -168,21 +165,23 @@ public class UserAdminController {
     }
 
     @PostMapping("/admin-dashboard/users/{userId}/role")
-    public String assignRole(@PathVariable UUID userId, @RequestParam String roleCode,
-            @RequestParam UUID membershipId, HttpSession session, Model model) {
+    public String assignRole(@PathVariable UUID userId, @Valid AssignRoleForm form,
+            BindingResult binding, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
-        try {
-            userAdminService.assignRole(clinicId, membershipId, roleCode);
-            activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.assign_role", "user");
-        } catch (IllegalArgumentException e) {
-            fieldErrors.put("user", e.getMessage());
+        fieldErrors.putAll(FormErrors.of(binding));
+        if (fieldErrors.isEmpty()) {
+            try {
+                userAdminService.assignRole(clinicId, form.getMembershipId(), form.getRoleCode());
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.assign_role", "user");
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("user", e.getMessage());
+            }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), fieldErrors,
-                fieldErrors.isEmpty() ? null : "role", UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم تغيير الدور");
         } else {
@@ -191,12 +190,9 @@ public class UserAdminController {
         return "admin/users :: usersCard";
     }
 
-    private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, Map<String, String> fieldErrors,
-            String errorScope, UserForm addForm) {
+    private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, UserForm addForm) {
         model.addAttribute("users", userAdminService.list(clinicId));
         model.addAttribute("currentMembershipId", currentMembershipId);
-        model.addAttribute("userErrors", fieldErrors == null ? Map.of() : fieldErrors);
-        model.addAttribute("userErrorScope", errorScope);
         model.addAttribute("addForm", addForm);
         model.addAttribute("roleNames", roleNames());
     }
@@ -209,26 +205,111 @@ public class UserAdminController {
                 "receptionist", LayoutModel.roleDisplayName("receptionist"));
     }
 
-    private static void validate(UserForm form, Map<String, String> errors) {
-        if (form.username() == null || form.username().isBlank()) {
-            errors.put("username", "اسم المستخدم مطلوب");
-        }
-        if (form.fullName() == null || form.fullName().isBlank()) {
-            errors.put("fullName", "الاسم الكامل مطلوب");
-        }
-        if (form.password() == null || form.password().isBlank()) {
-            errors.put("password", "كلمة المرور مطلوبة");
-        }
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
-    public record UserForm(String username, String fullName, String email, String password) {
+    public static class UserForm {
+        @NotBlank(message = "اسم المستخدم مطلوب")
+        private String username;
+        @NotBlank(message = "الاسم الكامل مطلوب")
+        private String fullName;
+        @Email(regexp = "^$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "صيغة البريد الإلكتروني غير صحيحة")
+        private String email;
+        @NotBlank(message = "كلمة المرور مطلوبة")
+        private String password;
 
         static UserForm empty() {
             return of("", "", "", "");
         }
 
         static UserForm of(String username, String fullName, String email, String password) {
-            return new UserForm(username, fullName, email, password);
+            UserForm form = new UserForm();
+            form.username = username;
+            form.fullName = fullName;
+            form.email = email;
+            form.password = password;
+            return form;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public void setFullName(String fullName) {
+            this.fullName = fullName;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
+
+    public static class PasswordForm {
+        @NotBlank(message = "كلمة المرور مطلوبة")
+        private String newPassword;
+
+        static PasswordForm of(String newPassword) {
+            PasswordForm form = new PasswordForm();
+            form.newPassword = newPassword;
+            return form;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
+    }
+
+    public static class AssignRoleForm {
+        @NotBlank(message = "الدور مطلوب")
+        private String roleCode;
+        private UUID membershipId;
+
+        static AssignRoleForm of(String roleCode, UUID membershipId) {
+            AssignRoleForm form = new AssignRoleForm();
+            form.roleCode = roleCode;
+            form.membershipId = membershipId;
+            return form;
+        }
+
+        public String getRoleCode() {
+            return roleCode;
+        }
+
+        public void setRoleCode(String roleCode) {
+            this.roleCode = roleCode;
+        }
+
+        public UUID getMembershipId() {
+            return membershipId;
+        }
+
+        public void setMembershipId(UUID membershipId) {
+            this.membershipId = membershipId;
         }
     }
 }

@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<div th:fragment="weightsCard(settings, weightErrors, weights, weightsSum)"
+<div th:fragment="weightsCard(weightsForm, weightsSum)"
      id="weights-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
@@ -13,19 +13,15 @@
     <p class="text-sm text-on-surface-variant">نسب مساهمة كل مكوّن في نتيجة التقييم الشهري. مجموع الأوزان يجب أن يساوي 100.</p>
   </div>
 
-  <div th:if="${weightErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${weightErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
-  </div>
-
   <form class="flex flex-col gap-4" th:attr="hx-post='/admin-dashboard/settings/weights'" hx-target="#weights-card" hx-swap="outerHTML">
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-      <label th:each="entry : ${weights}" class="flex flex-col gap-1 text-xs text-on-surface-variant">
-        <span th:text="${entry.category().arabicName()}">الإنجاز</span>
+      <label th:each="row, iter : ${weightsForm.getWeights()}" class="flex flex-col gap-1 text-xs text-on-surface-variant">
+        <span th:text="${T(com.clinicos.clinicconfig.api.ClinicSettingsService$Category).fromCode(row.category).arabicName()}">الإنجاز</span>
         <div class="flex items-center gap-1">
+          <input type="hidden" th:name="'weights[' + ${iter.index} + '].category'" th:value="${row.category}">
           <input type="number" min="0" max="100" step="0.01" inputmode="decimal"
-                 class="clinicos-input w-full" name="weight-completion"
-                 placeholder="النسبة" th:name="'weight-' + ${entry.category().code()}"
-                 th:value="${entry.weight() != null ? entry.weight() : ''}">
+                 class="clinicos-input w-full" th:name="'weights[' + ${iter.index} + '].weight'"
+                 placeholder="النسبة" th:value="${row.weight}">
           <span class="shrink-0">%</span>
         </div>
       </label>
@@ -38,7 +34,7 @@
   </form>
 </div>
 
-<div th:fragment="volumeCard(settings, volumeErrors)"
+<div th:fragment="volumeCard(volumeForm)"
      id="volume-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
@@ -46,21 +42,17 @@
     <p class="text-sm text-on-surface-variant">إجمالي فواتير العمليات التجميليّة المستهدفة شهرياً.</p>
   </div>
 
-  <div th:if="${volumeErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${volumeErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
-  </div>
-
   <form class="flex flex-wrap items-end gap-3" th:attr="hx-post='/admin-dashboard/settings/volume'" hx-target="#volume-card" hx-swap="outerHTML">
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       الهدف الشهري (ج.م)
       <input type="number" min="0" step="0.01" name="volumeTarget" placeholder="20000"
-             class="clinicos-input w-40" th:value="${settings.volumeTarget() != null ? settings.volumeTarget() : ''}">
+             class="clinicos-input w-40" th:value="${volumeForm.getVolumeTarget()}">
     </label>
     <button type="submit" class="clinicos-btn">حفظ الهدف</button>
   </form>
 </div>
 
-<div th:fragment="dutyCard(settings, dutyErrors)"
+<div th:fragment="dutyCard(dutyForm)"
      id="duty-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
@@ -68,41 +60,37 @@
     <p class="text-sm text-on-surface-variant">الافتراضات المطبّقة على موظف بلا شفت مخصّص، وفي احتساب الحضور والانضباط.</p>
   </div>
 
-  <div th:if="${dutyErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${dutyErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
-  </div>
-
   <form class="flex flex-wrap items-end gap-3" th:attr="hx-post='/admin-dashboard/settings/duty'" hx-target="#duty-card" hx-swap="outerHTML">
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       بداية الدوام
       <input type="time" name="defaultShiftStart" class="clinicos-input w-36"
-             th:value="${settings.defaultShiftStart()}">
+             th:value="${dutyForm.getDefaultShiftStart()}">
     </label>
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       نهاية الدوام
       <input type="time" name="defaultShiftEnd" class="clinicos-input w-36"
-             th:value="${settings.defaultShiftEnd()}">
+             th:value="${dutyForm.getDefaultShiftEnd()}">
     </label>
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       مهلة التأخير (دقيقة)
       <input type="number" min="0" name="lateGraceMinutes" class="clinicos-input w-28"
-             th:value="${settings.lateGraceMinutes()}">
+             th:value="${dutyForm.getLateGraceMinutes()}">
     </label>
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       أيام العمل الشهرية
       <input type="number" min="1" max="31" name="workingDaysPerMonth" class="clinicos-input w-28"
-             th:value="${settings.workingDaysPerMonth()}">
+             th:value="${dutyForm.getWorkingDaysPerMonth()}">
     </label>
     <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
       درجة النجاح بالأكاديمية
       <input type="number" min="0" max="100" name="academyPassScore" class="clinicos-input w-28"
-             th:value="${settings.academyPassScore()}">
+             th:value="${dutyForm.getAcademyPassScore()}">
     </label>
     <button type="submit" class="clinicos-btn">حفظ الدوام</button>
   </form>
 </div>
 
-<div th:fragment="tiersCard(settings, tierErrors, tiers)"
+<div th:fragment="tiersCard(tiersForm)"
      id="tiers-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
@@ -110,28 +98,24 @@
     <p class="text-sm text-on-surface-variant">كل موظف ضمن شريحة حسب نتيجته النهائية؛ حافزه الشهري = الحافز الكامل × نسبة الشريحة.</p>
   </div>
 
-  <div th:if="${tierErrors != null}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${tierErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
-  </div>
-
   <form class="flex flex-col gap-3" th:attr="hx-post='/admin-dashboard/settings/tiers'" hx-target="#tiers-card" hx-swap="outerHTML">
-    <div class="flex flex-wrap items-end gap-3" th:each="tier, iter : ${tiers}">
+    <div class="flex flex-wrap items-end gap-3" th:each="row, iter : ${tiersForm.getTiers()}">
       <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
         اسم الشريحة
-        <input type="text" class="clinicos-input w-40" th:name="'tierName' + ${iter.index}"
-               th:value="${tier.name()}">
+        <input type="text" class="clinicos-input w-40" th:name="'tiers[' + ${iter.index} + '].name'"
+               th:value="${row.name}">
       </label>
       <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
         الحد الأدنى للدرجة
         <input type="number" min="0" max="100" step="0.01" class="clinicos-input w-28"
-               th:name="'tierMinScore' + ${iter.index}"
-               th:value="${tier.minScore() != null ? tier.minScore() : ''}">
+               th:name="'tiers[' + ${iter.index} + '].minScore'"
+               th:value="${row.minScore}">
       </label>
       <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
         نسبة الحافز %
         <input type="number" min="0" max="100" step="0.01" class="clinicos-input w-28"
-               th:name="'tierPct' + ${iter.index}"
-               th:value="${tier.incentivePct() != null ? tier.incentivePct() : ''}">
+               th:name="'tiers[' + ${iter.index} + '].incentivePct'"
+               th:value="${row.incentivePct}">
       </label>
     </div>
     <div class="flex items-center gap-3">

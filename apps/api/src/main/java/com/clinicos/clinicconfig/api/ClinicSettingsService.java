@@ -85,6 +85,15 @@ public interface ClinicSettingsService {
         public String arabicName() {
             return arabicName;
         }
+
+        public static Category fromCode(String code) {
+            for (Category category : values()) {
+                if (category.code().equals(code)) {
+                    return category;
+                }
+            }
+            throw new IllegalArgumentException("كود مكوّن التقييم غير معروف: " + code);
+        }
     }
 
     /**

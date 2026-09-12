@@ -1,6 +1,7 @@
 package com.clinicos.ui;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -8,12 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.AutoPopulatingList;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.GamificationService;
+import com.clinicos.clinicconfig.api.GamificationService.BadgeThreshold;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
+import com.clinicos.clinicconfig.api.GamificationService.WeeklyGoal;
 import com.clinicos.shared.ActivityLogService;
 
 import jakarta.servlet.http.HttpSession;
@@ -67,38 +71,33 @@ public class GamificationController {
     }
 
     @PostMapping("/admin-dashboard/goals/goals")
-    public String updateGoals(
-            @RequestParam String[] titles,
-            @RequestParam String[] targets,
-            HttpSession session, Model model) {
+    public String updateGoals(GoalsForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
-        if (titles.length != targets.length) {
-            errors.put("targets", "عدد الأهداف والأسماء غير متطابق");
+        List<GoalsForm.GoalRow> rows = form.goals;
+        if (rows.size() > 3) {
+            errors.put("goals", "لا يمكن حفظ أكثر من 3 أهداف");
         }
-        int[] parsedTargets = new int[titles.length];
-        for (int i = 0; i < titles.length && i < 3; i++) {
-            String target = (i < targets.length) ? targets[i] : "";
-            if (target.isBlank()) {
-                continue;
+        int[] parsedTargets = new int[rows.size()];
+        for (int i = 0; i < rows.size() && errors.isEmpty(); i++) {
+            String target = rows.get(i).target;
+            Integer parsed = FormParsing.parseInt(target, "targets", errors, "قيمة الهدف يجب أن تكون رقماً");
+            if (parsed == null && (target == null || target.isBlank())) {
+                parsed = 0;
             }
-            try {
-                parsedTargets[i] = Integer.parseInt(target);
-            } catch (NumberFormatException e) {
-                errors.put("targets", "قيمة الهدف يجب أن تكون رقماً");
-                break;
-            }
+            parsedTargets[i] = parsed == null ? 0 : parsed;
         }
         if (errors.isEmpty()) {
             try {
-                for (int i = 0; i < titles.length && i < 3; i++) {
-                    if (titles[i] == null || titles[i].isBlank()) {
+                for (int i = 0; i < rows.size(); i++) {
+                    GoalsForm.GoalRow row = rows.get(i);
+                    if (row.title == null || row.title.isBlank()) {
                         continue;
                     }
-                    gamificationService.updateGoal(clinicId, i + 1, titles[i], parsedTargets[i]);
+                    gamificationService.updateGoal(clinicId, i + 1, row.title.trim(), parsedTargets[i]);
                 }
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
             } catch (IllegalArgumentException e) {
@@ -107,35 +106,34 @@ public class GamificationController {
         }
         if (errors.isEmpty()) {
             Toasts.success(model, "تم حفظ الأهداف الأسبوعية");
+        } else {
+            Toasts.error(model, String.join("؛ ", errors.values()));
         }
-        model.addAttribute("goalErrors", errors);
         renderPage(model, clinicId);
         return "admin/gamification :: goalsCard";
     }
 
     @PostMapping("/admin-dashboard/goals/thresholds")
-    public String updateThresholds(
-            @RequestParam String[] names,
-            @RequestParam String[] thresholds,
-            HttpSession session, Model model) {
+    public String updateThresholds(ThresholdsForm form, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
-        int[] parsedThresholds = new int[names.length];
-        for (int i = 0; i < names.length; i++) {
-            try {
-                parsedThresholds[i] = (i < thresholds.length) ? Integer.parseInt(thresholds[i]) : 0;
-            } catch (NumberFormatException e) {
-                errors.put("thresholds", "عدد المهام يجب أن يكون رقماً");
-                break;
+        List<ThresholdsForm.ThresholdRow> rows = form.thresholds;
+        int[] parsedThresholds = new int[rows.size()];
+        for (int i = 0; i < rows.size() && errors.isEmpty(); i++) {
+            String threshold = rows.get(i).threshold;
+            Integer parsed = FormParsing.parseInt(threshold, "thresholds", errors, "عدد المهام يجب أن يكون رقماً");
+            if (parsed == null && (threshold == null || threshold.isBlank())) {
+                parsed = 0;
             }
+            parsedThresholds[i] = parsed == null ? 0 : parsed;
         }
         if (errors.isEmpty()) {
             try {
-                for (int i = 0; i < names.length; i++) {
-                    gamificationService.updateThreshold(clinicId, names[i], parsedThresholds[i]);
+                for (int i = 0; i < rows.size(); i++) {
+                    gamificationService.updateThreshold(clinicId, rows.get(i).name, parsedThresholds[i]);
                 }
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.thresholds", "badge_threshold");
             } catch (IllegalArgumentException e) {
@@ -144,8 +142,9 @@ public class GamificationController {
         }
         if (errors.isEmpty()) {
             Toasts.success(model, "تم حفظ شروط الشارات");
+        } else {
+            Toasts.error(model, String.join("؛ ", errors.values()));
         }
-        model.addAttribute("thresholdErrors", errors);
         renderPage(model, clinicId);
         return "admin/gamification :: thresholdsCard";
     }
@@ -153,7 +152,99 @@ public class GamificationController {
     private void renderPage(Model model, UUID clinicId) {
         GamificationSettings settings = gamificationService.get(clinicId);
         model.addAttribute("settings", settings != null ? settings : new GamificationSettings(false, false, false, false, false, false));
-        model.addAttribute("goals", gamificationService.getGoals(clinicId));
-        model.addAttribute("thresholds", gamificationService.getThresholds(clinicId));
+        model.addAttribute("goalForm", GoalsForm.from(gamificationService.getGoals(clinicId)));
+        model.addAttribute("thresholdForm", ThresholdsForm.from(gamificationService.getThresholds(clinicId)));
+    }
+
+    public static class GoalsForm {
+        private AutoPopulatingList<GoalRow> goals = new AutoPopulatingList<>(GoalRow.class);
+
+        public List<GoalRow> getGoals() {
+            return goals;
+        }
+
+        public void setGoals(List<GoalRow> goals) {
+            this.goals = new AutoPopulatingList<>(goals, GoalRow.class);
+        }
+
+        static GoalsForm from(List<WeeklyGoal> saved) {
+            GoalsForm form = new GoalsForm();
+            for (int slot = 1; slot <= 3; slot++) {
+                GoalRow row = new GoalRow();
+                final int s = slot;
+                saved.stream().filter(g -> g.slot() == s).findFirst().ifPresent(g -> {
+                    row.title = g.title();
+                    row.target = g.target() == 0 ? "" : Integer.toString(g.target());
+                });
+                form.goals.add(row);
+            }
+            return form;
+        }
+
+        public static class GoalRow {
+            private String title;
+            private String target;
+
+            public String getTitle() {
+                return title;
+            }
+
+            public void setTitle(String title) {
+                this.title = title;
+            }
+
+            public String getTarget() {
+                return target;
+            }
+
+            public void setTarget(String target) {
+                this.target = target;
+            }
+        }
+    }
+
+    public static class ThresholdsForm {
+        private AutoPopulatingList<ThresholdRow> thresholds = new AutoPopulatingList<>(ThresholdRow.class);
+
+        public List<ThresholdRow> getThresholds() {
+            return thresholds;
+        }
+
+        public void setThresholds(List<ThresholdRow> thresholds) {
+            this.thresholds = new AutoPopulatingList<>(thresholds, ThresholdRow.class);
+        }
+
+        static ThresholdsForm from(List<BadgeThreshold> saved) {
+            ThresholdsForm form = new ThresholdsForm();
+            for (String name : List.of("نجم الأسبوع", "الأكثر إنجازاً", "مبدع", "ملتزم", "متميز")) {
+                ThresholdRow row = new ThresholdRow();
+                row.name = name;
+                saved.stream().filter(t -> t.name().equals(name)).findFirst().ifPresent(t ->
+                        row.threshold = t.threshold() == 0 ? "" : Integer.toString(t.threshold()));
+                form.thresholds.add(row);
+            }
+            return form;
+        }
+
+        public static class ThresholdRow {
+            private String name;
+            private String threshold;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getThreshold() {
+                return threshold;
+            }
+
+            public void setThreshold(String threshold) {
+                this.threshold = threshold;
+            }
+        }
     }
 }

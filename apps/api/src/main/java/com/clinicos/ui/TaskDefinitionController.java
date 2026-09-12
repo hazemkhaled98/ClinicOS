@@ -8,17 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.TaskDefinitionService;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 @Controller
 public class TaskDefinitionController {
@@ -43,30 +45,28 @@ public class TaskDefinitionController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        model.addAttribute("tasks", taskDefinitionService.list(clinicId));
-        model.addAttribute("taskErrors", Map.of());
-        model.addAttribute("taskErrorScope", (String) null);
+        renderCard(model, clinicId);
         return "admin/tasks-page";
     }
 
     @PostMapping("/admin-dashboard/tasks")
-    public String createTask(TaskForm form, HttpSession session, Model model) {
+    public String createTask(@Valid TaskForm form, BindingResult binding, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
-        validate(form, fieldErrors);
+        fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.create(clinicId, new TaskDefinitionRequest(
-                        form.name().trim(), form.dimension(), form.frequency(), form.roleCode()));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode()));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.create", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
             }
         }
-        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "add");
+        renderCard(model, clinicId);
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تمت إضافة المهمة");
         } else {
@@ -76,24 +76,24 @@ public class TaskDefinitionController {
     }
 
     @PostMapping("/admin-dashboard/tasks/{taskId}")
-    public String updateTask(@PathVariable UUID taskId, TaskForm form,
-            HttpSession session, Model model) {
+    public String updateTask(@PathVariable UUID taskId, @Valid TaskForm form,
+            BindingResult binding, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
-        validate(form, fieldErrors);
+        fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.update(clinicId, taskId, new TaskDefinitionRequest(
-                        form.name().trim(), form.dimension(), form.frequency(), form.roleCode()));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode()));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.update", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
             }
         }
-        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "edit");
+        renderCard(model, clinicId);
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم حفظ المهمة");
         } else {
@@ -117,7 +117,7 @@ public class TaskDefinitionController {
             log.warn("deleteTask failed: task {} clinic {}", taskId, clinicId, e);
             fieldErrors.put("task", e.getMessage());
         }
-        renderCard(model, clinicId, fieldErrors, fieldErrors.isEmpty() ? null : "delete");
+        renderCard(model, clinicId);
         if (fieldErrors.isEmpty()) {
             Toasts.success(model, "تم حذف المهمة");
         } else {
@@ -126,27 +126,59 @@ public class TaskDefinitionController {
         return "admin/tasks :: tasksCard";
     }
 
-    private void renderCard(Model model, UUID clinicId, Map<String, String> fieldErrors, String errorScope) {
+    private void renderCard(Model model, UUID clinicId) {
         model.addAttribute("tasks", taskDefinitionService.list(clinicId));
-        model.addAttribute("taskErrors", fieldErrors);
-        model.addAttribute("taskErrorScope", errorScope);
     }
 
-    private static void validate(TaskForm form, Map<String, String> errors) {
-        if (form.name() == null || form.name().isBlank()) {
-            errors.put("name", "اسم المهمة مطلوب");
-        }
-        if (form.dimension() == null || form.dimension().isBlank()) {
-            errors.put("dimension", "البُعد مطلوب");
-        }
-        if (form.frequency() == null || form.frequency().isBlank()) {
-            errors.put("frequency", "التكرار مطلوب");
-        }
-        if (form.roleCode() == null || form.roleCode().isBlank()) {
-            errors.put("roleCode", "الدور مطلوب");
-        }
-    }
+    public static class TaskForm {
+        @NotBlank(message = "اسم المهمة مطلوب")
+        private String name;
+        @NotBlank(message = "البُعد مطلوب")
+        private String dimension;
+        @NotBlank(message = "التكرار مطلوب")
+        private String frequency;
+        @NotBlank(message = "الدور مطلوب")
+        private String roleCode;
 
-    public record TaskForm(String name, String dimension, String frequency, String roleCode) {
+        static TaskForm of(String name, String dimension, String frequency, String roleCode) {
+            TaskForm form = new TaskForm();
+            form.name = name;
+            form.dimension = dimension;
+            form.frequency = frequency;
+            form.roleCode = roleCode;
+            return form;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDimension() {
+            return dimension;
+        }
+
+        public void setDimension(String dimension) {
+            this.dimension = dimension;
+        }
+
+        public String getFrequency() {
+            return frequency;
+        }
+
+        public void setFrequency(String frequency) {
+            this.frequency = frequency;
+        }
+
+        public String getRoleCode() {
+            return roleCode;
+        }
+
+        public void setRoleCode(String roleCode) {
+            this.roleCode = roleCode;
+        }
     }
 }

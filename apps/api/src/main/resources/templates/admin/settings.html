@@ -9,13 +9,13 @@
       <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title" th:text="${section.title}">لوحة التحكم</h1>
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub" th:text="${section.subtitle}">التحليلات التشغيلية والإدارية</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('settings')}"></nav>
-      <div id="employees-card"
-           th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeRoles}, ${employeeErrors}, ${employeeErrorScope}, ${employeeErrorRow})}">
+<div id="employees-card"
+         th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeRoles})}">
       </div>
-      <div th:replace="~{admin/clinic-settings :: weightsCard(${settings}, null, ${weights}, ${weightsSum})}"></div>
-      <div th:replace="~{admin/clinic-settings :: volumeCard(${settings}, null)}"></div>
-      <div th:replace="~{admin/clinic-settings :: dutyCard(${settings}, null)}"></div>
-      <div th:replace="~{admin/clinic-settings :: tiersCard(${settings}, null, ${tiers})}"></div>
+      <div th:replace="~{admin/clinic-settings :: weightsCard(${weightsForm}, ${weightsSum})}"></div>
+      <div th:replace="~{admin/clinic-settings :: volumeCard(${volumeForm})}"></div>
+      <div th:replace="~{admin/clinic-settings :: dutyCard(${dutyForm})}"></div>
+      <div th:replace="~{admin/clinic-settings :: tiersCard(${tiersForm})}"></div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

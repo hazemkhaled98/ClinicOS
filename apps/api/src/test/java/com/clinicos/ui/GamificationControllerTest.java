@@ -2,13 +2,14 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,9 +18,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.clinicconfig.api.GamificationService;
-import com.clinicos.clinicconfig.api.GamificationService.BadgeThreshold;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
-import com.clinicos.clinicconfig.api.GamificationService.WeeklyGoal;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.ui.nav.NavSectionResolver;
@@ -59,8 +58,8 @@ class GamificationControllerTest {
 
         assertThat(view).isEqualTo("admin/gamification-page");
         assertThat(model.getAttribute("settings")).isEqualTo(settings);
-        assertThat(model.getAttribute("goals")).isEqualTo(List.of());
-        assertThat(model.getAttribute("thresholds")).isEqualTo(List.of());
+        assertThat(model.getAttribute("goalForm")).isNotNull();
+        assertThat(model.getAttribute("thresholdForm")).isNotNull();
     }
 
     @Test
@@ -97,7 +96,15 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateGoals(new String[]{"مهارة1", "مهارة2", "مهارة3"}, new String[]{"10", "20", "30"}, session, model);
+        var form = GamificationController.GoalsForm.from(List.of());
+        goals(form).setTitle("مهارة1");
+        goals(form).setTarget("10");
+        targetsOf(form, 1).setTitle("مهارة2");
+        targetsOf(form, 1).setTarget("20");
+        targetsOf(form, 2).setTitle("مهارة3");
+        targetsOf(form, 2).setTarget("30");
+
+        controller.updateGoals(form, session, model);
 
         verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
         verify(gamificationService).updateGoal(CLINIC, 2, "مهارة2", 20);
@@ -114,12 +121,15 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateGoals(new String[]{"مهارة1", "", ""}, new String[]{"10", "", ""}, session, model);
+        var form = GamificationController.GoalsForm.from(List.of());
+        goals(form).setTitle("مهارة1");
+        goals(form).setTarget("10");
+
+        controller.updateGoals(form, session, model);
 
         verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
-        verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(2), any(), org.mockito.ArgumentMatchers.anyInt());
-        verify(gamificationService, org.mockito.Mockito.never()).updateGoal(eq(CLINIC), eq(3), any(), org.mockito.ArgumentMatchers.anyInt());
-        assertThat(model.getAttribute("goalErrors")).isEqualTo(Map.of());
+        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(2), any(), anyInt());
+        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(3), any(), anyInt());
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الأهداف الأسبوعية");
     }
 
@@ -131,7 +141,11 @@ class GamificationControllerTest {
         when(gamificationService.getGoals(CLINIC)).thenReturn(List.of());
         when(gamificationService.getThresholds(CLINIC)).thenReturn(List.of());
 
-        controller.updateThresholds(new String[]{"شارة1", "شارة2"}, new String[]{"5", "15"}, session, model);
+        var form = new GamificationController.ThresholdsForm();
+        threshold(form, "شارة1").setThreshold("5");
+        threshold(form, "شارة2").setThreshold("15");
+
+        controller.updateThresholds(form, session, model);
 
         verify(gamificationService).updateThreshold(CLINIC, "شارة1", 5);
         verify(gamificationService).updateThreshold(CLINIC, "شارة2", 15);
@@ -140,14 +154,37 @@ class GamificationControllerTest {
     }
 
     @Test
-    void updateGoalsSkipsToastWhenTargetsInvalid() {
+    void updateGoalsInvalidTargetReportsErrorAndSkipsService() {
         HttpSession session = session();
         allowDashboard();
 
-        controller.updateGoals(new String[]{"مهارة1"}, new String[]{"abc"}, session, model);
+        var form = GamificationController.GoalsForm.from(List.of());
+        goals(form).setTitle("مهارة1");
+        goals(form).setTarget("abc");
 
-        assertThat((Map<?, ?>) model.getAttribute("goalErrors")).isNotEmpty();
-        assertThat(model.getAttribute("toastMessage")).isNull();
+        controller.updateGoals(form, session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("قيمة الهدف يجب أن تكون رقماً");
+        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt());
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    private static GamificationController.GoalsForm.GoalRow goals(GamificationController.GoalsForm form) {
+        return form.getGoals().get(0);
+    }
+
+    private static GamificationController.GoalsForm.GoalRow targetsOf(GamificationController.GoalsForm form, int index) {
+        return form.getGoals().get(index);
+    }
+
+    private static GamificationController.ThresholdsForm.ThresholdRow threshold(
+            GamificationController.ThresholdsForm form, String name) {
+        GamificationController.ThresholdsForm.ThresholdRow row =
+                new GamificationController.ThresholdsForm.ThresholdRow();
+        row.setName(name);
+        form.getThresholds().add(row);
+        return row;
     }
 
     private void allowDashboard() {

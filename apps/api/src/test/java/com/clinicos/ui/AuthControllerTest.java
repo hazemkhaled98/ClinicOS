@@ -51,7 +51,7 @@ class AuthControllerTest {
         form.setPassword("short");
         form.setConfirmPassword("short");
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString()
@@ -64,7 +64,7 @@ class AuthControllerTest {
         form.setPassword("correct-password");
         form.setConfirmPassword("other-password");
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString()
@@ -76,7 +76,7 @@ class AuthControllerTest {
         when(signupService.signUp(any(SignupRequest.class)))
                 .thenThrow(new SignupConflictException(Field.USERNAME, "dup"));
 
-        String view = controller.signup(form(), model);
+        String view = controller.signup(form(), Validated.of(form()), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString()
@@ -88,7 +88,7 @@ class AuthControllerTest {
         when(signupService.signUp(any(SignupRequest.class)))
                 .thenThrow(new SignupConflictException(Field.EMAIL, "dup"));
 
-        String view = controller.signup(form(), model);
+        String view = controller.signup(form(), Validated.of(form()), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString()
@@ -100,7 +100,7 @@ class AuthControllerTest {
         when(signupService.signUp(any(SignupRequest.class)))
                 .thenThrow(new SignupConflictException(Field.CLINIC_SLUG, "dup"));
 
-        String view = controller.signup(form(), model);
+        String view = controller.signup(form(), Validated.of(form()), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString()
@@ -112,7 +112,7 @@ class AuthControllerTest {
         AuthController.SignupForm form = form();
         form.setClinicName(null);
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString().contains("اسم العيادة مطلوب");
@@ -123,7 +123,7 @@ class AuthControllerTest {
         AuthController.SignupForm form = form();
         form.setFullName("   ");
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString().contains("الاسم الكامل مطلوب");
@@ -134,7 +134,7 @@ class AuthControllerTest {
         AuthController.SignupForm form = form();
         form.setUsername(null);
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString().contains("اسم المستخدم مطلوب");
@@ -146,7 +146,7 @@ class AuthControllerTest {
         form.setPassword(null);
         form.setConfirmPassword("correct-password");
 
-        String view = controller.signup(form, model);
+        String view = controller.signup(form, Validated.of(form), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("fieldErrors")).asString().contains("كلمة المرور مطلوبة");
@@ -157,7 +157,7 @@ class AuthControllerTest {
         when(signupService.signUp(any(SignupRequest.class))).thenReturn(
                 new SignupResult(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "myclinic"));
 
-        String view = controller.signup(form(), model);
+        String view = controller.signup(form(), Validated.of(form()), model);
 
         assertThat(view).isEqualTo("redirect:/login?signup=success&clinic=myclinic");
         verify(activityLogService).log(any(UUID.class), any(UUID.class),
@@ -169,7 +169,7 @@ class AuthControllerTest {
         when(signupService.signUp(any(SignupRequest.class)))
                 .thenThrow(new IllegalStateException("db down"));
 
-        String view = controller.signup(form(), model);
+        String view = controller.signup(form(), Validated.of(form()), model);
 
         assertThat(view).isEqualTo("auth/signup");
         assertThat(model.getAttribute("generalError")).asString()

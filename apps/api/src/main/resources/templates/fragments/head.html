@@ -10,10 +10,10 @@
       e.detail.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     });
     document.addEventListener('htmx:responseError', function (e) {
-      alert('حدث خطأ في الخادم. يرجى المحاولة مرة أخرى.');
+      window.toastShow('حدث خطأ في الخادم. يرجى المحاولة مرة أخرى.', 'error');
     });
     document.addEventListener('htmx:sendError', function (e) {
-      alert('تعذر الاتصال بالخادم. يرجى التحقق من الاتصال.');
+      window.toastShow('تعذر الاتصال بالخادم. يرجى التحقق من الاتصال.', 'error');
     });
     var toastTimer = null;
     window.toastShow = function (message, type) {

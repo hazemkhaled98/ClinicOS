@@ -2,17 +2,17 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,47 +65,42 @@ class ClinicSettingsControllerTest {
         allowDashboard();
 
         String view = controller.updateWeights(
-                Map.of("weight-completion", "20", "weight-fanni", "16",
-                        "weight-solooki", "12", "weight-ibda3", "22",
-                        "weight-attendance", "12", "weight-volume", "18"),
-                session, model);
+                ClinicSettingsController.WeightsForm.from(WEIGHTS), session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: weightsCard");
         verify(settingsService).updateWeights(eq(CLINIC), any());
-        assertThat(model.getAttribute("weightErrors")).isNull();
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
     @Test
     void updateWeightsSurfacesServiceValidation() {
         HttpSession session = session();
         allowDashboard();
-        org.mockito.Mockito.doThrow(new ClinicSettingsValidationException(
-                        Map.of("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100")))
+        doThrow(new ClinicSettingsValidationException(
+                java.util.Map.of("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100")))
                 .when(settingsService).updateWeights(eq(CLINIC), any());
 
-        String view = controller.updateWeights(Map.of(
-                "weight-completion", "10", "weight-fanni", "18", "weight-solooki", "12",
-                "weight-ibda3", "22", "weight-attendance", "12", "weight-volume", "18"),
-                session, model);
+        String view = controller.updateWeights(
+                ClinicSettingsController.WeightsForm.from(WEIGHTS), session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: weightsCard");
-        assertThat(model.getAttribute("weightErrors"))
-                .isEqualTo(Map.of("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100"));
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage")))
+                .contains("مجموع أوزان مكونات التقييم يجب أن يساوي 100");
     }
 
     @Test
     void malformedWeightValueReportsArabicErrorAndSkipsService() {
         HttpSession session = session();
         allowDashboard();
+        var form = ClinicSettingsController.WeightsForm.from(WEIGHTS);
+        form.getWeights().get(0).setWeight("abc");
 
-        String view = controller.updateWeights(Map.of(
-                "weight-completion", "abc", "weight-fanni", "18", "weight-solooki", "12",
-                "weight-ibda3", "22", "weight-attendance", "12", "weight-volume", "18"),
-                session, model);
+        String view = controller.updateWeights(form, session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: weightsCard");
-        assertThat(model.getAttribute("weightErrors"))
-                .isEqualTo(Map.of("weights", "أوزان مكونات التقييم غير صحيحة"));
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("أوزان مكونات التقييم غير صحيحة");
         verify(settingsService, never()).updateWeights(any(), any());
     }
 
@@ -113,13 +108,17 @@ class ClinicSettingsControllerTest {
     void updateDutyParsesFieldsAndRendersCard() {
         HttpSession session = session();
         allowDashboard();
+        var form = new ClinicSettingsController.DutyForm();
+        form.setDefaultShiftStart("08:30");
+        form.setDefaultShiftEnd("16:30");
+        form.setLateGraceMinutes("20");
+        form.setWorkingDaysPerMonth("22");
+        form.setAcademyPassScore("65");
 
-        String view = controller.updateDuty(Map.of(
-                "defaultShiftStart", "08:30", "defaultShiftEnd", "16:30",
-                "lateGraceMinutes", "20", "workingDaysPerMonth", "22", "academyPassScore", "65"),
-                session, model);
+        String view = controller.updateDuty(form, session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: dutyCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateDuty(CLINIC, LocalTime.of(8, 30), LocalTime.of(16, 30),
                 20, 22, 65);
     }
@@ -128,15 +127,18 @@ class ClinicSettingsControllerTest {
     void badDutyNumbersReportArabicErrors() {
         HttpSession session = session();
         allowDashboard();
+        var form = new ClinicSettingsController.DutyForm();
+        form.setDefaultShiftStart("08:30");
+        form.setDefaultShiftEnd("16:30");
+        form.setLateGraceMinutes("abc");
+        form.setWorkingDaysPerMonth("22");
+        form.setAcademyPassScore("65");
 
-        String view = controller.updateDuty(Map.of(
-                "defaultShiftStart", "08:30", "defaultShiftEnd", "16:30",
-                "lateGraceMinutes", "abc", "workingDaysPerMonth", "22", "academyPassScore", "65"),
-                session, model);
+        String view = controller.updateDuty(form, session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: dutyCard");
-        assertThat(model.getAttribute("dutyErrors"))
-                .isEqualTo(Map.of("lateGraceMinutes", "مهلة التأخير غير صحيحة"));
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("مهلة التأخير غير صحيحة");
         verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt());
     }
 
@@ -144,10 +146,13 @@ class ClinicSettingsControllerTest {
     void updateVolumeParsesAndRendersCard() {
         HttpSession session = session();
         allowDashboard();
+        var form = new ClinicSettingsController.VolumeForm();
+        form.setVolumeTarget("30000");
 
-        String view = controller.updateVolumeTarget(Map.of("volumeTarget", "30000"), session, model);
+        String view = controller.updateVolumeTarget(form, session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: volumeCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateVolumeTarget(CLINIC, new BigDecimal("30000"));
     }
 
@@ -156,15 +161,30 @@ class ClinicSettingsControllerTest {
         HttpSession session = session();
         allowDashboard();
 
-        String view = controller.updateTiers(Map.of(
-                "tierName0", "ممتاز", "tierMinScore0", "90", "tierPct0", "100",
-                "tierName1", "جيد", "tierMinScore1", "60", "tierPct1", "50"),
-                session, model);
+        String view = controller.updateTiers(ClinicSettingsController.TiersForm.from(TIERS), session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: tiersCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateTiers(eq(CLINIC), eq(List.of(
                 new Tier("ممتاز", new BigDecimal("90"), new BigDecimal("100")),
                 new Tier("جيد", new BigDecimal("60"), new BigDecimal("50")))));
+    }
+
+    @Test
+    void tooManyTiersAreRejectedByService() {
+        HttpSession session = session();
+        allowDashboard();
+        var form = new ClinicSettingsController.TiersForm();
+        for (int i = 0; i < 21; i++) {
+            form.getTiers().add(new ClinicSettingsController.TiersForm.TierRow());
+        }
+        doThrow(new ClinicSettingsValidationException(java.util.Map.of("tiers", "عدد شرائح الحافز يجب ألا يتجاوز 20")))
+                .when(settingsService).updateTiers(eq(CLINIC), any());
+
+        String view = controller.updateTiers(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: tiersCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
     }
 
     @Test
@@ -172,10 +192,10 @@ class ClinicSettingsControllerTest {
         HttpSession session = session();
         denyDashboard();
 
-        assertThat(controller.updateWeights(Map.of(), session, model)).isEqualTo("redirect:/");
-        assertThat(controller.updateDuty(Map.of(), session, model)).isEqualTo("redirect:/");
-        assertThat(controller.updateVolumeTarget(Map.of(), session, model)).isEqualTo("redirect:/");
-        assertThat(controller.updateTiers(Map.of(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.updateWeights(new ClinicSettingsController.WeightsForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.updateDuty(new ClinicSettingsController.DutyForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.updateVolumeTarget(new ClinicSettingsController.VolumeForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.updateTiers(new ClinicSettingsController.TiersForm(), session, model)).isEqualTo("redirect:/");
         verify(settingsService, never()).updateWeights(any(), any());
         verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt());
         verify(settingsService, never()).updateVolumeTarget(any(), any());

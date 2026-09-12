@@ -4,16 +4,12 @@
 <title>المستخدمون</title>
 </head>
 <body>
-<div th:fragment="usersCard(users, userErrors, userErrorScope, addForm)"
+<div th:fragment="usersCard(users, currentMembershipId, addForm)"
      id="users-card" class="mt-10 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👤 المستخدمون</h2>
     <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وحالة الحساب. بيانات الموظف والدور في تبويب «الإعدادات».</p>
-  </div>
-
-  <div th:if="${!userErrors.isEmpty()}" class="mb-6 rounded-xl bg-danger-50 border border-danger-600 p-3 text-sm text-danger-600" role="alert">
-    <span th:each="err : ${userErrors.values()}" th:text="${err} + ' · '" th:remove="tag"></span>
   </div>
 
   <div class="flex flex-col gap-3">
@@ -58,15 +54,15 @@
             hx-target="#users-card" hx-swap="outerHTML">
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           اسم المستخدم
-          <input type="text" name="username" class="clinicos-input w-36" th:value="${addForm.username()}" required>
+          <input type="text" name="username" class="clinicos-input w-36" th:value="${addForm.getUsername()}" required>
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           الاسم الكامل
-          <input type="text" name="fullName" class="clinicos-input w-40" th:value="${addForm.fullName()}" required>
+          <input type="text" name="fullName" class="clinicos-input w-40" th:value="${addForm.getFullName()}" required>
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           البريد الإلكتروني
-          <input type="email" name="email" class="clinicos-input w-48" th:value="${addForm.email()}">
+          <input type="email" name="email" class="clinicos-input w-48" th:value="${addForm.getEmail()}">
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           كلمة المرور
