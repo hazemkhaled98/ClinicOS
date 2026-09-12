@@ -118,7 +118,7 @@ public class AdminController {
                 fieldErrors.put("role", e.getMessage());
             }
         }
-        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
+        renderCard(model, session, fieldErrors.isEmpty() ? userAdminService.list(AdminAccess.clinicId(session)) : users);
         Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات الموظف");
         return "admin/employees :: employeesCard";
     }
@@ -149,7 +149,7 @@ public class AdminController {
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
             fieldErrors.put("employee", e.getMessage());
         }
-        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
+        renderCard(model, session, fieldErrors.isEmpty() ? userAdminService.list(AdminAccess.clinicId(session)) : users);
         Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
         return "admin/employees :: employeesCard";
     }
