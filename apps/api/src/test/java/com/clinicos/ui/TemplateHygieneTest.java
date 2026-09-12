@@ -33,7 +33,7 @@ class TemplateHygieneTest {
     private static final Pattern ON_ATTRIBUTE = Pattern.compile(
             "\\son[a-z]+\\s*=\\s*[\"']", Pattern.CASE_INSENSITIVE);
 
-    private static final String HEAD_FRAGMENT = "fragments" + Path.of("/").toString() + "head.html";
+    private static final String HEAD_FRAGMENT = "fragments/head.html";
 
     @Test
     void noTemplateShipsInlineStyleScriptOrEventHandlers() throws IOException, URISyntaxException {

@@ -49,6 +49,8 @@ class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
             clinicA = TestFixtures.insertClinic(connection);
             clinicB = TestFixtures.insertClinic(connection);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicA);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicB);
             managerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "manager");
             ownerMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "owner");
             receptionistMembership = TestFixtures.insertMembership(connection, clinicA, TestFixtures.insertUser(connection, clinicA), "receptionist");

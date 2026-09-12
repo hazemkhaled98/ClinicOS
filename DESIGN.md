@@ -169,6 +169,12 @@ The design uses moderate corner radii to project approachability and visual refi
   - Cancelled / Overdue: `bg-danger-50 text-danger-600`.
   - Scheduled: `bg-info-50 text-info-600`.
 
+### Admin Control Plane (Dashboard Tabs & Employee Roster)
+- **Admin Tabs** (`clinicos-admin-tab`, `--active`, `--disabled`): pill-shaped (`rounded-full`) tab strip, background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29` at 70% opacity, weight `600`, size `14px`. Active tab gets an emerald tint fill (`rgba(16, 185, 129, 0.12)`), `border-teal-600`, full-opacity `#0a2e29` text, and renders as non-linkable. Unbuilt tabs render `--disabled` (50% opacity, `pointer-events: none`) until their slice ships.
+- **Employee Roster Card**: white card shell (`rounded-2xl`, border `#e2e8f0`), header = emoji + `text-xl font-extrabold text-teal-900` title + variant-secondary description. Rows are stacked flex strips (`space-y`), not a data grid: 40px circular avatar (`bg-teal-100 text-teal-700`, first Arabic letter) beside static bold name, then inline editable controls.
+- **Inline Editable Row**: each row is its own HTMX `<form>` — role `<select>`, base-pay and max-incentive `<input>`s, and an optional custom-shift checkbox that toggles start/end `<input type="time">`. Row save posts (`hx-post`), archive is a trailing destructive icon button (`hx-delete`, `hx-confirm`), both swap the card fragment. A dashed hairline separator (`border-dashed border-neutral-300`) divides the list from the add form, which reuses the same field layout on `bg-teal-50 border-teal-200`.
+- **In-band Validation**: field-level Arabic errors re-render the card fragment with a danger banner (`bg-danger-50 border-danger-600 text-danger-600`) — full-width above the add form for create scope, or above the offending row for edit scope. No toast, no modal.
+
 ### Brand Color Palette (Tailwind Utilities)
 
 The following brand colors are configured as Tailwind utilities in `apps/api/src/main/styles/tokens.css` via a `@theme` block. Use these utility names (`bg-teal-900`, `text-emerald-500`, `border-teal-850`) rather than raw hex or arbitrary values (`bg-[#...]`):

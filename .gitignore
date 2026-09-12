@@ -26,6 +26,10 @@ replay_pid*
 # Claude Code local session state
 .claude/
 .opencode/
+.agents/
+.serena/
+.mcp.json
+skills-lock.json
 docs/plans/
 
 # Maven

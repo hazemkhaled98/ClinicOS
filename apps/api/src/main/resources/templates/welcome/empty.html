@@ -5,7 +5,7 @@
       th:attr="hx-headers='{\&quot;X-CSRF-TOKEN\&quot;:\&quot;' + ${_csrf.token} + '\&quot;}'">
   <main class="w-full min-h-screen flex flex-col bg-surface">
     <header th:replace="~{fragments/topbar :: topbar}"></header>
-    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full">
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto">
       <div class="mt-10 bg-white rounded-2xl border border-neutral-200 p-10 flex flex-col items-center justify-center text-center clinicos-empty-state">
         <svg class="w-10 h-10 text-teal-300 mb-3 clinicos-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>

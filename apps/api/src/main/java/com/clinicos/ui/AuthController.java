@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,12 +19,12 @@ import com.clinicos.identity.api.SignupService.SignupResult;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.TenantContext;
 
-/**
- * Login and self-service sign-up (UC-001) server-rendered with Thymeleaf.
- * Replaces the Vaadin {@code LoginView}/{@code SignupView}; the controller
- * carries the same validation and conflict messages so the forms behave
- * identically.
- */
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 @Controller
 public class AuthController {
 
@@ -59,11 +60,18 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String signup(SignupForm form, Model model) {
-        Map<String, String> fieldErrors = validate(form);
+    public String signup(@Valid SignupForm form, BindingResult binding, Model model) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.putAll(FormErrors.of(binding));
+        fieldErrors.remove("passwordsMatch");
+        if (fieldErrors.isEmpty() && form.getPassword() != null && !form.getPassword().isBlank()
+                && !form.getPassword().equals(form.getConfirmPassword())) {
+            fieldErrors.putIfAbsent("confirmPassword", "كلمتا المرور غير متطابقتين");
+        }
         if (!fieldErrors.isEmpty()) {
             model.addAttribute("form", form);
             model.addAttribute("fieldErrors", fieldErrors);
+            model.addAttribute("generalError", null);
             return "auth/signup";
         }
 
@@ -80,6 +88,7 @@ public class AuthController {
         } catch (SignupConflictException conflict) {
             model.addAttribute("form", form);
             model.addAttribute("fieldErrors", Map.of(conflictFieldName(conflict), conflictMessage(conflict)));
+            model.addAttribute("generalError", null);
             return "auth/signup";
         } catch (Exception e) {
             log.error("Signup failed for clinic='{}' username='{}'", request.clinicName(), request.username(), e);
@@ -97,34 +106,6 @@ public class AuthController {
         }
 
         return "redirect:/login?signup=success&clinic=" + result.clinicSlug();
-    }
-
-    private static Map<String, String> validate(SignupForm form) {
-        Map<String, String> errors = new HashMap<>();
-        require(errors, "clinicName", form.getClinicName(), "اسم العيادة مطلوب");
-        require(errors, "fullName", form.getFullName(), "الاسم الكامل مطلوب");
-        require(errors, "username", form.getUsername(), "اسم المستخدم مطلوب");
-        if (form.getPassword() == null || form.getPassword().isBlank()) {
-            errors.put("password", "كلمة المرور مطلوبة");
-        } else if (form.getPassword().length() < 8) {
-            errors.put("password", "كلمة المرور يجب أن تكون 8 محارف على الأقل");
-        }
-        if (form.getConfirmPassword() == null || form.getConfirmPassword().isBlank()) {
-            errors.put("confirmPassword", "تأكيد كلمة المرور مطلوب");
-        } else if (!form.getConfirmPassword().equals(form.getPassword())) {
-            errors.put("confirmPassword", "كلمتا المرور غير متطابقتين");
-        }
-        String email = form.getEmail();
-        if (email != null && !email.isBlank() && !email.contains("@")) {
-            errors.put("email", "صيغة البريد الإلكتروني غير صحيحة");
-        }
-        return errors;
-    }
-
-    private static void require(Map<String, String> errors, String field, String value, String message) {
-        if (value == null || value.isBlank()) {
-            errors.put(field, message);
-        }
     }
 
     private static String conflictFieldName(SignupConflictException conflict) {
@@ -152,12 +133,24 @@ public class AuthController {
     }
 
     public static class SignupForm {
+        @NotBlank(message = "اسم العيادة مطلوب")
         private String clinicName;
+        @NotBlank(message = "الاسم الكامل مطلوب")
         private String fullName;
+        @NotBlank(message = "اسم المستخدم مطلوب")
         private String username;
+        @NotBlank(message = "كلمة المرور مطلوبة")
+        @Size(min = 8, message = "كلمة المرور يجب أن تكون 8 محارف على الأقل")
         private String password;
+        @NotBlank(message = "تأكيد كلمة المرور مطلوب")
         private String confirmPassword;
+        @Email(regexp = "^$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "صيغة البريد الإلكتروني غير صحيحة")
         private String email;
+
+        @AssertTrue(message = "كلمتا المرور غير متطابقتين")
+        public boolean isPasswordsMatch() {
+            return password == null || confirmPassword == null || password.equals(confirmPassword);
+        }
 
         public String getClinicName() {
             return clinicName;

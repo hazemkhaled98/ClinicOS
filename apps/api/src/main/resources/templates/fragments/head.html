@@ -2,7 +2,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title th:text="${pageTitle}">عيادتي</title>
+  <meta th:name="_csrf" th:content="${_csrf.token}" name="_csrf" content="">
   <link rel="stylesheet" th:href="@{/css/app.css}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script>
+    document.addEventListener('htmx:configRequest', function (e) {
+      e.detail.headers['X-CSRF-TOKEN'] = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    });
+    document.addEventListener('htmx:responseError', function (e) {
+      window.toastShow('حدث خطأ في الخادم. يرجى المحاولة مرة أخرى.', 'error');
+    });
+    document.addEventListener('htmx:sendError', function (e) {
+      window.toastShow('تعذر الاتصال بالخادم. يرجى التحقق من الاتصال.', 'error');
+    });
+    var toastTimer = null;
+    window.toastShow = function (message, type) {
+      var el = document.getElementById('toast-root');
+      if (!el) return;
+      var colors = {
+        success: 'bg-teal-700 text-white',
+        error: 'bg-danger-600 text-white',
+        info: 'bg-neutral-700 text-white'
+      };
+      el.className = 'fixed top-6 start-6 z-50 rounded-xl px-5 py-4 text-base font-bold shadow-2xl transition-opacity duration-300 '
+        + (colors[type] || colors.success);
+      el.textContent = message;
+      el.classList.remove('hidden');
+      el.style.opacity = '1';
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        el.style.opacity = '0';
+        setTimeout(function () { el.classList.add('hidden'); }, 300);
+      }, type === 'error' ? 4500 : 3500);
+    };
+    document.addEventListener('htmx:afterSwap', function () {
+      var el = document.querySelector('[data-toast]');
+      if (el) {
+        window.toastShow(el.getAttribute('data-toast'), el.getAttribute('data-toast-type') || 'success');
+        el.removeAttribute('data-toast');
+      }
+    });
+  </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>

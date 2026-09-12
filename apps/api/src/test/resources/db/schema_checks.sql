@@ -70,8 +70,8 @@ declare
 begin
     perform set_config('app.clinic_id', '11111111-1111-1111-1111-111111111111', true);
     begin
-        insert into employee (clinic_id, name, staff_role, base_pay, max_incentive)
-        values ('22222222-2222-2222-2222-222222222222', 'Cross Tenant', 'assistant', 100, 10);
+        insert into employee (clinic_id, name, base_pay, max_incentive)
+        values ('22222222-2222-2222-2222-222222222222', 'Cross Tenant', 100, 10);
         unexpected_success := true;
     exception when others then
         null; -- expected: RLS WITH CHECK rejects the row
@@ -432,8 +432,8 @@ begin
 
     -- 5e. employee.custom_shift = true with no shift_start/shift_end must raise.
     begin
-        insert into employee (clinic_id, name, staff_role, base_pay, max_incentive, custom_shift)
-        values ('11111111-1111-1111-1111-111111111111', 'Bad Shift Employee', 'assistant', 100, 10, true);
+        insert into employee (clinic_id, name, base_pay, max_incentive, custom_shift)
+        values ('11111111-1111-1111-1111-111111111111', 'Bad Shift Employee', 100, 10, true);
         unexpected_success := true;
     exception when others then null;
     end;
@@ -444,8 +444,8 @@ begin
     -- 5f. custom_shift = false with shift_start/shift_end set must also raise.
     unexpected_success := false;
     begin
-        insert into employee (clinic_id, name, staff_role, base_pay, max_incentive, custom_shift, shift_start, shift_end)
-        values ('11111111-1111-1111-1111-111111111111', 'Bad Shift Employee 2', 'assistant', 100, 10, false, '08:00', '16:00');
+        insert into employee (clinic_id, name, base_pay, max_incentive, custom_shift, shift_start, shift_end)
+        values ('11111111-1111-1111-1111-111111111111', 'Bad Shift Employee 2', 100, 10, false, '08:00', '16:00');
         unexpected_success := true;
     exception when others then null;
     end;

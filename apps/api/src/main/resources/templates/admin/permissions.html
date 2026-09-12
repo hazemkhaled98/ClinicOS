@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>الصلاحيات</title>
+</head>
+<body>
+<div th:fragment="permissionsCard(rolePermissionMap, usersByRole)"
+     id="permissions-card" class="mt-10 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🔐 الصلاحيات</h2>
+    <p class="text-sm text-on-surface-variant">تحديد ما يمكن لكل دور الوصول إليه. الدور «المالك» يحصل على كل الصلاحيات تلقائياً.</p>
+  </div>
+
+  <th:block th:each="roleCode : ${roleCodes}">
+    <div th:if="${roleCode == 'owner'}"
+         th:attr="data-role=${roleCode}"
+         x-show="activeRole === $el.dataset.role">
+      <div class="p-4 bg-teal-50 rounded-xl mb-4">
+        <p class="text-sm text-teal-700 font-bold">المالك يحصل على كل الصلاحيات تلقائياً ولا يمكن تغيير ذلك.</p>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 text-sm text-on-surface-variant"
+               th:each="perm : ${permissionLabels}">
+          <input type="checkbox" class="accent-teal-600" checked disabled>
+          <span th:text="${perm.value}">perm</span>
+        </label>
+      </div>
+    </div>
+
+    <form th:unless="${roleCode == 'owner'}"
+          th:id="'perm-form-' + ${roleCode}"
+          hx-post="/admin-dashboard/permissions"
+          hx-target="#permissions-card" hx-swap="outerHTML"
+          th:attr="data-role=${roleCode}"
+          x-show="activeRole === $el.dataset.role">
+      <input type="hidden" name="roleCode" th:value="${roleCode}">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <label class="flex items-center gap-2 text-sm text-on-surface-variant cursor-pointer"
+               th:each="perm : ${permissionLabels}">
+          <input type="checkbox" name="permissionCodes" th:value="${perm.key}"
+                 class="accent-teal-600"
+                 th:checked="${rolePermissionMap.get(roleCode) != null and rolePermissionMap.get(roleCode).contains(perm.key)}">
+          <span th:text="${perm.value}">perm</span>
+        </label>
+      </div>
+      <button type="submit" class="clinicos-btn mt-4">حفظ الصلاحيات</button>
+    </form>
+
+    <div th:attr="data-role=${roleCode}" x-show="activeRole === $el.dataset.role" class="mt-3">
+      <p th:if="${usersByRole.get(roleCode) == null or #lists.isEmpty(usersByRole.get(roleCode))}"
+         class="text-xs text-on-surface-variant mb-2">مفيش حد على التوصيف ده لسه</p>
+      <div th:unless="${usersByRole.get(roleCode) == null or #lists.isEmpty(usersByRole.get(roleCode))}"
+           class="flex flex-wrap gap-2 mb-3">
+        <span th:each="u : ${usersByRole.get(roleCode)}" class="clinicos-chip clinicos-chip--info"
+              th:text="${u.fullName()}">محمود</span>
+      </div>
+    </div>
+  </th:block>
+</div>
+</body>
+</html>

@@ -10,7 +10,7 @@ Shared vocabulary for planning and revamp discussions. Terms as used by the exis
 | **Manager** | Approves tasks, checklists, stock edits, and returns (BR-G12, BR-G18, BR-G26). Sees admin dashboard (BR-G30) and all inventory areas (BR-G25). |
 | **Assistant** | Clinical staff role. Sees own tasks, tray stock/issuing, own procedures (BR-G25). |
 | **Receptionist** | Front-desk staff role. Sees ordering/receiving/returns/suppliers (BR-G25). |
-| **Employee** | Umbrella term for assistant or receptionist (BR-G04) — not owner/manager. |
+| **Employee** | Any staff account in the clinic; their role is the membership role (BR-G04). |
 
 ## Evaluation & Performance
 
