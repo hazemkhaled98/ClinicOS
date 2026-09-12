@@ -2,6 +2,7 @@ package com.clinicos.ui;
 
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -172,7 +173,7 @@ public class AdminController {
         return AdminAccess.canDashboard(layoutModel, session);
     }
 
-    private void renderCard(Model model, HttpSession session, java.util.List<UserSummary> users) {
+    private void renderCard(Model model, HttpSession session, List<UserSummary> users) {
         UUID clinicId = AdminAccess.clinicId(session);
         Map<UUID, UserSummary> employeeRoles = employeeRoles(users);
         String actorRole = AdminAccess.roleCode(session);
@@ -184,7 +185,7 @@ public class AdminController {
         model.addAttribute("actorRole", actorRole);
     }
 
-    private static UserSummary linkedUser(java.util.List<UserSummary> users, UUID employeeId) {
+    private static UserSummary linkedUser(List<UserSummary> users, UUID employeeId) {
         return users.stream()
                 .filter(user -> employeeId.equals(user.employeeId()))
                 .findFirst()
@@ -199,7 +200,7 @@ public class AdminController {
         return !"owner".equals(employeeRole) && !"manager".equals(employeeRole);
     }
 
-    private static Map<UUID, UserSummary> employeeRoles(java.util.List<UserSummary> users) {
+    private static Map<UUID, UserSummary> employeeRoles(List<UserSummary> users) {
         Map<UUID, UserSummary> roles = new HashMap<>();
         for (UserSummary user : users) {
             if (user.employeeId() != null) {
@@ -212,7 +213,7 @@ public class AdminController {
     private record RoleChange(UUID membershipId, String roleCode) {
     }
 
-    private static RoleChange resolveRoleChange(java.util.List<UserSummary> users, UUID employeeId, String roleCode) {
+    private static RoleChange resolveRoleChange(List<UserSummary> users, UUID employeeId, String roleCode) {
         if (roleCode == null || roleCode.isBlank()) {
             return null;
         }
