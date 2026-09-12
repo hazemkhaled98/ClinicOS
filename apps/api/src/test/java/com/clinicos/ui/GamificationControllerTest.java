@@ -170,6 +170,39 @@ class GamificationControllerTest {
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
+    @Test
+    void updateGoalsRejectsMoreThanThreeRows() {
+        HttpSession session = session();
+        allowDashboard();
+
+        var form = GamificationController.GoalsForm.from(List.of());
+        goals(form).setTitle("مهارة1");
+        form.getGoals().add(new GamificationController.GoalsForm.GoalRow());
+
+        controller.updateGoals(form, session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("لا يمكن حفظ أكثر من 3 أهداف");
+        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt());
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void updateThresholdsInvalidValueReportsErrorAndSkipsService() {
+        HttpSession session = session();
+        allowDashboard();
+
+        var form = new GamificationController.ThresholdsForm();
+        threshold(form, "شارة1").setThreshold("abc");
+
+        controller.updateThresholds(form, session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("عدد المهام يجب أن يكون رقماً");
+        verify(gamificationService, never()).updateThreshold(any(), any(), anyInt());
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
     private static GamificationController.GoalsForm.GoalRow goals(GamificationController.GoalsForm form) {
         return form.getGoals().get(0);
     }

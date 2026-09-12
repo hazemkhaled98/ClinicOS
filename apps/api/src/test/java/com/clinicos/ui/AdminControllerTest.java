@@ -3,6 +3,7 @@ package com.clinicos.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -216,6 +217,45 @@ class AdminControllerTest {
         controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
 
         verify(userAdminService, never()).assignRole(any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeSameRoleSkipsAssignRole() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
+        Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        controller.updateEmployee(employeeId, form("محمود", "assistant"), Validated.of(form("محمود", "assistant")), session, model);
+
+        verify(userAdminService, never()).assignRole(any(), any(), any());
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+    }
+
+    @Test
+    void updateEmployeeRoleChangeFailureShowsErrorAndStillLogsUpdate() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
+        doThrow(new IllegalArgumentException("الدور غير موجود: manager"))
+                .when(userAdminService).assignRole(eq(CLINIC), eq(membershipId), eq("manager"));
+        Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        controller.updateEmployee(employeeId, form("محمود", "manager"), Validated.of(form("محمود", "manager")), session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("الدور غير موجود");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.update", "employee");
     }
 
     private static AdminController.EmployeeForm form(String name, String roleCode) {

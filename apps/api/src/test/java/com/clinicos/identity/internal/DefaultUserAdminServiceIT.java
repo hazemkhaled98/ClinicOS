@@ -160,6 +160,22 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void suspendCrossClinicThrowsAndLeavesClinicAUnaffected() {
+        TenantContext.set(clinicA);
+        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                "cross-" + UUID.randomUUID(), "عبر العيادات", null, "hash"));
+        UUID userId = userAdminService.list(clinicA).get(0).id();
+
+        TenantContext.set(clinicB);
+        assertThatThrownBy(() -> userAdminService.suspend(clinicB, userId, UUID.randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("غير موجود");
+
+        TenantContext.set(clinicA);
+        assertThat(userAdminService.list(clinicA).get(0).status()).isEqualTo("active");
+    }
+
+    @Test
     void listShowsLinkedEmployeeId() throws Exception {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
