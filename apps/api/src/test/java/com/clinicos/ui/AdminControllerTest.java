@@ -219,6 +219,102 @@ class AdminControllerTest {
     }
 
     @Test
+    void updateEmployeeManagerCannotEditPeerManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary peer = new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(peer));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updateEmployee(employeeId, form("سارة", null), Validated.of(form("سارة", null)), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(employeeService, never()).update(any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeManagerCanEditAssistant() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        Employee updated = employee("محمود");
+        UserSummary assistant = new UserSummary(UUID.randomUUID(), "mahmoud", "محمود", null, "active", "assistant",
+                UUID.randomUUID(), updated.id());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(assistant));
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+    }
+
+    @Test
+    void archiveEmployeeManagerCannotArchivePeerManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary peer = new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(peer));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(employeeService, never()).archive(any(), any());
+    }
+
+    @Test
+    void renderCardHidesPeersAndSuperiorsFromManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        Employee peerEmployee = employee("سارة");
+        Employee ownerEmployee = employee("المالك");
+        Employee assistantEmployee = employee("أحمد");
+        when(employeeService.list(CLINIC)).thenReturn(List.of(peerEmployee, ownerEmployee, assistantEmployee));
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(
+                new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager", UUID.randomUUID(), peerEmployee.id()),
+                new UserSummary(UUID.randomUUID(), "owner", "المالك", null, "active", "owner", UUID.randomUUID(), ownerEmployee.id()),
+                new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", UUID.randomUUID(), assistantEmployee.id())));
+        var settings = new ClinicSettingsService.ClinicSettings(
+                java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+        when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
+
+        controller.settings(session, model);
+
+        @SuppressWarnings("unchecked")
+        var employees = (List<Employee>) model.getAttribute("employees");
+        assertThat(employees).containsExactly(assistantEmployee);
+    }
+
+    @Test
+    void archiveEmployeeReportsErrorWhenSuspendFails() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        Employee archived = employee("محمود");
+        UserSummary linked = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(linked));
+        when(employeeService.archive(CLINIC, employeeId)).thenReturn(archived);
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+        doThrow(new IllegalArgumentException("تعذر تعليق الحساب"))
+                .when(userAdminService).suspend(eq(CLINIC), eq(linked.id()), eq(MEMBERSHIP));
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.archive", "employee");
+    }
+
+    @Test
     void updateEmployeeWithChangedRoleAssignsRole() {
         HttpSession session = session();
         allowDashboard();
@@ -328,9 +424,14 @@ class AdminControllerTest {
     }
 
     private static HttpSession session() {
+        return session("owner");
+    }
+
+    private static HttpSession session(String roleCode) {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
         when(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(MEMBERSHIP);
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn(roleCode);
         return session;
     }
 

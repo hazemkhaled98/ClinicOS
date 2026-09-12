@@ -137,7 +137,10 @@ public class AdminController {
         try {
             employeeService.archive(AdminAccess.clinicId(session), employeeId);
             activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
-            linked.ifPresent(user -> suspendLinkedUser(user, session));
+            boolean suspended = linked.map(user -> suspendLinkedUser(user, session)).orElse(true);
+            if (!suspended) {
+                fieldErrors.put("employee", "تم أرشفة الموظف، لكن تعليق حساب الدخول فشل");
+            }
         } catch (IllegalArgumentException e) {
             // not found / already archived / RLS-hidden -- re-render clean card
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
@@ -148,16 +151,18 @@ public class AdminController {
         return "admin/employees :: employeesCard";
     }
 
-    private void suspendLinkedUser(UserSummary user, HttpSession session) {
+    private boolean suspendLinkedUser(UserSummary user, HttpSession session) {
         UUID clinicId = AdminAccess.clinicId(session);
         if ("owner".equals(user.roleCode())
                 || user.membershipId().equals(AdminAccess.membershipId(session))) {
-            return;
+            return true;
         }
         try {
             userAdminService.suspend(clinicId, user.id(), AdminAccess.membershipId(session));
+            return true;
         } catch (IllegalArgumentException e) {
-            log.warn("archive suspend skipped: user {} clinic {}", user.id(), clinicId, e);
+            log.warn("archive suspend failed: user {} clinic {}", user.id(), clinicId, e);
+            return false;
         }
     }
 
