@@ -93,7 +93,7 @@ public class PermissionsController {
         if (fieldErrors.isEmpty()) {
             Set<String> codes = form.getPermissionCodes() != null ? Set.of(form.getPermissionCodes()) : Set.of();
             try {
-                rolePermissionService.setPermissions(clinicId, form.getRoleCode(), codes);
+                rolePermissionService.setPermissions(clinicId, AdminAccess.membershipId(session), form.getRoleCode(), codes);
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "permissions.update", "role_permission");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("permissions", e.getMessage());
@@ -106,7 +106,7 @@ public class PermissionsController {
 
     private void renderPage(Model model, HttpSession session) {
         UUID clinicId = AdminAccess.clinicId(session);
-        model.addAttribute("roleCodes", ROLE_CODES);
+        model.addAttribute("roleCodes", manageableRoleCodes(AdminAccess.roleCode(session)));
         model.addAttribute("roleNames", roleNames());
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
@@ -116,6 +116,15 @@ public class PermissionsController {
             log.warn("listForClinic failed: clinic {}", clinicId, e);
             model.addAttribute("rolePermissionMap", Map.of());
         }
+    }
+
+    private static List<String> manageableRoleCodes(String actorRole) {
+        if ("owner".equals(actorRole)) {
+            return ROLE_CODES;
+        }
+        return ROLE_CODES.stream()
+                .filter(code -> !"owner".equals(code) && !"manager".equals(code))
+                .toList();
     }
 
     private static Map<String, String> roleNames() {

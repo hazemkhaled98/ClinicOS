@@ -81,43 +81,51 @@ public class DefaultUserAdminService implements UserAdminService {
     }
 
     @Override
-    public void changePassword(UUID clinicId, UUID userId, String newPasswordHash) {
-        transactionTemplate.executeWithoutResult(status ->
-                setUserPassword(dsl.configuration(), clinicId, userId, newPasswordHash));
+    public void changePassword(UUID clinicId, UUID userId, String newPasswordHash, UUID actorMembershipId) {
+        transactionTemplate.executeWithoutResult(status -> {
+            Target target = resolveTarget(clinicId, userId);
+            String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
+            if (!RoleRanks.OWNER.equals(actorRole)
+                    && !target.membershipId().equals(actorMembershipId)
+                    && RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+                throw new IllegalArgumentException("لا يمكنك تغيير كلمة مرور حساب بدور أعلى أو مساوٍ لدورك");
+            }
+            setUserPassword(dsl.configuration(), clinicId, userId, newPasswordHash);
+        });
     }
 
     @Override
     public void suspend(UUID clinicId, UUID userId, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status -> {
-            org.jooq.Record target = dsl.select(MEMBERSHIP.ID, ROLE.CODE)
-                    .from(APP_USER)
-                    .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
-                            .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
-                    .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
-                    .where(APP_USER.ID.eq(userId))
-                    .and(APP_USER.CLINIC_ID.eq(clinicId))
-                    .fetchOne();
-            if (target == null) {
-                throw new IllegalArgumentException("المستخدم غير موجود");
-            }
-            if (target.get(MEMBERSHIP.ID).equals(actorMembershipId)) {
+            Target target = resolveTarget(clinicId, userId);
+            if (target.membershipId().equals(actorMembershipId)) {
                 throw new IllegalArgumentException("لا يمكنك تعليق حسابك الخاص");
             }
-            if ("owner".equals(target.get(ROLE.CODE))) {
+            if (RoleRanks.OWNER.equals(target.roleCode())) {
                 throw new IllegalArgumentException("تعليق حساب المالك من صلاحيات إدارة النظام فقط");
+            }
+            String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
+            if (RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+                throw new IllegalArgumentException("لا يمكنك تعليق حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserStatus(dsl.configuration(), clinicId, userId, "suspended");
         });
     }
 
     @Override
-    public void reactivate(UUID clinicId, UUID userId) {
-        transactionTemplate.executeWithoutResult(status ->
-                setUserStatus(dsl.configuration(), clinicId, userId, "active"));
+    public void reactivate(UUID clinicId, UUID userId, UUID actorMembershipId) {
+        transactionTemplate.executeWithoutResult(status -> {
+            Target target = resolveTarget(clinicId, userId);
+            String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
+            if (RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+                throw new IllegalArgumentException("لا يمكنك تفعيل حساب بدور أعلى أو مساوٍ لدورك");
+            }
+            setUserStatus(dsl.configuration(), clinicId, userId, "active");
+        });
     }
 
     @Override
-    public void assignRole(UUID clinicId, UUID membershipId, String roleCode) {
+    public void assignRole(UUID clinicId, UUID membershipId, String roleCode, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status -> {
             UUID roleId = dsl.select(ROLE.ID)
                     .from(ROLE)
@@ -125,6 +133,19 @@ public class DefaultUserAdminService implements UserAdminService {
                     .fetchOne(ROLE.ID);
             if (roleId == null) {
                 throw new IllegalArgumentException("الدور غير موجود: " + roleCode);
+            }
+            if (RoleRanks.OWNER.equals(roleCode)) {
+                throw new IllegalArgumentException("لا يمكن تعيين دور المالك");
+            }
+            String targetRole = RoleRanks.ofMembership(dsl, clinicId, membershipId);
+            String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
+            if (!RoleRanks.OWNER.equals(actorRole)) {
+                if (RoleRanks.of(targetRole) >= RoleRanks.of(actorRole)) {
+                    throw new IllegalArgumentException("لا يمكنك تغيير دور حساب بدور أعلى أو مساوٍ لدورك");
+                }
+                if (RoleRanks.of(roleCode) >= RoleRanks.of(actorRole)) {
+                    throw new IllegalArgumentException("لا يمكنك تعيين دور أعلى أو مساوٍ لدورك");
+                }
             }
             int updated = dsl.update(MEMBERSHIP)
                     .set(MEMBERSHIP.ROLE_ID, roleId)
@@ -149,6 +170,24 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }
         });
+    }
+
+    private Target resolveTarget(UUID clinicId, UUID userId) {
+        org.jooq.Record row = dsl.select(MEMBERSHIP.ID, ROLE.CODE)
+                .from(APP_USER)
+                .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
+                        .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
+                .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
+                .where(APP_USER.ID.eq(userId))
+                .and(APP_USER.CLINIC_ID.eq(clinicId))
+                .fetchOne();
+        if (row == null) {
+            throw new IllegalArgumentException("المستخدم غير موجود");
+        }
+        return new Target(userId, row.get(MEMBERSHIP.ID), row.get(ROLE.CODE));
+    }
+
+    private record Target(UUID userId, UUID membershipId, String roleCode) {
     }
 
     private static UserValidationException conflictByConstraint(DuplicateKeyException e) {

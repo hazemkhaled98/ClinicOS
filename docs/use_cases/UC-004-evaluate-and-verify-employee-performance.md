@@ -8,6 +8,8 @@
 **Goal:** The manager reviews each employee's daily work, confirms proof, rates the qualitative parts of performance, and manages one-off assignments so the monthly evaluation is accurate and fair.
 **Status:** Implemented
 
+> **Deferred to Phase 4:** the evaluation engine itself is not yet ported. The automatic monthly-score recalculation (step 6), A2 frozen-month review and BR-001 (only the current month live-scores) depend on UC-002 BR-002's freeze write-once; A3 manual-floor depends on UC-002 A2; and the evaluation-reflection half of UC-002 step 5. These land with the evaluation-engine slice of Phase 4 and do not block UC-002 being marked Tested.
+
 ## Preconditions
 
 - The manager is logged in (UC-001) with evaluation access.

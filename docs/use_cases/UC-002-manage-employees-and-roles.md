@@ -6,7 +6,7 @@
 **Use Case Name:** Manage Employees and Roles
 **Primary Actor:** Owner/Manager
 **Goal:** The owner or manager keeps the roster of employees, their roles, pay, shifts and evaluation settings up to date so performance can be tracked accurately.
-**Status:** Implemented
+**Status:** Tested
 
 ## Preconditions
 
@@ -18,7 +18,7 @@
 2. The manager selects an employee from the list, or starts registering a new one.
 3. The manager enters or edits the employee's name, role (assistant or receptionist), base pay, maximum incentive, and work shift.
 4. The manager saves the changes.
-5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role.
+5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role. (Computation of evaluation, academy and inventory impact is deferred to Phase 4 / Phase 6 / Phase 7; only the role-based task list is reflected now.)
 6. The manager reviews or adjusts clinic-wide settings that affect every employee's evaluation: the task list per role, evaluation category weights, monthly operating target, grace period for lateness, and gamification/badge thresholds.
 7. The manager reviews or edits which user accounts exist, which employee each account is linked to, and what permissions each account/role has.
 
@@ -29,7 +29,7 @@
 **Trigger:** The manager marks an employee's account inactive instead of deleting history (step 3)
 **Flow:**
 
-1. The system keeps the employee's historical evaluation records intact but the account can no longer log in.
+1. The system keeps the employee's historical evaluation records intact, unlinks the employee from the user account, suspends the linked account so it can no longer log in, and records the action in the activity log. The linked account is not suspended when it belongs to the clinic owner or to the currently logged-in manager.
 2. Use case continues at step 4.
 
 ### A2: Adjusting a Manual Performance Override
@@ -50,6 +50,8 @@
 3. The system records who unlocked the month and when.
 4. Use case continues at step 7.
 
+> **Deferred:** A2, A3, BR-002, BR-003, BR-004 and the evaluation/academy/inventory computation in step 5 are scheduled with the evaluation engine in Phase 4 (UC-004/UC-005); academy reflection moves to Phase 6, inventory reflection to Phase 7. They do not block this use case being marked Implemented.
+
 ## Postconditions
 
 ### Success Postconditions
@@ -66,6 +68,10 @@
 ### BR-001: Two Employee Roles
 
 An employee is either an assistant or a receptionist; the role determines which task list, academy curriculum, and inventory areas apply to them.
+
+### BR-005: Role Hierarchy and Manager Authority
+
+Clinic roles rank: owner > manager > assistant/receptionist. The owner may assign or change any role, including the manager role, and manage any account's permissions. A manager may only manage employees with a strictly lower role (assistant or receptionist), cannot assign, demote, or promote a role at or above their own, cannot suspend, reactivate, or change the password of a peer or superior, and edits permissions only for roles strictly below their own. The owner role cannot be assigned through the role form.
 
 ### BR-002: Evaluation Months Freeze Automatically
 

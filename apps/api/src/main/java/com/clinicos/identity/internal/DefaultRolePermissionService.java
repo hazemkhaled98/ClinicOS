@@ -39,11 +39,16 @@ public class DefaultRolePermissionService implements RolePermissionService {
     }
 
     @Override
-    public void setPermissions(UUID clinicId, String roleCode, Set<String> permissionCodes) {
+    public void setPermissions(UUID clinicId, UUID actorMembershipId, String roleCode, Set<String> permissionCodes) {
         if (permissionCodes == null || permissionCodes.isEmpty()) {
             throw new IllegalArgumentException("يجب تحديد صلاحية واحدة على الأقل");
         }
         transactionTemplate.executeWithoutResult(status -> {
+            String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
+            if (!RoleRanks.OWNER.equals(actorRole)
+                    && RoleRanks.of(roleCode) >= RoleRanks.of(actorRole)) {
+                throw new IllegalArgumentException("لا يمكنك تعديل صلاحيات دور أعلى أو مساوٍ لدورك");
+            }
             UUID roleId = dsl.select(ROLE.ID)
                     .from(ROLE)
                     .where(ROLE.CODE.eq(roleCode))

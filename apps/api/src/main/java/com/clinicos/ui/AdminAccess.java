@@ -31,4 +31,8 @@ final class AdminAccess {
     static UUID membershipId(HttpSession session) {
         return (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
     }
+
+    static String roleCode(HttpSession session) {
+        return (String) session.getAttribute(SessionKeys.ROLE_CODE);
+    }
 }

@@ -10,13 +10,13 @@ public interface UserAdminService {
 
     UserSummary create(UUID clinicId, UserCreateRequest request);
 
-    void changePassword(UUID clinicId, UUID userId, String newPasswordHash);
+    void changePassword(UUID clinicId, UUID userId, String newPasswordHash, UUID actorMembershipId);
 
     void suspend(UUID clinicId, UUID userId, UUID actorMembershipId);
 
-    void reactivate(UUID clinicId, UUID userId);
+    void reactivate(UUID clinicId, UUID userId, UUID actorMembershipId);
 
-    void assignRole(UUID clinicId, UUID membershipId, String roleCode);
+    void assignRole(UUID clinicId, UUID membershipId, String roleCode, UUID actorMembershipId);
 
     void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId);
 

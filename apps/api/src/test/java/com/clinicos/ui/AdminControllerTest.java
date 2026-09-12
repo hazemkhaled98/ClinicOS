@@ -170,6 +170,151 @@ class AdminControllerTest {
     }
 
     @Test
+    void archiveEmployeeSuspendsLinkedUser() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary linked = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(linked));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(userAdminService).suspend(CLINIC, linked.id(), MEMBERSHIP);
+    }
+
+    @Test
+    void archiveEmployeeSkipsSuspendingOwnerLinkedUser() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary owner = new UserSummary(UUID.randomUUID(), "owner", "المالك", null, "active", "owner",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(owner));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(userAdminService, never()).suspend(any(), any(), any());
+    }
+
+    @Test
+    void archiveEmployeeSkipsSuspendingSelfLinkedUser() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary self = new UserSummary(UUID.randomUUID(), "me", "أنا", null, "active", "manager",
+                MEMBERSHIP, employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(self));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(userAdminService, never()).suspend(any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeManagerCannotEditPeerManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary peer = new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(peer));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.updateEmployee(employeeId, form("سارة", null), Validated.of(form("سارة", null)), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(employeeService, never()).update(any(), any(), any());
+    }
+
+    @Test
+    void updateEmployeeManagerCanEditAssistant() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        Employee updated = employee("محمود");
+        UserSummary assistant = new UserSummary(UUID.randomUUID(), "mahmoud", "محمود", null, "active", "assistant",
+                UUID.randomUUID(), updated.id());
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(assistant));
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
+
+        String view = controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+    }
+
+    @Test
+    void archiveEmployeeManagerCannotArchivePeerManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        UserSummary peer = new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(peer));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(employeeService, never()).archive(any(), any());
+    }
+
+    @Test
+    void renderCardHidesPeersAndSuperiorsFromManager() {
+        HttpSession session = session("manager");
+        allowDashboard();
+        Employee peerEmployee = employee("سارة");
+        Employee ownerEmployee = employee("المالك");
+        Employee assistantEmployee = employee("أحمد");
+        when(employeeService.list(CLINIC)).thenReturn(List.of(peerEmployee, ownerEmployee, assistantEmployee));
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(
+                new UserSummary(UUID.randomUUID(), "sara", "سارة", null, "active", "manager", UUID.randomUUID(), peerEmployee.id()),
+                new UserSummary(UUID.randomUUID(), "owner", "المالك", null, "active", "owner", UUID.randomUUID(), ownerEmployee.id()),
+                new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", UUID.randomUUID(), assistantEmployee.id())));
+        var settings = new ClinicSettingsService.ClinicSettings(
+                java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+        when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
+
+        controller.settings(session, model);
+
+        @SuppressWarnings("unchecked")
+        var employees = (List<Employee>) model.getAttribute("employees");
+        assertThat(employees).containsExactly(assistantEmployee);
+    }
+
+    @Test
+    void archiveEmployeeReportsErrorWhenSuspendFails() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID employeeId = UUID.randomUUID();
+        Employee archived = employee("محمود");
+        UserSummary linked = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant",
+                UUID.randomUUID(), employeeId);
+        when(userAdminService.list(CLINIC)).thenReturn(List.of(linked));
+        when(employeeService.archive(CLINIC, employeeId)).thenReturn(archived);
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+        doThrow(new IllegalArgumentException("تعذر تعليق الحساب"))
+                .when(userAdminService).suspend(eq(CLINIC), eq(linked.id()), eq(MEMBERSHIP));
+
+        String view = controller.archiveEmployee(employeeId, session, model);
+
+        assertThat(view).isEqualTo("admin/employees :: employeesCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "employee.archive", "employee");
+    }
+
+    @Test
     void updateEmployeeWithChangedRoleAssignsRole() {
         HttpSession session = session();
         allowDashboard();
@@ -184,7 +329,7 @@ class AdminControllerTest {
         String view = controller.updateEmployee(employeeId, form("محمود", "manager"), Validated.of(form("محمود", "manager")), session, model);
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
-        verify(userAdminService).assignRole(CLINIC, membershipId, "manager");
+        verify(userAdminService).assignRole(CLINIC, membershipId, "manager", MEMBERSHIP);
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ بيانات الموظف");
     }
 
@@ -202,7 +347,7 @@ class AdminControllerTest {
 
         controller.updateEmployee(employeeId, form("المالك", "manager"), Validated.of(form("المالك", "manager")), session, model);
 
-        verify(userAdminService, never()).assignRole(any(), any(), any());
+        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
     }
 
     @Test
@@ -216,7 +361,7 @@ class AdminControllerTest {
 
         controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
 
-        verify(userAdminService, never()).assignRole(any(), any(), any());
+        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
     }
 
     @Test
@@ -233,7 +378,7 @@ class AdminControllerTest {
 
         controller.updateEmployee(employeeId, form("محمود", "assistant"), Validated.of(form("محمود", "assistant")), session, model);
 
-        verify(userAdminService, never()).assignRole(any(), any(), any());
+        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
@@ -246,7 +391,7 @@ class AdminControllerTest {
         UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
         doThrow(new IllegalArgumentException("الدور غير موجود: manager"))
-                .when(userAdminService).assignRole(eq(CLINIC), eq(membershipId), eq("manager"));
+                .when(userAdminService).assignRole(eq(CLINIC), eq(membershipId), eq("manager"), eq(MEMBERSHIP));
         Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
         when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
@@ -279,9 +424,14 @@ class AdminControllerTest {
     }
 
     private static HttpSession session() {
+        return session("owner");
+    }
+
+    private static HttpSession session(String roleCode) {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
         when(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(MEMBERSHIP);
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn(roleCode);
         return session;
     }
 

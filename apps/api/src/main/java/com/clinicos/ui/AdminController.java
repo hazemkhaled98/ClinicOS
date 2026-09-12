@@ -2,7 +2,9 @@ package com.clinicos.ui;
 
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -78,7 +80,7 @@ public class AdminController {
         model.addAttribute("volumeForm", ClinicSettingsController.VolumeForm.from(clinicSettings.volumeTarget()));
         model.addAttribute("dutyForm", ClinicSettingsController.DutyForm.from(clinicSettings));
         model.addAttribute("tiersForm", ClinicSettingsController.TiersForm.from(clinicSettings.tiers()));
-        renderCard(model, session);
+        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
         return "admin/settings";
     }
 
@@ -88,8 +90,12 @@ public class AdminController {
         if (!canAccessDashboard(session)) {
             return "redirect:/";
         }
+        var users = userAdminService.list(AdminAccess.clinicId(session));
         Map<String, String> fieldErrors = new HashMap<>();
         fieldErrors.putAll(FormErrors.of(binding));
+        if (!isManageableBy(AdminAccess.roleCode(session), linkedUser(users, employeeId))) {
+            fieldErrors.put("employee", "لا يمكنك تعديل بيانات هذا الموظف");
+        }
         EmployeeRequest request = toRequest(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
@@ -102,16 +108,17 @@ public class AdminController {
                 fieldErrors.put("employee", e.getMessage());
             }
         }
-        RoleChange roleChange = resolveRoleChange(session, employeeId, form.getRoleCode());
+        RoleChange roleChange = resolveRoleChange(users, employeeId, form.getRoleCode());
         if (fieldErrors.isEmpty() && roleChange != null) {
             try {
-                userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode());
+                userAdminService.assignRole(AdminAccess.clinicId(session), roleChange.membershipId(), roleChange.roleCode(),
+                        AdminAccess.membershipId(session));
             } catch (IllegalArgumentException e) {
                 log.warn("assignRole failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
                 fieldErrors.put("role", e.getMessage());
             }
         }
-        renderCard(model, session);
+        renderCard(model, session, fieldErrors.isEmpty() ? userAdminService.list(AdminAccess.clinicId(session)) : users);
         Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات الموظف");
         return "admin/employees :: employeesCard";
     }
@@ -121,31 +128,79 @@ public class AdminController {
         if (!canAccessDashboard(session)) {
             return "redirect:/";
         }
+        var users = userAdminService.list(AdminAccess.clinicId(session));
         Map<String, String> fieldErrors = new HashMap<>();
+        var linked = Optional.ofNullable(linkedUser(users, employeeId));
+        if (!isManageableBy(AdminAccess.roleCode(session), linked.orElse(null))) {
+            fieldErrors.put("employee", "لا يمكنك أرشفة هذا الموظف");
+            renderCard(model, session, users);
+            Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
+            return "admin/employees :: employeesCard";
+        }
         try {
             employeeService.archive(AdminAccess.clinicId(session), employeeId);
             activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
+            boolean suspended = linked.map(user -> suspendLinkedUser(user, session)).orElse(true);
+            if (!suspended) {
+                fieldErrors.put("employee", "تم أرشفة الموظف، لكن تعليق حساب الدخول فشل");
+            }
         } catch (IllegalArgumentException e) {
             // not found / already archived / RLS-hidden -- re-render clean card
             log.warn("archiveEmployee failed: employee {} clinic {}", employeeId, AdminAccess.clinicId(session), e);
             fieldErrors.put("employee", e.getMessage());
         }
-        renderCard(model, session);
+        renderCard(model, session, fieldErrors.isEmpty() ? userAdminService.list(AdminAccess.clinicId(session)) : users);
         Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
         return "admin/employees :: employeesCard";
+    }
+
+    private boolean suspendLinkedUser(UserSummary user, HttpSession session) {
+        UUID clinicId = AdminAccess.clinicId(session);
+        if ("owner".equals(user.roleCode())
+                || user.membershipId().equals(AdminAccess.membershipId(session))) {
+            return true;
+        }
+        try {
+            userAdminService.suspend(clinicId, user.id(), AdminAccess.membershipId(session));
+            return true;
+        } catch (IllegalArgumentException e) {
+            log.warn("archive suspend failed: user {} clinic {}", user.id(), clinicId, e);
+            return false;
+        }
     }
 
     private boolean canAccessDashboard(HttpSession session) {
         return AdminAccess.canDashboard(layoutModel, session);
     }
 
-    private void renderCard(Model model, HttpSession session) {
+    private void renderCard(Model model, HttpSession session, List<UserSummary> users) {
         UUID clinicId = AdminAccess.clinicId(session);
-        model.addAttribute("employees", employeeService.list(clinicId));
-        model.addAttribute("employeeRoles", employeeRoles(userAdminService.list(clinicId)));
+        Map<UUID, UserSummary> employeeRoles = employeeRoles(users);
+        String actorRole = AdminAccess.roleCode(session);
+        var employees = employeeService.list(clinicId).stream()
+                .filter(employee -> isManageableBy(actorRole, employeeRoles.get(employee.id())))
+                .toList();
+        model.addAttribute("employees", employees);
+        model.addAttribute("employeeRoles", employeeRoles);
+        model.addAttribute("actorRole", actorRole);
     }
 
-    private static Map<UUID, UserSummary> employeeRoles(java.util.List<UserSummary> users) {
+    private static UserSummary linkedUser(List<UserSummary> users, UUID employeeId) {
+        return users.stream()
+                .filter(user -> employeeId.equals(user.employeeId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static boolean isManageableBy(String actorRole, UserSummary linkedUser) {
+        if ("owner".equals(actorRole) || linkedUser == null) {
+            return true;
+        }
+        String employeeRole = linkedUser.roleCode();
+        return !"owner".equals(employeeRole) && !"manager".equals(employeeRole);
+    }
+
+    private static Map<UUID, UserSummary> employeeRoles(List<UserSummary> users) {
         Map<UUID, UserSummary> roles = new HashMap<>();
         for (UserSummary user : users) {
             if (user.employeeId() != null) {
@@ -158,11 +213,11 @@ public class AdminController {
     private record RoleChange(UUID membershipId, String roleCode) {
     }
 
-    private RoleChange resolveRoleChange(HttpSession session, UUID employeeId, String roleCode) {
+    private static RoleChange resolveRoleChange(List<UserSummary> users, UUID employeeId, String roleCode) {
         if (roleCode == null || roleCode.isBlank()) {
             return null;
         }
-        for (UserSummary user : userAdminService.list(AdminAccess.clinicId(session))) {
+        for (UserSummary user : users) {
             if (employeeId.equals(user.employeeId())) {
                 if ("owner".equals(user.roleCode()) || user.roleCode().equals(roleCode)) {
                     return null;

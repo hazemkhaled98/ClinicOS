@@ -97,9 +97,9 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 0 — Scaffolding | done | |
 | 1 — UC-001 Login + Phase 1b sign-up | done | PR #5 merged; UI migrated to Thymeleaf/HTMX on `refactor/thymeleaf-htmx` (see Phase 1 migration note) |
 | 1c — Design system reconciliation | in progress | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
-| 2 — UC-002 Employees/roles | in progress | Slices 2a–2e: V16 user-admin functions, V17 tenant-scoped role_permission, V18 gamification tables, service interfaces + implementations, UI controllers + templates, unit + IT tests · Slice 2f: users-tab cleanup — duplicate username/email renders a field error (no 500), add form is account-fields only (every user auto-becomes an employee), row role is read-only, role editing moved to the Settings employee row |
+| 2 — UC-002 Employees/roles | done | Slices 2a–2e: V16 user-admin functions, V17 tenant-scoped role_permission, V18 gamification tables, service interfaces + implementations, UI controllers + templates, unit + IT tests · Slice 2f: users-tab cleanup — duplicate username/email renders a field error (no 500), add form is account-fields only (every user auto-becomes an employee), row role is read-only, role editing moved to the Settings employee row · Slice 2g `feat/uc002-role-hierarchy`: role hierarchy enforcement (BR-005, RoleRanks rank guard), A1 archive now unlinks + suspends the linked account to block login, manager scoping of employee/permission editing, actor-aware controllers/templates + tests; evaluation-engine units (A2/A3/BR-002/BR-003/BR-004, step-5 eval reflection) deferred to Phase 4 with UC-004/UC-005 |
 | 3 — UC-003 Daily work/attendance | not started | |
-| 4 — UC-004/005 Evaluation | not started | |
+| 4 — UC-004/005 Evaluation | not started | Includes the deferred UC-002 evaluation-engine units (A2 manual overrides as floor, A3 month unlocking/recalc, BR-002 freeze-write-once, BR-003 floor rule, BR-004 incentive-by-tier, step-5 evaluation reflection) |
 | 5 — UC-006 Prep checklists | not started | |
 | 6 — UC-007 Academy | not started | |
 | 7a–7d — UC-008 Inventory | not started | |

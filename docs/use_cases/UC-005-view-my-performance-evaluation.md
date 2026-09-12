@@ -8,6 +8,8 @@
 **Goal:** An employee (who is not the owner) checks their own current standing, score breakdown, goals and recognition so they know where they stand and what to improve.
 **Status:** Implemented
 
+> **Deferred to Phase 4:** the live current-month score (step 2) and the frozen-snapshot display for past months (A1) depend on the UC-004/UC-002 evaluation engine (freeze write-once, weighted scoring), which Phase 4 constructs. They do not block UC-002 being marked Tested.
+
 ## Preconditions
 
 - The employee is logged in (UC-001) and linked to an employee record.

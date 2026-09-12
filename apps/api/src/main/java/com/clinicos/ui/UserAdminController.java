@@ -54,7 +54,7 @@ public class UserAdminController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), UserForm.empty());
         return "admin/users-page";
     }
 
@@ -85,7 +85,7 @@ public class UserAdminController {
                 fieldErrors.put("username", e.getMessage());
             }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), form);
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), form);
         Toasts.fromErrors(model, fieldErrors, "تم إضافة المستخدم");
         return "admin/users :: usersCard";
     }
@@ -101,13 +101,14 @@ public class UserAdminController {
         fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
-                userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(form.getNewPassword()));
+                userAdminService.changePassword(clinicId, userId, passwordEncoder.encode(form.getNewPassword()),
+                        AdminAccess.membershipId(session));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.password_change", "user");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("user", e.getMessage());
             }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), UserForm.empty());
         Toasts.fromErrors(model, fieldErrors, "تم تغيير كلمة المرور");
         return "admin/users :: usersCard";
     }
@@ -125,7 +126,7 @@ public class UserAdminController {
         } catch (IllegalArgumentException e) {
             fieldErrors.put("user", e.getMessage());
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), UserForm.empty());
         Toasts.fromErrors(model, fieldErrors, "تم تعليق المستخدم");
         return "admin/users :: usersCard";
     }
@@ -138,12 +139,12 @@ public class UserAdminController {
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> fieldErrors = new HashMap<>();
         try {
-            userAdminService.reactivate(clinicId, userId);
+            userAdminService.reactivate(clinicId, userId, AdminAccess.membershipId(session));
             activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.reactivate", "user");
         } catch (IllegalArgumentException e) {
             fieldErrors.put("user", e.getMessage());
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), UserForm.empty());
         Toasts.fromErrors(model, fieldErrors, "تم تفعيل المستخدم");
         return "admin/users :: usersCard";
     }
@@ -159,22 +160,24 @@ public class UserAdminController {
         fieldErrors.putAll(FormErrors.of(binding));
         if (fieldErrors.isEmpty()) {
             try {
-                userAdminService.assignRole(clinicId, form.getMembershipId(), form.getRoleCode());
+                userAdminService.assignRole(clinicId, form.getMembershipId(), form.getRoleCode(),
+                        AdminAccess.membershipId(session));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.assign_role", "user");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("user", e.getMessage());
             }
         }
-        renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
+        renderCard(model, clinicId, AdminAccess.membershipId(session), AdminAccess.roleCode(session), UserForm.empty());
         Toasts.fromErrors(model, fieldErrors, "تم تغيير الدور");
         return "admin/users :: usersCard";
     }
 
-    private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, UserForm addForm) {
+    private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, String actorRole, UserForm addForm) {
         model.addAttribute("users", userAdminService.list(clinicId));
         model.addAttribute("currentMembershipId", currentMembershipId);
         model.addAttribute("addForm", addForm);
         model.addAttribute("roleNames", roleNames());
+        model.addAttribute("actorRole", actorRole);
     }
 
     private static Map<String, String> roleNames() {
