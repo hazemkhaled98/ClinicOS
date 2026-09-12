@@ -60,7 +60,8 @@ public class TaskDefinitionController {
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.create(clinicId, new TaskDefinitionRequest(
-                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode()));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode(),
+                        form.isRequiresPhoto(), form.getEveryN(), norm(form.getIntervalUnit())));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.create", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
@@ -83,7 +84,8 @@ public class TaskDefinitionController {
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.update(clinicId, taskId, new TaskDefinitionRequest(
-                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode()));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode(),
+                        form.isRequiresPhoto(), form.getEveryN(), norm(form.getIntervalUnit())));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.update", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
@@ -118,6 +120,10 @@ public class TaskDefinitionController {
         model.addAttribute("tasks", taskDefinitionService.list(clinicId));
     }
 
+    private static String norm(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     public static class TaskForm {
         @NotBlank(message = "اسم المهمة مطلوب")
         private String name;
@@ -127,13 +133,20 @@ public class TaskDefinitionController {
         private String frequency;
         @NotBlank(message = "الدور مطلوب")
         private String roleCode;
+        private boolean requiresPhoto;
+        private Integer everyN;
+        private String intervalUnit;
 
-        static TaskForm of(String name, String dimension, String frequency, String roleCode) {
+        static TaskForm of(String name, String dimension, String frequency, String roleCode,
+                boolean requiresPhoto, Integer everyN, String intervalUnit) {
             TaskForm form = new TaskForm();
             form.name = name;
             form.dimension = dimension;
             form.frequency = frequency;
             form.roleCode = roleCode;
+            form.requiresPhoto = requiresPhoto;
+            form.everyN = everyN;
+            form.intervalUnit = intervalUnit;
             return form;
         }
 
@@ -167,6 +180,30 @@ public class TaskDefinitionController {
 
         public void setRoleCode(String roleCode) {
             this.roleCode = roleCode;
+        }
+
+        public boolean isRequiresPhoto() {
+            return requiresPhoto;
+        }
+
+        public void setRequiresPhoto(boolean requiresPhoto) {
+            this.requiresPhoto = requiresPhoto;
+        }
+
+        public Integer getEveryN() {
+            return everyN;
+        }
+
+        public void setEveryN(Integer everyN) {
+            this.everyN = everyN;
+        }
+
+        public String getIntervalUnit() {
+            return intervalUnit;
+        }
+
+        public void setIntervalUnit(String intervalUnit) {
+            this.intervalUnit = intervalUnit;
         }
     }
 }

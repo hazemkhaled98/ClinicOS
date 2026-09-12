@@ -71,7 +71,7 @@ class TaskDefinitionControllerTest {
     void createTaskLogsActivityAndReturnsCard() {
         HttpSession session = session();
         allowDashboard();
-        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", "assistant");
+        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", "assistant", false, null, null);
         when(taskDefinitionService.create(eq(CLINIC), any(TaskDefinitionRequest.class))).thenReturn(created);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(created));
 
@@ -112,7 +112,7 @@ class TaskDefinitionControllerTest {
         HttpSession session = session();
         allowDashboard();
         UUID taskId = UUID.randomUUID();
-        TaskDefinition updated = new TaskDefinition(taskId, "تنظيف", "fanni", "daily", "assistant");
+        TaskDefinition updated = new TaskDefinition(taskId, "تنظيف", "fanni", "daily", "assistant", false, null, null);
         when(taskDefinitionService.update(eq(CLINIC), eq(taskId), any(TaskDefinitionRequest.class))).thenReturn(updated);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(updated));
 
@@ -157,8 +157,7 @@ class TaskDefinitionControllerTest {
 
     private static TaskDefinitionController.TaskForm taskForm(String name, String dimension,
             String frequency, String roleCode) {
-        var form = TaskDefinitionController.TaskForm.of(name, dimension, frequency, roleCode);
-        return form;
+        return TaskDefinitionController.TaskForm.of(name, dimension, frequency, roleCode, false, null, null);
     }
 
     private void allowDashboard() {

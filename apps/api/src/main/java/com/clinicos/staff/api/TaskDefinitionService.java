@@ -18,13 +18,19 @@ public interface TaskDefinitionService {
             String name,
             String dimension,
             String frequency,
-            String roleCode) {
+            String roleCode,
+            boolean requiresPhoto,
+            Integer everyN,
+            String intervalUnit) {
     }
 
     record TaskDefinitionRequest(
             String name,
             String dimension,
             String frequency,
-            String roleCode) {
+            String roleCode,
+            boolean requiresPhoto,
+            Integer everyN,
+            String intervalUnit) {
     }
 }

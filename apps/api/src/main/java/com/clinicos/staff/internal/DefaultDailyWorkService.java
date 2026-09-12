@@ -133,7 +133,10 @@ public class DefaultDailyWorkService implements DailyWorkService {
                 Boolean.TRUE.equals(rec.getValue(DAILY_TASK_COMPLETION.DONE)),
                 rec.getValue(DAILY_TASK_COMPLETION.COMPLETED_AT),
                 rec.getValue(DAILY_TASK_COMPLETION.PHOTO_ID),
-                rec.getValue(lastCompleted));
+                rec.getValue(lastCompleted),
+                rec.getValue(TASK_DEFINITION.EVERY_N),
+                rec.getValue(TASK_DEFINITION.INTERVAL_UNIT) == null ? null
+                        : rec.getValue(TASK_DEFINITION.INTERVAL_UNIT).getLiteral());
     }
 
     private UUID ensureDailyRecord(UUID clinicId, UUID employeeId, LocalDate date) {

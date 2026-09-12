@@ -22,6 +22,8 @@ public interface DailyWorkService {
             boolean done,
             OffsetDateTime completedAt,
             UUID photoId,
-            LocalDate lastCompletedDate) {
+            LocalDate lastCompletedDate,
+            Integer everyN,
+            String intervalUnit) {
     }
 }

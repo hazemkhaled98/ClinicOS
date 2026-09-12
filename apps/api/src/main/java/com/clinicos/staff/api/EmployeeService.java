@@ -22,6 +22,8 @@ public interface EmployeeService {
 
     List<Employee> list(UUID clinicId);
 
+    Employee findByMembership(UUID clinicId, UUID membershipId);
+
     Employee create(UUID clinicId, EmployeeRequest request);
 
     Employee update(UUID clinicId, UUID employeeId, EmployeeRequest request);

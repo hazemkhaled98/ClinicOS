@@ -50,6 +50,22 @@
             <option value="receptionist" th:selected="${task.roleCode() == 'receptionist'}">موظف استقبال</option>
           </select>
         </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant" th:if="${task.frequency() == 'custom'}">
+          كل
+          <input type="number" name="everyN" min="1" class="clinicos-input w-20" th:value="${task.everyN()}">
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant" th:if="${task.frequency() == 'custom'}">
+          الوحدة
+          <select name="intervalUnit" class="clinicos-input w-24">
+            <option value="day" th:selected="${task.intervalUnit() == 'day'}">يوم</option>
+            <option value="week" th:selected="${task.intervalUnit() == 'week'}">أسبوع</option>
+            <option value="month" th:selected="${task.intervalUnit() == 'month'}">شهر</option>
+          </select>
+        </label>
+        <label class="flex items-center gap-1 text-xs text-on-surface-variant pt-5">
+          <input type="checkbox" name="requiresPhoto" class="accent-teal-600" th:checked="${task.requiresPhoto()}">
+          يتطلب صورة إثبات
+        </label>
         <button type="submit" class="clinicos-btn me-auto">حفظ</button>
       </form>
       <form th:attr="hx-delete='/admin-dashboard/tasks/' + ${task.id()}"
@@ -93,8 +109,26 @@
             <option value="receptionist">موظف استقبال</option>
           </select>
         </label>
+        <label class="flex flex-col items-center gap-1 text-xs text-on-surface-variant">
+          كل
+          <input type="number" name="everyN" min="1" class="clinicos-input w-16" placeholder="—">
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الوحدة
+          <select name="intervalUnit" class="clinicos-input w-24">
+            <option value="">—</option>
+            <option value="day">يوم</option>
+            <option value="week">أسبوع</option>
+            <option value="month">شهر</option>
+          </select>
+        </label>
+        <label class="flex items-center gap-1 text-xs text-on-surface-variant w-40 mb-1">
+          <input type="checkbox" name="requiresPhoto" class="accent-teal-600">
+          يتطلب صورة إثبات
+        </label>
         <button type="submit" class="clinicos-btn">+ إضافة مهمة</button>
       </form>
+      <p class="mt-2 text-[11px] text-teal-700/70">العدد والوحدة يُستخدمان مع التكرار «مخصص» فقط.</p>
     </div>
   </div>
 </div>
