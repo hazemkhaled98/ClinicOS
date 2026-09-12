@@ -86,11 +86,7 @@ public class UserAdminController {
             }
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), form);
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم إضافة المستخدم");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم إضافة المستخدم");
         return "admin/users :: usersCard";
     }
 
@@ -112,11 +108,7 @@ public class UserAdminController {
             }
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم تغيير كلمة المرور");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم تغيير كلمة المرور");
         return "admin/users :: usersCard";
     }
 
@@ -134,11 +126,7 @@ public class UserAdminController {
             fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم تعليق المستخدم");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم تعليق المستخدم");
         return "admin/users :: usersCard";
     }
 
@@ -156,11 +144,7 @@ public class UserAdminController {
             fieldErrors.put("user", e.getMessage());
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم تفعيل المستخدم");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم تفعيل المستخدم");
         return "admin/users :: usersCard";
     }
 
@@ -182,11 +166,7 @@ public class UserAdminController {
             }
         }
         renderCard(model, clinicId, AdminAccess.membershipId(session), UserForm.empty());
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم تغيير الدور");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم تغيير الدور");
         return "admin/users :: usersCard";
     }
 

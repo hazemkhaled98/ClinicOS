@@ -1,5 +1,7 @@
 package com.clinicos.ui;
 
+import java.util.Map;
+
 import org.springframework.ui.Model;
 
 /**
@@ -21,5 +23,13 @@ final class Toasts {
     static void error(Model model, String message) {
         model.addAttribute("toastMessage", message);
         model.addAttribute("toastType", "error");
+    }
+
+    static void fromErrors(Model model, Map<String, String> fieldErrors, String successMessage) {
+        if (fieldErrors.isEmpty()) {
+            success(model, successMessage);
+        } else {
+            error(model, String.join("؛ ", fieldErrors.values()));
+        }
     }
 }

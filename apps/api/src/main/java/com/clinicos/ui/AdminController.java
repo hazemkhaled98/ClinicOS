@@ -111,11 +111,7 @@ public class AdminController {
             }
         }
         renderCard(model, session);
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ بيانات الموظف");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات الموظف");
         return "admin/employees :: employeesCard";
     }
 
@@ -134,11 +130,7 @@ public class AdminController {
             fieldErrors.put("employee", e.getMessage());
         }
         renderCard(model, session);
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم أرشفة الموظف");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم أرشفة الموظف");
         return "admin/employees :: employeesCard";
     }
 

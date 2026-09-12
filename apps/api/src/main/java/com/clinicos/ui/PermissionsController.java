@@ -96,11 +96,7 @@ public class PermissionsController {
             }
         }
         renderPage(model, session);
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الصلاحيات");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ الصلاحيات");
         return "admin/permissions :: permissionsCard";
     }
 

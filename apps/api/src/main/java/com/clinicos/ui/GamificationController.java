@@ -81,15 +81,8 @@ public class GamificationController {
         if (rows.size() > 3) {
             errors.put("goals", "لا يمكن حفظ أكثر من 3 أهداف");
         }
-        int[] parsedTargets = new int[rows.size()];
-        for (int i = 0; i < rows.size() && errors.isEmpty(); i++) {
-            String target = rows.get(i).target;
-            Integer parsed = FormParsing.parseInt(target, "targets", errors, "قيمة الهدف يجب أن تكون رقماً");
-            if (parsed == null && (target == null || target.isBlank())) {
-                parsed = 0;
-            }
-            parsedTargets[i] = parsed == null ? 0 : parsed;
-        }
+        int[] parsedTargets = parseIntsOrZero(rows.stream().map(r -> r.target).toList(),
+                "targets", "قيمة الهدف يجب أن تكون رقماً", errors);
         if (errors.isEmpty()) {
             try {
                 for (int i = 0; i < rows.size(); i++) {
@@ -104,11 +97,7 @@ public class GamificationController {
                 errors.put("goals", e.getMessage());
             }
         }
-        if (errors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الأهداف الأسبوعية");
-        } else {
-            Toasts.error(model, String.join("؛ ", errors.values()));
-        }
+        Toasts.fromErrors(model, errors, "تم حفظ الأهداف الأسبوعية");
         renderPage(model, clinicId);
         return "admin/gamification :: goalsCard";
     }
@@ -121,15 +110,8 @@ public class GamificationController {
         UUID clinicId = AdminAccess.clinicId(session);
         Map<String, String> errors = new HashMap<>();
         List<ThresholdsForm.ThresholdRow> rows = form.thresholds;
-        int[] parsedThresholds = new int[rows.size()];
-        for (int i = 0; i < rows.size() && errors.isEmpty(); i++) {
-            String threshold = rows.get(i).threshold;
-            Integer parsed = FormParsing.parseInt(threshold, "thresholds", errors, "عدد المهام يجب أن يكون رقماً");
-            if (parsed == null && (threshold == null || threshold.isBlank())) {
-                parsed = 0;
-            }
-            parsedThresholds[i] = parsed == null ? 0 : parsed;
-        }
+        int[] parsedThresholds = parseIntsOrZero(rows.stream().map(r -> r.threshold).toList(),
+                "thresholds", "عدد المهام يجب أن يكون رقماً", errors);
         if (errors.isEmpty()) {
             try {
                 for (int i = 0; i < rows.size(); i++) {
@@ -140,13 +122,20 @@ public class GamificationController {
                 errors.put("thresholds", e.getMessage());
             }
         }
-        if (errors.isEmpty()) {
-            Toasts.success(model, "تم حفظ شروط الشارات");
-        } else {
-            Toasts.error(model, String.join("؛ ", errors.values()));
-        }
+        Toasts.fromErrors(model, errors, "تم حفظ شروط الشارات");
         renderPage(model, clinicId);
         return "admin/gamification :: thresholdsCard";
+    }
+
+    private static int[] parseIntsOrZero(List<String> rawValues, String field, String message,
+            Map<String, String> errors) {
+        int[] parsed = new int[rawValues.size()];
+        for (int i = 0; i < rawValues.size() && errors.isEmpty(); i++) {
+            String raw = rawValues.get(i);
+            Integer value = FormParsing.parseInt(raw, field, errors, message);
+            parsed[i] = value == null ? 0 : value;
+        }
+        return parsed;
     }
 
     private void renderPage(Model model, UUID clinicId) {

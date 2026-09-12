@@ -53,16 +53,12 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الأوزان");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
-        WeightsForm rendered = fieldErrors.isEmpty()
-                ? WeightsForm.from(clinicSettingsService.get(AdminAccess.clinicId(session)).weights())
-                : form;
-        model.addAttribute("weightsForm", rendered);
-        model.addAttribute("weightsSum", sumWeights(weightsOf(rendered)));
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ الأوزان");
+        List<CategoryWeight> summedWeights = fieldErrors.isEmpty()
+                ? clinicSettingsService.get(AdminAccess.clinicId(session)).weights()
+                : weights;
+        model.addAttribute("weightsForm", fieldErrors.isEmpty() ? WeightsForm.from(summedWeights) : form);
+        model.addAttribute("weightsSum", sumWeights(summedWeights));
         return "admin/clinic-settings :: weightsCard";
     }
 
@@ -81,11 +77,7 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الهدف الشهري");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ الهدف الشهري");
         model.addAttribute("volumeForm", form);
         return "admin/clinic-settings :: volumeCard";
     }
@@ -111,11 +103,7 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الدوام");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ الدوام");
         model.addAttribute("dutyForm", form);
         return "admin/clinic-settings :: dutyCard";
     }
@@ -134,11 +122,7 @@ public class ClinicSettingsController {
                 fieldErrors.putAll(e.fieldErrors());
             }
         }
-        if (fieldErrors.isEmpty()) {
-            Toasts.success(model, "تم حفظ الشرائح");
-        } else {
-            Toasts.error(model, String.join("؛ ", fieldErrors.values()));
-        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ الشرائح");
         TiersForm rendered = fieldErrors.isEmpty()
                 ? TiersForm.from(clinicSettingsService.get(AdminAccess.clinicId(session)).tiers())
                 : form;
@@ -162,23 +146,6 @@ public class ClinicSettingsController {
                         FormParsing.parseAmount(row.weight, "weights", fieldErrors, "أوزان مكونات التقييم غير صحيحة")));
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("weights", e.getMessage());
-            }
-        }
-        return weights;
-    }
-
-    private static List<CategoryWeight> weightsOf(WeightsForm form) {
-        List<CategoryWeight> weights = new ArrayList<>();
-        for (WeightsForm.WeightRow row : form.weights) {
-            BigDecimal weight = null;
-            try {
-                weight = row.weight == null || row.weight.isBlank()
-                        ? null : new BigDecimal(row.weight);
-            } catch (NumberFormatException ignored) {
-            }
-            try {
-                weights.add(new CategoryWeight(Category.fromCode(row.category), weight));
-            } catch (IllegalArgumentException ignored) {
             }
         }
         return weights;
