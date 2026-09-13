@@ -65,3 +65,6 @@ Legacy Screenshots/
 
 # Session scratch files (briefs, logs) — not part of the build
 scratch/
+
+# Playwright MCP browser snapshots
+.playwright-mcp/
