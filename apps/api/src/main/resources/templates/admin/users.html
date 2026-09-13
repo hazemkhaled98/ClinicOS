@@ -74,7 +74,7 @@
             <option th:if="${actorRole == 'owner'}" value="manager"
                     th:selected="${addForm.getRoleCode() == 'manager'}">مدير</option>
             <option value="assistant" th:selected="${addForm.getRoleCode() == 'assistant'}">مساعد</option>
-            <option value="receptionist" selected
+            <option value="receptionist"
                     th:selected="${addForm.getRoleCode() == 'receptionist'}">موظف استقبال</option>
           </select>
         </label>

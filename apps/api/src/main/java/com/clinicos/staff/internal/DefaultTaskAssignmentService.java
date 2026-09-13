@@ -78,6 +78,9 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
             if (name == null || name.isBlank()) {
                 throw new IllegalArgumentException("اسم المهمة مطلوب");
             }
+            if (form.employeeId() == null) {
+                throw new IllegalArgumentException("الموظف مطلوب");
+            }
             LocalDate dueDate = form.dueDate() != null ? form.dueDate() : LocalDate.now();
             return dsl.insertInto(TASK_ASSIGNMENT,
                     TASK_ASSIGNMENT.CLINIC_ID,

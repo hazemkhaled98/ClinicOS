@@ -14,6 +14,8 @@ import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -25,6 +27,8 @@ import com.clinicos.staff.api.SelfCheckService;
 
 @Service
 public class DefaultDailyWorkService implements DailyWorkService {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultDailyWorkService.class);
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
@@ -42,6 +46,8 @@ public class DefaultDailyWorkService implements DailyWorkService {
         return transactionTemplate.execute(status -> {
             String roleCode = resolveRoleCode(clinicId, employeeId);
             if (roleCode == null) {
+                log.warn("No role resolved for employee {} in clinic {} -- returning empty daily task list",
+                        employeeId, clinicId);
                 return List.of();
             }
             LocalDate date = LocalDate.now();
@@ -78,9 +84,16 @@ public class DefaultDailyWorkService implements DailyWorkService {
             if (selfCheckService.today(clinicId, employeeId).checkedInAt() == null) {
                 throw new IllegalArgumentException("لازم تسجّل الحضور الأول");
             }
+            String roleCode = resolveRoleCode(clinicId, employeeId);
+            if (roleCode == null) {
+                throw new IllegalArgumentException("المهمة غير موجودة");
+            }
             TaskDefinitionRecord task = dsl.selectFrom(TASK_DEFINITION)
                     .where(TASK_DEFINITION.ID.eq(taskDefinitionId))
                     .and(TASK_DEFINITION.CLINIC_ID.eq(clinicId))
+                    .and(TASK_DEFINITION.ROLE_CODE.eq(roleCode)
+                            .or(TASK_DEFINITION.ROLE_CODE.isNull().and(TASK_DEFINITION.EMPLOYEE_ID.isNull()))
+                            .or(TASK_DEFINITION.EMPLOYEE_ID.eq(employeeId)))
                     .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
                     .fetchOne();
             if (task == null) {
@@ -109,6 +122,21 @@ public class DefaultDailyWorkService implements DailyWorkService {
     @Override
     public void uncomplete(UUID clinicId, UUID employeeId, UUID taskDefinitionId) {
         transactionTemplate.executeWithoutResult(status -> {
+            String roleCode = resolveRoleCode(clinicId, employeeId);
+            if (roleCode == null) {
+                throw new IllegalArgumentException("المهمة غير موجودة");
+            }
+            TaskDefinitionRecord task = dsl.selectFrom(TASK_DEFINITION)
+                    .where(TASK_DEFINITION.ID.eq(taskDefinitionId))
+                    .and(TASK_DEFINITION.CLINIC_ID.eq(clinicId))
+                    .and(TASK_DEFINITION.ROLE_CODE.eq(roleCode)
+                            .or(TASK_DEFINITION.ROLE_CODE.isNull().and(TASK_DEFINITION.EMPLOYEE_ID.isNull()))
+                            .or(TASK_DEFINITION.EMPLOYEE_ID.eq(employeeId)))
+                    .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
+                    .fetchOne();
+            if (task == null) {
+                throw new IllegalArgumentException("المهمة غير موجودة");
+            }
             UUID dailyRecordId = ensureDailyRecord(clinicId, employeeId, LocalDate.now());
             dsl.insertInto(DAILY_TASK_COMPLETION,
                     DAILY_TASK_COMPLETION.DAILY_RECORD_ID,

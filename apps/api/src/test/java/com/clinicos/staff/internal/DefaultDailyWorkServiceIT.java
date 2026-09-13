@@ -264,6 +264,31 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(dailyWorkService.today(clinicA, targetId).get(0).completedAt()).isNotNull();
     }
 
+    @Test
+    void complete_taskAssignedToOtherRole_notScopedEmployee_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "receptionist", null, "استقبال", TaskDimension.solooki, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, employeeId);
+
+        assertThatThrownBy(() -> dailyWorkService.complete(clinicA, employeeId, taskId, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("المهمة غير موجودة");
+    }
+
+    @Test
+    void uncomplete_taskAssignedToOtherRole_notScopedEmployee_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "receptionist", null, "استقبال", TaskDimension.solooki, TaskFrequency.daily, false);
+
+        assertThatThrownBy(() -> dailyWorkService.uncomplete(clinicA, employeeId, taskId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("المهمة غير موجودة");
+    }
+
     private UUID createEmployee(String name) {
         return employeeService.create(clinicA,
                 new EmployeeService.EmployeeRequest(name, BigDecimal.ZERO, BigDecimal.ZERO,

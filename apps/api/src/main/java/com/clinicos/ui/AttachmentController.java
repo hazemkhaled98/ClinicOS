@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,8 @@ import jakarta.servlet.http.HttpSession;
  */
 @Controller
 public class AttachmentController {
+
+    private static final Logger log = LoggerFactory.getLogger(AttachmentController.class);
 
     private final AttachmentService attachmentService;
 
@@ -48,6 +52,7 @@ public class AttachmentController {
                 in.transferTo(response.getOutputStream());
             }
         } catch (IllegalArgumentException e) {
+            log.warn("Attachment {} not found or not accessible: {}", attachmentId, e.getMessage());
             response.sendError(HttpStatus.NOT_FOUND.value());
         }
     }
