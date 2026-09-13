@@ -23,6 +23,12 @@ class SectionFocusTest {
     }
 
     @Test
+    void managerLandsOnEmployeesInsteadOfCeoDashboard() {
+        assertThat(SectionFocus.resolveTarget(null, managerCodes(), "manager"))
+                .isEqualTo("employees");
+    }
+
+    @Test
     void returnsNullWithoutSessionState() {
         assertThat(SectionFocus.resolveTarget(null, null, null)).isNull();
     }
@@ -31,6 +37,11 @@ class SectionFocusTest {
     void alwaysFallsBackToPrepWhichIsUnconditional() {
         assertThat(SectionFocus.resolveTarget(null, List.of(), "assistant"))
                 .isEqualTo("prep");
+    }
+
+    private static List<String> managerCodes() {
+        return List.copyOf(Set.of("emp", "quick", "ceo", "tasksTab", "acadVerify",
+                "acadEdit", "tray", "issue", "procs"));
     }
 
     private static List<String> ownerCodes() {
