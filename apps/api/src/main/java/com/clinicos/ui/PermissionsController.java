@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.RolePermissionService;
 import com.clinicos.identity.api.UserAdminService;
@@ -72,12 +73,12 @@ public class PermissionsController {
     }
 
     @GetMapping("/admin-dashboard/permissions")
-    public String permissions(HttpSession session, Model model) {
+    public String permissions(@RequestParam(required = false) String role, HttpSession session, Model model) {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        renderPage(model, session, null);
+        renderPage(model, session, role);
         return "admin/permissions-page";
     }
 
@@ -104,15 +105,15 @@ public class PermissionsController {
         return "admin/permissions :: permissionsCard";
     }
 
-    private void renderPage(Model model, HttpSession session, String submittedRole) {
+    private void renderPage(Model model, HttpSession session, String requestedRole) {
         UUID clinicId = AdminAccess.clinicId(session);
         List<String> manageable = manageableRoleCodes(AdminAccess.roleCode(session));
+        String activeRole = requestedRole != null && manageable.contains(requestedRole) ? requestedRole : manageable.getFirst();
         model.addAttribute("roleCodes", manageable);
         model.addAttribute("roleNames", roleNames());
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
-        model.addAttribute("activeRole",
-                submittedRole != null && manageable.contains(submittedRole) ? submittedRole : manageable.getFirst());
+        model.addAttribute("activeRole", activeRole);
         try {
             model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         } catch (Exception e) {

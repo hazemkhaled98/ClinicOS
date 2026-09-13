@@ -57,7 +57,7 @@ class PermissionsControllerTest {
                 new RolePermissionRow("manager", "emp"),
                 new RolePermissionRow("manager", "quick")));
 
-        String view = controller.permissions(session, model);
+        String view = controller.permissions(null, session, model);
 
         assertThat(view).isEqualTo("admin/permissions-page");
         assertThat(model.getAttribute("rolePermissionMap")).isNotNull();
@@ -70,7 +70,7 @@ class PermissionsControllerTest {
         HttpSession session = session();
         denyDashboard();
 
-        String view = controller.permissions(session, model);
+        String view = controller.permissions(null, session, model);
 
         assertThat(view).isEqualTo("redirect:/");
     }
@@ -83,7 +83,7 @@ class PermissionsControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
 
-        controller.permissions(session, model);
+        controller.permissions(null, session, model);
 
         String[] expected = {"owner", "manager", "assistant", "receptionist"};
         assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
@@ -98,7 +98,7 @@ class PermissionsControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
 
-        controller.permissions(session, model);
+        controller.permissions(null, session, model);
 
         assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
                 .containsExactlyInAnyOrder("assistant", "receptionist");
