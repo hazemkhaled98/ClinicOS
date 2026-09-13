@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidat
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
-import com.clinicos.clinicconfig.api.WorkCalendarService.WorkCalendarValidationException;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
@@ -222,8 +220,7 @@ class ClinicSettingsControllerTest {
     void emptyWeekdaySetReportsArabicError() {
         HttpSession session = session();
         allowDashboard();
-        doThrow(new WorkCalendarValidationException(
-                Map.of("weekdays", "أيام العمل يجب أن تتضمن يوماً واحداً على الأقل")))
+        doThrow(new IllegalArgumentException("أيام العمل يجب أن تتضمن يوماً واحداً على الأقل"))
                 .when(workCalendarService).setWorkingWeekdays(eq(CLINIC), any());
         var form = new ClinicSettingsController.WeekdaysForm();
 

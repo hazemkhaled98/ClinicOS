@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -287,6 +288,43 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThatThrownBy(() -> dailyWorkService.uncomplete(clinicA, employeeId, taskId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("المهمة غير موجودة");
+    }
+
+    @Test
+    void today_archivedTask_notReturned() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        archiveTask(taskId);
+
+        List<DailyTask> tasks = dailyWorkService.today(clinicA, employeeId);
+
+        assertThat(tasks).isEmpty();
+    }
+
+    @Test
+    void complete_archivedTask_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        archiveTask(taskId);
+        selfCheckService.checkIn(clinicA, employeeId);
+
+        assertThatThrownBy(() -> dailyWorkService.complete(clinicA, employeeId, taskId, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("المهمة غير موجودة");
+    }
+
+    private void archiveTask(UUID taskId) throws Exception {
+        try (Connection conn = superuser()) {
+            DSL.using(conn, SQLDialect.POSTGRES)
+                    .update(TASK_DEFINITION)
+                    .set(TASK_DEFINITION.ARCHIVED_AT, OffsetDateTime.now())
+                    .where(TASK_DEFINITION.ID.eq(taskId))
+                    .execute();
+        }
     }
 
     private UUID createEmployee(String name) {

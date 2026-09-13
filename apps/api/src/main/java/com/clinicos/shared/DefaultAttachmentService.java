@@ -18,6 +18,7 @@ import com.clinicos.shared.jooq.tables.records.AttachmentRecord;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
@@ -62,6 +63,34 @@ public class DefaultAttachmentService implements AttachmentService {
                     .fetchOne(ATTACHMENT.ID);
             return new Attachment(id, storageKey, contentType, byteSize);
         });
+    }
+
+    @Override
+    public void delete(UUID clinicId, UUID attachmentId) {
+        String storageKey = transactionTemplate.execute(status -> {
+            AttachmentRecord row = dsl.selectFrom(ATTACHMENT)
+                    .where(ATTACHMENT.ID.eq(attachmentId))
+                    .and(ATTACHMENT.CLINIC_ID.eq(clinicId))
+                    .fetchOne();
+            if (row == null) {
+                return null;
+            }
+            dsl.deleteFrom(ATTACHMENT)
+                    .where(ATTACHMENT.ID.eq(attachmentId))
+                    .execute();
+            return row.getStorageKey();
+        });
+        if (storageKey == null) {
+            return;
+        }
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(storage.bucket())
+                    .object(storageKey)
+                    .build());
+        } catch (MinioException | IOException | InvalidKeyException | NoSuchAlgorithmException e) {
+            throw minioFailure(e);
+        }
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettings;
@@ -48,6 +49,8 @@ class EmployeeDayControllerTest {
     private static final UUID MEMBERSHIP = UUID.randomUUID();
     private static final UUID EMPLOYEE = UUID.randomUUID();
     private static final UUID TASK = UUID.randomUUID();
+    private static final UUID ASSIGNMENT = UUID.randomUUID();
+    private static final UUID PHOTO = UUID.randomUUID();
 
     private LayoutModel layoutModel;
     private EmployeeService employeeService;
@@ -213,6 +216,151 @@ class EmployeeDayControllerTest {
     }
 
     @Test
+    void completeTaskWithoutPhotoRendersSuccessToast() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+
+        String view = controller.completeTask(TASK, null, session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat((String) model.getAttribute("toastMessage")).contains("تم تأكيد المهمة");
+        verify(dailyWorkService).complete(CLINIC, EMPLOYEE, TASK, null);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.complete", "daily_task_completion");
+        verify(attachmentService, never()).upload(any(), any(), any());
+        verify(attachmentService, never()).delete(any(), any());
+    }
+
+    @Test
+    void completeTaskWithPhotoRendersSuccessToastAndUploads() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+        MultipartFile photo = mock(MultipartFile.class);
+        when(photo.isEmpty()).thenReturn(false);
+        when(attachmentService.upload(eq(CLINIC), eq(MEMBERSHIP), eq(photo)))
+                .thenReturn(new AttachmentService.Attachment(PHOTO, "k", "image/jpeg", 10));
+
+        String view = controller.completeTask(TASK, photo, session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat((String) model.getAttribute("toastMessage")).contains("تم تأكيد المهمة");
+        verify(dailyWorkService).complete(CLINIC, EMPLOYEE, TASK, PHOTO);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.complete", "daily_task_completion");
+        verify(attachmentService, never()).delete(any(), any());
+    }
+
+    @Test
+    void completeTaskServiceErrorAfterUploadDeletesAttachment() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+        MultipartFile photo = mock(MultipartFile.class);
+        when(photo.isEmpty()).thenReturn(false);
+        when(attachmentService.upload(eq(CLINIC), eq(MEMBERSHIP), eq(photo)))
+                .thenReturn(new AttachmentService.Attachment(PHOTO, "k", "image/jpeg", 10));
+        doThrow(new IllegalArgumentException("المهمة غير موجودة"))
+                .when(dailyWorkService).complete(CLINIC, EMPLOYEE, TASK, PHOTO);
+
+        String view = controller.completeTask(TASK, photo, session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat((String) model.getAttribute("toastMessage")).contains("المهمة غير موجودة");
+        verify(attachmentService).delete(CLINIC, PHOTO);
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void uncompleteTaskRendersSuccessToast() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+
+        String view = controller.uncompleteTask(TASK, session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat((String) model.getAttribute("toastMessage")).contains("تم إلغاء تأكيد المهمة");
+        verify(dailyWorkService).uncomplete(CLINIC, EMPLOYEE, TASK);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.uncomplete", "daily_task_completion");
+    }
+
+    @Test
+    void assignmentDoneRendersSuccessToast() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+
+        String view = controller.assignmentDone(ASSIGNMENT, null, session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat((String) model.getAttribute("toastMessage")).contains("تم تسليم المهمة");
+        verify(assignmentService).markDone(CLINIC, EMPLOYEE, ASSIGNMENT, null);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "assignment.done", "task_assignment");
+    }
+
+    @Test
+    void checkOutRendersSuccessToast() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+
+        String view = controller.checkOut(session, model);
+
+        assertThat(view).isEqualTo("employees :: dayGrid");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat((String) model.getAttribute("toastMessage")).contains("تم تسجيل الانصراف");
+        verify(selfCheckService).checkOut(CLINIC, EMPLOYEE);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "selfcheck.checkout", "self_check");
+    }
+
+    @Test
+    void employeesDayOffWhenNotWorkday() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee();
+        when(workCalendarService.isWorkday(eq(CLINIC), any(), eq(EMPLOYEE))).thenReturn(false);
+
+        String view = controller.employees(session, model);
+
+        assertThat(view).isEqualTo("employees-page");
+        DayView day = (DayView) model.getAttribute("day");
+        assertThat(day.dayOff()).isTrue();
+    }
+
+    @Test
+    void employeesShiftOverWithCustomShiftEndedAtMidnight() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee(new Employee(EMPLOYEE, "محمود", null, null,
+                LocalTime.of(9, 0), LocalTime.MIN, true, null, null));
+
+        String view = controller.employees(session, model);
+
+        assertThat(view).isEqualTo("employees-page");
+        DayView day = (DayView) model.getAttribute("day");
+        assertThat(day.shiftOver()).isTrue();
+    }
+
+    @Test
+    void employeesShiftNotOverWithCustomShiftEndingAtMax() {
+        HttpSession session = session();
+        allowEmployees();
+        stubLinkedEmployee(new Employee(EMPLOYEE, "محمود", null, null,
+                LocalTime.of(9, 0), LocalTime.MAX, true, null, null));
+
+        String view = controller.employees(session, model);
+
+        assertThat(view).isEqualTo("employees-page");
+        DayView day = (DayView) model.getAttribute("day");
+        assertThat(day.shiftOver()).isFalse();
+    }
+
+    @Test
     void withoutEmployeesSectionEveryRouteRedirectsHome() {
         HttpSession session = session();
         denyEmployees();
@@ -233,8 +381,11 @@ class EmployeeDayControllerTest {
     }
 
     private void stubLinkedEmployee() {
-        when(employeeService.findByMembership(CLINIC, MEMBERSHIP))
-                .thenReturn(new Employee(EMPLOYEE, "محمود", null, null, null, null, false, null, null));
+        stubLinkedEmployee(new Employee(EMPLOYEE, "محمود", null, null, null, null, false, null, null));
+    }
+
+    private void stubLinkedEmployee(Employee employee) {
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee);
         when(clinicSettingsService.get(CLINIC)).thenReturn(settings());
         when(workCalendarService.isWorkday(eq(CLINIC), any(), eq(EMPLOYEE))).thenReturn(true);
         when(selfCheckService.today(CLINIC, EMPLOYEE))

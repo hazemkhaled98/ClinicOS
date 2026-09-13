@@ -127,15 +127,20 @@ public class EmployeeDayController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
+        UUID clinicId = AdminAccess.clinicId(session);
+        UUID photoId = null;
         try {
-            UUID clinicId = AdminAccess.clinicId(session);
             Employee employee = employeeId(session);
-            dailyWorkService.complete(clinicId, employee.id(), taskId,
-                    photo == null || photo.isEmpty() ? null : attachmentService.upload(clinicId,
-                            AdminAccess.membershipId(session), photo).id());
+            photoId = photo == null || photo.isEmpty() ? null
+                    : attachmentService.upload(clinicId,
+                            AdminAccess.membershipId(session), photo).id();
+            dailyWorkService.complete(clinicId, employee.id(), taskId, photoId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session),
                     "task.complete", "daily_task_completion");
         } catch (IllegalArgumentException e) {
+            if (photoId != null) {
+                attachmentService.delete(clinicId, photoId);
+            }
             fieldErrors.put("task", e.getMessage());
         }
         renderGrid(model, session);
@@ -169,15 +174,20 @@ public class EmployeeDayController {
             return "redirect:/";
         }
         Map<String, String> fieldErrors = new HashMap<>();
+        UUID clinicId = AdminAccess.clinicId(session);
+        UUID photoId = null;
         try {
-            UUID clinicId = AdminAccess.clinicId(session);
             Employee employee = employeeId(session);
-            assignmentService.markDone(clinicId, employee.id(), assignmentId,
-                    photo == null || photo.isEmpty() ? null : attachmentService.upload(clinicId,
-                            AdminAccess.membershipId(session), photo).id());
+            photoId = photo == null || photo.isEmpty() ? null
+                    : attachmentService.upload(clinicId,
+                            AdminAccess.membershipId(session), photo).id();
+            assignmentService.markDone(clinicId, employee.id(), assignmentId, photoId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session),
                     "assignment.done", "task_assignment");
         } catch (IllegalArgumentException e) {
+            if (photoId != null) {
+                attachmentService.delete(clinicId, photoId);
+            }
             fieldErrors.put("assignment", e.getMessage());
         }
         renderGrid(model, session);

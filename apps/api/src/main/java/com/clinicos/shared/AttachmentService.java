@@ -21,6 +21,8 @@ public interface AttachmentService {
 
     Attachment upload(UUID clinicId, UUID uploadedByMembershipId, MultipartFile file);
 
+    void delete(UUID clinicId, UUID attachmentId);
+
     InputStream open(UUID clinicId, UUID attachmentId);
 
     ContentInfo contentInfo(UUID clinicId, UUID attachmentId);
