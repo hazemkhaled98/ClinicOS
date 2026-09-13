@@ -86,6 +86,7 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 - `spring.servlet.multipart.max-file-size`/`max-request-size` raised (8MB/10MB) to fit phone photos
 
 **Local dev**: `docker compose up -d postgres minio`
+- Reset dev data: `./seed-dev.ps1` — wipes ALL business data and reseeds one clinic (`test-clinic`) with four users: `owner` / `manager` / `assistant` / `receptionist`. Owner password `12345678`, others `123`. Needs a migrated DB first. Destructive.
 - Postgres: `localhost:5432`, db `clinicos`, user `postgres` / `local-dev-only`
 - After Flyway migrates (as `postgres`), `app_rw` must get a password:
   ```sql
