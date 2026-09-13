@@ -27,7 +27,6 @@ import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.WorkCalendarService.Holiday;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
-import com.clinicos.clinicconfig.api.WorkCalendarService.WorkCalendarValidationException;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -76,12 +75,11 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     void weekdayMaskRejectsEmptyInvalidOutOfRangeAndDuplicate() {
         TenantContext.set(clinicA);
 
-        assertThrows(WorkCalendarValidationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> workCalendarService.setWorkingWeekdays(clinicA, List.of()));
-        WorkCalendarValidationException invalid = assertThrows(WorkCalendarValidationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 8)));
-        assertThat(invalid.fieldErrors()).containsKey("weekdays");
-        assertThrows(WorkCalendarValidationException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 1)));
 
         assertThat(workCalendarService.workingWeekdays(clinicA)).containsExactly(6, 7, 1, 2, 3, 4);

@@ -2,7 +2,6 @@ package com.clinicos.clinicconfig.api;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -41,22 +40,5 @@ public interface WorkCalendarService {
     }
 
     record HolidayRequest(LocalDate date, String name, UUID employeeId) {
-    }
-
-    /**
-     * Field-level validation failure (Arabic messages, keyed by field name).
-     * Raised before any SQL runs.
-     */
-    class WorkCalendarValidationException extends RuntimeException {
-        private final Map<String, String> fieldErrors;
-
-        public WorkCalendarValidationException(Map<String, String> fieldErrors) {
-            super(String.join("؛ ", fieldErrors.values()));
-            this.fieldErrors = fieldErrors;
-        }
-
-        public Map<String, String> fieldErrors() {
-            return fieldErrors;
-        }
     }
 }

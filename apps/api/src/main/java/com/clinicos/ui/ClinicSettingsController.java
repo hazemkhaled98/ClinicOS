@@ -25,7 +25,6 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidat
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
-import com.clinicos.clinicconfig.api.WorkCalendarService.WorkCalendarValidationException;
 import com.clinicos.staff.api.EmployeeService;
 
 import jakarta.servlet.http.HttpSession;
@@ -152,8 +151,6 @@ public class ClinicSettingsController {
         List<Integer> weekdays = form.getWeekdays() == null ? List.of() : form.getWeekdays();
         try {
             workCalendarService.setWorkingWeekdays(AdminAccess.clinicId(session), weekdays);
-        } catch (WorkCalendarValidationException e) {
-            fieldErrors.putAll(e.fieldErrors());
         } catch (IllegalArgumentException e) {
             fieldErrors.put("weekdays", e.getMessage());
         }

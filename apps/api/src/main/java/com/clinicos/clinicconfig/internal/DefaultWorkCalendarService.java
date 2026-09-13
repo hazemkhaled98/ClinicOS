@@ -6,10 +6,8 @@ import static com.clinicos.shared.jooq.tables.Employee.EMPLOYEE;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -162,24 +160,17 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
     }
 
     private void validateWeekdays(List<Integer> weekdays) {
-        Map<String, String> fieldErrors = new HashMap<>();
         if (weekdays == null || weekdays.isEmpty()) {
-            fieldErrors.put("weekdays", "أيام العمل يجب أن تتضمن يوماً واحداً على الأقل");
-        } else {
-            Set<Integer> seen = new HashSet<>();
-            for (Integer weekday : weekdays) {
-                if (weekday == null || weekday < 1 || weekday > 7) {
-                    fieldErrors.put("weekdays", "قيمة يوم العمل يجب أن تكون بين 1 (الاثنين) و 7 (الأحد)");
-                    break;
-                }
-                if (!seen.add(weekday)) {
-                    fieldErrors.put("weekdays", "لا يمكن تكرار نفس اليوم");
-                    break;
-                }
-            }
+            throw new IllegalArgumentException("أيام العمل يجب أن تتضمن يوماً واحداً على الأقل");
         }
-        if (!fieldErrors.isEmpty()) {
-            throw new WorkCalendarValidationException(fieldErrors);
+        Set<Integer> seen = new HashSet<>();
+        for (Integer weekday : weekdays) {
+            if (weekday == null || weekday < 1 || weekday > 7) {
+                throw new IllegalArgumentException("قيمة يوم العمل يجب أن تكون بين 1 (الاثنين) و 7 (الأحد)");
+            }
+            if (!seen.add(weekday)) {
+                throw new IllegalArgumentException("لا يمكن تكرار نفس اليوم");
+            }
         }
     }
 
