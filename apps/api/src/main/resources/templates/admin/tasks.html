@@ -65,6 +65,7 @@
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant" x-show="freq === 'custom'" x-cloak>
           الوحدة
           <select name="intervalUnit" class="clinicos-input w-24">
+            <option value="">—</option>
             <option value="day" th:selected="${task.intervalUnit() == 'day'}">يوم</option>
             <option value="week" th:selected="${task.intervalUnit() == 'week'}">أسبوع</option>
             <option value="month" th:selected="${task.intervalUnit() == 'month'}">شهر</option>
