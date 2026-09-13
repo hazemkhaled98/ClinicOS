@@ -46,7 +46,7 @@ public final class NavSectionResolver {
         for (NavSection section : ALL) {
             switch (section.key()) {
                 case "emp" -> {
-                    if (permissionCodes.contains("emp")) {
+                    if (!owner && permissionCodes.contains("emp")) {
                         visible.add(section);
                     }
                 }

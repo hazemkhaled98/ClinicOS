@@ -31,8 +31,15 @@ class NavSectionResolverTest {
         var visible = NavSectionResolver.resolve(fullCatalog(), "owner");
 
         assertThat(keys(visible))
-                .containsExactly("emp", "quick", "prep", "acad", "inv", "ceo")
+                .containsExactly("quick", "prep", "acad", "inv", "ceo")
                 .doesNotContain("myeval", "tasks");
+    }
+
+    @Test
+    void employeesSectionHiddenForOwnerEvenWithEmpPermission() {
+        var visible = NavSectionResolver.resolve(Set.of("emp"), "owner");
+
+        assertThat(keys(visible)).doesNotContain("emp");
     }
 
     @Test

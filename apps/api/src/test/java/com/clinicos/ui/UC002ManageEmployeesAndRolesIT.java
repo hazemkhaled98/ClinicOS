@@ -150,6 +150,7 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             page().onDialog(dialog -> dialog.accept());
             employeeRow("محمود سمير")
                     .locator("button[aria-label='حذف الموظف']").click();
+            page().locator("#confirm-ok").click();
 
             PlaywrightAssertions.assertThat(page().getByText("لا يوجد موظفون بعد")).isVisible();
             assertThat(page().locator(".clinicos-employee-row").count()).isZero();

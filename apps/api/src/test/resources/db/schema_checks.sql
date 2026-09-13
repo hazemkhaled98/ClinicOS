@@ -400,7 +400,7 @@ begin
 
     -- 5c. task_definition: frequency='custom' without every_n/interval_unit must raise.
     begin
-        insert into task_definition (clinic_id, staff_role, name, dimension, frequency)
+        insert into task_definition (clinic_id, role_code, name, dimension, frequency)
         values ('11111111-1111-1111-1111-111111111111', 'assistant', 'Bad custom task', 'fanni', 'custom');
         unexpected_success := true;
     exception when others then null;
@@ -414,13 +414,39 @@ begin
     -- check missed (it only required "not both null", not "both null").
     unexpected_success := false;
     begin
-        insert into task_definition (clinic_id, staff_role, name, dimension, frequency, every_n, interval_unit)
+        insert into task_definition (clinic_id, role_code, name, dimension, frequency, every_n, interval_unit)
         values ('11111111-1111-1111-1111-111111111111', 'assistant', 'Bad daily task', 'fanni', 'daily', 5, 'week');
         unexpected_success := true;
     exception when others then null;
     end;
     if unexpected_success then
         raise exception 'REGRESSION: frequency=''daily'' with every_n/interval_unit set was accepted';
+    end if;
+
+    -- 5e. task_definition: a task may target a role OR an employee, not both.
+    unexpected_success := false;
+    begin
+        insert into task_definition (clinic_id, role_code, employee_id, name, dimension, frequency)
+        values ('11111111-1111-1111-1111-111111111111', 'assistant',
+                'bbbbbbbb-0000-0000-0000-000000000001', 'Bad dual target', 'fanni', 'daily');
+        unexpected_success := true;
+    exception when others then null;
+    end;
+    if unexpected_success then
+        raise exception 'REGRESSION: task_definition with both role_code and employee_id was accepted';
+    end if;
+
+    -- 5f. task_definition: employee target must belong to the same clinic.
+    unexpected_success := false;
+    begin
+        insert into task_definition (clinic_id, employee_id, name, dimension, frequency)
+        values ('11111111-1111-1111-1111-111111111111',
+                'bbbbbbbb-0000-0000-0000-000000000002', 'Cross-clinic task', 'fanni', 'daily');
+        unexpected_success := true;
+    exception when others then null;
+    end;
+    if unexpected_success then
+        raise exception 'REGRESSION: task_definition targeted a cross-clinic employee';
     end if;
 end $$;
 

@@ -11,14 +11,20 @@ class SectionFocusTest {
 
     @Test
     void remembersLastSectionCookieWhenStillPermitted() {
-        assertThat(SectionFocus.resolveTarget("inventory", ownerCodes(), "owner"))
+        assertThat(SectionFocus.resolveTarget("inventory", List.of("emp", "tray"), "manager"))
                 .isEqualTo("inventory");
     }
 
     @Test
-    void fallsBackToFirstPermittedSectionWhenCookieNotPermitted() {
-        // tasks is hidden for owners (dashboard supersedes it)
+    void ceoPermissionRedirectsToAdminDashboard() {
+        // ceo beats the saved section and the first-permitted fallback for owners
         assertThat(SectionFocus.resolveTarget("tasks", ownerCodes(), "owner"))
+                .isEqualTo("admin-dashboard");
+    }
+
+    @Test
+    void managerLandsOnEmployeesInsteadOfCeoDashboard() {
+        assertThat(SectionFocus.resolveTarget(null, managerCodes(), "manager"))
                 .isEqualTo("employees");
     }
 
@@ -31,6 +37,11 @@ class SectionFocusTest {
     void alwaysFallsBackToPrepWhichIsUnconditional() {
         assertThat(SectionFocus.resolveTarget(null, List.of(), "assistant"))
                 .isEqualTo("prep");
+    }
+
+    private static List<String> managerCodes() {
+        return List.copyOf(Set.of("emp", "quick", "ceo", "tasksTab", "acadVerify",
+                "acadEdit", "tray", "issue", "procs"));
     }
 
     private static List<String> ownerCodes() {

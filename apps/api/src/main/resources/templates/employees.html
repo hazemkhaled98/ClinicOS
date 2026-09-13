@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>مهامي اليوم</title>
+</head>
+<body>
+<div th:fragment="dayGrid(day)"
+     id="day-grid" class="flex flex-col gap-6"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+
+  <th:block th:if="${day.noEmployee()}">
+    <div class="clinicos-card p-6 sm:p-8">
+      <div class="clinicos-empty-state">
+        <div class="text-4xl mb-2">👤</div>
+        <p class="font-bold text-teal-900 text-base">حسابك غير مرتبط بملف موظف</p>
+        <p class="mt-1 text-sm text-on-surface-variant">صفحة تسجيل الموظف متاحة لأعضاء العيادة المرتبطين بملف موظف. مالك/مدير الحساب لديه لوحة التحكم بدلاً من هذه الصفحة.</p>
+      </div>
+    </div>
+    <div class="clinicos-card p-6 sm:p-8">
+      <div class="clinicos-empty-state">
+        <div class="text-4xl mb-2">📋</div>
+        <p class="font-bold text-teal-900 text-base">لا توجد مهام لعرضها</p>
+        <p class="mt-1 text-sm text-on-surface-variant">المهام اليومية تظهر هنا عند الارتباط بملف موظف.</p>
+      </div>
+    </div>
+  </th:block>
+
+  <th:block th:unless="${day.noEmployee()}">
+
+    <p class="text-xs font-bold text-emerald-600 mb-1 clinicos-section-kicker">عيادتي</p>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">مهامي اليوم</h1>
+    <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">تسجيل الحضور والانصراف وتأكيد المهام وإرفاق صور الإثبات</p>
+
+    <div class="clinicos-card p-5 sm:p-6">
+      <th:block th:if="${day.dayOff}">
+        <div class="mb-4 rounded-lg bg-warning-50 border border-warning-600/40 px-4 py-3 text-sm text-warning-600">🎉 النهاردة إجازة — التسجيل اختياري ومش بيأثّر على تقييمك.</div>
+      </th:block>
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex gap-3 flex-1 min-w-64">
+          <th:block th:if="${day.attendance().checkedIn()}">
+            <div class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center"
+                 th:classappend="${day.attendance().inLabel().ok()} ? ' bg-emerald-50 border border-emerald-200' : ' bg-warning-50 border border-warning-600/40'">
+              <span class="text-[10.5px] text-on-surface-variant">الحضور</span>
+              <span class="text-sm font-extrabold" th:classappend="${day.attendance().inLabel().ok()} ? ' text-emerald-700' : ' text-warning-600'"
+                    th:text="'✔ ' + ${day.attendance().inTime()}">✔ 09:00</span>
+              <span class="text-[10px]" th:classappend="${day.attendance().inLabel().ok()} ? ' text-emerald-700' : ' text-warning-600'"
+                    th:text="${day.attendance().inLabel().label()}">في الميعاد</span>
+            </div>
+          </th:block>
+          <th:block th:unless="${day.attendance().checkedIn()}">
+            <form class="flex-1 min-w-0" hx-post="/employees/check-in"
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="w-full flex flex-col items-center gap-1 rounded-xl px-3 py-3 border-[1.5px] border-teal-700 text-teal-700 bg-white">
+                <span class="text-[10.5px] opacity-85">الحضور</span>
+                <span class="text-sm font-extrabold">سجّل الآن</span>
+              </button>
+            </form>
+          </th:block>
+
+          <th:block th:if="${day.attendance().checkedOut()}">
+            <div class="flex-1 min-w-0 flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center"
+                 th:classappend="${day.attendance().outLabel().ok()} ? ' bg-emerald-50 border border-emerald-200' : ' bg-warning-50 border border-warning-600/40'">
+              <span class="text-[10.5px] text-on-surface-variant">الانصراف</span>
+              <span class="text-sm font-extrabold" th:classappend="${day.attendance().outLabel().ok()} ? ' text-emerald-700' : ' text-warning-600'"
+                    th:text="'✔ ' + ${day.attendance().outTime()}">✔ 17:00</span>
+              <span class="text-[10px]" th:classappend="${day.attendance().outLabel().ok()} ? ' text-emerald-700' : ' text-warning-600'"
+                    th:text="${day.attendance().outLabel().label()}">ميعاد كامل</span>
+            </div>
+          </th:block>
+          <th:block th:if="${day.attendance().checkedIn() and !day.attendance().checkedOut()}">
+            <form class="flex-1 min-w-0" hx-post="/employees/check-out"
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="w-full flex flex-col items-center gap-1 rounded-xl px-3 py-3 border-[1.5px] border-teal-700 text-teal-700 bg-white">
+                <span class="text-[10.5px] opacity-85">الانصراف</span>
+                <span class="text-sm font-extrabold">سجّل الآن</span>
+              </button>
+            </form>
+          </th:block>
+        </div>
+        <span class="text-[10.5px] text-on-surface-variant whitespace-nowrap text-center leading-relaxed">
+          ⏰ <span th:text="${day.shiftStart()}">09:00</span><br>
+          حتى <span th:text="${day.shiftEnd()}">17:00</span><br>
+          سماح <span th:text="${day.graceMinutes()}">15</span>د
+          <span th:if="${day.customShift()}" class="text-warning-600 font-bold">· مخصّص</span>
+        </span>
+      </div>
+      <p th:if="${!day.attendance().checkedIn() and day.shiftOver() and !day.dayOff()}"
+         class="mt-3 text-sm text-danger-600 font-semibold">⛔ وقت الدوام انتهى — اليوم ده هيتحسب غياب.</p>
+    </div>
+
+    <div class="clinicos-card p-5 sm:p-6">
+      <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900 mb-4">🗒️ مهامي اليوم — تأكيد وإرفاق صور</h2>
+      <th:block th:if="${day.locked()}">
+        <div class="mb-4 rounded-lg bg-neutral-100 border border-neutral-300 px-4 py-3 text-sm text-neutral-700">🔒 المهام مقفولة — سجّل حضورك الأول عشان تفتح وتبدأ تسجّل مهامك.</div>
+      </th:block>
+
+      <div class="flex flex-col gap-2">
+        <th:block th:if="${#lists.isEmpty(day.dailyGroups()) and #lists.isEmpty(day.periodicTasks())}">
+          <p class="py-4 text-center text-sm text-on-surface-variant">مفيش مهام.</p>
+        </th:block>
+
+        <div th:each="group : ${day.dailyGroups()}" class="mt-1">
+          <div class="flex items-center gap-2 rounded-lg px-3 py-2 mb-1 bg-warning-50 border border-warning-600/40">
+            <span class="text-sm" th:text="${group.dimension() == 'fanni'} ? '⚙️' : (${group.dimension() == 'solooki'} ? '🤝' : '💡')">⚙️</span>
+            <b class="text-sm text-warning-600" th:text="${group.label()}">فني</b>
+          </div>
+          <div th:each="task : ${group.tasks()}" class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+            <form th:if="${!task.done()}"
+                  class="flex items-center gap-2"
+                  th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/complete|"
+                  hx-target="#day-grid" hx-swap="outerHTML" hx-encoding="multipart/form-data">
+              <label th:if="${!day.locked()}"
+                     class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">
+                📷 إرفاق
+                <input type="file" name="photo" accept="image/*" class="sr-only"
+                       th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/complete|"
+                       hx-trigger="change" hx-encoding="multipart/form-data"
+                       hx-target="#day-grid" hx-swap="outerHTML">
+              </label>
+              <button type="submit" class="clinicos-btn clinicos-btn--secondary text-xs" th:disabled="${day.locked()}">✔ أكّدها</button>
+            </form>
+
+            <span th:if="${task.done()}" class="text-emerald-700 font-bold text-xs whitespace-nowrap" th:text="${task.doneLabel()}">✔ أكّدتها 09:15</span>
+            <a th:if="${task.done() and task.photoId() != null}"
+               th:href="|/attachments/${task.photoId()}|" target="_blank" rel="noopener"
+               class="block">
+              <img th:src="|/attachments/${task.photoId()}|" alt="صورة الإثبات"
+                   class="block w-9 h-9 rounded-lg object-cover border border-neutral-200">
+            </a>
+            <form th:if="${task.done()}"
+                  th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/uncomplete|"
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">إلغاء</button>
+            </form>
+
+            <span class="flex-1">
+              <span class="text-sm font-semibold text-teal-900" th:text="${task.name()}">التعقيم</span>
+              <span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle"
+                    th:classappend="${task.frequency() == 'weekly'} ? ' bg-info-600' : (${task.frequency() == 'monthly'} ? ' bg-warning-600' : ' bg-teal-600')"
+                    th:text="${task.frequencyLabel()}">يومي</span>
+              <span th:if="${task.dueLabel() != null}"
+                    class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 align-middle"
+                    th:classappend="${task.dueState() == 'due'} ? ' bg-warning-50 text-warning-600 border border-warning-600/40' : (${task.dueState() == 'overdue'} ? ' bg-danger-50 text-danger-600 border border-danger-600/40' : ' bg-info-50 text-info-600 border border-info-600/40')"
+                    th:text="${task.dueLabel()}">🔔 موعدها دلوقتي</span>
+            </span>
+          </div>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(day.periodicTasks())}" class="mt-3">
+          <div class="flex items-center gap-2 rounded-lg px-3 py-2 mb-1 bg-warning-50 border border-warning-600/40">
+            <span class="text-sm">🔁</span>
+            <b class="text-sm text-warning-600">مهام دورية</b>
+          </div>
+          <div th:each="task : ${day.periodicTasks()}" class="flex items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+            <form th:if="${!task.done()}"
+                  class="flex items-center gap-2"
+                  th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/complete|"
+                  hx-target="#day-grid" hx-swap="outerHTML" hx-encoding="multipart/form-data">
+              <label th:if="${!day.locked()}"
+                     class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">
+                📷 إرفاق
+                <input type="file" name="photo" accept="image/*" class="sr-only"
+                       th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/complete|"
+                       hx-trigger="change" hx-encoding="multipart/form-data"
+                       hx-target="#day-grid" hx-swap="outerHTML">
+              </label>
+              <button type="submit" class="clinicos-btn clinicos-btn--secondary text-xs" th:disabled="${day.locked()}">✔ أكّدها</button>
+            </form>
+
+            <span th:if="${task.done()}" class="text-emerald-700 font-bold text-xs whitespace-nowrap" th:text="${task.doneLabel()}">✔ أكّدتها 09:15</span>
+            <a th:if="${task.done() and task.photoId() != null}"
+               th:href="|/attachments/${task.photoId()}|" target="_blank" rel="noopener"
+               class="block">
+              <img th:src="|/attachments/${task.photoId()}|" alt="صورة الإثبات"
+                   class="block w-9 h-9 rounded-lg object-cover border border-neutral-200">
+            </a>
+            <form th:if="${task.done()}"
+                  th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/uncomplete|"
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">إلغاء</button>
+            </form>
+
+            <span class="flex-1">
+              <span class="text-sm font-semibold text-teal-900" th:text="${task.name()}">مراجعة الأدوية</span>
+              <span class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 text-white align-middle"
+                    th:classappend="${task.frequency() == 'weekly'} ? ' bg-info-600' : (${task.frequency() == 'monthly'} ? ' bg-warning-600' : ' bg-teal-600')"
+                    th:text="${task.frequencyLabel()}">أسبوعي</span>
+              <span th:if="${task.dueLabel() != null}"
+                    class="inline-block me-2 rounded-md text-[10px] font-bold px-2 py-0.5 align-middle"
+                    th:classappend="${task.dueState() == 'due'} ? ' bg-warning-50 text-warning-600 border border-warning-600/40' : (${task.dueState() == 'overdue'} ? ' bg-danger-50 text-danger-600 border border-danger-600/40' : ' bg-info-50 text-info-600 border border-info-600/40')"
+                    th:text="${task.dueLabel()}">🔔 موعدها دلوقتي</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="clinicos-card p-5 sm:p-6">
+      <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900 mb-4">🎯 مهام مكلّفة ليك</h2>
+      <th:block th:if="${day.locked()}">
+        <div class="mb-4 rounded-lg bg-neutral-100 border border-neutral-300 px-4 py-3 text-sm text-neutral-700">🔒 سجّل حضورك الأول عشان تفتح المهام المكلّفة وتعلّم عليها.</div>
+      </th:block>
+
+      <th:block th:if="${#lists.isEmpty(day.assignments())}">
+        <p class="py-4 text-center text-sm text-on-surface-variant">مفيش مهام مطلوبة دلوقتي ✅</p>
+      </th:block>
+
+      <div th:each="asg : ${day.assignments()}" class="flex flex-wrap items-center gap-3 py-3 border-b border-neutral-100 last:border-0">
+        <form th:if="${asg.canMarkDone()}"
+              class="flex items-center gap-2"
+              th:attr="hx-post=|/employees/assignments/${asg.id()}/done|"
+              hx-target="#day-grid" hx-swap="outerHTML" hx-encoding="multipart/form-data">
+          <label th:if="${!day.locked()}"
+                 class="inline-flex items-center rounded-lg border border-teal-700 text-teal-700 bg-white px-3 py-1.5 text-xs cursor-pointer">
+            📷 إرفاق
+            <input type="file" name="photo" accept="image/*" class="sr-only"
+                   th:attr="hx-post=|/employees/assignments/${asg.id()}/done|"
+                   hx-trigger="change" hx-encoding="multipart/form-data"
+                   hx-target="#day-grid" hx-swap="outerHTML">
+          </label>
+          <button type="submit" class="clinicos-btn clinicos-btn--secondary text-xs" th:disabled="${day.locked()}">✔ سلّمها</button>
+        </form>
+        <span th:if="${!asg.canMarkDone() and !asg.done()}"
+              class="inline-block w-4 h-4 rounded border border-neutral-300" aria-hidden="true"></span>
+        <span th:if="${asg.done()}" class="text-emerald-700 font-bold text-xs whitespace-nowrap">✔ سُلّمت</span>
+
+        <a th:if="${asg.proofPhotoId() != null}"
+           th:href="|/attachments/${asg.proofPhotoId()}|" target="_blank" rel="noopener"
+           class="block">
+          <img th:src="|/attachments/${asg.proofPhotoId()}|" alt="صورة الإثبات"
+               class="block w-9 h-9 rounded-lg object-cover border border-neutral-200">
+        </a>
+
+        <span class="flex-1">
+          <span class="text-sm font-semibold text-teal-900" th:text="${asg.name()}">تجهيز ملف الحجوزات</span>
+          <span class="inline-block me-2 rounded-full text-[10px] font-bold px-2.5 py-0.5 align-middle clinicos-chip"
+                th:classappend="' ' + ${asg.statusCss()}"
+                th:text="${asg.statusLabel()}">مطلوبة منك</span>
+          <span th:if="${asg.dueLabel() != null}" class="block mt-1 text-xs text-on-surface-variant" th:text="${asg.dueLabel()}">📅 تسليمها: 2026-09-12</span>
+        </span>
+      </div>
+
+      <form class="mt-4 pt-4 border-t border-dashed border-neutral-300 flex flex-wrap items-end gap-3"
+            hx-post="/employees/assignments/propose"
+            hx-target="#day-grid" hx-swap="outerHTML">
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          اقترح مهمة لنفسك
+          <input type="text" name="name" class="clinicos-input min-w-48" th:disabled="${day.locked()}" required>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          تسليمها
+          <input type="date" name="dueDate" class="clinicos-input" th:disabled="${day.locked()}">
+        </label>
+        <button type="submit" class="clinicos-btn" th:disabled="${day.locked()}">اقترح للمدير</button>
+      </form>
+    </div>
+
+  </th:block>
+</div>
+</body>
+</html>

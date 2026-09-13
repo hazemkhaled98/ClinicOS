@@ -3,8 +3,10 @@ package com.clinicos;
 import static com.clinicos.shared.jooq.tables.AppUser.APP_USER;
 import static com.clinicos.shared.jooq.tables.Clinic.CLINIC;
 import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
+import static com.clinicos.shared.jooq.tables.Employee.EMPLOYEE;
 import static com.clinicos.shared.jooq.tables.EvaluationWeight.EVALUATION_WEIGHT;
 import static com.clinicos.shared.jooq.tables.IncentiveTier.INCENTIVE_TIER;
+import static com.clinicos.shared.jooq.tables.TaskDefinition.TASK_DEFINITION;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
@@ -22,6 +24,9 @@ import org.jooq.impl.DSL;
 
 import com.clinicos.shared.jooq.enums.EvalCategory;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
+
+import com.clinicos.shared.jooq.enums.TaskDimension;
+import com.clinicos.shared.jooq.enums.TaskFrequency;
 
 /**
  * Shared row-insert helpers for integration tests that seed clinic/user/
@@ -115,6 +120,35 @@ public final class TestFixtures {
                         .where(ROLE.CODE.eq(roleCode)))
                 .returningResult(MEMBERSHIP.ID)
                 .fetchOne(MEMBERSHIP.ID);
+    }
+
+    public static UUID insertEmployee(Connection connection, UUID clinicId, String name) throws Exception {
+        return DSL.using(connection, SQLDialect.POSTGRES)
+                .insertInto(EMPLOYEE, EMPLOYEE.CLINIC_ID, EMPLOYEE.NAME,
+                        EMPLOYEE.BASE_PAY, EMPLOYEE.MAX_INCENTIVE, EMPLOYEE.CUSTOM_SHIFT)
+                .values(clinicId, name, new BigDecimal("5000"), new BigDecimal("1000"), false)
+                .returningResult(EMPLOYEE.ID)
+                .fetchOne(EMPLOYEE.ID);
+    }
+
+    public static UUID insertTaskDefinition(Connection connection, UUID clinicId, String roleCode, String name,
+            String dimension, String frequency, boolean requiresPhoto) throws Exception {
+        return DSL.using(connection, SQLDialect.POSTGRES)
+                .insertInto(TASK_DEFINITION, TASK_DEFINITION.CLINIC_ID, TASK_DEFINITION.ROLE_CODE,
+                        TASK_DEFINITION.NAME, TASK_DEFINITION.DIMENSION, TASK_DEFINITION.FREQUENCY,
+                        TASK_DEFINITION.REQUIRES_PHOTO)
+                .values(clinicId, roleCode, name, TaskDimension.valueOf(dimension),
+                        TaskFrequency.valueOf(frequency), requiresPhoto)
+                .returningResult(TASK_DEFINITION.ID)
+                .fetchOne(TASK_DEFINITION.ID);
+    }
+
+    public static void linkMembershipToEmployee(Connection connection, UUID membershipId, UUID employeeId) throws Exception {
+        DSL.using(connection, SQLDialect.POSTGRES)
+                .update(MEMBERSHIP)
+                .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
+                .where(MEMBERSHIP.ID.eq(membershipId))
+                .execute();
     }
 
     public static void seedRolePermissionDefaults(Connection connection, UUID clinicId) {

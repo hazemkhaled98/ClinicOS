@@ -41,6 +41,20 @@ public class DefaultEmployeeService implements EmployeeService {
     }
 
     @Override
+    public Employee findByMembership(UUID clinicId, UUID membershipId) {
+        return transactionTemplate.execute(status -> {
+            EmployeeRecord record = dsl.select(EMPLOYEE.fields())
+                    .from(MEMBERSHIP)
+                    .join(EMPLOYEE).on(EMPLOYEE.ID.eq(MEMBERSHIP.EMPLOYEE_ID))
+                    .where(MEMBERSHIP.ID.eq(membershipId))
+                    .and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                    .and(EMPLOYEE.ARCHIVED_AT.isNull())
+                    .fetchOneInto(EmployeeRecord.class);
+            return record == null ? null : toEmployee(record);
+        });
+    }
+
+    @Override
     public Employee create(UUID clinicId, EmployeeRequest request) {
         validate(request);
         try {

@@ -13,6 +13,14 @@
 - Postgres: localhost:5432, db `clinicos`, user `postgres`/`app_rw` both `local-dev-only`
 - MinIO: localhost:9000 (API) / 9001 (console), `minioadmin`/`minioadmin`
 
+## Seed / reset dev data
+
+```bash
+./seed-dev.ps1
+```
+
+Wipes **all** business data and reseeds one clinic (`test-clinic`) with four users: `owner` / `manager` / `assistant` / `receptionist`. Owner password `12345678`, everyone else `123`. Requires a migrated DB (run `dev-up.ps1` once first). Destructive — never point at prod.
+
 ## Migrations
 
 Flyway runs **inside the app** at startup (`spring-boot-starter-flyway`). Do not migrate manually; the old `migrate` docker-compose service was removed.

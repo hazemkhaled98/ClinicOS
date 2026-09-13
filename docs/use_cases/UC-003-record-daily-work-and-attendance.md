@@ -6,7 +6,7 @@
 **Use Case Name:** Record Daily Work and Attendance
 **Primary Actor:** Assistant or Receptionist
 **Goal:** An employee checks in for the day, completes their recurring and assigned tasks, and provides proof so their performance is measured accurately.
-**Status:** Implemented
+**Status:** Implemented (Phase 4: attendance/task evaluation — see evaluation note)
 
 ## Preconditions
 
@@ -22,7 +22,7 @@
 5. The employee reviews any one-off tasks assigned to them and marks assigned tasks as done, attaching proof where required.
 6. The employee proposes a new one-off task on their own initiative when they notice something that needs attention.
 7. The employee checks out at the end of the day, recording their departure time.
-8. The system saves each update immediately and reflects it in the employee's ongoing performance figures.
+8. The system saves each update immediately. Reflecting the day in the employee's performance figures is a Phase 4 concern (UC-004/UC-005 evaluation engine) — see the evaluation note below.
 
 ## Alternative Flows
 
@@ -31,7 +31,7 @@
 **Trigger:** The recorded check-in time is after the shift start plus the grace period (step 2)
 **Flow:**
 
-1. The system counts the day as a late arrival when scoring attendance.
+1. The system labels the day as late in the daily view (BR-001). Counting it as a late arrival in the attendance score is a Phase 4 concern (UC-004/UC-005 evaluation engine).
 2. Use case continues at step 3.
 
 ### A2: Leaving Early
@@ -39,7 +39,7 @@
 **Trigger:** The recorded check-out time is before the shift end (step 7)
 **Flow:**
 
-1. The system counts the day as an early departure when scoring attendance.
+1. The system labels the day as an early departure in the daily view. Counting it as an early departure in the attendance score is a Phase 4 concern (UC-004/UC-005 evaluation engine).
 2. Use case continues at step 8.
 
 ### A3: No Check-In Recorded for a Work Day
@@ -47,7 +47,7 @@
 **Trigger:** The employee does not check in on a scheduled work day (step 2)
 **Flow:**
 
-1. The system counts the day as absent when scoring attendance.
+1. The system shows an absence warning once the shift has ended and still no check-in is recorded (the day will not be counted as worked). Counting the day as absent in the attendance score is a Phase 4 concern (UC-004/UC-005 evaluation engine).
 2. Use case ends.
 
 ### A4: Self-Proposed Task Requires Manager Approval
@@ -58,24 +58,24 @@
 1. The proposed task is marked pending until the manager approves or rejects it (see UC-004).
 2. Use case continues at step 7.
 
-### A5: Offline Recording
+### A5: Offline Recording — Not Applicable
 
-**Trigger:** The device has no confirmed connection to the shared cloud data (step 1)
-**Flow:**
-
-1. The system saves the entry on the device and queues it for automatic sync once the connection is confirmed.
-2. Use case continues at step 2.
+**Status:** Out of scope by decision (see `docs/roadmap.md`, "Offline mode" row and the UC-001 deviation note). ClinicOS is a server-rendered Thymeleaf app with no client-side offline queue — this flow does not exist and will not be implemented.
 
 ## Postconditions
 
 ### Success Postconditions
 
-- The day's task completions and attendance times are saved and available for evaluation.
+- The day's task completions and attendance times are saved, persisted immediately, and labeled (late / early / absent) in the daily view. Making them "available for evaluation" — feeding the scores an evaluation engine reads — is a Phase 4 concern (UC-004/UC-005), since the evaluation module ships there.
 - The activity log records that the employee reviewed and logged their daily work.
 
 ### Failure Postconditions
 
-- The day's entry is not saved, or is queued locally pending connection.
+- The day's entry is not saved.
+
+## Evaluation Note (Phase 4)
+
+Attendance and task-completion data is captured, labelled, and persisted by this use case. The evaluation engine that turns the data into scores — late/early/absent counting, monthly evaluation, incentive tiers — is Phase 4 (UC-004/UC-005), matching the roadmap's evaluation row and the deferred units listed in the Phase 2 note.
 
 ## Business Rules
 

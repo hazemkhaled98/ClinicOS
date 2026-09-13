@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,11 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.CategoryWeight;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettings;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidationException;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
+import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.staff.api.EmployeeService;
+import com.clinicos.staff.api.EmployeeService.Employee;
 import com.clinicos.ui.nav.NavSectionResolver;
 
 import jakarta.servlet.http.HttpSession;
@@ -47,6 +52,8 @@ class ClinicSettingsControllerTest {
 
     private LayoutModel layoutModel;
     private ClinicSettingsService settingsService;
+    private WorkCalendarService workCalendarService;
+    private EmployeeService employeeService;
     private ClinicSettingsController controller;
     private Model model;
 
@@ -54,9 +61,15 @@ class ClinicSettingsControllerTest {
     void setUp() {
         layoutModel = mock(LayoutModel.class);
         settingsService = mock(ClinicSettingsService.class);
-        controller = new ClinicSettingsController(layoutModel, settingsService);
+        workCalendarService = mock(WorkCalendarService.class);
+        employeeService = mock(EmployeeService.class);
+        controller = new ClinicSettingsController(layoutModel, settingsService,
+                workCalendarService, employeeService);
         model = new ExtendedModelMap();
         when(settingsService.get(CLINIC)).thenReturn(settings(WEIGHTS, TIERS));
+        when(workCalendarService.workingWeekdays(CLINIC)).thenReturn(List.of(6, 7, 1, 2, 3, 4));
+        when(workCalendarService.listHolidays(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
     }
 
     @Test
@@ -188,6 +201,101 @@ class ClinicSettingsControllerTest {
     }
 
     @Test
+    void updateWeekdaysPersistsMaskAndRendersCard() {
+        HttpSession session = session();
+        allowDashboard();
+        var form = new ClinicSettingsController.WeekdaysForm();
+        form.setWeekdays(List.of(1, 2, 3, 4, 5, 6, 7));
+
+        String view = controller.updateWeekdays(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(workCalendarService).setWorkingWeekdays(CLINIC, List.of(1, 2, 3, 4, 5, 6, 7));
+        verify(workCalendarService).listHolidays(CLINIC);
+        verify(employeeService).list(CLINIC);
+    }
+
+    @Test
+    void emptyWeekdaySetReportsArabicError() {
+        HttpSession session = session();
+        allowDashboard();
+        doThrow(new IllegalArgumentException("أيام العمل يجب أن تتضمن يوماً واحداً على الأقل"))
+                .when(workCalendarService).setWorkingWeekdays(eq(CLINIC), any());
+        var form = new ClinicSettingsController.WeekdaysForm();
+
+        String view = controller.updateWeekdays(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage")))
+                .contains("أيام العمل يجب أن تتضمن يوماً واحداً على الأقل");
+    }
+
+    @Test
+    void addHolidayRendersCardAndInvokesService() {
+        HttpSession session = session();
+        allowDashboard();
+        var form = new ClinicSettingsController.HolidayForm();
+        form.setDate("2026-03-20");
+        form.setName("عيد الفطر");
+
+        String view = controller.addHoliday(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(workCalendarService).addHoliday(eq(CLINIC),
+                any(HolidayRequest.class));
+    }
+
+    @Test
+    void blankHolidayDateAndNameReportArabicFieldErrors() {
+        HttpSession session = session();
+        allowDashboard();
+        var form = new ClinicSettingsController.HolidayForm();
+
+        String view = controller.addHoliday(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage")))
+                .contains("تاريخ الإجازة غير صحيح", "اسم الإجازة مطلوب");
+        verify(workCalendarService, never()).addHoliday(any(), any());
+    }
+
+    @Test
+    void duplicateHolidaySurfacesArabicServiceError() {
+        HttpSession session = session();
+        allowDashboard();
+        doThrow(new IllegalArgumentException("هذه الإجازة مسجلة مسبقاً"))
+                .when(workCalendarService).addHoliday(eq(CLINIC), any());
+        var form = new ClinicSettingsController.HolidayForm();
+        form.setDate("2026-03-20");
+        form.setName("عيد الفطر");
+
+        String view = controller.addHoliday(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).contains("مسجلة مسبقاً");
+        assertThat(((ClinicSettingsController.HolidayForm) model.getAttribute("holidaysForm")).getName())
+                .isEqualTo("عيد الفطر");
+    }
+
+    @Test
+    void deleteHolidayInvokesServiceAndRendersCard() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID holidayId = UUID.randomUUID();
+
+        String view = controller.deleteHoliday(holidayId, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(workCalendarService).removeHoliday(CLINIC, holidayId);
+    }
+
+    @Test
     void withoutCeoPermissionEveryCardRedirectsHome() {
         HttpSession session = session();
         denyDashboard();
@@ -196,10 +304,29 @@ class ClinicSettingsControllerTest {
         assertThat(controller.updateDuty(new ClinicSettingsController.DutyForm(), session, model)).isEqualTo("redirect:/");
         assertThat(controller.updateVolumeTarget(new ClinicSettingsController.VolumeForm(), session, model)).isEqualTo("redirect:/");
         assertThat(controller.updateTiers(new ClinicSettingsController.TiersForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.updateWeekdays(new ClinicSettingsController.WeekdaysForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.addHoliday(new ClinicSettingsController.HolidayForm(), session, model)).isEqualTo("redirect:/");
+        assertThat(controller.deleteHoliday(UUID.randomUUID(), session, model)).isEqualTo("redirect:/");
         verify(settingsService, never()).updateWeights(any(), any());
         verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt());
         verify(settingsService, never()).updateVolumeTarget(any(), any());
         verify(settingsService, never()).updateTiers(any(), any());
+        verify(workCalendarService, never()).setWorkingWeekdays(any(), any());
+        verify(workCalendarService, never()).addHoliday(any(), any());
+        verify(workCalendarService, never()).removeHoliday(any(), any());
+    }
+
+    @Test
+    void calendarHandlersRenderHolidayListAndEmployeeSelect() {
+        HttpSession session = session();
+        allowDashboard();
+        Employee employee = new Employee(UUID.randomUUID(), "محمود", null, null, null, null, false, null, null);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(employee));
+
+        controller.updateWeekdays(new ClinicSettingsController.WeekdaysForm(), session, model);
+
+        assertThat(model.getAttribute("employees")).isEqualTo(List.of(employee));
+        assertThat(model.getAttribute("holidays")).isEqualTo(List.of());
     }
 
     private static ClinicSettings settings(List<CategoryWeight> weights, List<Tier> tiers) {

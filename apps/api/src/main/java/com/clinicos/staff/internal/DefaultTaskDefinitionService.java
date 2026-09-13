@@ -3,12 +3,17 @@ package com.clinicos.staff.internal;
 import static com.clinicos.shared.jooq.tables.TaskDefinition.TASK_DEFINITION;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.shared.jooq.enums.IntervalUnit;
+import com.clinicos.shared.jooq.enums.TaskDimension;
+import com.clinicos.shared.jooq.enums.TaskFrequency;
+import com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord;
 import com.clinicos.staff.api.TaskDefinitionService;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinition;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
@@ -36,6 +41,7 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
 
     @Override
     public TaskDefinition create(UUID clinicId, TaskDefinitionRequest request) {
+        validate(request);
         return transactionTemplate.execute(status -> {
             UUID id = UUID.randomUUID();
             dsl.insertInto(TASK_DEFINITION)
@@ -44,20 +50,32 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
                     .set(TASK_DEFINITION.NAME, request.name())
                     .set(TASK_DEFINITION.DIMENSION, toDbDimension(request.dimension()))
                     .set(TASK_DEFINITION.FREQUENCY, toDbFrequency(request.frequency()))
-                    .set(TASK_DEFINITION.STAFF_ROLE, toDbStaffRole(request.roleCode()))
+                    .set(TASK_DEFINITION.ROLE_CODE, request.roleCode())
+                    .set(TASK_DEFINITION.EMPLOYEE_ID, request.employeeId())
+                    .set(TASK_DEFINITION.REQUIRES_PHOTO, request.requiresPhoto())
+                    .set(TASK_DEFINITION.EVERY_N, request.everyN())
+                    .set(TASK_DEFINITION.INTERVAL_UNIT,
+                            request.intervalUnit() == null ? null : IntervalUnit.valueOf(request.intervalUnit()))
                     .execute();
-            return new TaskDefinition(id, request.name(), request.dimension(), request.frequency(), request.roleCode());
+            return new TaskDefinition(id, request.name(), request.dimension(), request.frequency(), request.roleCode(),
+                    request.employeeId(), request.requiresPhoto(), request.everyN(), request.intervalUnit());
         });
     }
 
     @Override
     public TaskDefinition update(UUID clinicId, UUID taskId, TaskDefinitionRequest request) {
+        validate(request);
         return transactionTemplate.execute(status -> {
             int updated = dsl.update(TASK_DEFINITION)
                     .set(TASK_DEFINITION.NAME, request.name())
                     .set(TASK_DEFINITION.DIMENSION, toDbDimension(request.dimension()))
                     .set(TASK_DEFINITION.FREQUENCY, toDbFrequency(request.frequency()))
-                    .set(TASK_DEFINITION.STAFF_ROLE, toDbStaffRole(request.roleCode()))
+                    .set(TASK_DEFINITION.ROLE_CODE, request.roleCode())
+                    .set(TASK_DEFINITION.EMPLOYEE_ID, request.employeeId())
+                    .set(TASK_DEFINITION.REQUIRES_PHOTO, request.requiresPhoto())
+                    .set(TASK_DEFINITION.EVERY_N, request.everyN())
+                    .set(TASK_DEFINITION.INTERVAL_UNIT,
+                            request.intervalUnit() == null ? null : IntervalUnit.valueOf(request.intervalUnit()))
                     .where(TASK_DEFINITION.ID.eq(taskId))
                     .and(TASK_DEFINITION.CLINIC_ID.eq(clinicId))
                     .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
@@ -92,25 +110,51 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
         });
     }
 
-    private TaskDefinition toTask(com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord r) {
+    private TaskDefinition toTask(TaskDefinitionRecord r) {
         return new TaskDefinition(
                 r.getId(),
                 r.getName(),
                 fromDbDimension(r.getDimension()),
                 fromDbFrequency(r.getFrequency()),
-                fromDbStaffRole(r.getStaffRole()));
+                r.getRoleCode(),
+                r.getEmployeeId(),
+                r.getRequiresPhoto(),
+                r.getEveryN(),
+                r.getIntervalUnit() == null ? null : r.getIntervalUnit().getLiteral());
     }
 
-    private static com.clinicos.shared.jooq.enums.TaskDimension toDbDimension(String dimension) {
+    private void validate(TaskDefinitionRequest request) {
+        if (request.name() == null || request.name().isBlank()) {
+            throw new IllegalArgumentException("اسم المهمة مطلوب");
+        }
+        if (request.roleCode() != null && request.employeeId() != null) {
+            throw new IllegalArgumentException("اختر دورًا أو موظفًا واحدًا فقط");
+        }
+        if ("custom".equals(request.frequency())) {
+            if (request.everyN() == null || request.everyN() < 1) {
+                throw new IllegalArgumentException("التكرار المخصص يتطلب رقم تكرار صحيح موجب");
+            }
+            if (request.intervalUnit() == null) {
+                throw new IllegalArgumentException("التكرار المخصص يتطلب وحدة زمنية");
+            }
+            if (!Set.of("day", "week", "month").contains(request.intervalUnit())) {
+                throw new IllegalArgumentException("الوحدة الزمنية غير معروفة: " + request.intervalUnit());
+            }
+        } else if (request.everyN() != null || request.intervalUnit() != null) {
+            throw new IllegalArgumentException("العدد والوحدة الزمنية خاصان بالتكرار المخصص فقط");
+        }
+    }
+
+    private static TaskDimension toDbDimension(String dimension) {
         return switch (dimension) {
-            case "fanni" -> com.clinicos.shared.jooq.enums.TaskDimension.fanni;
-            case "solooki" -> com.clinicos.shared.jooq.enums.TaskDimension.solooki;
-            case "ibda3" -> com.clinicos.shared.jooq.enums.TaskDimension.ibda3;
+            case "fanni" -> TaskDimension.fanni;
+            case "solooki" -> TaskDimension.solooki;
+            case "ibda3" -> TaskDimension.ibda3;
             default -> throw new IllegalArgumentException("البُعد غير معروف: " + dimension);
         };
     }
 
-    private static String fromDbDimension(com.clinicos.shared.jooq.enums.TaskDimension d) {
+    private static String fromDbDimension(TaskDimension d) {
         return switch (d) {
             case fanni -> "fanni";
             case solooki -> "solooki";
@@ -118,37 +162,22 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
         };
     }
 
-    private static com.clinicos.shared.jooq.enums.TaskFrequency toDbFrequency(String frequency) {
+    private static TaskFrequency toDbFrequency(String frequency) {
         return switch (frequency) {
-            case "daily" -> com.clinicos.shared.jooq.enums.TaskFrequency.daily;
-            case "weekly" -> com.clinicos.shared.jooq.enums.TaskFrequency.weekly;
-            case "monthly" -> com.clinicos.shared.jooq.enums.TaskFrequency.monthly;
-            case "custom" -> com.clinicos.shared.jooq.enums.TaskFrequency.custom;
+            case "daily" -> TaskFrequency.daily;
+            case "weekly" -> TaskFrequency.weekly;
+            case "monthly" -> TaskFrequency.monthly;
+            case "custom" -> TaskFrequency.custom;
             default -> throw new IllegalArgumentException("التكرار غير معروف: " + frequency);
         };
     }
 
-    private static String fromDbFrequency(com.clinicos.shared.jooq.enums.TaskFrequency f) {
+    private static String fromDbFrequency(TaskFrequency f) {
         return switch (f) {
             case daily -> "daily";
             case weekly -> "weekly";
             case monthly -> "monthly";
             case custom -> "custom";
-        };
-    }
-
-    private static com.clinicos.shared.jooq.enums.StaffRole toDbStaffRole(String roleCode) {
-        return switch (roleCode) {
-            case "assistant" -> com.clinicos.shared.jooq.enums.StaffRole.assistant;
-            case "receptionist" -> com.clinicos.shared.jooq.enums.StaffRole.receptionist;
-            default -> throw new IllegalArgumentException("الدور غير معروف: " + roleCode);
-        };
-    }
-
-    private static String fromDbStaffRole(com.clinicos.shared.jooq.enums.StaffRole r) {
-        return switch (r) {
-            case assistant -> "assistant";
-            case receptionist -> "receptionist";
         };
     }
 }

@@ -9,7 +9,7 @@
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">👤 المستخدمون</h2>
-    <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وحالة الحساب. بيانات الموظف والدور في تبويب «الإعدادات».</p>
+    <p class="text-sm text-on-surface-variant">إدارة حسابات الدخول وكلمات المرور وحالة الحساب والدور.</p>
   </div>
 
   <div class="flex flex-col gap-3">
@@ -67,6 +67,16 @@
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           كلمة المرور
           <input type="password" name="password" class="clinicos-input w-36" required>
+        </label>
+        <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+          الدور
+          <select name="roleCode" class="clinicos-input w-32">
+            <option th:if="${actorRole == 'owner'}" value="manager"
+                    th:selected="${addForm.getRoleCode() == 'manager'}">مدير</option>
+            <option value="assistant" th:selected="${addForm.getRoleCode() == 'assistant'}">مساعد</option>
+            <option value="receptionist"
+                    th:selected="${addForm.getRoleCode() == 'receptionist'}">موظف استقبال</option>
+          </select>
         </label>
         <button type="submit" class="clinicos-btn">+ إضافة مستخدم</button>
       </form>

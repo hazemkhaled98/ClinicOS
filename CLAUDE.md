@@ -77,8 +77,16 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 - V12: seeds `permission` codes and legacy default `role_permission` sets
 - V13: `signup_clinic_with_owner` — `SECURITY DEFINER` self-service sign-up (clinic + owner atomically, before a tenant exists; the only door for `app_rw` to create a clinic)
 - V14: `app_user.clinic_id` NOT NULL + `unique (clinic_id, username)` — usernames are per-clinic, not global; auth key becomes (clinic_slug, username) via `app_user_credentials_lookup_by_clinic_username`; sign-up returns the clinic slug (the login screen's clinic code)
+- V20: `clinic_settings.working_weekdays` (ISO weekday mask, default Sat-Thu) + `clinic_holiday` table (clinic-wide or per-employee, RLS-protected) — the authoritative work-calendar source for UC-003 A3
+
+## Object Storage (MinIO)
+
+- Config: `clinicos.storage.{endpoint,access-key,secret-key,bucket}` in `application.yml`
+- `shared/AttachmentService` — `upload(clinicId, uploadedByMembershipId, file)` writes to MinIO then the `attachment` row; `open(clinicId, attachmentId)` streams it back, tenancy-checked against `clinicId` and RLS
+- `spring.servlet.multipart.max-file-size`/`max-request-size` raised (8MB/10MB) to fit phone photos
 
 **Local dev**: `docker compose up -d postgres minio`
+- Reset dev data: `./seed-dev.ps1` — wipes ALL business data and reseeds one clinic (`test-clinic`) with four users: `owner` / `manager` / `assistant` / `receptionist`. Owner password `12345678`, others `123`. Needs a migrated DB first. Destructive.
 - Postgres: `localhost:5432`, db `clinicos`, user `postgres` / `local-dev-only`
 - After Flyway migrates (as `postgres`), `app_rw` must get a password:
   ```sql
@@ -143,6 +151,8 @@ mvn spring-boot:run
 
 ## Session Workflow
 
+0. **Code discovery — serena-first.** This repo has a `.serena/` semantic index. For symbol-level lookups ("where is X defined", "what calls Y", "list methods of Z") use `mcp__serena__*` tools — `get_symbols_overview`, `find_symbol`, `find_declaration`, `find_referencing_symbols`, `search_for_pattern` — before Grep/Glob. They load preconnected (context: claude-code) and cost less than raw grep over generated jOOQ sources. Fall back to Grep/Glob freely for non-indexed files (yaml, markdown, SQL, HTML) or when serena returns nothing.
+
 1. **At the start of every session — new or resumed — run `git fetch origin`** before any work (or first read), so local refs/tracking match the remote. Applies even when resuming a previous session/branch.
 2. **Read `docs/roadmap.md` first.** Find the phase marked `in progress`, scan for the first `- [ ]` step — resume there. All `- [x]` steps are done.
 3. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
@@ -168,7 +178,7 @@ mvn spring-boot:run
 | 1 — UC-001 Login + Phase 1b sign-up | done |
 | 1c — Design system reconciliation | in progress |
 | 2 — UC-002 Employees/roles | not started |
-| 3 — UC-003 Daily work/attendance | not started |
+| 3 — UC-003 Daily work/attendance | in progress |
 | 4 — UC-004/005 Evaluation | not started |
 | 5 — UC-006 Prep checklists | not started |
 | 6 — UC-007 Academy | not started |

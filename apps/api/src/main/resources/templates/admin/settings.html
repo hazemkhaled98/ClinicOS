@@ -15,10 +15,12 @@
       <div th:replace="~{admin/clinic-settings :: weightsCard(${weightsForm}, ${weightsSum})}"></div>
       <div th:replace="~{admin/clinic-settings :: volumeCard(${volumeForm})}"></div>
       <div th:replace="~{admin/clinic-settings :: dutyCard(${dutyForm})}"></div>
+      <div th:replace="~{admin/clinic-settings :: calendarCard(${weekdaysForm}, ${holidaysForm})}"></div>
       <div th:replace="~{admin/clinic-settings :: tiersCard(${tiersForm})}"></div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>
   <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
 </body>
 </html>

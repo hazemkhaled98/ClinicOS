@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
@@ -47,15 +48,17 @@ public class AdminController {
     private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
     private final ClinicSettingsService clinicSettingsService;
+    private final WorkCalendarService workCalendarService;
     private final UserAdminService userAdminService;
 
     public AdminController(LayoutModel layoutModel, EmployeeService employeeService,
             ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService,
-            UserAdminService userAdminService) {
+            WorkCalendarService workCalendarService, UserAdminService userAdminService) {
         this.layoutModel = layoutModel;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
         this.clinicSettingsService = clinicSettingsService;
+        this.workCalendarService = workCalendarService;
         this.userAdminService = userAdminService;
     }
 
@@ -80,7 +83,12 @@ public class AdminController {
         model.addAttribute("volumeForm", ClinicSettingsController.VolumeForm.from(clinicSettings.volumeTarget()));
         model.addAttribute("dutyForm", ClinicSettingsController.DutyForm.from(clinicSettings));
         model.addAttribute("tiersForm", ClinicSettingsController.TiersForm.from(clinicSettings.tiers()));
-        renderCard(model, session, userAdminService.list(AdminAccess.clinicId(session)));
+        UUID clinicId = AdminAccess.clinicId(session);
+        model.addAttribute("weekdaysForm", ClinicSettingsController.WeekdaysForm.from(workCalendarService.workingWeekdays(clinicId)));
+        model.addAttribute("holidaysForm", new ClinicSettingsController.HolidayForm());
+        model.addAttribute("holidays", workCalendarService.listHolidays(clinicId));
+        model.addAttribute("employees", employeeService.list(clinicId));
+        renderCard(model, session, userAdminService.list(clinicId));
         return "admin/settings";
     }
 

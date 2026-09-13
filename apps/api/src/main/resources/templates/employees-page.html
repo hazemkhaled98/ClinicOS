@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تسجيل الموظف')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+      <div th:replace="~{employees :: dayGrid(${day})}"></div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>
