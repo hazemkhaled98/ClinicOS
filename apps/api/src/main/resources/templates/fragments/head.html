@@ -33,7 +33,7 @@
       toastTimer = setTimeout(function () {
         el.style.opacity = '0';
         setTimeout(function () { el.classList.add('hidden'); }, 300);
-      }, type === 'error' ? 4500 : 3500);
+      }, type === 'error' ? 3000 : 2500);
     };
     document.addEventListener('htmx:afterSwap', function () {
       var el = document.querySelector('[data-toast]');
