@@ -60,11 +60,12 @@
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant" x-show="freq === 'custom'" x-cloak>
           كل
-          <input type="number" name="everyN" min="1" class="clinicos-input w-20" th:value="${task.everyN()}">
+          <input type="number" name="everyN" min="1" class="clinicos-input w-20" th:value="${task.everyN()}" :disabled="freq !== 'custom'">
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant" x-show="freq === 'custom'" x-cloak>
           الوحدة
-          <select name="intervalUnit" class="clinicos-input w-24">
+          <select name="intervalUnit" class="clinicos-input w-24" :disabled="freq !== 'custom'">
+            <option value="">—</option>
             <option value="day" th:selected="${task.intervalUnit() == 'day'}">يوم</option>
             <option value="week" th:selected="${task.intervalUnit() == 'week'}">أسبوع</option>
             <option value="month" th:selected="${task.intervalUnit() == 'month'}">شهر</option>
@@ -127,11 +128,11 @@
         </label>
         <label class="flex flex-col items-center gap-1 text-xs text-on-surface-variant" x-show="freq === 'custom'" x-cloak>
           كل
-          <input type="number" name="everyN" min="1" class="clinicos-input w-16" placeholder="—">
+          <input type="number" name="everyN" min="1" class="clinicos-input w-16" placeholder="—" :disabled="freq !== 'custom'">
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant" x-show="freq === 'custom'" x-cloak>
           الوحدة
-          <select name="intervalUnit" class="clinicos-input w-24">
+          <select name="intervalUnit" class="clinicos-input w-24" :disabled="freq !== 'custom'">
             <option value="">—</option>
             <option value="day">يوم</option>
             <option value="week">أسبوع</option>
