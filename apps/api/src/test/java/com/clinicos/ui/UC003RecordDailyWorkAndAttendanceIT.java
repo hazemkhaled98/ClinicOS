@@ -1,10 +1,16 @@
 package com.clinicos.ui;
 
+import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
+import static com.clinicos.shared.jooq.tables.Employee.EMPLOYEE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.time.LocalTime;
 import java.util.UUID;
+
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +69,35 @@ class UC003RecordDailyWorkAndAttendanceIT extends AbstractBrowserIT {
         page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("دخول")).click();
     }
 
+    private String seedAssistantShiftEnded(String username, String rawPassword) throws Exception {
+        String slug = "clinic-" + uniqueSuffix();
+        try (Connection connection = DriverManager.getConnection(
+                PostgresTestSupport.POSTGRES.getJdbcUrl(),
+                PostgresTestSupport.POSTGRES.getUsername(),
+                PostgresTestSupport.POSTGRES.getPassword())) {
+            UUID clinicId = TestFixtures.insertClinic(connection, "Test Clinic " + username, slug);
+            UUID userId = TestFixtures.insertUser(
+                    connection, clinicId, username, passwordEncoder.encode(rawPassword), "active");
+            UUID membershipId = TestFixtures.insertMembership(connection, clinicId, userId, "assistant");
+            UUID employeeId = TestFixtures.insertEmployee(connection, clinicId, "منى أحمد");
+            TestFixtures.linkMembershipToEmployee(connection, membershipId, employeeId);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicId);
+            DSL.using(connection, SQLDialect.POSTGRES)
+                    .update(EMPLOYEE)
+                    .set(EMPLOYEE.CUSTOM_SHIFT, true)
+                    .set(EMPLOYEE.SHIFT_START, LocalTime.MIN)
+                    .set(EMPLOYEE.SHIFT_END, LocalTime.MIN)
+                    .where(EMPLOYEE.ID.eq(employeeId))
+                    .execute();
+            DSL.using(connection, SQLDialect.POSTGRES)
+                    .update(CLINIC_SETTINGS)
+                    .set(CLINIC_SETTINGS.WORKING_WEEKDAYS, new Short[] { 1, 2, 3, 4, 5, 6, 7 })
+                    .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
+                    .execute();
+        }
+        return slug;
+    }
+
     private String seedAssistantWithTasks(String username, String rawPassword, String nonPhotoTaskName,
             String photoTaskName) throws Exception {
         String slug = "clinic-" + uniqueSuffix();
@@ -87,6 +122,21 @@ class UC003RecordDailyWorkAndAttendanceIT extends AbstractBrowserIT {
 
     private Locator taskRow(String taskName) {
         return page().locator("div.flex.items-center.gap-3.py-3", new Page.LocatorOptions().setHasText(taskName));
+    }
+
+    @Test
+    @DisplayName("Employee with no check-in after shift end sees the absence warning")
+    void noCheckInAfterShiftEndShowsAbsenceWarning() throws Exception {
+        String username = "emp-" + uniqueSuffix();
+        String rawPassword = "correct-horse-battery-staple";
+        String clinicSlug = seedAssistantShiftEnded(username, rawPassword);
+
+        page().navigate(getUrl() + "login");
+        login(username, rawPassword, clinicSlug);
+        page().waitForURL(url -> url.contains("/employees"));
+
+        PlaywrightAssertions.assertThat(page().getByText("⛔ وقت الدوام انتهى — اليوم ده هيتحسب غياب.")).isVisible();
+        PlaywrightAssertions.assertThat(page().getByText("🔒 المهام مقفولة")).isVisible();
     }
 
     @Test

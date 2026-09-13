@@ -26,12 +26,4 @@ public final class AttendanceStatus {
         boolean full = !checkOutTime.isBefore(shiftEnd.minusMinutes(graceMinutes));
         return new AttendanceLabel(full ? "ميعاد كامل" : "انصراف مبكّر", full);
     }
-
-    public static boolean isOnTime(LocalTime checkInTime, LocalTime shiftStart, int graceMinutes) {
-        return !checkInTime.isAfter(shiftStart.plusMinutes(graceMinutes));
-    }
-
-    public static boolean isFullShift(LocalTime checkOutTime, LocalTime shiftEnd, int graceMinutes) {
-        return !checkOutTime.isBefore(shiftEnd.minusMinutes(graceMinutes));
-    }
 }
