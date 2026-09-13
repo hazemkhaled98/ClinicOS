@@ -68,3 +68,6 @@ scratch/
 
 # Playwright MCP browser snapshots
 .playwright-mcp/
+
+# Scratchpad diff artifacts (temp paths mangled into filenames)
+*scratchpad*.diff
