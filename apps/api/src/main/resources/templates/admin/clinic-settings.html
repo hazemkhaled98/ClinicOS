@@ -160,7 +160,7 @@
     <div th:each="holiday : ${holidays}" class="mt-1 rounded-xl border border-neutral-200 p-4 flex flex-wrap items-center gap-3">
       <span class="text-sm font-bold text-teal-900" th:text="${holiday.name()}">عيد الفطر</span>
       <span class="clinicos-chip" th:classappend="${holiday.employeeId() != null} ? ' clinicos-chip--info' : ' clinicos-chip--success'"
-            th:text="${holiday.employeeId() != null} ? 'موظف محدد' : 'كل العيادة'">كل العيادة</span>
+            th:text="${holiday.employeeId() != null} ? ${holiday.employeeName()} : 'كل العيادة'">كل العيادة</span>
       <span class="text-sm text-on-surface-variant" th:text="${holiday.date()}">2026-03-20</span>
       <form class="ms-auto" th:attr="hx-delete='/admin-dashboard/settings/holidays/' + ${holiday.id()}"
             hx-target="#calendar-card" hx-swap="outerHTML"

@@ -17,7 +17,6 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.clinicos.shared.jooq.enums.StaffRole;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord;
@@ -41,8 +40,8 @@ public class DefaultDailyWorkService implements DailyWorkService {
     @Override
     public List<DailyTask> today(UUID clinicId, UUID employeeId) {
         return transactionTemplate.execute(status -> {
-            StaffRole role = resolveStaffRole(clinicId, employeeId);
-            if (role == null) {
+            String roleCode = resolveRoleCode(clinicId, employeeId);
+            if (roleCode == null) {
                 return List.of();
             }
             LocalDate date = LocalDate.now();
@@ -64,7 +63,9 @@ public class DefaultDailyWorkService implements DailyWorkService {
                             .on(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID.eq(TASK_DEFINITION.ID)
                                     .and(DAILY_TASK_COMPLETION.DAILY_RECORD_ID.eq(dailyRecordId)))
                     .where(TASK_DEFINITION.CLINIC_ID.eq(clinicId))
-                    .and(TASK_DEFINITION.STAFF_ROLE.eq(role))
+                    .and(TASK_DEFINITION.ROLE_CODE.eq(roleCode)
+                            .or(TASK_DEFINITION.ROLE_CODE.isNull().and(TASK_DEFINITION.EMPLOYEE_ID.isNull()))
+                            .or(TASK_DEFINITION.EMPLOYEE_ID.eq(employeeId)))
                     .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
                     .orderBy(TASK_DEFINITION.DISPLAY_ORDER.asc(), TASK_DEFINITION.NAME.asc())
                     .fetch(rec -> newDailyTask(rec, lastCompleted));
@@ -161,18 +162,13 @@ public class DefaultDailyWorkService implements DailyWorkService {
                 .fetchOne(DAILY_RECORD.ID);
     }
 
-    private StaffRole resolveStaffRole(UUID clinicId, UUID employeeId) {
-        String roleCode = dsl.select(ROLE.CODE)
+    private String resolveRoleCode(UUID clinicId, UUID employeeId) {
+        return dsl.select(ROLE.CODE)
                 .from(MEMBERSHIP)
                 .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
                 .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                 .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
                 .fetchOne(ROLE.CODE);
-        return switch (roleCode == null ? "" : roleCode) {
-            case "assistant" -> StaffRole.assistant;
-            case "receptionist" -> StaffRole.receptionist;
-            default -> null;
-        };
     }
 
     private static String fromDbDimension(TaskDimension d) {

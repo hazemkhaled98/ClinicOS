@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.clinicos.shared.ActivityLogService;
+import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.TaskDefinitionService;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
 
@@ -29,12 +30,14 @@ public class TaskDefinitionController {
 
     private final LayoutModel layoutModel;
     private final TaskDefinitionService taskDefinitionService;
+    private final EmployeeService employeeService;
     private final ActivityLogService activityLogService;
 
     public TaskDefinitionController(LayoutModel layoutModel, TaskDefinitionService taskDefinitionService,
-            ActivityLogService activityLogService) {
+            EmployeeService employeeService, ActivityLogService activityLogService) {
         this.layoutModel = layoutModel;
         this.taskDefinitionService = taskDefinitionService;
+        this.employeeService = employeeService;
         this.activityLogService = activityLogService;
     }
 
@@ -60,8 +63,9 @@ public class TaskDefinitionController {
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.create(clinicId, new TaskDefinitionRequest(
-                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode(),
-                        form.isRequiresPhoto(), form.getEveryN(), norm(form.getIntervalUnit())));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), targetRole(form.getTarget()),
+                        targetEmployee(form.getTarget()), form.isRequiresPhoto(), form.getEveryN(),
+                        norm(form.getIntervalUnit())));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.create", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
@@ -84,8 +88,9 @@ public class TaskDefinitionController {
         if (fieldErrors.isEmpty()) {
             try {
                 taskDefinitionService.update(clinicId, taskId, new TaskDefinitionRequest(
-                        form.getName().trim(), form.getDimension(), form.getFrequency(), form.getRoleCode(),
-                        form.isRequiresPhoto(), form.getEveryN(), norm(form.getIntervalUnit())));
+                        form.getName().trim(), form.getDimension(), form.getFrequency(), targetRole(form.getTarget()),
+                        targetEmployee(form.getTarget()), form.isRequiresPhoto(), form.getEveryN(),
+                        norm(form.getIntervalUnit())));
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "task.update", "task_definition");
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("task", e.getMessage());
@@ -118,6 +123,25 @@ public class TaskDefinitionController {
 
     private void renderCard(Model model, UUID clinicId) {
         model.addAttribute("tasks", taskDefinitionService.list(clinicId));
+        model.addAttribute("employees", employeeService.list(clinicId));
+    }
+
+    private static String targetRole(String target) {
+        if (target == null || !target.startsWith("role:")) {
+            return null;
+        }
+        return target.substring("role:".length());
+    }
+
+    private static UUID targetEmployee(String target) {
+        if (target == null || !target.startsWith("employee:")) {
+            return null;
+        }
+        try {
+            return UUID.fromString(target.substring("employee:".length()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("الموظف غير معروف");
+        }
     }
 
     private static String norm(String value) {
@@ -131,19 +155,19 @@ public class TaskDefinitionController {
         private String dimension;
         @NotBlank(message = "التكرار مطلوب")
         private String frequency;
-        @NotBlank(message = "الدور مطلوب")
-        private String roleCode;
+        @NotBlank(message = "الدور أو الموظف مطلوب")
+        private String target;
         private boolean requiresPhoto;
         private Integer everyN;
         private String intervalUnit;
 
-        static TaskForm of(String name, String dimension, String frequency, String roleCode,
+        static TaskForm of(String name, String dimension, String frequency, String target,
                 boolean requiresPhoto, Integer everyN, String intervalUnit) {
             TaskForm form = new TaskForm();
             form.name = name;
             form.dimension = dimension;
             form.frequency = frequency;
-            form.roleCode = roleCode;
+            form.target = target;
             form.requiresPhoto = requiresPhoto;
             form.everyN = everyN;
             form.intervalUnit = intervalUnit;
@@ -174,12 +198,12 @@ public class TaskDefinitionController {
             this.frequency = frequency;
         }
 
-        public String getRoleCode() {
-            return roleCode;
+        public String getTarget() {
+            return target;
         }
 
-        public void setRoleCode(String roleCode) {
-            this.roleCode = roleCode;
+        public void setTarget(String target) {
+            this.target = target;
         }
 
         public boolean isRequiresPhoto() {

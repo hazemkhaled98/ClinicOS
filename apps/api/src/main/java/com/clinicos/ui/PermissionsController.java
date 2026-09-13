@@ -77,7 +77,7 @@ public class PermissionsController {
             return "redirect:/";
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
-        renderPage(model, session);
+        renderPage(model, session, null);
         return "admin/permissions-page";
     }
 
@@ -99,17 +99,20 @@ public class PermissionsController {
                 fieldErrors.put("permissions", e.getMessage());
             }
         }
-        renderPage(model, session);
+        renderPage(model, session, form.getRoleCode());
         Toasts.fromErrors(model, fieldErrors, "تم حفظ الصلاحيات");
         return "admin/permissions :: permissionsCard";
     }
 
-    private void renderPage(Model model, HttpSession session) {
+    private void renderPage(Model model, HttpSession session, String submittedRole) {
         UUID clinicId = AdminAccess.clinicId(session);
-        model.addAttribute("roleCodes", manageableRoleCodes(AdminAccess.roleCode(session)));
+        List<String> manageable = manageableRoleCodes(AdminAccess.roleCode(session));
+        model.addAttribute("roleCodes", manageable);
         model.addAttribute("roleNames", roleNames());
         model.addAttribute("permissionLabels", PERMISSION_LABELS);
         model.addAttribute("usersByRole", usersByRole(userAdminService.list(clinicId)));
+        model.addAttribute("activeRole",
+                submittedRole != null && manageable.contains(submittedRole) ? submittedRole : manageable.getFirst());
         try {
             model.addAttribute("rolePermissionMap", toMap(rolePermissionService.listForClinic(clinicId)));
         } catch (Exception e) {

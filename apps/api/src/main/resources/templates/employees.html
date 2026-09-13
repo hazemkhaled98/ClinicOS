@@ -129,9 +129,8 @@
             </a>
             <form th:if="${task.done()}"
                   th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/uncomplete|"
-                  hx-target="#day-grid" hx-swap="outerHTML"
-                  class="clinicos-btn clinicos-btn--danger text-xs p-0">
-              <button type="submit" class="text-xs px-2 py-1">إلغاء</button>
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">إلغاء</button>
             </form>
 
             <span class="flex-1">
@@ -177,9 +176,8 @@
             </a>
             <form th:if="${task.done()}"
                   th:attr="hx-post=|/employees/tasks/${task.taskDefinitionId()}/uncomplete|"
-                  hx-target="#day-grid" hx-swap="outerHTML"
-                  class="clinicos-btn clinicos-btn--danger text-xs p-0">
-              <button type="submit" class="text-xs px-2 py-1">إلغاء</button>
+                  hx-target="#day-grid" hx-swap="outerHTML">
+              <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">إلغاء</button>
             </form>
 
             <span class="flex-1">

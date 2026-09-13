@@ -28,10 +28,15 @@ insert into employee (id, clinic_id, name, base_pay, max_incentive) values
     ('bbbbbbbb-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Sara Ahmed', 4000, 1000),
     ('bbbbbbbb-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'Sara Ahmed', 4200, 1100);
 
--- Same task name in both clinics.
-insert into task_definition (id, clinic_id, staff_role, name, dimension, frequency, display_order) values
+-- Same task name in both clinics (role-targeted), plus one employee-targeted
+-- task to prove role_code/employee_id routing and the same-clinic trigger.
+insert into task_definition (id, clinic_id, role_code, name, dimension, frequency, display_order) values
     ('cccccccc-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'assistant', 'Sterilize tray', 'fanni', 'daily', 1),
     ('cccccccc-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'assistant', 'Sterilize tray', 'fanni', 'daily', 1);
+
+insert into task_definition (id, clinic_id, employee_id, name, dimension, frequency, display_order) values
+    ('cccccccc-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+     'bbbbbbbb-0000-0000-0000-000000000001', 'Clean room B', 'fanni', 'daily', 2);
 
 -- Inventory + a receive/issue/return chain for the stock_movement sum check.
 insert into inventory_item (id, clinic_id, name, uom, unit_cost) values

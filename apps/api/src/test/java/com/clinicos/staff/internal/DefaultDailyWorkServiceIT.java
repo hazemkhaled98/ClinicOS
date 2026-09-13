@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.jooq.InsertSetMoreStep;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
@@ -27,9 +28,9 @@ import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.shared.TenantContext;
-import com.clinicos.shared.jooq.enums.StaffRole;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
+import com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord;
 import com.clinicos.staff.api.DailyWorkService;
 import com.clinicos.staff.api.DailyWorkService.DailyTask;
 import com.clinicos.staff.api.EmployeeService;
@@ -68,7 +69,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف العيادة", TaskDimension.fanni, TaskFrequency.daily, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف العيادة", TaskDimension.fanni, TaskFrequency.daily, false);
 
         List<DailyTask> tasks = dailyWorkService.today(clinicA, employeeId);
 
@@ -105,7 +106,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
 
         assertThatThrownBy(() -> dailyWorkService.complete(clinicA, employeeId, taskId, null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -129,7 +130,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, true);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, true);
         selfCheckService.checkIn(clinicA, employeeId);
 
         assertThatThrownBy(() -> dailyWorkService.complete(clinicA, employeeId, taskId, null))
@@ -142,7 +143,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
         selfCheckService.checkIn(clinicA, employeeId);
 
         dailyWorkService.complete(clinicA, employeeId, taskId, null);
@@ -158,7 +159,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
         selfCheckService.checkIn(clinicA, employeeId);
 
         dailyWorkService.complete(clinicA, employeeId, taskId, null);
@@ -174,7 +175,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
         selfCheckService.checkIn(clinicA, employeeId);
 
         dailyWorkService.complete(clinicA, employeeId, taskId, null);
@@ -191,7 +192,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTask(clinicA, StaffRole.assistant, "تنظيف", TaskDimension.fanni, TaskFrequency.weekly, false);
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.weekly, false);
         selfCheckService.checkIn(clinicA, employeeId);
 
         UUID dailyRecordIdYday;
@@ -219,6 +220,50 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(task.lastCompletedDate()).isEqualTo(java.time.LocalDate.now().minusDays(1));
     }
 
+    @Test
+    void today_employeeTargetedTask_visibleOnlyToThatEmployee() throws Exception {
+        TenantContext.set(clinicA);
+        UUID targetId = createEmployee("مستهدف");
+        UUID otherId = createEmployee("آخر");
+        linkEmployeeToRole(targetId, "assistant");
+        linkEmployeeToRole(otherId, "receptionist");
+        UUID taskId = seedTask(clinicA, null, targetId, "تنظيف خاصة", TaskDimension.fanni, TaskFrequency.daily, false);
+
+        List<DailyTask> targetTasks = dailyWorkService.today(clinicA, targetId);
+        List<DailyTask> otherTasks = dailyWorkService.today(clinicA, otherId);
+
+        assertThat(targetTasks).extracting(DailyTask::taskDefinitionId).containsExactly(taskId);
+        assertThat(otherTasks).isEmpty();
+    }
+
+    @Test
+    void today_unassignedTask_visibleToAnyRole() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, null, null, "شامل", TaskDimension.fanni, TaskFrequency.daily, false);
+
+        List<DailyTask> tasks = dailyWorkService.today(clinicA, employeeId);
+
+        assertThat(tasks).extracting(DailyTask::taskDefinitionId).containsExactly(taskId);
+    }
+
+    @Test
+    void complete_employeeTargetedTask_seenByThatEmployee() throws Exception {
+        TenantContext.set(clinicA);
+        UUID targetId = createEmployee("مستهدف");
+        linkEmployeeToRole(targetId, "assistant");
+        UUID taskId = seedTask(clinicA, null, targetId, "تنظيف خاصة", TaskDimension.fanni, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, targetId);
+
+        dailyWorkService.complete(clinicA, targetId, taskId, null);
+
+        assertThat(dailyWorkService.today(clinicA, targetId))
+                .extracting(DailyTask::taskDefinitionId)
+                .containsExactly(taskId);
+        assertThat(dailyWorkService.today(clinicA, targetId).get(0).completedAt()).isNotNull();
+    }
+
     private UUID createEmployee(String name) {
         return employeeService.create(clinicA,
                 new EmployeeService.EmployeeRequest(name, BigDecimal.ZERO, BigDecimal.ZERO,
@@ -237,14 +282,19 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         }
     }
 
-    private UUID seedTask(UUID clinicId, StaffRole role, String name, TaskDimension dimension,
+    private UUID seedTask(UUID clinicId, String roleCode, UUID employeeId, String name, TaskDimension dimension,
             TaskFrequency frequency, boolean requiresPhoto) throws Exception {
         try (Connection conn = superuser()) {
-            return DSL.using(conn, SQLDialect.POSTGRES)
+            InsertSetMoreStep<TaskDefinitionRecord> insert = DSL.using(conn, SQLDialect.POSTGRES)
                     .insertInto(TASK_DEFINITION)
-                    .set(TASK_DEFINITION.CLINIC_ID, clinicId)
-                    .set(TASK_DEFINITION.STAFF_ROLE, role)
-                    .set(TASK_DEFINITION.NAME, name)
+                    .set(TASK_DEFINITION.CLINIC_ID, clinicId);
+            if (roleCode != null) {
+                insert = insert.set(TASK_DEFINITION.ROLE_CODE, roleCode);
+            }
+            if (employeeId != null) {
+                insert = insert.set(TASK_DEFINITION.EMPLOYEE_ID, employeeId);
+            }
+            return insert.set(TASK_DEFINITION.NAME, name)
                     .set(TASK_DEFINITION.DIMENSION, dimension)
                     .set(TASK_DEFINITION.FREQUENCY, frequency)
                     .set(TASK_DEFINITION.REQUIRES_PHOTO, requiresPhoto)

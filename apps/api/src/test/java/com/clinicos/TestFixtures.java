@@ -24,7 +24,7 @@ import org.jooq.impl.DSL;
 
 import com.clinicos.shared.jooq.enums.EvalCategory;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
-import com.clinicos.shared.jooq.enums.StaffRole;
+
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 
@@ -131,13 +131,13 @@ public final class TestFixtures {
                 .fetchOne(EMPLOYEE.ID);
     }
 
-    public static UUID insertTaskDefinition(Connection connection, UUID clinicId, String staffRole, String name,
+    public static UUID insertTaskDefinition(Connection connection, UUID clinicId, String roleCode, String name,
             String dimension, String frequency, boolean requiresPhoto) throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
-                .insertInto(TASK_DEFINITION, TASK_DEFINITION.CLINIC_ID, TASK_DEFINITION.STAFF_ROLE,
+                .insertInto(TASK_DEFINITION, TASK_DEFINITION.CLINIC_ID, TASK_DEFINITION.ROLE_CODE,
                         TASK_DEFINITION.NAME, TASK_DEFINITION.DIMENSION, TASK_DEFINITION.FREQUENCY,
                         TASK_DEFINITION.REQUIRES_PHOTO)
-                .values(clinicId, StaffRole.valueOf(staffRole), name, TaskDimension.valueOf(dimension),
+                .values(clinicId, roleCode, name, TaskDimension.valueOf(dimension),
                         TaskFrequency.valueOf(frequency), requiresPhoto)
                 .returningResult(TASK_DEFINITION.ID)
                 .fetchOne(TASK_DEFINITION.ID);

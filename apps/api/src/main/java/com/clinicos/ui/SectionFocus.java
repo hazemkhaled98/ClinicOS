@@ -24,6 +24,9 @@ public final class SectionFocus {
             return null;
         }
         List<String> codes = (List<String>) codesRaw;
+        if (codes.contains("ceo")) {
+            return "admin-dashboard";
+        }
         List<NavSection> sections = NavSectionResolver.resolve(new HashSet<>(codes), roleCode);
         if (sections.isEmpty()) {
             return null;

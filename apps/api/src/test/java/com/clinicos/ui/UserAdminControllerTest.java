@@ -94,10 +94,11 @@ class UserAdminControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "user.create", "user");
+        verify(userAdminService).assignRole(CLINIC, created.membershipId(), "receptionist", MEMBERSHIP);
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
@@ -108,7 +109,7 @@ class UserAdminControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createUser(UserAdminController.UserForm.of("", "أحمد", "a@b.com", "hash123"), Validated.of(UserAdminController.UserForm.of("", "أحمد", "a@b.com", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("", "أحمد", "a@b.com", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("", "أحمد", "a@b.com", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
@@ -123,7 +124,7 @@ class UserAdminControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "not-an-email", "hash123"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "not-an-email", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "not-an-email", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "not-an-email", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
@@ -251,12 +252,12 @@ class UserAdminControllerTest {
         when(employeeService.create(eq(CLINIC), any())).thenReturn(employee);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
 
-        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         verify(employeeService).create(eq(CLINIC), any());
         verify(userAdminService).linkEmployee(CLINIC, membershipId, employeeId);
-        verify(userAdminService, never()).assignRole(any(), any(), any(), any());
+        verify(userAdminService).assignRole(CLINIC, membershipId, "receptionist", MEMBERSHIP);
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
@@ -269,7 +270,7 @@ class UserAdminControllerTest {
                         Map.of("email", "البريد الإلكتروني مستخدم بالفعل في هذه العيادة")));
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createUser(UserAdminController.UserForm.of("ahmed2", "أحمد", "a@b.com", "hash123"), Validated.of(UserAdminController.UserForm.of("ahmed2", "أحمد", "a@b.com", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("ahmed2", "أحمد", "a@b.com", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("ahmed2", "أحمد", "a@b.com", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(((String) model.getAttribute("toastMessage")))
@@ -287,7 +288,7 @@ class UserAdminControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123")), session, model);
+        String view = controller.createUser(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist"), Validated.of(UserAdminController.UserForm.of("ahmed", "أحمد", "a@b.com", "hash123", "receptionist")), session, model);
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("اسم المستخدم موجود مسبقاً");

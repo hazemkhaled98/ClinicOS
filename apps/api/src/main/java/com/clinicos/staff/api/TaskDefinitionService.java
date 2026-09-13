@@ -19,6 +19,7 @@ public interface TaskDefinitionService {
             String dimension,
             String frequency,
             String roleCode,
+            UUID employeeId,
             boolean requiresPhoto,
             Integer everyN,
             String intervalUnit) {
@@ -29,6 +30,7 @@ public interface TaskDefinitionService {
             String dimension,
             String frequency,
             String roleCode,
+            UUID employeeId,
             boolean requiresPhoto,
             Integer everyN,
             String intervalUnit) {

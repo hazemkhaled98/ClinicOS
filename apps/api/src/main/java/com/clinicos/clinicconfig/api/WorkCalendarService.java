@@ -37,7 +37,7 @@ public interface WorkCalendarService {
     /** Replaces the weekday mask (validated 1..7, non-empty, no duplicates). */
     void setWorkingWeekdays(UUID clinicId, List<Integer> weekdays);
 
-    record Holiday(UUID id, LocalDate date, String name, UUID employeeId) {
+    record Holiday(UUID id, LocalDate date, String name, UUID employeeId, String employeeName) {
     }
 
     record HolidayRequest(LocalDate date, String name, UUID employeeId) {

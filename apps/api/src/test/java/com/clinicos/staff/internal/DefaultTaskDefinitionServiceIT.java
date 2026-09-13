@@ -47,7 +47,7 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
     void createThenListReturnsTask() {
         TenantContext.set(clinicA);
         TaskDefinition created = taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("تنظيف", "fanni", "daily", "assistant", false, null, null));
+                new TaskDefinitionRequest("تنظيف", "fanni", "daily", "assistant", null, false, null, null));
 
         List<TaskDefinition> tasks = taskDefinitionService.list(clinicA);
 
@@ -56,15 +56,16 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(tasks.get(0).dimension()).isEqualTo("fanni");
         assertThat(tasks.get(0).frequency()).isEqualTo("daily");
         assertThat(tasks.get(0).roleCode()).isEqualTo("assistant");
+        assertThat(tasks.get(0).employeeId()).isNull();
         assertThat(tasks.get(0).requiresPhoto()).isFalse();
     }
 
     @Test
     void listFiltersByClinic() {
         TenantContext.set(clinicA);
-        taskDefinitionService.create(clinicA, new TaskDefinitionRequest("مهنة أ", "fanni", "daily", "assistant", false, null, null));
+        taskDefinitionService.create(clinicA, new TaskDefinitionRequest("مهنة أ", "fanni", "daily", "assistant", null, false, null, null));
         TenantContext.set(clinicB);
-        taskDefinitionService.create(clinicB, new TaskDefinitionRequest("مهنة ب", "solooki", "weekly", "receptionist", true, null, null));
+        taskDefinitionService.create(clinicB, new TaskDefinitionRequest("مهنة ب", "solooki", "weekly", "receptionist", null, true, null, null));
 
         TenantContext.set(clinicA);
         List<TaskDefinition> aTasks = taskDefinitionService.list(clinicA);
@@ -82,10 +83,10 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
     void updateTaskChangesName() {
         TenantContext.set(clinicA);
         TaskDefinition created = taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("اسم قديم", "fanni", "daily", "assistant", false, null, null));
+                new TaskDefinitionRequest("اسم قديم", "fanni", "daily", "assistant", null, false, null, null));
 
         taskDefinitionService.update(clinicA, created.id(),
-                new TaskDefinitionRequest("اسم جديد", "solooki", "weekly", "receptionist", true, null, null));
+                new TaskDefinitionRequest("اسم جديد", "solooki", "weekly", "receptionist", null, true, null, null));
 
         List<TaskDefinition> tasks = taskDefinitionService.list(clinicA);
         assertThat(tasks.get(0).name()).isEqualTo("اسم جديد");
@@ -99,7 +100,7 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
     void deleteTaskSoftDeletes() {
         TenantContext.set(clinicA);
         TaskDefinition created = taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("للحذف", "fanni", "daily", "assistant", false, null, null));
+                new TaskDefinitionRequest("للحذف", "fanni", "daily", "assistant", null, false, null, null));
 
         taskDefinitionService.delete(clinicA, created.id());
 
@@ -119,7 +120,7 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
     void createCustomFrequencyPersistsEveryNAndInterval() {
         TenantContext.set(clinicA);
         TaskDefinition created = taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("مراجعة أدوية", "fanni", "custom", "assistant", false, 2, "week"));
+                new TaskDefinitionRequest("مراجعة أدوية", "fanni", "custom", "assistant", null, false, 2, "week"));
 
         List<TaskDefinition> tasks = taskDefinitionService.list(clinicA);
         assertThat(tasks).hasSize(1);
@@ -134,10 +135,10 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
     void updateCustomFrequencyChangesEveryN() {
         TenantContext.set(clinicA);
         TaskDefinition created = taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("مهمة مخصصة", "ibda3", "custom", "assistant", false, 3, "month"));
+                new TaskDefinitionRequest("مهمة مخصصة", "ibda3", "custom", "assistant", null, false, 3, "month"));
 
         taskDefinitionService.update(clinicA, created.id(),
-                new TaskDefinitionRequest("مهمة مخصصة", "ibda3", "custom", "assistant", true, 1, "day"));
+                new TaskDefinitionRequest("مهمة مخصصة", "ibda3", "custom", "assistant", null, true, 1, "day"));
 
         List<TaskDefinition> tasks = taskDefinitionService.list(clinicA);
         assertThat(tasks.get(0).everyN()).isEqualTo(1);
@@ -150,7 +151,7 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
 
         assertThatThrownBy(() -> taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("مهمة ناقصة", "fanni", "custom", "assistant", false, null, "week")))
+                new TaskDefinitionRequest("مهمة ناقصة", "fanni", "custom", "assistant", null, false, null, "week")))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -159,7 +160,7 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
 
         assertThatThrownBy(() -> taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("مهمة خاطئة", "fanni", "daily", "assistant", false, 2, null)))
+                new TaskDefinitionRequest("مهمة خاطئة", "fanni", "daily", "assistant", null, false, 2, null)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -168,7 +169,43 @@ class DefaultTaskDefinitionServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
 
         assertThatThrownBy(() -> taskDefinitionService.create(clinicA,
-                new TaskDefinitionRequest("   ", "fanni", "daily", "assistant", false, null, null)))
+                new TaskDefinitionRequest("   ", "fanni", "daily", "assistant", null, false, null, null)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void createWithAllRolesTarget() {
+        TenantContext.set(clinicA);
+        taskDefinitionService.create(clinicA,
+                new TaskDefinitionRequest("شامل", "fanni", "daily", null, null, false, null, null));
+
+        List<TaskDefinition> tasks = taskDefinitionService.list(clinicA);
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.get(0).roleCode()).isNull();
+        assertThat(tasks.get(0).employeeId()).isNull();
+    }
+
+    @Test
+    void createWithEmployeeTarget() throws Exception {
+        TenantContext.set(clinicA);
+        UUID empId;
+        try (var connection = superuser()) {
+            empId = TestFixtures.insertEmployee(connection, clinicA, "مستهدفة");
+        }
+        TaskDefinition created = taskDefinitionService.create(clinicA,
+                new TaskDefinitionRequest("خاصه", "fanni", "daily", null, empId, false, null, null));
+
+        assertThat(created.roleCode()).isNull();
+        assertThat(created.employeeId()).isEqualTo(empId);
+    }
+
+    @Test
+    void createWithBothRoleAndEmployeeTargetThrows() {
+        TenantContext.set(clinicA);
+        UUID empId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> taskDefinitionService.create(clinicA,
+                new TaskDefinitionRequest("مزدوج", "fanni", "daily", "assistant", empId, false, null, null)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

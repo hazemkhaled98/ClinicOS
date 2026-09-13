@@ -75,6 +75,8 @@ public class UserAdminController {
                     Employee employee = employeeService.create(clinicId, new EmployeeRequest(
                             form.getFullName().trim(), null, null, null, null, false, null));
                     userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id());
+                    userAdminService.assignRole(clinicId, created.membershipId(), form.getRoleCode(),
+                            AdminAccess.membershipId(session));
                 });
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");
             } catch (UserValidationException e) {
@@ -201,17 +203,20 @@ public class UserAdminController {
         private String email;
         @NotBlank(message = "كلمة المرور مطلوبة")
         private String password;
+        @NotBlank(message = "الدور مطلوب")
+        private String roleCode;
 
         static UserForm empty() {
-            return of("", "", "", "");
+            return of("", "", "", "", "");
         }
 
-        static UserForm of(String username, String fullName, String email, String password) {
+        static UserForm of(String username, String fullName, String email, String password, String roleCode) {
             UserForm form = new UserForm();
             form.username = username;
             form.fullName = fullName;
             form.email = email;
             form.password = password;
+            form.roleCode = roleCode;
             return form;
         }
 
@@ -245,6 +250,14 @@ public class UserAdminController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public String getRoleCode() {
+            return roleCode;
+        }
+
+        public void setRoleCode(String roleCode) {
+            this.roleCode = roleCode;
         }
     }
 

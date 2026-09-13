@@ -1,0 +1,12 @@
+<th:block th:fragment="confirm-dialog" xmlns:th="http://www.thymeleaf.org">
+  <div id="confirm-overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-neutral-900/40 p-4"
+       role="dialog" aria-modal="true" aria-label="تأكيد العملية">
+    <div class="clinicos-card clinicos-card--modal w-full max-w-sm p-6">
+      <p id="confirm-message" class="text-base font-bold text-teal-900">هل أنت متأكد؟</p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button type="button" id="confirm-cancel" class="clinicos-btn">إلغاء</button>
+        <button type="button" id="confirm-ok" class="clinicos-btn clinicos-btn--danger">تأكيد</button>
+      </div>
+    </div>
+  </div>
+</th:block>

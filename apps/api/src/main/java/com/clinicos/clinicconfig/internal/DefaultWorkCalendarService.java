@@ -54,7 +54,10 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
     @Override
     public List<Holiday> listHolidays(UUID clinicId) {
         return transactionTemplate.execute(status ->
-                dsl.selectFrom(CLINIC_HOLIDAY)
+                dsl.select(CLINIC_HOLIDAY.fields())
+                        .select(EMPLOYEE.NAME)
+                        .from(CLINIC_HOLIDAY)
+                        .leftJoin(EMPLOYEE).on(EMPLOYEE.ID.eq(CLINIC_HOLIDAY.EMPLOYEE_ID))
                         .where(CLINIC_HOLIDAY.CLINIC_ID.eq(clinicId))
                         .orderBy(CLINIC_HOLIDAY.HOLIDAY_DATE.asc())
                         .fetch(this::toHoliday));
@@ -84,7 +87,7 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
                     .set(CLINIC_HOLIDAY.NAME, request.name().trim())
                     .set(CLINIC_HOLIDAY.EMPLOYEE_ID, request.employeeId())
                     .execute();
-            return new Holiday(id, request.date(), request.name().trim(), request.employeeId());
+            return new Holiday(id, request.date(), request.name().trim(), request.employeeId(), null);
         });
     }
 
@@ -180,8 +183,10 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
         }
     }
 
-    private Holiday toHoliday(ClinicHolidayRecord record) {
-        return new Holiday(record.getId(), record.getHolidayDate(), record.getName(), record.getEmployeeId());
+    private Holiday toHoliday(org.jooq.Record record) {
+        ClinicHolidayRecord r = record.into(CLINIC_HOLIDAY);
+        return new Holiday(r.getId(), r.getHolidayDate(), r.getName(), r.getEmployeeId(),
+                record.getValue(EMPLOYEE.NAME));
     }
 
     private static List<Integer> toIntegers(Short[] weekdays) {

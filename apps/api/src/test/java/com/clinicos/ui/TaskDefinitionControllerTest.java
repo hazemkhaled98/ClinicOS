@@ -13,12 +13,14 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.ui.nav.NavSectionResolver;
+import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.TaskDefinitionService;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinition;
 import com.clinicos.staff.api.TaskDefinitionService.TaskDefinitionRequest;
@@ -32,6 +34,7 @@ class TaskDefinitionControllerTest {
 
     private LayoutModel layoutModel;
     private TaskDefinitionService taskDefinitionService;
+    private EmployeeService employeeService;
     private ActivityLogService activityLogService;
     private TaskDefinitionController controller;
     private Model model;
@@ -40,8 +43,9 @@ class TaskDefinitionControllerTest {
     void setUp() {
         layoutModel = mock(LayoutModel.class);
         taskDefinitionService = mock(TaskDefinitionService.class);
+        employeeService = mock(EmployeeService.class);
         activityLogService = mock(ActivityLogService.class);
-        controller = new TaskDefinitionController(layoutModel, taskDefinitionService, activityLogService);
+        controller = new TaskDefinitionController(layoutModel, taskDefinitionService, employeeService, activityLogService);
         model = new ExtendedModelMap();
     }
 
@@ -71,14 +75,51 @@ class TaskDefinitionControllerTest {
     void createTaskLogsActivityAndReturnsCard() {
         HttpSession session = session();
         allowDashboard();
-        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", "assistant", false, null, null);
+        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", "assistant", null, false, null, null);
         when(taskDefinitionService.create(eq(CLINIC), any(TaskDefinitionRequest.class))).thenReturn(created);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(created));
 
-        String view = controller.createTask(taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
+        String view = controller.createTask(taskForm("تنظيف", "fanni", "daily", "role:assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "role:assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        ArgumentCaptor<TaskDefinitionRequest> captor = ArgumentCaptor.forClass(TaskDefinitionRequest.class);
+        verify(taskDefinitionService).create(eq(CLINIC), captor.capture());
+        assertThat(captor.getValue().roleCode()).isEqualTo("assistant");
+        assertThat(captor.getValue().employeeId()).isNull();
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.create", "task_definition");
+    }
+
+    @Test
+    void createTaskParsesEmployeeTarget() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID empId = UUID.randomUUID();
+        TaskDefinition created = new TaskDefinition(UUID.randomUUID(), "تنظيف", "fanni", "daily", null, empId, false, null, null);
+        when(taskDefinitionService.create(eq(CLINIC), any(TaskDefinitionRequest.class))).thenReturn(created);
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(created));
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.createTask(taskForm("تنظيف", "fanni", "daily", "employee:" + empId), Validated.of(taskForm("تنظيف", "fanni", "daily", "employee:" + empId)), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        ArgumentCaptor<TaskDefinitionRequest> captor = ArgumentCaptor.forClass(TaskDefinitionRequest.class);
+        verify(taskDefinitionService).create(eq(CLINIC), captor.capture());
+        assertThat(captor.getValue().roleCode()).isNull();
+        assertThat(captor.getValue().employeeId()).isEqualTo(empId);
+    }
+
+    @Test
+    void createTaskInvalidEmployeeTargetReturnsToast() {
+        HttpSession session = session();
+        allowDashboard();
+        when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.createTask(taskForm("تنظيف", "fanni", "daily", "employee:not-a-uuid"), Validated.of(taskForm("تنظيف", "fanni", "daily", "employee:not-a-uuid")), session, model);
+
+        assertThat(view).isEqualTo("admin/tasks :: tasksCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((String) model.getAttribute("toastMessage"))).isEqualTo("الموظف غير معروف");
+        verify(taskDefinitionService, never()).create(any(), any());
     }
 
     @Test
@@ -87,7 +128,7 @@ class TaskDefinitionControllerTest {
         allowDashboard();
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.createTask(taskForm("", "fanni", "daily", "assistant"), Validated.of(taskForm("", "fanni", "daily", "assistant")), session, model);
+        String view = controller.createTask(taskForm("", "fanni", "daily", "role:assistant"), Validated.of(taskForm("", "fanni", "daily", "role:assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
@@ -112,11 +153,11 @@ class TaskDefinitionControllerTest {
         HttpSession session = session();
         allowDashboard();
         UUID taskId = UUID.randomUUID();
-        TaskDefinition updated = new TaskDefinition(taskId, "تنظيف", "fanni", "daily", "assistant", false, null, null);
+        TaskDefinition updated = new TaskDefinition(taskId, "تنظيف", "fanni", "daily", "assistant", null, false, null, null);
         when(taskDefinitionService.update(eq(CLINIC), eq(taskId), any(TaskDefinitionRequest.class))).thenReturn(updated);
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of(updated));
 
-        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
+        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "role:assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "role:assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "task.update", "task_definition");
@@ -130,7 +171,7 @@ class TaskDefinitionControllerTest {
         UUID taskId = UUID.randomUUID();
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.updateTask(taskId, taskForm("", "fanni", "daily", "assistant"), Validated.of(taskForm("", "fanni", "daily", "assistant")), session, model);
+        String view = controller.updateTask(taskId, taskForm("", "fanni", "daily", "role:assistant"), Validated.of(taskForm("", "fanni", "daily", "role:assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
@@ -147,7 +188,7 @@ class TaskDefinitionControllerTest {
                 .thenThrow(new IllegalArgumentException("المهمة غير موجودة"));
         when(taskDefinitionService.list(CLINIC)).thenReturn(List.of());
 
-        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "assistant")), session, model);
+        String view = controller.updateTask(taskId, taskForm("تنظيف", "fanni", "daily", "role:assistant"), Validated.of(taskForm("تنظيف", "fanni", "daily", "role:assistant")), session, model);
 
         assertThat(view).isEqualTo("admin/tasks :: tasksCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
@@ -156,8 +197,8 @@ class TaskDefinitionControllerTest {
     }
 
     private static TaskDefinitionController.TaskForm taskForm(String name, String dimension,
-            String frequency, String roleCode) {
-        return TaskDefinitionController.TaskForm.of(name, dimension, frequency, roleCode, false, null, null);
+            String frequency, String target) {
+        return TaskDefinitionController.TaskForm.of(name, dimension, frequency, target, false, null, null);
     }
 
     private void allowDashboard() {

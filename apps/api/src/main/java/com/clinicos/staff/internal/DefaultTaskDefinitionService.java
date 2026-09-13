@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.shared.jooq.enums.IntervalUnit;
-import com.clinicos.shared.jooq.enums.StaffRole;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord;
@@ -51,14 +50,15 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
                     .set(TASK_DEFINITION.NAME, request.name())
                     .set(TASK_DEFINITION.DIMENSION, toDbDimension(request.dimension()))
                     .set(TASK_DEFINITION.FREQUENCY, toDbFrequency(request.frequency()))
-                    .set(TASK_DEFINITION.STAFF_ROLE, toDbStaffRole(request.roleCode()))
+                    .set(TASK_DEFINITION.ROLE_CODE, request.roleCode())
+                    .set(TASK_DEFINITION.EMPLOYEE_ID, request.employeeId())
                     .set(TASK_DEFINITION.REQUIRES_PHOTO, request.requiresPhoto())
                     .set(TASK_DEFINITION.EVERY_N, request.everyN())
                     .set(TASK_DEFINITION.INTERVAL_UNIT,
                             request.intervalUnit() == null ? null : IntervalUnit.valueOf(request.intervalUnit()))
                     .execute();
             return new TaskDefinition(id, request.name(), request.dimension(), request.frequency(), request.roleCode(),
-                    request.requiresPhoto(), request.everyN(), request.intervalUnit());
+                    request.employeeId(), request.requiresPhoto(), request.everyN(), request.intervalUnit());
         });
     }
 
@@ -70,7 +70,8 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
                     .set(TASK_DEFINITION.NAME, request.name())
                     .set(TASK_DEFINITION.DIMENSION, toDbDimension(request.dimension()))
                     .set(TASK_DEFINITION.FREQUENCY, toDbFrequency(request.frequency()))
-                    .set(TASK_DEFINITION.STAFF_ROLE, toDbStaffRole(request.roleCode()))
+                    .set(TASK_DEFINITION.ROLE_CODE, request.roleCode())
+                    .set(TASK_DEFINITION.EMPLOYEE_ID, request.employeeId())
                     .set(TASK_DEFINITION.REQUIRES_PHOTO, request.requiresPhoto())
                     .set(TASK_DEFINITION.EVERY_N, request.everyN())
                     .set(TASK_DEFINITION.INTERVAL_UNIT,
@@ -115,7 +116,8 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
                 r.getName(),
                 fromDbDimension(r.getDimension()),
                 fromDbFrequency(r.getFrequency()),
-                fromDbStaffRole(r.getStaffRole()),
+                r.getRoleCode(),
+                r.getEmployeeId(),
                 r.getRequiresPhoto(),
                 r.getEveryN(),
                 r.getIntervalUnit() == null ? null : r.getIntervalUnit().getLiteral());
@@ -124,6 +126,9 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
     private void validate(TaskDefinitionRequest request) {
         if (request.name() == null || request.name().isBlank()) {
             throw new IllegalArgumentException("اسم المهمة مطلوب");
+        }
+        if (request.roleCode() != null && request.employeeId() != null) {
+            throw new IllegalArgumentException("اختر دورًا أو موظفًا واحدًا فقط");
         }
         if ("custom".equals(request.frequency())) {
             if (request.everyN() == null || request.everyN() < 1) {
@@ -173,21 +178,6 @@ public class DefaultTaskDefinitionService implements TaskDefinitionService {
             case weekly -> "weekly";
             case monthly -> "monthly";
             case custom -> "custom";
-        };
-    }
-
-    private static StaffRole toDbStaffRole(String roleCode) {
-        return switch (roleCode) {
-            case "assistant" -> StaffRole.assistant;
-            case "receptionist" -> StaffRole.receptionist;
-            default -> throw new IllegalArgumentException("الدور غير معروف: " + roleCode);
-        };
-    }
-
-    private static String fromDbStaffRole(StaffRole r) {
-        return switch (r) {
-            case assistant -> "assistant";
-            case receptionist -> "receptionist";
         };
     }
 }

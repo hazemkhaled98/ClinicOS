@@ -24,7 +24,7 @@
         error: 'bg-danger-600 text-white',
         info: 'bg-neutral-700 text-white'
       };
-      el.className = 'fixed top-6 start-6 z-50 rounded-xl px-5 py-4 text-base font-bold shadow-2xl transition-opacity duration-300 '
+      el.className = 'fixed top-20 start-6 z-50 rounded-xl px-5 py-4 text-base font-bold shadow-2xl transition-opacity duration-300 '
         + (colors[type] || colors.success);
       el.textContent = message;
       el.classList.remove('hidden');
@@ -42,6 +42,31 @@
         el.removeAttribute('data-toast');
       }
     });
+    document.addEventListener('htmx:confirm', function (e) {
+      if (!e.detail.question) return;
+      e.preventDefault();
+      window.confirmShow(e.detail.question, function () { e.detail.issueRequest(true); });
+    });
+    window.confirmShow = function (message, onConfirm) {
+      var overlay = document.getElementById('confirm-overlay');
+      if (!overlay) return;
+      document.getElementById('confirm-message').textContent = message;
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.getElementById('confirm-ok').focus();
+      var finish = function (result) {
+        document.onkeydown = null;
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        if (result) onConfirm();
+      };
+      document.getElementById('confirm-ok').onclick = function () { finish(true); };
+      document.getElementById('confirm-cancel').onclick = function () { finish(false); };
+      overlay.onclick = function (event) { if (event.target === overlay) finish(false); };
+      document.onkeydown = function (event) {
+        if (event.key === 'Escape') finish(false);
+      };
+    };
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 </head>

@@ -11,15 +11,15 @@ class SectionFocusTest {
 
     @Test
     void remembersLastSectionCookieWhenStillPermitted() {
-        assertThat(SectionFocus.resolveTarget("inventory", ownerCodes(), "owner"))
+        assertThat(SectionFocus.resolveTarget("inventory", List.of("emp", "tray"), "manager"))
                 .isEqualTo("inventory");
     }
 
     @Test
-    void fallsBackToFirstPermittedSectionWhenCookieNotPermitted() {
-        // tasks is hidden for owners (dashboard supersedes it)
+    void ceoPermissionRedirectsToAdminDashboard() {
+        // ceo beats the saved section and the first-permitted fallback for owners
         assertThat(SectionFocus.resolveTarget("tasks", ownerCodes(), "owner"))
-                .isEqualTo("employees");
+                .isEqualTo("admin-dashboard");
     }
 
     @Test

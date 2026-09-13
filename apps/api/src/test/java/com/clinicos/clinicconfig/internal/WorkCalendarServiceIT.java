@@ -124,6 +124,7 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(workCalendarService.isWorkday(clinicA, day, employeeB)).isTrue();
         assertThat(workCalendarService.isWorkday(clinicA, day, null)).isTrue();
         assertThat(workCalendarService.listHolidays(clinicA)).hasSize(1);
+        assertThat(workCalendarService.listHolidays(clinicA).get(0).employeeName()).isEqualTo("محمود");
     }
 
     @Test
