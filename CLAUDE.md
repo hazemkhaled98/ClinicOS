@@ -151,6 +151,8 @@ mvn spring-boot:run
 
 ## Session Workflow
 
+0. **Code discovery — serena-first.** This repo has a `.serena/` semantic index. For symbol-level lookups ("where is X defined", "what calls Y", "list methods of Z") use `mcp__serena__*` tools — `get_symbols_overview`, `find_symbol`, `find_declaration`, `find_referencing_symbols`, `search_for_pattern` — before Grep/Glob. They load preconnected (context: claude-code) and cost less than raw grep over generated jOOQ sources. Fall back to Grep/Glob freely for non-indexed files (yaml, markdown, SQL, HTML) or when serena returns nothing.
+
 1. **At the start of every session — new or resumed — run `git fetch origin`** before any work (or first read), so local refs/tracking match the remote. Applies even when resuming a previous session/branch.
 2. **Read `docs/roadmap.md` first.** Find the phase marked `in progress`, scan for the first `- [ ]` step — resume there. All `- [x]` steps are done.
 3. **One branch per phase.** Each phase gets its own branch cut from an **updated** `main` (fetch + pull/merge `origin/main` first).
