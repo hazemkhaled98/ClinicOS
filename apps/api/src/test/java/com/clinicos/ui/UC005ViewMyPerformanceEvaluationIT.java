@@ -75,6 +75,10 @@ class UC005ViewMyPerformanceEvaluationIT extends AbstractBrowserIT {
     }
 
     private Seed seedAssistantWithApprovedWork() throws Exception {
+        return seedAssistantWithApprovedWork(LocalDate.now());
+    }
+
+    private Seed seedAssistantWithApprovedWork(LocalDate workDate) throws Exception {
         String slug = "clinic-" + uniqueSuffix();
         String username = "asst-" + uniqueSuffix();
         String rawPassword = "assistant-pass";
@@ -82,7 +86,6 @@ class UC005ViewMyPerformanceEvaluationIT extends AbstractBrowserIT {
                 PostgresTestSupport.POSTGRES.getJdbcUrl(),
                 PostgresTestSupport.POSTGRES.getUsername(),
                 PostgresTestSupport.POSTGRES.getPassword())) {
-            LocalDate today = LocalDate.now();
             UUID clinicId = TestFixtures.insertClinic(connection, "Test Clinic " + username, slug);
             UUID employeeId = TestFixtures.insertEmployee(connection, clinicId, "سارة محمد");
             UUID userId = TestFixtures.insertUser(connection, clinicId, username,
@@ -98,7 +101,7 @@ class UC005ViewMyPerformanceEvaluationIT extends AbstractBrowserIT {
                     .execute();
 
             UUID taskId = insertTask(connection, clinicId, employeeId, "تعقيم الأدوات");
-            seedAttendanceAndCompletion(connection, clinicId, employeeId, taskId, today);
+            seedAttendanceAndCompletion(connection, clinicId, employeeId, taskId, workDate);
 
             return new Seed(slug, username, rawPassword);
         }
@@ -153,6 +156,21 @@ class UC005ViewMyPerformanceEvaluationIT extends AbstractBrowserIT {
 
         page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("الشهر السابق")).click();
         PlaywrightAssertions.assertThat(page().getByText("لا توجد بيانات كافية لهذا الشهر بعد")).isVisible();
+    }
+
+    @Test
+    @DisplayName("Employee viewing a past month sees the frozen snapshot")
+    void viewsFrozenPastMonth() throws Exception {
+        LocalDate lastMonthDay = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+        Seed seed = seedAssistantWithApprovedWork(lastMonthDay);
+
+        page().navigate(getUrl() + "login");
+        login(seed.username(), seed.rawPassword(), seed.slug());
+
+        page().navigate(getUrl() + "my-evaluation?month=" + lastMonthDay.getYear() + "-"
+                + String.format("%02d", lastMonthDay.getMonthValue()));
+
+        PlaywrightAssertions.assertThat(page().getByText("مجمّد (شهر مقفل)")).isVisible();
     }
 
     private record Seed(String slug, String username, String rawPassword) {

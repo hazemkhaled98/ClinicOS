@@ -251,6 +251,25 @@ class EvaluationControllerTest {
         assertThat(model.getAttribute("assignments")).isNotNull();
     }
 
+    @Test
+    void pastMonthMarksGridReadOnly() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        when(employeeService.list(CLINIC)).thenReturn(List.of(new Employee(
+                emp, "أحمد", new BigDecimal("5000"), new BigDecimal("0.1"), null, null, false, null, null)));
+        MonthlyEvaluation ev = new MonthlyEvaluation(
+                new BigDecimal("68.57"), new BigDecimal("0.70"), List.of(), "جيد",
+                new BigDecimal("500.00"), new BigDecimal("5000.00"), new BigDecimal("5500.00"),
+                30, true);
+        YearMonth lastMonth = YearMonth.now().minusMonths(1);
+        when(evaluationService.evaluate(CLINIC, emp, lastMonth)).thenReturn(ev);
+
+        String view = controller.evaluation(lastMonth.toString(), emp.toString(), session(), model);
+
+        assertThat(view).isEqualTo("evaluation-page");
+        assertThat(model.getAttribute("isClosed")).isEqualTo(true);
+    }
+
     private void allowView() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("evaluation")))
                 .thenReturn(new LayoutModel.LayoutData(

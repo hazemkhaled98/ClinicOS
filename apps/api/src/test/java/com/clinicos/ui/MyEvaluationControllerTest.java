@@ -16,9 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
 import com.clinicos.clinicconfig.api.GamificationService;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
 import com.clinicos.evaluation.api.EvaluationService;
+import com.clinicos.evaluation.api.EvaluationService.ComponentScore;
 import com.clinicos.evaluation.api.EvaluationService.EvaluationConflictException;
 import com.clinicos.evaluation.api.EvaluationService.Gamification;
 import com.clinicos.evaluation.api.EvaluationService.GoalProgress;
@@ -102,6 +104,26 @@ class MyEvaluationControllerTest {
         assertThat(model.getAttribute("hasData")).isEqualTo(true);
         assertThat(model.getAttribute("employeeName")).isEqualTo("أحمد");
         assertThat(model.getAttribute("view")).isNotNull();
+    }
+
+    @Test
+    void showsCoverageGapsForExcludedComponents() {
+        allowView();
+        MonthlyEvaluation ev = new MonthlyEvaluation(
+                new BigDecimal("70"), new BigDecimal("0.83"),
+                List.of(
+                        new ComponentScore(Category.COMPLETION, new BigDecimal("90"), new BigDecimal("1"), true, null),
+                        new ComponentScore(Category.VOLUME, null, new BigDecimal("1"), false, null)),
+                "جيد", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 20, false);
+        when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
+
+        String view = controller.myEvaluation(null, session(), model);
+
+        assertThat(view).isEqualTo("my-evaluation");
+        MyEvaluationController.MyEvaluationView data =
+                (MyEvaluationController.MyEvaluationView) model.getAttribute("view");
+        assertThat(data.components()).hasSize(2);
+        assertThat(data.coverageGaps()).containsExactly("حجم الإنتاج");
     }
 
     @Test

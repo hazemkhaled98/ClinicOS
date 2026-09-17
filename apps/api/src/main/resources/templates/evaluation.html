@@ -150,7 +150,12 @@
           </thead>
           <tbody class="divide-y divide-neutral-100">
             <tr th:each="a : ${assignments}">
-              <td class="font-bold text-teal-900" th:text="${a.name()}">مهمة</td>
+              <td class="font-bold text-teal-900">
+                <span th:text="${a.name()}">مهمة</span>
+                <a th:if="${a.proofPhotoId() != null}"
+                   th:href="|/attachments/${a.proofPhotoId()}|" target="_blank" rel="noopener"
+                   class="block text-xs text-emerald-600 font-bold">⬆ صورة الإثبات</a>
+              </td>
               <td class="text-neutral-600" th:if="${a.dueDate() != null}" th:text="${a.dueDate()}">2026-09-15</td>
               <td class="text-neutral-400" th:if="${a.dueDate() == null}">—</td>
               <td>

@@ -269,7 +269,7 @@ public class EvaluationController {
         return assignmentService.listForMonth(clinicId, employeeId, month).stream()
                 .map(a -> new AssignmentView(a.id(), a.name(),
                         a.dueDate() == null ? null : a.dueDate().toString(),
-                        a.status(), assignmentLabel(a), a.doneAt()))
+                        a.status(), assignmentLabel(a), a.doneAt(), a.proofPhotoId()))
                 .toList();
     }
 
@@ -282,7 +282,7 @@ public class EvaluationController {
     }
 
     private static String assignmentLabel(Assignment a) {
-        if (a.doneAt() != null) {
+        if (a.doneAt() != null && "pending".equals(a.status())) {
             return "مُسلَّم — بانتظار الاعتماد";
         }
         return switch (a.status()) {
@@ -352,7 +352,7 @@ public class EvaluationController {
     }
 
     record AssignmentView(UUID id, String name, String dueDate, String status, String statusLabel,
-            OffsetDateTime doneAt) {
+            OffsetDateTime doneAt, UUID proofPhotoId) {
     }
 
     record CategoryOption(String code, String name) {

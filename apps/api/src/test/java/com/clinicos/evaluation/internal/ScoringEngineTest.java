@@ -286,6 +286,22 @@ class ScoringEngineTest {
         assertThat(score.stripTrailingZeros()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
+    // UC-004 A1: a rejected assignment is excluded, not scored as a zero
+    @Test
+    void assignmentRejected_excludedFromCompletion_notScored0() {
+        List<AssignmentRecord> rejectedOnly = List.of(assignment("rejected", "manager", d(10), null));
+        EngineResult rejectedResult = ScoringEngine.evaluate(
+                input(noTasks(), List.of(), List.of(d(1)), List.of(), rejectedOnly), config(), Map.of());
+        assertThat(component(rejectedResult, COMPLETION).rawScore()).isNull();
+
+        List<AssignmentRecord> mixed = List.of(
+                assignment("rejected", "manager", d(10), null),
+                assignment("approved", "manager", d(10), d(9)));
+        EngineResult mixedResult = ScoringEngine.evaluate(
+                input(noTasks(), List.of(), List.of(d(1)), List.of(), mixed), config(), Map.of());
+        assertThat(component(mixedResult, COMPLETION).rawScore()).isEqualByComparingTo("100.00");
+    }
+
     // initiative: min(approved self ∕ 3 × 100, 100), averaged with ibda3
     @Test
     void initiative_threeApprovedSelfProposals_capsAt100() {

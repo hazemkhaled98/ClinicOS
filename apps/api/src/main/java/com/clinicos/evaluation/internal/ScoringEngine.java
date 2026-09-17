@@ -193,11 +193,11 @@ public final class ScoringEngine {
     }
 
     private static BigDecimal assignmentMean(List<AssignmentRecord> assignments) {
-        if (assignments.isEmpty()) {
-            return null;
-        }
         List<BigDecimal> scores = new ArrayList<>();
         for (AssignmentRecord a : assignments) {
+            if ("rejected".equals(a.status())) {
+                continue;
+            }
             scores.add(assignmentScore(a));
         }
         return mean(scores);

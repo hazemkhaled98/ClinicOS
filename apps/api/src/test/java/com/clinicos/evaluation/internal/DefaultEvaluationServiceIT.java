@@ -42,6 +42,7 @@ import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.enums.TaskReviewStatus;
+import com.clinicos.staff.api.DailyWorkService;
 import com.clinicos.staff.api.EmployeeService;
 
 @SpringBootTest(classes = Application.class)
@@ -52,6 +53,9 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private DailyWorkService dailyWorkService;
 
     @Autowired
     private ClinicSettingsService clinicSettingsService;
@@ -172,6 +176,27 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void currentMonth_approvingPendingCompletion_changesScoreOnRescore() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", now.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        LocalDate workDate = LocalDate.now();
+        seedAttendanceOnly(clinicA, employeeId, workDate);
+        UUID recordId = seedPendingCompletion(clinicA, employeeId, taskId, workDate);
+
+        MonthlyEvaluation before = evaluationService.evaluate(clinicA, employeeId, now);
+        assertThat(component(before, "fanni").rawScore()).isEqualByComparingTo("0.00");
+
+        dailyWorkService.approveReview(clinicA, recordId, taskId, membershipId(employeeId));
+        MonthlyEvaluation after = evaluationService.evaluate(clinicA, employeeId, now);
+
+        assertThat(component(after, "fanni").rawScore()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
     void currentMonth_liveEvaluation_noSnapshotPersisted() throws Exception {
         TenantContext.set(clinicA);
         seedWeekdays(clinicA);
@@ -246,6 +271,26 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
                     .set(DAILY_TASK_COMPLETION.DONE, true)
                     .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.approved)
                     .execute();
+        }
+    }
+
+    private UUID seedPendingCompletion(UUID clinicId, UUID employeeId, UUID taskId, LocalDate workDate)
+            throws Exception {
+        try (Connection conn = superuser()) {
+            DSLContext root = DSL.using(conn, SQLDialect.POSTGRES);
+            UUID recordId = root.select(DAILY_RECORD.ID)
+                    .from(DAILY_RECORD)
+                    .where(DAILY_RECORD.CLINIC_ID.eq(clinicId))
+                    .and(DAILY_RECORD.EMPLOYEE_ID.eq(employeeId))
+                    .and(DAILY_RECORD.WORK_DATE.eq(workDate))
+                    .fetchOne(DAILY_RECORD.ID);
+            root.insertInto(DAILY_TASK_COMPLETION)
+                    .set(DAILY_TASK_COMPLETION.DAILY_RECORD_ID, recordId)
+                    .set(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID, taskId)
+                    .set(DAILY_TASK_COMPLETION.DONE, true)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.pending)
+                    .execute();
+            return recordId;
         }
     }
 
