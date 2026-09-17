@@ -8,7 +8,7 @@
 **Goal:** The manager reviews each employee's daily work, confirms proof, rates the qualitative parts of performance, and manages one-off assignments so the monthly evaluation is accurate and fair.
 **Status:** Implemented
 
-> **Deferred to Phase 4:** the evaluation engine itself is not yet ported. The automatic monthly-score recalculation (step 6), A2 frozen-month review and BR-001 (only the current month live-scores) depend on UC-002 BR-002's freeze write-once; A3 manual-floor depends on UC-002 A2; and the evaluation-reflection half of UC-002 step 5. These land with the evaluation-engine slice of Phase 4 and do not block UC-002 being marked Tested.
+> **Not built (deliberate):** step 3's manual 1–5 technical/behavioral rating UI is not implemented. In the legacy app these ratings (`daily_record.fanni/solooki/ibda3`) feed only the trend sparkline and never the score itself — the `fanni`/`ibda3` score components are derived from approved task completions classified under each dimension instead (BR-004). The manager daily note + "show to employee" toggle (`docs/backlog/legacy-gaps.md`) is likewise not built. Operating-volume input (step 6, BR-004) has no UI yet — deferred to Phase 8; the volume category is simply excluded from scoring until an `operations_volume` row exists (BR-005). Step 2's attendance review is the aggregate attendance score only, matching the design reference (`ClinicOS Design/04_daily_tasks_evaluation`); a per-day arrival/departure breakdown is not built.
 
 ## Preconditions
 
@@ -18,7 +18,7 @@
 ## Main Success Scenario
 
 1. The manager opens the evaluation and verification section and selects an employee and month.
-2. The manager reviews the employee's daily task completions, attendance, and any attached proof photos.
+2. The manager reviews the employee's daily task completions and any attached proof photos, and sees the employee's aggregate attendance score for the month (per-day arrival/departure detail is not broken out in this screen — see the deliberate non-build note below).
 3. The manager rates the employee's technical performance and behavioral performance for the day.
 4. The manager reviews any one-off tasks assigned to or proposed by the employee, and approves or rejects each one, including any proof photo attached.
 5. The manager assigns a new one-off task to an employee when needed, optionally with a due date.

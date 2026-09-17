@@ -8,7 +8,7 @@
 **Goal:** An employee (who is not the owner) checks their own current standing, score breakdown, goals and recognition so they know where they stand and what to improve.
 **Status:** Implemented
 
-> **Deferred to Phase 4:** the live current-month score (step 2) and the frozen-snapshot display for past months (A1) depend on the UC-004/UC-002 evaluation engine (freeze write-once, weighted scoring), which Phase 4 constructs. They do not block UC-002 being marked Tested.
+> **Not built (deliberate):** operating-volume input has no UI (deferred to Phase 8, see UC-004); its category is simply excluded from the breakdown until an `operations_volume` row exists for the month.
 
 ## Preconditions
 
@@ -18,7 +18,7 @@
 
 1. The employee opens their own evaluation view.
 2. The system shows the employee's current monthly score and its breakdown by category (task completion, technical, behavioral, initiative, attendance, and operating volume where applicable).
-3. The system shows the employee's progress toward their personal weekly and monthly goals.
+3. The system shows the employee's progress toward their personal weekly goals.
 4. The system shows any badges, streaks, or motivational recognition the employee has earned.
 5. The employee reviews warnings or coverage gaps (categories not yet rated) affecting their score.
 

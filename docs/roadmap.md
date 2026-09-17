@@ -99,7 +99,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 1c — Design system reconciliation | in progress | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
 | 2 — UC-002 Employees/roles | done | Slices 2a–2e: V16 user-admin functions, V17 tenant-scoped role_permission, V18 gamification tables, service interfaces + implementations, UI controllers + templates, unit + IT tests · Slice 2f: users-tab cleanup — duplicate username/email renders a field error (no 500), add form is account-fields only (every user auto-becomes an employee), row role is read-only, role editing moved to the Settings employee row · Slice 2g `feat/uc002-role-hierarchy`: role hierarchy enforcement (BR-005, RoleRanks rank guard), A1 archive now unlinks + suspends the linked account to block login, manager scoping of employee/permission editing, actor-aware controllers/templates + tests; evaluation-engine units (A2/A3/BR-002/BR-003/BR-004, step-5 eval reflection) deferred to Phase 4 with UC-004/UC-005 |
 | 3 — UC-003 Daily work/attendance | done | Slices 3a–3f: V20 work calendar (`clinic_settings.working_weekdays` weekday mask + `clinic_holiday` table), MinIO object storage + `AttachmentService`, staff attendance/daily-task/assignment services, `/employees` daily-work screen + photo/frequency task fields, admin work-calendar UI (weekday mask + holidays), A5 (offline recording) marked not applicable · Evaluation units (A1/A2/A3 scoring counts, step-8/Post-S-1 figure reflection) deferred to Phase 4 with UC-004/UC-005 — attendance is captured, labelled, and persisted only. PR #15 |
-| 4 — UC-004/005 Evaluation | not started | Includes the deferred UC-002 evaluation-engine units (A2 manual overrides as floor, A3 month unlocking/recalc, BR-002 freeze-write-once, BR-003 floor rule, BR-004 incentive-by-tier, step-5 evaluation reflection) |
+| 4 — UC-004/005 Evaluation | in progress | Slices 4a–4d on `feat/uc004-evaluation`: V22 task-review columns + staff `EvaluationInputService`; `ScoringEngine` (pure, BR-by-BR tested) + `DefaultEvaluationService` (lazy freeze-on-read, unlock/refreeze); manager `تقييم وتحقّق` review screen (task/assignment approve-reject, override, unlock) replacing the `quick-access` placeholder; employee `تقييمي` screen with gamification (weekly goals, streak, badges). Closes the deferred UC-002 evaluation-engine units (A2 floor overrides, A3 unlock/recalc, BR-002 freeze-write-once, BR-003 floor rule, BR-004 incentive-by-tier) and UC-003's deferred figure reflection. Awaiting PR + coverage-check. |
 | 5 — UC-006 Prep checklists | not started | |
 | 6 — UC-007 Academy | not started | |
 | 7a–7d — UC-008 Inventory | not started | |
@@ -188,12 +188,12 @@ BR-G05, BR-G12, BR-G13, BR-G14, BR-G15, BR-G16, BR-G17, and the admin-dashboard 
 
 The hardest phase — the scoring engine lives here.
 
-- [ ] `تقييم وتحقّق المدير`: date strip, employee chooser, per-day technical/behavioural rating, task approve/reject with reason, assigned tasks (`task_assignment`) approve/reject, auto-save.
-- [ ] Scoring service: weighted blend of six categories from `evaluation_weight`; no-data category excluded, not zeroed; coverage reported (BR-G15); manual override is floor (BR-G06); on-time > late > undone for assignments (BR-G13).
-- [ ] Freeze/unlock: past months read `evaluation_snapshot`; service surfaces V10 trigger errors as clean user errors, not 500s.
-- [ ] `تقييمي` (UC-005): read-only, own record only (BR-G16), closed months only; owner has no evaluation (BR-G17).
-- [ ] V-migration: add `review_status` + `review_reason` + `reviewed_by` / `reviewed_at` to `daily_task_completion`.
-- [ ] BR-by-BR test class before any UI work.
+- [x] `تقييم وتحقّق المدير`: date strip, employee chooser, task approve/reject with reason, assigned tasks (`task_assignment`) approve/reject, auto-save. (Per-day manual technical/behavioural 1–5 rating deliberately not built — legacy ratings feed only the trend sparkline, never the score; see UC-004 doc.)
+- [x] Scoring service: weighted blend of six categories from `evaluation_weight`; no-data category excluded, not zeroed; coverage reported (BR-G15); manual override is floor (BR-G06); on-time > late > undone for assignments (BR-G13).
+- [x] Freeze/unlock: past months read `evaluation_snapshot`; service surfaces V10 trigger errors as clean user errors, not 500s.
+- [x] `تقييمي` (UC-005): read-only, own record only (BR-G16); shows the live current month too (deviation from legacy, see UC-005 doc and roadmap note below); owner has no evaluation (BR-G17).
+- [x] V-migration: add `review_status` + `review_reason` + `reviewed_by` / `reviewed_at` to `daily_task_completion` (V22).
+- [x] BR-by-BR test class before any UI work (`ScoringEngineTest`).
 
 ### Phase 5 — UC-006 Prepare and run procedure checklists
 
