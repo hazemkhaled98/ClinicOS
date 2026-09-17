@@ -16,11 +16,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
-import com.clinicos.prep.api.PrepChecklistService;
-import com.clinicos.prep.api.PrepChecklistService.Actor;
-import com.clinicos.prep.api.PrepChecklistService.ChecklistRequest;
-import com.clinicos.prep.api.PrepChecklistService.ItemRequest;
-import com.clinicos.prep.api.PrepChecklistService.SectionRequest;
+import com.clinicos.prep.PrepChecklistService;
+import com.clinicos.prep.PrepChecklistService.Actor;
+import com.clinicos.prep.PrepChecklistService.ChecklistRequest;
+import com.clinicos.prep.PrepChecklistService.ItemRequest;
+import com.clinicos.prep.PrepChecklistService.SectionRequest;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)

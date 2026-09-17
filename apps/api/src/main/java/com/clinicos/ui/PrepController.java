@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.identity.api.SessionKeys;
-import com.clinicos.prep.api.PrepChecklistService;
-import com.clinicos.prep.api.PrepChecklistService.Actor;
-import com.clinicos.prep.api.PrepChecklistService.Checklist;
-import com.clinicos.prep.api.PrepChecklistService.ChecklistRequest;
-import com.clinicos.prep.api.PrepChecklistService.ItemRequest;
-import com.clinicos.prep.api.PrepChecklistService.SectionRequest;
+import com.clinicos.prep.PrepChecklistService;
+import com.clinicos.prep.PrepChecklistService.Actor;
+import com.clinicos.prep.PrepChecklistService.Checklist;
+import com.clinicos.prep.PrepChecklistService.ChecklistRequest;
+import com.clinicos.prep.PrepChecklistService.ItemRequest;
+import com.clinicos.prep.PrepChecklistService.SectionRequest;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;

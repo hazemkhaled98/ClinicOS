@@ -1,4 +1,4 @@
-package com.clinicos.prep.api;
+package com.clinicos.prep;
 
 import java.time.LocalDate;
 import java.util.List;

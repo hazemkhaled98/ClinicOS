@@ -1,4 +1,4 @@
-package com.clinicos.prep.api;
+package com.clinicos.prep;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
