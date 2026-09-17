@@ -117,6 +117,42 @@ class EvaluationControllerTest {
     }
 
     @Test
+    void approveCompletionConflictSurfacesArabicToast() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        UUID recordId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        doThrow(new EvaluationService.EvaluationConflictException("الشهر مقفل"))
+                .when(dailyWorkService).approveReview(any(), any(), any(), any());
+
+        String view = controller.approveCompletion(emp, recordId, taskId,
+                YearMonth.now().toString(), session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat((String) model.getAttribute("toastMessage")).contains("الشهر مقفل");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void rejectCompletionInvalidArgumentShowsError() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        UUID recordId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("سبب مطلوب"))
+                .when(dailyWorkService).rejectReview(any(), any(), any(), any(), any());
+
+        String view = controller.rejectCompletion(emp, recordId, taskId,
+                YearMonth.now().toString(), null, session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat((String) model.getAttribute("toastMessage")).contains("سبب مطلوب");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
     void approvesAssignmentLogsActivity() {
         allowView();
         UUID emp = UUID.randomUUID();
@@ -144,6 +180,40 @@ class EvaluationControllerTest {
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(assignmentService).reject(CLINIC, assignmentId, MEMBERSHIP, "مطلوب تعديل");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "eval.reject", "task_assignment");
+    }
+
+    @Test
+    void approveAssignmentConflictSurfacesArabicToast() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        UUID assignmentId = UUID.randomUUID();
+        doThrow(new EvaluationService.EvaluationConflictException("الشهر مقفل"))
+                .when(assignmentService).approve(any(), any(), any());
+
+        String view = controller.approveAssignment(emp, assignmentId,
+                YearMonth.now().toString(), session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat((String) model.getAttribute("toastMessage")).contains("الشهر مقفل");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void rejectAssignmentInvalidArgumentShowsError() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        UUID assignmentId = UUID.randomUUID();
+        doThrow(new IllegalArgumentException("سبب مطلوب"))
+                .when(assignmentService).reject(any(), any(), any(), any());
+
+        String view = controller.rejectAssignment(emp, assignmentId,
+                YearMonth.now().toString(), null, session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat((String) model.getAttribute("toastMessage")).contains("سبب مطلوب");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     @Test
@@ -239,7 +309,7 @@ class EvaluationControllerTest {
                 emp, name, new BigDecimal("5000"), new BigDecimal("0.1"), null, null, false, null, null)));
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("68.57"), new BigDecimal("0.70"), List.of(), "جيد",
-                new BigDecimal("500.00"), new BigDecimal("5000.00"), new BigDecimal("5500.00"),
+                new BigDecimal("500.00"), new BigDecimal("5000.00"),
                 30, true);
         when(evaluationService.evaluate(CLINIC, emp, YearMonth.now())).thenReturn(ev);
 
@@ -259,7 +329,7 @@ class EvaluationControllerTest {
                 emp, "أحمد", new BigDecimal("5000"), new BigDecimal("0.1"), null, null, false, null, null)));
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("68.57"), new BigDecimal("0.70"), List.of(), "جيد",
-                new BigDecimal("500.00"), new BigDecimal("5000.00"), new BigDecimal("5500.00"),
+                new BigDecimal("500.00"), new BigDecimal("5000.00"),
                 30, true);
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
         when(evaluationService.evaluate(CLINIC, emp, lastMonth)).thenReturn(ev);

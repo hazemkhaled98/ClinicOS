@@ -45,17 +45,25 @@ public interface EvaluationService {
             String tierName,
             BigDecimal incentiveAmount,
             BigDecimal basePay,
-            BigDecimal totalPay,
             int daysLogged,
             boolean frozen) {
+
+        /** Base pay plus incentive; not stored, always derived from the two. */
+        public BigDecimal totalPay() {
+            return basePay.add(incentiveAmount);
+        }
     }
 
     record ComponentScore(
             Category category,
             BigDecimal rawScore,
             BigDecimal weight,
-            boolean included,
             BigDecimal overrideFloor) {
+
+        /** A category with no raw score is excluded from the final average (BR-G14/BR-G15). */
+        public boolean included() {
+            return rawScore != null;
+        }
     }
 
     record Gamification(List<GoalProgress> goals, int streak, List<String> earnedBadges) {

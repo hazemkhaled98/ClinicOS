@@ -76,20 +76,23 @@ public class DefaultEvaluationService implements EvaluationService {
     private MonthlyEvaluation doEvaluate(UUID clinicId, UUID employeeId, YearMonth month) {
         MonthData md = evaluationInput.forMonth(clinicId, employeeId, month);
         EmployeeService.Employee employee = employeeService.findById(clinicId, employeeId);
+        if (employee == null) {
+            return null;
+        }
         ClinicSettings settings = clinicSettings.get(clinicId);
         LocalDate firstOfMonth = month.atDay(1);
         LocalDate asOf = month.equals(YearMonth.now()) ? LocalDate.now() : month.atEndOfMonth();
 
         Map<Category, BigDecimal> weights = settings.weights().stream()
                 .collect(Collectors.toMap(CategoryWeight::category, CategoryWeight::weight));
-        boolean customShift = employee != null && employee.customShift();
+        boolean customShift = employee.customShift();
         ScoringEngine.EngineConfig config = new ScoringEngine.EngineConfig(weights,
                 settings.volumeTarget(),
                 customShift ? employee.shiftStart() : settings.defaultShiftStart(),
                 customShift ? employee.shiftEnd() : settings.defaultShiftEnd(),
                 settings.lateGraceMinutes(),
                 workdays(clinicId, month, employeeId),
-                employee != null && employee.maxIncentive() != null ? employee.maxIncentive() : BigDecimal.ZERO,
+                employee.maxIncentive() != null ? employee.maxIncentive() : BigDecimal.ZERO,
                 settings.tiers());
 
         Map<Category, BigDecimal> overrides = loadOverrides(clinicId, employeeId, firstOfMonth);
@@ -156,7 +159,6 @@ public class DefaultEvaluationService implements EvaluationService {
                         Category.fromCode(r.getCategory().getLiteral()),
                         r.getRawScore(),
                         r.getWeight(),
-                        r.getIncluded(),
                         overrides.get(Category.fromCode(r.getCategory().getLiteral()))));
 
         BigDecimal assessedWeight = BigDecimal.ZERO;
@@ -170,10 +172,10 @@ public class DefaultEvaluationService implements EvaluationService {
         BigDecimal coverage = totalWeight.signum() > 0
                 ? assessedWeight.divide(totalWeight, 4, java.math.RoundingMode.HALF_UP) : null;
         String tierName = snap.getFinalScore() == null ? null : tierName(clinicId, snap.getFinalScore());
-        BigDecimal basePay = employee != null && employee.basePay() != null ? employee.basePay() : BigDecimal.ZERO;
+        BigDecimal basePay = employee.basePay() != null ? employee.basePay() : BigDecimal.ZERO;
         BigDecimal incentive = snap.getIncentiveAmount() == null ? BigDecimal.ZERO : snap.getIncentiveAmount();
         return new MonthlyEvaluation(snap.getFinalScore(), coverage, components, tierName,
-                incentive, basePay, basePay.add(incentive), md.loggedDates().size(), true);
+                incentive, basePay, md.loggedDates().size(), true);
     }
 
     private String tierName(UUID clinicId, BigDecimal finalScore) {
@@ -200,13 +202,13 @@ public class DefaultEvaluationService implements EvaluationService {
             ScoringEngine.EngineResult result, Map<Category, BigDecimal> overrides, boolean frozen) {
         List<ComponentScore> components = result.components().entrySet().stream()
                 .map(e -> new ComponentScore(e.getKey(), e.getValue().rawScore(), e.getValue().weight(),
-                        e.getValue().included(), overrides.get(e.getKey())))
+                        overrides.get(e.getKey())))
                 .toList();
-        BigDecimal basePay = employee != null && employee.basePay() != null ? employee.basePay() : BigDecimal.ZERO;
+        BigDecimal basePay = employee.basePay() != null ? employee.basePay() : BigDecimal.ZERO;
         BigDecimal incentive = result.incentiveAmount() == null ? BigDecimal.ZERO : result.incentiveAmount();
         return new MonthlyEvaluation(result.finalScore(), result.coverage(), components,
                 result.tier() == null ? null : result.tier().name(), incentive, basePay,
-                basePay.add(incentive), md.loggedDates().size(), frozen);
+                md.loggedDates().size(), frozen);
     }
 
     private Map<Category, BigDecimal> loadOverrides(UUID clinicId, UUID employeeId, LocalDate firstOfMonth) {

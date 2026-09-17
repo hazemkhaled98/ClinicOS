@@ -16,6 +16,13 @@ import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
@@ -211,6 +218,79 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(evaluation.frozen()).isFalse();
         assertThat(evaluation.finalScore()).isNotNull();
         assertThat(snapshotCount()).isZero();
+    }
+
+    @Test
+    void crossTenant_evaluateWithOtherClinicsEmployee_returnsNoData() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth june = YearMonth.of(2026, 6);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", june.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        for (LocalDate day = june.atDay(1); !day.isAfter(june.atEndOfMonth()); day = day.plusDays(1)) {
+            seedWorkday(clinicA, employeeId, taskId, day);
+        }
+        MonthlyEvaluation ownTenant = evaluationService.evaluate(clinicA, employeeId, june);
+        assertThat(ownTenant).isNotNull();
+
+        TenantContext.set(clinicB);
+        MonthlyEvaluation otherTenant = evaluationService.evaluate(clinicB, employeeId, june);
+
+        assertThat(otherTenant).isNull();
+    }
+
+    @Test
+    void closedMonth_concurrentFirstReads_onlyOneWinsSnapshotRace() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth june = YearMonth.of(2026, 6);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", june.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        for (LocalDate day = june.atDay(1); !day.isAfter(june.atEndOfMonth()); day = day.plusDays(1)) {
+            seedWorkday(clinicA, employeeId, taskId, day);
+        }
+        seedVolume(clinicA, june, "20000");
+
+        int threads = 4;
+        ExecutorService pool = Executors.newFixedThreadPool(threads);
+        CountDownLatch ready = new CountDownLatch(threads);
+        CountDownLatch go = new CountDownLatch(1);
+        List<Callable<MonthlyEvaluation>> tasks = new ArrayList<>();
+        for (int i = 0; i < threads; i++) {
+            tasks.add(() -> {
+                TenantContext.set(clinicA);
+                ready.countDown();
+                go.await();
+                try {
+                    return evaluationService.evaluate(clinicA, employeeId, june);
+                } finally {
+                    TenantContext.clear();
+                }
+            });
+        }
+        List<Future<MonthlyEvaluation>> futures = tasks.stream().map(pool::submit).toList();
+        ready.await();
+        go.countDown();
+        pool.shutdown();
+
+        long succeeded = 0;
+        long conflicted = 0;
+        for (Future<MonthlyEvaluation> f : futures) {
+            try {
+                MonthlyEvaluation result = f.get();
+                assertThat(result.finalScore()).isEqualByComparingTo("68.57");
+                succeeded++;
+            } catch (ExecutionException e) {
+                assertThat(e.getCause()).isInstanceOf(EvaluationService.EvaluationConflictException.class);
+                conflicted++;
+            }
+        }
+
+        assertThat(succeeded).isGreaterThan(0);
+        assertThat(succeeded + conflicted).isEqualTo(threads);
+        assertThat(snapshotCount()).isEqualTo(1);
     }
 
     private ComponentScore component(MonthlyEvaluation evaluation, String code) {

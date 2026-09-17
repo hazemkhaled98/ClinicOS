@@ -80,7 +80,7 @@ class MyEvaluationControllerTest {
     void showsEmptyStateWhenNoDaysLogged() {
         allowView();
         MonthlyEvaluation ev = new MonthlyEvaluation(null, null, List.of(), null,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0, false);
+                BigDecimal.ZERO, BigDecimal.ZERO, 0, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
 
         String view = controller.myEvaluation(null, session(), model);
@@ -94,7 +94,7 @@ class MyEvaluationControllerTest {
         allowView();
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("68.57"), new BigDecimal("0.70"), List.of(), "جيد",
-                new BigDecimal("500.00"), new BigDecimal("5000.00"), new BigDecimal("5500.00"),
+                new BigDecimal("500.00"), new BigDecimal("5000.00"),
                 20, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
 
@@ -112,9 +112,9 @@ class MyEvaluationControllerTest {
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("70"), new BigDecimal("0.83"),
                 List.of(
-                        new ComponentScore(Category.COMPLETION, new BigDecimal("90"), new BigDecimal("1"), true, null),
-                        new ComponentScore(Category.VOLUME, null, new BigDecimal("1"), false, null)),
-                "جيد", BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 20, false);
+                        new ComponentScore(Category.COMPLETION, new BigDecimal("90"), new BigDecimal("1"), null),
+                        new ComponentScore(Category.VOLUME, null, new BigDecimal("1"), null)),
+                "جيد", BigDecimal.ZERO, BigDecimal.ZERO, 20, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
 
         String view = controller.myEvaluation(null, session(), model);
@@ -135,10 +135,10 @@ class MyEvaluationControllerTest {
                 otherEmployeeId, "سارة", new BigDecimal("4000"), new BigDecimal("400"), null, null, false, null, null));
         MonthlyEvaluation ownEv = new MonthlyEvaluation(
                 new BigDecimal("50"), new BigDecimal("1"), List.of(), "جيد",
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
+                BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
         MonthlyEvaluation otherEv = new MonthlyEvaluation(
                 new BigDecimal("90"), new BigDecimal("1"), List.of(), "ممتاز",
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
+                BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ownEv);
         when(evaluationService.evaluate(CLINIC, otherEmployeeId, YearMonth.now())).thenReturn(otherEv);
 
@@ -174,7 +174,7 @@ class MyEvaluationControllerTest {
         allowView();
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("70"), new BigDecimal("1"), List.of(), "جيد",
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 15, false);
+                BigDecimal.ZERO, BigDecimal.ZERO, 15, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
         when(gamificationService.get(CLINIC)).thenReturn(
                 new GamificationSettings(true, true, true, true, false, false));
@@ -198,7 +198,7 @@ class MyEvaluationControllerTest {
         allowView();
         MonthlyEvaluation ev = new MonthlyEvaluation(
                 new BigDecimal("70"), new BigDecimal("1"), List.of(), "جيد",
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 15, false);
+                BigDecimal.ZERO, BigDecimal.ZERO, 15, false);
         when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
         when(gamificationService.get(CLINIC)).thenReturn(
                 new GamificationSettings(true, true, true, true, false, false));
