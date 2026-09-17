@@ -168,7 +168,7 @@
                 <span th:if="${a.doneAt() == null and a.status() != 'approved' and a.status() != 'rejected'}" class="clinicos-chip clinicos-chip--info" th:text="${a.statusLabel()}">بانتظار الاعتماد</span>
               </td>
               <td class="text-end whitespace-nowrap">
-                <th:block th:if="${!isClosed and a.doneAt() != null and a.status() != 'approved' and a.status() != 'rejected'}">
+                <th:block th:if="${!isClosed and a.status() != 'approved' and a.status() != 'rejected'}">
                   <form class="inline-flex items-center gap-1"
                         th:attr="hx-post=|/evaluation/${selectedId}/assignment/${a.id()}/approve|"
                         hx-target="#evaluation-grid" hx-swap="outerHTML">
@@ -184,7 +184,7 @@
                   </form>
                 </th:block>
                 <span th:if="${isClosed}" class="text-xs text-neutral-400">قراءة فقط</span>
-                <span th:if="${!isClosed and (a.status() == 'approved' or a.status() == 'rejected' or a.doneAt() == null)}" class="text-xs text-neutral-400">—</span>
+                <span th:if="${!isClosed and (a.status() == 'approved' or a.status() == 'rejected')}" class="text-xs text-neutral-400">—</span>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(assignments)}">
@@ -203,7 +203,7 @@
               hx-target="#evaluation-grid" hx-swap="outerHTML"
               hx-confirm="فتح الشهر يعيد حساب النتيجة ثم يُجمّدها من جديد. المتابعة؟">
           <input type="hidden" name="month" th:value="${month}">
-          <button type="submit" class="clinicos-btn clinicos-btn--danger">فتح الشهر وإعادة التقييم</button>
+          <button type="submit" class="clinicos-btn clinicos-btn--warning">فتح الشهر وإعادة التقييم</button>
         </form>
         <p th:if="${isClosed and !view.frozen()}" class="text-sm text-neutral-600">هذا الشهر مفتوح حالياً — ستُعاد الكتابة عند الحساب القادم.</p>
         <p th:if="${!isClosed}" class="text-sm text-on-surface-variant">الشهر الحالي يُحسب مباشرة ولا يحتاج لفتح. النتيجة تتحدث فور اعتماد المهام.</p>

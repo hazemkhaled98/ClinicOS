@@ -124,6 +124,45 @@
     background-color: var(--color-surface);
   }
 
+  .clinicos-btn--primary {
+    background-color: var(--color-teal-900);
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn--primary:hover:not(:disabled) {
+    background-color: var(--color-teal-950);
+  }
+
+  .clinicos-btn--ghost {
+    background-color: var(--color-teal-100);
+    border-color: var(--color-teal-600);
+    color: var(--color-teal-700);
+  }
+
+  .clinicos-btn--ghost:hover:not(:disabled) {
+    background-color: var(--color-teal-900);
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn--ghost:focus-visible {
+    outline-color: var(--color-teal-600);
+  }
+
+  .clinicos-btn--warning {
+    background-color: var(--color-warning-50);
+    border-color: var(--color-warning-600);
+    color: var(--color-warning-600);
+  }
+
+  .clinicos-btn--warning:hover:not(:disabled) {
+    background-color: var(--color-warning-600);
+    color: var(--color-surface-elevated);
+  }
+
+  .clinicos-btn--warning:focus-visible {
+    outline-color: var(--color-warning-600);
+  }
+
   .clinicos-btn--danger {
     background-color: var(--color-danger-50);
     border-color: var(--color-danger-600);
