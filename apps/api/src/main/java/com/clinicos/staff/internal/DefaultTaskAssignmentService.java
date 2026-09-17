@@ -4,6 +4,7 @@ import static com.clinicos.shared.jooq.tables.TaskAssignment.TASK_ASSIGNMENT;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,56 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
                         .or(TASK_ASSIGNMENT.DUE_DATE.greaterOrEqual(LocalDate.now())))
                 .orderBy(TASK_ASSIGNMENT.ASSIGNED_AT.desc())
                 .fetch(this::toAssignment));
+    }
+
+    @Override
+    public List<Assignment> listForMonth(UUID clinicId, UUID employeeId, YearMonth month) {
+        OffsetDateTime from = month.atDay(1).atStartOfDay()
+                .atOffset(OffsetDateTime.now().getOffset());
+        OffsetDateTime to = month.plusMonths(1).atDay(1).atStartOfDay()
+                .atOffset(OffsetDateTime.now().getOffset());
+        return transactionTemplate.execute(status ->
+                dsl.selectFrom(TASK_ASSIGNMENT)
+                        .where(TASK_ASSIGNMENT.CLINIC_ID.eq(clinicId))
+                        .and(TASK_ASSIGNMENT.EMPLOYEE_ID.eq(employeeId))
+                        .and(TASK_ASSIGNMENT.ASSIGNED_AT.greaterOrEqual(from))
+                        .and(TASK_ASSIGNMENT.ASSIGNED_AT.lessThan(to))
+                        .orderBy(TASK_ASSIGNMENT.ASSIGNED_AT.asc())
+                        .fetch(this::toAssignment));
+    }
+
+    @Override
+    public Assignment approve(UUID clinicId, UUID assignmentId, UUID approvedByMembershipId) {
+        return review(clinicId, assignmentId, AssignmentStatus.approved, approvedByMembershipId, null);
+    }
+
+    @Override
+    public Assignment reject(UUID clinicId, UUID assignmentId, UUID approvedByMembershipId, String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("سبب الرفض مطلوب");
+        }
+        return review(clinicId, assignmentId, AssignmentStatus.rejected, approvedByMembershipId, reason.strip());
+    }
+
+    private Assignment review(UUID clinicId, UUID assignmentId, AssignmentStatus target,
+            UUID approvedByMembershipId, String reason) {
+        return transactionTemplate.execute(status -> {
+            int updated = dsl.update(TASK_ASSIGNMENT)
+                    .set(TASK_ASSIGNMENT.STATUS, target)
+                    .set(TASK_ASSIGNMENT.APPROVED_BY, approvedByMembershipId)
+                    .set(TASK_ASSIGNMENT.APPROVED_AT, OffsetDateTime.now())
+                    .where(TASK_ASSIGNMENT.CLINIC_ID.eq(clinicId))
+                    .and(TASK_ASSIGNMENT.ID.eq(assignmentId))
+                    .and(TASK_ASSIGNMENT.STATUS.eq(AssignmentStatus.pending))
+                    .execute();
+            if (updated == 0) {
+                throw new IllegalArgumentException("المهمة ليست بانتظار الاعتماد");
+            }
+            return dsl.selectFrom(TASK_ASSIGNMENT)
+                    .where(TASK_ASSIGNMENT.CLINIC_ID.eq(clinicId))
+                    .and(TASK_ASSIGNMENT.ID.eq(assignmentId))
+                    .fetchOne(this::toAssignment);
+        });
     }
 
     @Override
@@ -102,7 +153,9 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
                 r.getDueDate(),
                 r.getStatus().getLiteral(),
                 r.getDoneAt(),
-                r.getProofPhotoId());
+                r.getProofPhotoId(),
+                r.getProposedBy().getLiteral(),
+                r.getApprovedAt());
     }
 
     private static AssignmentProposer toDbProposer(Proposer proposer) {

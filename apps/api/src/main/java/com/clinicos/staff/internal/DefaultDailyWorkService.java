@@ -8,6 +8,7 @@ import static com.clinicos.shared.jooq.tables.TaskDefinition.TASK_DEFINITION;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
+import com.clinicos.shared.jooq.enums.TaskReviewStatus;
 import com.clinicos.shared.jooq.tables.records.TaskDefinitionRecord;
 import com.clinicos.staff.api.DailyWorkService;
 import com.clinicos.staff.api.SelfCheckService;
@@ -43,6 +45,43 @@ public class DefaultDailyWorkService implements DailyWorkService {
 
     @Override
     public List<DailyTask> today(UUID clinicId, UUID employeeId) {
+        return forDate(clinicId, employeeId, LocalDate.now());
+    }
+
+    @Override
+    public List<CompletionRow> listForMonth(UUID clinicId, UUID employeeId, YearMonth month) {
+        return transactionTemplate.execute(status -> dsl.select(
+                        DAILY_TASK_COMPLETION.DAILY_RECORD_ID,
+                        DAILY_TASK_COMPLETION.TASK_DEFINITION_ID,
+                        TASK_DEFINITION.NAME,
+                        DAILY_RECORD.WORK_DATE,
+                        DAILY_TASK_COMPLETION.REVIEW_STATUS,
+                        DAILY_TASK_COMPLETION.REVIEW_REASON,
+                        DAILY_TASK_COMPLETION.PHOTO_ID,
+                        TASK_DEFINITION.REQUIRES_PHOTO)
+                .from(DAILY_TASK_COMPLETION)
+                .join(DAILY_RECORD).on(DAILY_RECORD.ID.eq(DAILY_TASK_COMPLETION.DAILY_RECORD_ID))
+                .join(TASK_DEFINITION).on(TASK_DEFINITION.ID.eq(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID))
+                .where(DAILY_RECORD.CLINIC_ID.eq(clinicId))
+                .and(DAILY_RECORD.EMPLOYEE_ID.eq(employeeId))
+                .and(DAILY_RECORD.WORK_DATE.ge(month.atDay(1)))
+                .and(DAILY_RECORD.WORK_DATE.le(month.atEndOfMonth()))
+                .and(DAILY_TASK_COMPLETION.DONE.isTrue())
+                .orderBy(DAILY_RECORD.WORK_DATE.asc(), TASK_DEFINITION.NAME.asc())
+                .fetch(r -> new CompletionRow(
+                        r.getValue(DAILY_TASK_COMPLETION.DAILY_RECORD_ID),
+                        r.getValue(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID),
+                        r.getValue(TASK_DEFINITION.NAME),
+                        r.getValue(DAILY_RECORD.WORK_DATE),
+                        r.getValue(DAILY_TASK_COMPLETION.REVIEW_STATUS) == null ? null
+                                : r.getValue(DAILY_TASK_COMPLETION.REVIEW_STATUS).getLiteral(),
+                        r.getValue(DAILY_TASK_COMPLETION.REVIEW_REASON),
+                        r.getValue(DAILY_TASK_COMPLETION.PHOTO_ID),
+                        r.getValue(TASK_DEFINITION.REQUIRES_PHOTO))));
+    }
+
+    @Override
+    public List<DailyTask> forDate(UUID clinicId, UUID employeeId, LocalDate date) {
         return transactionTemplate.execute(status -> {
             String roleCode = resolveRoleCode(clinicId, employeeId);
             if (roleCode == null) {
@@ -50,7 +89,6 @@ public class DefaultDailyWorkService implements DailyWorkService {
                         employeeId, clinicId);
                 return List.of();
             }
-            LocalDate date = LocalDate.now();
             UUID dailyRecordId = ensureDailyRecord(clinicId, employeeId, date);
             Field<LocalDate> lastCompleted = DSL.field(
                     DSL.select(DSL.max(DAILY_RECORD.WORK_DATE))
@@ -63,6 +101,9 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .select(DAILY_TASK_COMPLETION.DONE,
                             DAILY_TASK_COMPLETION.COMPLETED_AT,
                             DAILY_TASK_COMPLETION.PHOTO_ID,
+                            DAILY_TASK_COMPLETION.REVIEW_STATUS,
+                            DAILY_TASK_COMPLETION.REVIEW_REASON,
+                            DAILY_TASK_COMPLETION.REVIEWED_AT,
                             lastCompleted)
                     .from(TASK_DEFINITION)
                     .leftJoin(DAILY_TASK_COMPLETION)
@@ -75,6 +116,46 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .and(TASK_DEFINITION.ARCHIVED_AT.isNull())
                     .orderBy(TASK_DEFINITION.DISPLAY_ORDER.asc(), TASK_DEFINITION.NAME.asc())
                     .fetch(rec -> newDailyTask(rec, lastCompleted));
+        });
+    }
+
+    @Override
+    public void approveReview(UUID clinicId, UUID dailyRecordId, UUID taskDefinitionId, UUID reviewedByMembershipId) {
+        transactionTemplate.executeWithoutResult(status -> {
+            int updated = dsl.update(DAILY_TASK_COMPLETION)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.approved)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, (String) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_BY, reviewedByMembershipId)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_AT, OffsetDateTime.now())
+                    .where(DAILY_TASK_COMPLETION.DAILY_RECORD_ID.eq(dailyRecordId))
+                    .and(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID.eq(taskDefinitionId))
+                    .and(DAILY_TASK_COMPLETION.DONE.isTrue())
+                    .execute();
+            if (updated == 0) {
+                throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
+            }
+        });
+    }
+
+    @Override
+    public void rejectReview(UUID clinicId, UUID dailyRecordId, UUID taskDefinitionId, UUID reviewedByMembershipId,
+            String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("سبب الرفض مطلوب");
+        }
+        transactionTemplate.executeWithoutResult(status -> {
+            int updated = dsl.update(DAILY_TASK_COMPLETION)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.rejected)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, reason.strip())
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_BY, reviewedByMembershipId)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_AT, OffsetDateTime.now())
+                    .where(DAILY_TASK_COMPLETION.DAILY_RECORD_ID.eq(dailyRecordId))
+                    .and(DAILY_TASK_COMPLETION.TASK_DEFINITION_ID.eq(taskDefinitionId))
+                    .and(DAILY_TASK_COMPLETION.DONE.isTrue())
+                    .execute();
+            if (updated == 0) {
+                throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
+            }
         });
     }
 
@@ -115,6 +196,10 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .set(DAILY_TASK_COMPLETION.DONE, true)
                     .set(DAILY_TASK_COMPLETION.COMPLETED_AT, OffsetDateTime.now())
                     .set(DAILY_TASK_COMPLETION.PHOTO_ID, photoId)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.pending)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, (String) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_BY, (UUID) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_AT, (OffsetDateTime) null)
                     .execute();
         });
     }
@@ -148,6 +233,10 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .set(DAILY_TASK_COMPLETION.DONE, false)
                     .set(DAILY_TASK_COMPLETION.COMPLETED_AT, (OffsetDateTime) null)
                     .set(DAILY_TASK_COMPLETION.PHOTO_ID, (UUID) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.pending)
+                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, (String) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_BY, (UUID) null)
+                    .set(DAILY_TASK_COMPLETION.REVIEWED_AT, (OffsetDateTime) null)
                     .execute();
         });
     }
@@ -165,7 +254,11 @@ public class DefaultDailyWorkService implements DailyWorkService {
                 rec.getValue(lastCompleted),
                 rec.getValue(TASK_DEFINITION.EVERY_N),
                 rec.getValue(TASK_DEFINITION.INTERVAL_UNIT) == null ? null
-                        : rec.getValue(TASK_DEFINITION.INTERVAL_UNIT).getLiteral());
+                        : rec.getValue(TASK_DEFINITION.INTERVAL_UNIT).getLiteral(),
+                rec.getValue(DAILY_TASK_COMPLETION.REVIEW_STATUS) == null ? null
+                        : rec.getValue(DAILY_TASK_COMPLETION.REVIEW_STATUS).getLiteral(),
+                rec.getValue(DAILY_TASK_COMPLETION.REVIEW_REASON),
+                rec.getValue(DAILY_TASK_COMPLETION.REVIEWED_AT));
     }
 
     private UUID ensureDailyRecord(UUID clinicId, UUID employeeId, LocalDate date) {
