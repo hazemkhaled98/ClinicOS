@@ -1,0 +1,118 @@
+<!--
+  Post-hoc design reference for the "تقييمي" (My Evaluation) screen — UC-005.
+  No Stitch comp existed for this screen; this file was captured from the
+  shipped Thymeleaf template (apps/api/src/main/resources/templates/my-evaluation.html)
+  with sample data, after visually deriving the hero-card conventions from
+  05_employee_check_in_performance/code.html. No screen.png is provided:
+  this repo's assistant has no image-generation capability. Take a manual
+  screenshot of the running screen (./dev-up.ps1, log in as `assistant`,
+  open "تقييمي") to fill that gap if a visual reference is required later.
+-->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تقييمي</title>
+</head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 via-teal-850 to-teal-800 text-white shadow-xl p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold text-teal-200 mb-1">تقييم الأداء الشخصي</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">أهلاً سارة محمد 👋</h1>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="#" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر السابق">⇐ السابق</a>
+            <span class="text-base font-extrabold">2026-09</span>
+            <a href="#" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر التالي">التالي ⇒</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state (no days logged this month) -->
+      <div class="mt-6 clinicos-card p-6 sm:p-8">
+        <div class="clinicos-empty-state">
+          <div class="text-4xl mb-2">✨</div>
+          <p class="font-bold text-teal-900 text-base">لا توجد بيانات كافية لهذا الشهر بعد.</p>
+          <p class="mt-1 text-sm text-on-surface-variant">سجّل حضورك وأنجز مهامك اليومية ليظهر تقييمك هنا.</p>
+        </div>
+      </div>
+
+      <!-- Populated state -->
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="p-6 clinicos-card flex flex-col items-center gap-1 text-center">
+          <p class="text-sm text-on-surface-variant font-bold">النتيجة النهائية</p>
+          <p class="text-4xl font-black text-teal-800">68.57</p>
+          <span class="mt-2 rounded-full px-4 py-1 text-sm font-extrabold bg-warning-50 text-warning-600">جيد</span>
+          <span class="clinicos-chip clinicos-chip--info mt-1">مباشر</span>
+        </div>
+        <div class="p-6 clinicos-card flex flex-col gap-1">
+          <p class="text-sm font-bold text-on-surface-variant">أيام مُسجّلة</p>
+          <p class="text-lg font-extrabold text-teal-900">20</p>
+          <p class="text-sm text-neutral-600">تغطية التقييم: 70%</p>
+          <div class="mt-2">
+            <p class="text-xs font-bold text-warning-600 mb-1">فئات غير مكتملة البيانات:</p>
+            <span class="clinicos-chip clinicos-chip--warning me-1">التشغيل</span>
+          </div>
+        </div>
+        <div class="p-6 clinicos-card flex flex-col gap-3">
+          <p class="text-sm font-bold text-on-surface-variant">الحافز والإجمالي</p>
+          <div class="flex justify-between"><span class="text-sm text-neutral-600">حافز الأداء</span><span class="font-extrabold text-emerald-700">500.00</span></div>
+          <div class="flex justify-between border-t border-neutral-100 pt-3"><span class="text-sm font-bold text-neutral-600">الإجمالي</span><span class="font-black text-teal-900">5500.00</span></div>
+        </div>
+      </div>
+
+      <div class="mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start font-extrabold">الفئة</th>
+              <th class="text-end font-extrabold">الدرجة</th>
+              <th class="text-end font-extrabold">الحالة</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100">
+            <tr>
+              <td class="font-bold text-teal-900">الفني</td>
+              <td class="text-end font-extrabold text-teal-900">100.00</td>
+              <td class="text-end"><span class="clinicos-chip clinicos-chip--info">ضمن التقييم</span></td>
+            </tr>
+            <tr>
+              <td class="font-bold text-teal-900">التشغيل</td>
+              <td class="text-end text-neutral-500">—</td>
+              <td class="text-end"><span class="clinicos-chip clinicos-chip--warning">مستبعد (لا بيانات)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="p-6 clinicos-card flex flex-col gap-3">
+          <h2 class="text-lg font-extrabold text-teal-900">أهداف الأسبوع</h2>
+          <div class="flex flex-col gap-1">
+            <div class="flex justify-between text-sm font-bold text-neutral-600">
+              <span>إنجاز أسبوعي</span>
+              <span>3 / 5</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-neutral-100 overflow-hidden">
+              <div class="h-full rounded-full bg-teal-600" style="width:60%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 clinicos-card flex flex-col gap-3">
+          <h2 class="text-lg font-extrabold text-teal-900">مواظبة متتالية</h2>
+          <p class="text-3xl font-black text-teal-800">4 <span class="text-sm font-bold text-neutral-500">أيام</span></p>
+          <div>
+            <p class="text-sm font-bold text-on-surface-variant mb-2">شارات هذا الشهر</p>
+            <span class="clinicos-chip clinicos-chip--success me-1">نجم الأسبوع</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</body>
+</html>
