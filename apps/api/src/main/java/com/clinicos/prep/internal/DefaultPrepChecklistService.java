@@ -73,8 +73,8 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
 
     @Override
     public Checklist importTemplate(UUID clinicId, Actor actor, String templateCode) {
-        requireEmployee(clinicId, actor);
         return transactionTemplate.execute(status -> {
+            requireEmployee(clinicId, actor);
             var template = dsl.selectFrom(PREP_TEMPLATE).where(PREP_TEMPLATE.CODE.eq(templateCode)).fetchOne();
             if (template == null) {
                 throw missing();
