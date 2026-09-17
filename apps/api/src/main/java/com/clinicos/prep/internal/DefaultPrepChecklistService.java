@@ -92,15 +92,14 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
 
     @Override
     public Checklist save(UUID clinicId, Actor actor, UUID checklistId, ChecklistRequest request) {
-        requireEmployee(clinicId, actor);
         PrepChecklistService.validate(request);
-        return transactionTemplate.execute(status -> saveInside(clinicId, checklistId, request));
+        return transactionTemplate.execute(status -> { requireEmployee(clinicId, actor); return saveInside(clinicId, checklistId, request); });
     }
 
     @Override
     public void archive(UUID clinicId, Actor actor, UUID checklistId) {
-        requireEmployee(clinicId, actor);
-        transactionTemplate.executeWithoutResult(status -> {
+ transactionTemplate.executeWithoutResult(status -> {
+ requireEmployee(clinicId, actor);
             if (dsl.update(PREP_CHECKLIST).set(PREP_CHECKLIST.ARCHIVED_AT, OffsetDateTime.now())
                     .where(PREP_CHECKLIST.ID.eq(checklistId)).and(PREP_CHECKLIST.CLINIC_ID.eq(clinicId))
                     .and(PREP_CHECKLIST.ARCHIVED_AT.isNull()).execute() == 0) {
@@ -111,8 +110,8 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
 
     @Override
     public Checklist approve(UUID clinicId, Actor actor, UUID checklistId) {
-        requireApprover(clinicId, actor);
-        return transactionTemplate.execute(status -> {
+ return transactionTemplate.execute(status -> {
+ requireApprover(clinicId, actor);
             var checklist = loadChecklist(clinicId, checklistId);
             validateStoredStructure(checklistId, checklist.getName());
             dsl.update(PREP_CHECKLIST).set(PREP_CHECKLIST.STATUS, ChecklistStatus.approved)
@@ -124,8 +123,8 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
 
     @Override
     public Checklist unapprove(UUID clinicId, Actor actor, UUID checklistId) {
-        requireApprover(clinicId, actor);
-        return transactionTemplate.execute(status -> {
+ return transactionTemplate.execute(status -> {
+ requireApprover(clinicId, actor);
             loadChecklist(clinicId, checklistId);
             dsl.update(PREP_CHECKLIST).set(PREP_CHECKLIST.STATUS, ChecklistStatus.draft)
                     .setNull(PREP_CHECKLIST.APPROVED_BY).setNull(PREP_CHECKLIST.APPROVED_AT)
@@ -135,15 +134,13 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
     }
 
     @Override
-    public Run today(UUID clinicId, Actor actor, UUID checklistId) {
-        requireEmployee(clinicId, actor);
-        return transactionTemplate.execute(status -> run(clinicId, actor, checklistId));
+ public Run today(UUID clinicId, Actor actor, UUID checklistId) {
+ return transactionTemplate.execute(status -> { requireEmployee(clinicId, actor); return run(clinicId, actor, checklistId); });
     }
 
     @Override
-    public Run toggle(UUID clinicId, Actor actor, UUID checklistId, UUID itemId, boolean checked) {
-        requireEmployee(clinicId, actor);
-        return transactionTemplate.execute(status -> {
+ public Run toggle(UUID clinicId, Actor actor, UUID checklistId, UUID itemId, boolean checked) {
+ return transactionTemplate.execute(status -> { requireEmployee(clinicId, actor);
             var run = runRecord(clinicId, actor, checklistId);
             var itemExists = dsl.fetchExists(dsl.selectOne().from(PREP_ITEM).join(PREP_SECTION).on(PREP_ITEM.SECTION_ID.eq(PREP_SECTION.ID))
                     .where(PREP_ITEM.ID.eq(itemId)).and(PREP_SECTION.CHECKLIST_ID.eq(checklistId)));
@@ -159,9 +156,8 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
     }
 
     @Override
-    public Run reset(UUID clinicId, Actor actor, UUID checklistId) {
-        requireEmployee(clinicId, actor);
-        return transactionTemplate.execute(status -> {
+ public Run reset(UUID clinicId, Actor actor, UUID checklistId) {
+ return transactionTemplate.execute(status -> { requireEmployee(clinicId, actor);
             var run = runRecord(clinicId, actor, checklistId);
             dsl.deleteFrom(PREP_RUN_ITEM).where(PREP_RUN_ITEM.PREP_RUN_ID.eq(run.getId())).execute();
             return run(clinicId, actor, checklistId);

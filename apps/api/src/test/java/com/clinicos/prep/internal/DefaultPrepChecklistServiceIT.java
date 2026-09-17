@@ -99,6 +99,13 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
         var today = service.today(clinicA, assistant, checklist.id());
         assertThat(today.runDate()).isEqualTo(LocalDate.now());
         assertThat(today.checkedCount()).isEqualTo(1);
+        try (var connection = superuser(); var statement = connection.prepareStatement("update prep_run set run_date = current_date - 1 where id = ?")) {
+            statement.setObject(1, today.id());
+            statement.executeUpdate();
+        }
+        var nextDay = service.today(clinicA, assistant, checklist.id());
+        assertThat(nextDay.id()).isNotEqualTo(today.id());
+        assertThat(nextDay.checkedCount()).isZero();
     }
 
     @Test
