@@ -165,26 +165,7 @@ mvn spring-boot:run
 
 **Before marking any phase `done`:** run the `/coverage-check` skill against the target use case to verify all implementation and test coverage gaps are closed. If the skill reports any missing items, **do not mark the phase complete** — flag the gaps, address them, and re-run `/coverage-check` until clean.
 
-**After a phase's PR is merged:** mark that phase `done` in **both** the `## Phase Status` table in this `CLAUDE.md` and the status table in `docs/roadmap.md` (same commit):
-1. Update `docs/roadmap.md` status table — flip the merged phase to `done`
-2. Update this `CLAUDE.md` — flip the same phase to `done` in the `## Phase Status` table, and update this file if architecture/operations changed
-3. Commit both (with the phase work or a follow-up status commit)
-
-## Phase Status (from docs/roadmap.md)
-
-| Phase | Status |
-|-------|--------|
-| 0 — Scaffolding | done |
-| 1 — UC-001 Login + Phase 1b sign-up | done |
-| 1c — Design system reconciliation | in progress |
-| 2 — UC-002 Employees/roles | not started |
-| 3 — UC-003 Daily work/attendance | in progress |
-| 4 — UC-004/005 Evaluation | done |
-| 5 — UC-006 Prep checklists | not started |
-| 6 — UC-007 Academy | not started |
-| 7a–7d — UC-008 Inventory | not started |
-| 8 — UC-009 Admin dashboard | not started |
-| 9 — Hardening/release | not started |
+**After a phase's PR is merged:** mark that phase `done` in the status table in `docs/roadmap.md` — that file is the single source of truth for phase status, not this one.
 
 ## Legacy Data
 
