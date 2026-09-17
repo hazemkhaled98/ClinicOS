@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -88,159 +89,104 @@ public class EvaluationController {
     @PostMapping("/evaluation/{employeeId}/completion/{dailyRecordId}/{taskId}/approve")
     public String approveCompletion(@PathVariable UUID employeeId, @PathVariable UUID dailyRecordId,
             @PathVariable UUID taskId, @RequestParam String month, HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            dailyWorkService.approveReview(clinicId, dailyRecordId, taskId,
-                    AdminAccess.membershipId(session));
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.approve", "daily_task_completion");
-        } catch (IllegalArgumentException e) {
-            errors.put("completion", e.getMessage());
-        }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم اعتماد الإنجاز ✔");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "completion",
+                "eval.approve", "daily_task_completion", "تم اعتماد الإنجاز ✔",
+                clinicId -> dailyWorkService.approveReview(clinicId, dailyRecordId, taskId,
+                        AdminAccess.membershipId(session)));
     }
 
     @PostMapping("/evaluation/{employeeId}/completion/{dailyRecordId}/{taskId}/reject")
     public String rejectCompletion(@PathVariable UUID employeeId, @PathVariable UUID dailyRecordId,
             @PathVariable UUID taskId, @RequestParam String month, @RequestParam(required = false) String reason,
             HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            dailyWorkService.rejectReview(clinicId, dailyRecordId, taskId,
-                    AdminAccess.membershipId(session), reason);
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.reject", "daily_task_completion");
-        } catch (IllegalArgumentException e) {
-            errors.put("completion", e.getMessage());
-        }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم رفض الإنجاز");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "completion",
+                "eval.reject", "daily_task_completion", "تم رفض الإنجاز",
+                clinicId -> dailyWorkService.rejectReview(clinicId, dailyRecordId, taskId,
+                        AdminAccess.membershipId(session), reason));
     }
 
     @PostMapping("/evaluation/{employeeId}/assignment/{assignmentId}/approve")
     public String approveAssignment(@PathVariable UUID employeeId, @PathVariable UUID assignmentId,
             @RequestParam String month, HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            assignmentService.approve(clinicId, assignmentId, AdminAccess.membershipId(session));
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.approve", "task_assignment");
-        } catch (IllegalArgumentException e) {
-            errors.put("assignment", e.getMessage());
-        }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم اعتماد المهمة ✔");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "assignment",
+                "eval.approve", "task_assignment", "تم اعتماد المهمة ✔",
+                clinicId -> assignmentService.approve(clinicId, assignmentId, AdminAccess.membershipId(session)));
     }
 
     @PostMapping("/evaluation/{employeeId}/assignment/{assignmentId}/reject")
     public String rejectAssignment(@PathVariable UUID employeeId, @PathVariable UUID assignmentId,
             @RequestParam String month, @RequestParam(required = false) String reason,
             HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            assignmentService.reject(clinicId, assignmentId, AdminAccess.membershipId(session), reason);
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.reject", "task_assignment");
-        } catch (IllegalArgumentException e) {
-            errors.put("assignment", e.getMessage());
-        }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم رفض المهمة");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "assignment",
+                "eval.reject", "task_assignment", "تم رفض المهمة",
+                clinicId -> assignmentService.reject(clinicId, assignmentId,
+                        AdminAccess.membershipId(session), reason));
     }
 
     @PostMapping("/evaluation/{employeeId}/assign")
     public String assign(@PathVariable UUID employeeId, @RequestParam String month,
             @RequestParam String name, @RequestParam(required = false) String dueDate,
             HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        if (name != null && !name.isBlank()) {
-            try {
-                LocalDate due = dueDate == null || dueDate.isBlank() ? null : LocalDate.parse(dueDate.trim());
-                assignmentService.propose(clinicId, employeeId,
-                        new AssignmentForm(employeeId, name.strip(), due), Proposer.MANAGER);
-                activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                        "eval.assign", "task_assignment");
-            } catch (RuntimeException e) {
-                errors.put("assignment", e.getMessage());
+        if (name == null || name.isBlank()) {
+            if (!canView(session)) {
+                return "redirect:/";
             }
-        } else {
-            errors.put("assignment", "اسم المهمة مطلوب");
+            UUID clinicId = AdminAccess.clinicId(session);
+            renderGrid(model, clinicId, employeeId, parseMonth(month));
+            Toasts.fromErrors(model, Map.of("assignment", "اسم المهمة مطلوب"), "تم تعيين المهمة ✔");
+            return GRID;
         }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم تعيين المهمة ✔");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "assignment",
+                "eval.assign", "task_assignment", "تم تعيين المهمة ✔",
+                clinicId -> {
+                    LocalDate due = dueDate == null || dueDate.isBlank() ? null : LocalDate.parse(dueDate.trim());
+                    assignmentService.propose(clinicId, employeeId,
+                            new AssignmentForm(employeeId, name.strip(), due), Proposer.MANAGER);
+                });
     }
 
     @PostMapping("/evaluation/{employeeId}/override")
     public String override(@PathVariable UUID employeeId, @RequestParam String month,
             @RequestParam String category, @RequestParam String floorValue,
             HttpSession session, Model model) {
-        if (!canView(session)) {
-            return "redirect:/";
-        }
-        Map<String, String> errors = new HashMap<>();
-        UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            Category cat = Category.fromCode(category.trim());
-            if (cat == null) {
-                throw new IllegalArgumentException("فئة غير معروفة");
-            }
-            BigDecimal floor = new BigDecimal(floorValue.trim());
-            evaluationService.setOverride(clinicId, employeeId, parseMonth(month), cat, floor,
-                    AdminAccess.membershipId(session));
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.override", "performance_override");
-        } catch (IllegalArgumentException e) {
-            errors.put("override", e.getMessage());
-        }
-        renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم حفظ الحد الأدنى ✔");
-        return GRID;
+        return handleAction(session, model, employeeId, month, "override",
+                "eval.override", "performance_override", "تم حفظ الحد الأدنى ✔",
+                clinicId -> {
+                    Category cat = Category.fromCode(category.trim());
+                    if (cat == null) {
+                        throw new IllegalArgumentException("فئة غير معروفة");
+                    }
+                    BigDecimal floor = new BigDecimal(floorValue.trim());
+                    evaluationService.setOverride(clinicId, employeeId, parseMonth(month), cat, floor,
+                            AdminAccess.membershipId(session));
+                });
     }
 
     @PostMapping("/evaluation/{employeeId}/unlock")
     public String unlock(@PathVariable UUID employeeId, @RequestParam String month,
             HttpSession session, Model model) {
+        return handleAction(session, model, employeeId, month, "unlock",
+                "eval.unlock", "evaluation_snapshot", "تم فتح الشهر لإعادة التقييم ✔",
+                clinicId -> evaluationService.unlock(clinicId, employeeId, parseMonth(month),
+                        AdminAccess.membershipId(session)));
+    }
+
+    private String handleAction(HttpSession session, Model model, UUID employeeId, String month,
+            String errorKey, String logAction, String logEntity, String successMessage,
+            Consumer<UUID> action) {
         if (!canView(session)) {
             return "redirect:/";
         }
         Map<String, String> errors = new HashMap<>();
         UUID clinicId = AdminAccess.clinicId(session);
         try {
-            evaluationService.unlock(clinicId, employeeId, parseMonth(month),
-                    AdminAccess.membershipId(session));
-            activityLogService.log(clinicId, AdminAccess.membershipId(session),
-                    "eval.unlock", "evaluation_snapshot");
-        } catch (EvaluationConflictException e) {
-            errors.put("unlock", e.getMessage());
+            action.accept(clinicId);
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
+        } catch (RuntimeException e) {
+            errors.put(errorKey, e.getMessage());
         }
         renderGrid(model, clinicId, employeeId, parseMonth(month));
-        Toasts.fromErrors(model, errors, "تم فتح الشهر لإعادة التقييم ✔");
+        Toasts.fromErrors(model, errors, successMessage);
         return GRID;
     }
 
