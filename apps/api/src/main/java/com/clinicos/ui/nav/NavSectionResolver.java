@@ -30,7 +30,7 @@ public final class NavSectionResolver {
     private static final List<NavSection> ALL = List.of(
             new NavSection("emp", "employees", "تسجيل الموظف", "تسجيل الموظف", "إدارة ملفات الموظفين وصلاحياتهم", NavIcon.USER),
             new NavSection("myeval", "my-evaluation", "تقييمي", "تقييمي", "تقييم الأداء الشخصي", NavIcon.EDIT),
-            new NavSection("quick", "quick-access", "الوصول السريع", "الوصول السريع", "أدوات سريعة للمهام اليومية", NavIcon.BOLT),
+            new NavSection("quick", "evaluation", "تقييم وتحقّق", "تقييم وتحقّق", "تقييم الأداء الشهري للموظفين", NavIcon.BOLT),
             new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية", NavIcon.TASKS),
             new NavSection("prep", "prep", "تحضير الجلسات", "تحضير الجلسات", "إعداد قوائم الإجراءات الطبية", NavIcon.CLIPBOARD_CHECK),
             new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية", NavIcon.STAR),

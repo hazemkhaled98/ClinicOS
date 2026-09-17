@@ -10,7 +10,7 @@
 @org.springframework.modulith.ApplicationModule(
         allowedDependencies = {
                 "shared",
-                "identity :: api", "clinicconfig :: api", "staff :: api", "evaluation",
+                "identity :: api", "clinicconfig :: api", "staff :: api", "evaluation :: api",
                 "academy", "prep", "inventory", "procedures"
         })
 package com.clinicos.ui;

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<head th:replace="~{fragments/head :: head('تقييم وتحقّق')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker">تقييم الأداء</p>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">تقييم وتحقّق</h1>
+      <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">مراجعة الأداء الشهري، واعتماد منجزات الموظفين ونتيجة شهر التقييم</p>
+
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-4 p-4 clinicos-card">
+        <div class="flex items-center gap-3">
+          <a th:href="@{/evaluation(month=${prevMonth},employee=${selectedId})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر السابق">⇐ السابق</a>
+          <span class="text-base font-extrabold text-teal-900" th:text="${month}">2026-09</span>
+          <a th:if="${!nextDisabled}" th:href="@{/evaluation(month=${nextMonth},employee=${selectedId})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر التالي">التالي ⇒</a>
+        </div>
+        <span th:if="${month lt currentMonth}" class="clinicos-chip clinicos-chip--warning">شهر مقفل — يمكن فتحه لإعادة التقييم</span>
+        <span th:if="${month ge currentMonth}" class="clinicos-chip clinicos-chip--info">الشهر الحالي — يُحسب مباشرة</span>
+      </div>
+
+      <div class="mt-6 p-4 clinicos-card">
+        <p class="text-sm font-bold text-on-surface-variant mb-2">اختر الموظف</p>
+        <div class="flex flex-wrap gap-2">
+          <a th:each="emp : ${employees}"
+             th:href="@{/evaluation(month=${month},employee=${emp.id()})}"
+             th:classappend="${emp.id() == selectedId ? ' clinicos-btn clinicos-btn--primary' : ' clinicos-btn clinicos-btn--ghost'}"
+             th:text="${emp.name()}">أحمد</a>
+          <span th:if="${#lists.isEmpty(employees)}" class="text-sm text-neutral-500">لا يوجد موظفون مسجّلون بعد.</span>
+        </div>
+      </div>
+
+      <div class="mt-6" th:replace="~{evaluation :: reviewGrid}"></div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>تقييم وتحقّق</title>
+</head>
+<body>
+<div th:fragment="reviewGrid" id="evaluation-grid" class="flex flex-col gap-6"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+
+  <th:block th:if="${view == null}">
+    <div class="clinicos-card p-6 sm:p-8">
+      <div class="clinicos-empty-state">
+        <div class="text-4xl mb-2">📊</div>
+        <p class="font-bold text-teal-900 text-base">لا يمكن حساب تقييم هذا الموظف لهذا الشهر.</p>
+        <p class="mt-1 text-sm text-on-surface-variant">تأكد من وجود ملف موظف وإعدادات تقييم للعيادة، أو جرّب شهراً آخر.</p>
+      </div>
+    </div>
+  </th:block>
+
+  <th:block th:unless="${view == null}">
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div class="p-6 clinicos-card flex flex-col items-center gap-1 text-center">
+        <p class="text-sm text-on-surface-variant font-bold">النتيجة النهائية</p>
+        <p class="text-4xl font-black text-teal-800" th:text="${#numbers.formatDecimal(view.finalScore(), 1, 2)}">68.57</p>
+        <p class="text-xs text-on-surface-variant">تغطية التقييم: <span th:if="${view.coverage() != null}" th:text="${#numbers.formatDecimal(view.coverage() * 100, 0, 0)} + '%'">70%</span><span th:if="${view.coverage() == null}">—</span></p>
+        <span th:if="${view.tierName() != null}" class="mt-2 rounded-full px-4 py-1 text-sm font-extrabold bg-warning-50 text-warning-600" th:text="${view.tierName()}">جيد</span>
+      </div>
+      <div class="p-6 clinicos-card flex flex-col gap-1">
+        <p class="text-sm font-bold text-on-surface-variant">الفئات المحسوبة</p>
+        <p class="text-lg font-extrabold text-teal-900"><span th:text="${#lists.size(view.components())}">6</span> فئات منها <span th:if="${view.coverage() != null}" th:text="${#numbers.formatDecimal(view.coverage() * 100, 0, 0)}">70</span>% مغطاة</p>
+        <p class="text-sm text-neutral-600">أيام مُسجّلة: <span th:text="${view.daysLogged()}">30</span></p>
+        <span th:if="${view.frozen()}" class="clinicos-chip clinicos-chip--warning self-start mt-1">مجمّد (شهر مقفل)</span>
+        <span th:if="${!view.frozen()}" class="clinicos-chip clinicos-chip--info self-start mt-1">مباشر</span>
+      </div>
+      <div class="p-6 clinicos-card flex flex-col gap-3">
+        <p class="text-sm font-bold text-on-surface-variant">الراتب والحافز</p>
+        <div class="flex justify-between"><span class="text-sm text-neutral-600">الراتب الأساسي</span><span class="font-extrabold text-teal-900" th:text="${#numbers.formatDecimal(view.basePay(), 1, 2)}">5000.00</span></div>
+        <div class="flex justify-between"><span class="text-sm text-neutral-600">حافز الأداء</span><span class="font-extrabold text-emerald-700" th:text="${#numbers.formatDecimal(view.incentiveAmount(), 1, 2)}">500.00</span></div>
+        <div class="flex justify-between border-t border-neutral-100 pt-3"><span class="text-sm font-bold text-neutral-600">الإجمالي</span><span class="font-black text-teal-900" th:text="${#numbers.formatDecimal(view.totalPay(), 1, 2)}">5500.00</span></div>
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <table class="clinicos-table clinicos-table--comfortable">
+        <thead>
+          <tr>
+            <th class="text-start font-extrabold">الفئة</th>
+            <th class="text-end font-extrabold">الدرجة</th>
+            <th class="text-end font-extrabold">الوزن</th>
+            <th class="text-end font-extrabold">حد أدنى</th>
+            <th class="text-end font-extrabold">الحالة</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-100">
+          <tr th:each="row : ${view.components()}">
+            <td class="font-bold text-teal-900" th:text="${row.name()}">الفني</td>
+            <td class="text-end font-extrabold text-teal-900" th:if="${row.rawScore() != null}" th:text="${#numbers.formatDecimal(row.rawScore(), 1, 2)}">100.00</td>
+            <td class="text-end text-neutral-500" th:if="${row.rawScore() == null}">—</td>
+            <td class="text-end text-neutral-600" th:text="${#numbers.formatDecimal(row.weight(), 1, 2)}">18.00</td>
+            <td class="text-end text-neutral-600" th:if="${row.overrideFloor() != null}" th:text="${#numbers.formatDecimal(row.overrideFloor(), 1, 2)}">70.00</td>
+            <td class="text-end text-neutral-400" th:if="${row.overrideFloor() == null}">—</td>
+            <td class="text-end">
+              <span th:if="${row.included()}" class="clinicos-chip clinicos-chip--info">ضمن التقييم</span>
+              <span th:if="${!row.included()}" class="clinicos-chip clinicos-chip--warning">مستبعد (لا بيانات)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+        <h2 class="px-5 py-4 text-lg font-extrabold text-teal-900 border-b border-neutral-100">مهام يومية للمراجعة</h2>
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start font-extrabold">المهمة</th>
+              <th class="text-start font-extrabold">اليوم</th>
+              <th class="text-start font-extrabold">الحالة</th>
+              <th class="text-end font-extrabold">إجراء</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100">
+            <tr th:each="c : ${completions}">
+              <td class="font-bold text-teal-900">
+                <span th:text="${c.taskName()}">مهمة</span>
+                <a th:if="${c.photoId() != null && c.requiresPhoto()}"
+                   th:href="|/attachments/${c.photoId()}|" target="_blank" rel="noopener"
+                   class="block text-xs text-emerald-600 font-bold">⬆ صورة الإثبات</a>
+              </td>
+              <td class="text-neutral-600" th:text="${c.workDate()}">2026-09-01</td>
+              <td>
+                <span th:if="${c.status() == null or c.status() == 'pending'}" class="clinicos-chip clinicos-chip--warning" th:text="${c.statusLabel()}">بانتظار المراجعة</span>
+                <span th:if="${c.status() == 'approved'}" class="clinicos-chip clinicos-chip--success" th:text="${c.statusLabel()}">مُعتمد</span>
+                <span th:if="${c.status() == 'rejected'}" class="clinicos-chip clinicos-chip--danger" th:text="${c.statusLabel()}">مرفوض</span>
+                <p th:if="${c.reason() != null}" class="text-xs text-neutral-500 mt-1" th:text="${c.reason()}">السبب</p>
+              </td>
+              <td class="text-end whitespace-nowrap">
+                <th:block th:if="${!isClosed and (c.status() == null or c.status() == 'pending')}">
+                  <form class="inline-flex items-center gap-1"
+                        th:attr="hx-post=|/evaluation/${selectedId}/completion/${c.dailyRecordId()}/${c.taskDefinitionId()}/approve|"
+                        hx-target="#evaluation-grid" hx-swap="outerHTML">
+                    <input type="hidden" name="month" th:value="${month}">
+                    <button type="submit" class="clinicos-btn clinicos-btn--secondary text-emerald-700 px-3 py-1.5 text-xs">اعتماد</button>
+                  </form>
+                  <form class="inline-flex items-center gap-1"
+                        th:attr="hx-post=|/evaluation/${selectedId}/completion/${c.dailyRecordId()}/${c.taskDefinitionId()}/reject|"
+                        hx-target="#evaluation-grid" hx-swap="outerHTML">
+                    <input type="hidden" name="month" th:value="${month}">
+                    <input type="text" name="reason" placeholder="سبب الرفض" class="clinicos-input w-28 px-2 py-1 text-xs">
+                    <button type="submit" class="clinicos-btn clinicos-btn--secondary text-danger-600 px-3 py-1.5 text-xs">رفض</button>
+                  </form>
+                </th:block>
+                <span th:if="${isClosed}" class="text-xs text-neutral-400">قراءة فقط</span>
+                <span th:if="${!isClosed and (c.status() == 'approved' or c.status() == 'rejected')}" class="text-xs text-neutral-400">—</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(completions)}">
+              <td colspan="4" class="px-5 py-6 text-center text-neutral-500">لا مهام مكتملة في هذا الشهر.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+        <h2 class="px-5 py-4 text-lg font-extrabold text-teal-900 border-b border-neutral-100">مهام إضافية للمراجعة</h2>
+        <form th:if="${!isClosed}" class="px-5 py-4 border-b border-neutral-100 flex flex-wrap items-end gap-3"
+              th:attr="hx-post=|/evaluation/${selectedId}/assign|"
+              hx-target="#evaluation-grid" hx-swap="outerHTML">
+          <input type="hidden" name="month" th:value="${month}">
+          <label class="flex flex-col gap-1 text-sm text-on-surface-variant font-bold">
+            مهمة جديدة
+            <input type="text" name="name" required class="clinicos-input w-44" placeholder="مهمة إضافية">
+          </label>
+          <label class="flex flex-col gap-1 text-sm text-on-surface-variant font-bold">
+            الاستحقاق
+            <input type="date" name="dueDate" class="clinicos-input w-36">
+          </label>
+          <button type="submit" class="clinicos-btn px-4 py-2 text-xs">تعيين</button>
+        </form>
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start font-extrabold">المهمة</th>
+              <th class="text-start font-extrabold">الاستحقاق</th>
+              <th class="text-start font-extrabold">الحالة</th>
+              <th class="text-end font-extrabold">إجراء</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100">
+            <tr th:each="a : ${assignments}">
+              <td class="font-bold text-teal-900" th:text="${a.name()}">مهمة</td>
+              <td class="text-neutral-600" th:if="${a.dueDate() != null}" th:text="${a.dueDate()}">2026-09-15</td>
+              <td class="text-neutral-400" th:if="${a.dueDate() == null}">—</td>
+              <td>
+                <span th:if="${a.doneAt() != null and a.status() != 'approved' and a.status() != 'rejected'}" class="clinicos-chip clinicos-chip--warning" th:text="${a.statusLabel()}">مُسلَّم</span>
+                <span th:if="${a.status() == 'approved'}" class="clinicos-chip clinicos-chip--success" th:text="${a.statusLabel()}">مُعتمد</span>
+                <span th:if="${a.status() == 'rejected'}" class="clinicos-chip clinicos-chip--danger" th:text="${a.statusLabel()}">مرفوض</span>
+                <span th:if="${a.doneAt() == null and a.status() != 'approved' and a.status() != 'rejected'}" class="clinicos-chip clinicos-chip--info" th:text="${a.statusLabel()}">بانتظار الاعتماد</span>
+              </td>
+              <td class="text-end whitespace-nowrap">
+                <th:block th:if="${!isClosed and a.doneAt() != null and a.status() != 'approved' and a.status() != 'rejected'}">
+                  <form class="inline-flex items-center gap-1"
+                        th:attr="hx-post=|/evaluation/${selectedId}/assignment/${a.id()}/approve|"
+                        hx-target="#evaluation-grid" hx-swap="outerHTML">
+                    <input type="hidden" name="month" th:value="${month}">
+                    <button type="submit" class="clinicos-btn clinicos-btn--secondary text-emerald-700 px-3 py-1.5 text-xs">اعتماد</button>
+                  </form>
+                  <form class="inline-flex items-center gap-1"
+                        th:attr="hx-post=|/evaluation/${selectedId}/assignment/${a.id()}/reject|"
+                        hx-target="#evaluation-grid" hx-swap="outerHTML">
+                    <input type="hidden" name="month" th:value="${month}">
+                    <input type="text" name="reason" placeholder="سبب الرفض" class="clinicos-input w-28 px-2 py-1 text-xs">
+                    <button type="submit" class="clinicos-btn clinicos-btn--secondary text-danger-600 px-3 py-1.5 text-xs">رفض</button>
+                  </form>
+                </th:block>
+                <span th:if="${isClosed}" class="text-xs text-neutral-400">قراءة فقط</span>
+                <span th:if="${!isClosed and (a.status() == 'approved' or a.status() == 'rejected' or a.doneAt() == null)}" class="text-xs text-neutral-400">—</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(assignments)}">
+              <td colspan="4" class="px-5 py-6 text-center text-neutral-500">لا مهام إضافية في هذا الشهر.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div class="p-6 clinicos-card flex flex-col gap-2">
+        <h2 class="text-lg font-extrabold text-teal-900 mb-1">تجميد وإعادة التقييم</h2>
+        <form th:if="${isClosed and view.frozen()}"
+              th:attr="hx-post=|/evaluation/${selectedId}/unlock|"
+              hx-target="#evaluation-grid" hx-swap="outerHTML"
+              hx-confirm="فتح الشهر يعيد حساب النتيجة ثم يُجمّدها من جديد. المتابعة؟">
+          <input type="hidden" name="month" th:value="${month}">
+          <button type="submit" class="clinicos-btn clinicos-btn--danger">فتح الشهر وإعادة التقييم</button>
+        </form>
+        <p th:if="${isClosed and !view.frozen()}" class="text-sm text-neutral-600">هذا الشهر مفتوح حالياً — ستُعاد الكتابة عند الحساب القادم.</p>
+        <p th:if="${!isClosed}" class="text-sm text-on-surface-variant">الشهر الحالي يُحسب مباشرة ولا يحتاج لفتح. النتيجة تتحدث فور اعتماد المهام.</p>
+      </div>
+      <div class="p-6 clinicos-card">
+        <h2 class="text-lg font-extrabold text-teal-900 mb-1">حد أدنى يدوي</h2>
+        <p class="text-sm text-on-surface-variant mb-4">ارفع نتيجة فئة تعتقد أنها أقل من الواقع (0–100). يُطبَّق كحد أدنى عند الحساب.</p>
+        <form th:if="${!isClosed}" class="flex flex-wrap items-end gap-3"
+              th:attr="hx-post=|/evaluation/${selectedId}/override|"
+              hx-target="#evaluation-grid" hx-swap="outerHTML">
+          <input type="hidden" name="month" th:value="${month}">
+          <select name="category" class="clinicos-input w-40">
+            <option th:each="opt : ${categoryOptions}" th:value="${opt.code()}" th:text="${opt.name()}">الفني</option>
+          </select>
+          <input type="number" name="floorValue" min="0" max="100" step="0.01" required class="clinicos-input w-28" placeholder="70">
+          <button type="submit" class="clinicos-btn px-4 py-2 text-xs">حفظ الحد الأدنى</button>
+        </form>
+        <p th:if="${isClosed}" class="text-sm text-neutral-600">الشهر مقفل — افتحه أولاً لتعديل الحدود الدنيا.</p>
+      </div>
+    </div>
+
+  </th:block>
+</div>
+</body>
+</html>
