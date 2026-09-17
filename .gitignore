@@ -35,7 +35,10 @@ replay_pid*
 docs/plans/
 
 # Local agent/tooling state
-.agents/
+# .agents skills are tracked so they exist in every git worktree (like
+# .claude); keep only the platform binary and machine-local state out.
+.agents/pr-sentinel-state.json
+.agents/skills/impeccable/scripts/bin/
 .mcp.json
 .serena/
 skills-lock.json
