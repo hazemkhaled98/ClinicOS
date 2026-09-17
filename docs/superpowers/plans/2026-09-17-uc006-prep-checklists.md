@@ -172,7 +172,7 @@ save replaces children atomically and sets status draft plus null approval field
 
 - [ ] Step 5: Implement daily progress
 
-Create or select the unique clinic/checklist/employee/LocalDate.now run. Upsert one prep_run_item per current item; checked_at is OffsetDateTime.now when checked and null otherwise. Reset nulls all current run items. On a unique-key race, re-read the winning run.
+Create or select the unique clinic/checklist/employee/LocalDate.now run. Upsert one prep_run_item per current item; checked_at is OffsetDateTime.now when checked and null otherwise. Reset deletes all current run items. On a unique-key race, re-read the winning run.
 
 - [ ] Step 6: Run IT and commit
 
@@ -218,7 +218,7 @@ Expected: FAIL because PrepController is absent.
     @PostMapping("/prep/checklists/{id}/run/items/{itemId}")
     @PostMapping("/prep/checklists/{id}/run/reset")
 
-Build Actor from SessionKeys and the membership-linked employee resolved by the service. Return Arabic validation errors in-band and include the standard CSRF HTMX header.
+Build Actor from SessionKeys and resolve the membership-linked employee in the controller. Return Arabic validation errors in-band; the shared head fragment adds the CSRF HTMX header.
 
 - [ ] Step 4: Add activity logging and error translation
 

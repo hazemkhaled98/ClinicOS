@@ -19,6 +19,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import com.clinicos.PostgresTestSupport;
 import com.clinicos.TestFixtures;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Response;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.AriaRole;
 
@@ -237,6 +238,41 @@ class UC006PrepChecklistsIT extends AbstractBrowserIT {
 
             page().navigate(getUrl() + "prep");
             PlaywrightAssertions.assertThat(page().getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("تحضير الجلسات"))).isVisible();
+        }
+
+        @Test
+        @DisplayName("Assistant can complete and reset an approved daily checklist")
+        void assistantCanCompleteAndResetApprovedChecklist() throws Exception {
+            String clinicSlug = seedTestData();
+            loginAsRole("assistant", clinicSlug, "password");
+            page().navigate(getUrl() + "prep/checklists/new");
+            page().getByLabel("اسم الإجراء").fill("اختبار التشغيل اليومي");
+            page().locator("input[placeholder*='عنوان القسم']").first().fill("قسم");
+            page().locator("input[placeholder*='اسم الأداة']").first().fill("أداة");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ القائمة")).click();
+            page().waitForURL(url -> url.contains("/prep"));
+
+            page().context().clearCookies();
+            loginAsRole("manager", clinicSlug, "password");
+            page().navigate(getUrl() + "prep");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("اعتماد")).first().click();
+            page().waitForURL(url -> url.contains("/prep"));
+
+            page().context().clearCookies();
+            loginAsRole("assistant", clinicSlug, "password");
+            page().navigate(getUrl() + "prep");
+            page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("بدء الجلسة")).first().click();
+            Response response = page().waitForResponse(
+                    candidate -> candidate.url().contains("/run/items/"),
+                    () -> page().locator("input[type='checkbox']").first().check());
+            org.junit.jupiter.api.Assertions.assertEquals(200, response.status());
+            org.junit.jupiter.api.Assertions.assertEquals("checked=true", response.request().postData());
+            PlaywrightAssertions.assertThat(page().locator("span.text-sm.font-extrabold")).hasText("1/1");
+
+            page().reload();
+            PlaywrightAssertions.assertThat(page().locator("input[type='checkbox']").first()).isChecked();
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("إعادة ضبط")).click();
+            PlaywrightAssertions.assertThat(page().locator("span.text-sm.font-extrabold")).hasText("0/1");
         }
     }
 }

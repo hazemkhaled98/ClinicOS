@@ -71,7 +71,7 @@
             <div class="space-y-2.5">
               <label th:each="item : ${section.items()}" class="checklist-item flex items-center justify-between p-3.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer select-none transition-colors">
                 <div class="flex items-center gap-3">
-                  <input type="checkbox" th:checked="${item.checked()}" class="w-5 h-5 text-teal-600 rounded border-neutral-300 focus:ring-teal-600 cursor-pointer transition" th:attr="hx-post=|/prep/checklists/${checklistId}/run/items/${item.id()}|,hx-vals=|{'checked': '${!item.checked()}'}|" hx-target="#run-content" hx-swap="outerHTML">
+                  <input type="checkbox" th:checked="${item.checked()}" class="w-5 h-5 text-teal-600 rounded border-neutral-300 focus:ring-teal-600 cursor-pointer transition" th:attr="hx-post=|/prep/checklists/${checklistId}/run/items/${item.id()}|,hx-vals=|{&quot;checked&quot;: ${!item.checked()}}|" hx-target="#run-content" hx-swap="outerHTML">
                   <span class="text-sm font-semibold" th:classappend="${item.checked()} ? 'line-through text-neutral-400' : 'text-teal-900'" th:text="${item.name()}">أداة</span>
                 </div>
               </label>

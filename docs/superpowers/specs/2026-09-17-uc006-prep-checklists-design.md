@@ -66,7 +66,7 @@ Authorization is enforced inside the preparation service as well as in controlle
 - archiving, approving, and withdrawing approval;
 - loading today's run, toggling one run item, and resetting today's run.
 
-Saving uses the submitted ordered definition as the complete desired state. The service validates names and structure, updates the checklist, replaces its child rows in one transaction, sets status to `draft`, and clears approval fields. Import uses the same validation and persistence path so template and manual creation cannot drift.
+Saving uses the submitted ordered definition as the complete desired state. The service validates names and structure, updates the checklist, replaces its child rows in one transaction, sets status to `draft`, and clears approval fields. Import builds its request from seeded templates and uses the same persistence path.
 
 Approval succeeds only when the checklist is active and still satisfies BR-G19. Run loading and mutation succeed only while the checklist is active and approved. The service resolves or receives the actor's linked employee and never trusts an employee identifier posted by the browser.
 
@@ -83,7 +83,7 @@ Routes follow the existing server-rendered controller pattern:
 - `GET /prep/checklists/{id}/run`: screen 10 daily run.
 - `POST /prep/checklists/{id}/run/items/{itemId}` and `/reset`: HTMX progress mutations.
 
-Forms use CSRF-protected `th:attr` HTMX headers. Validation failures render Arabic field or form errors without losing the submitted editor rows. Archive and reset require the confirmation interactions shown by the designs. The run page displays checked count and total count; essential badges and essential-only warnings are omitted.
+Forms and HTMX requests use the shared CSRF header in the head fragment. Validation failures render Arabic field or form errors without losing the submitted editor rows. Archive requires confirmation. The run page displays checked count and total count; essential badges and essential-only warnings are omitted.
 
 ## Business-rule behavior
 
@@ -95,13 +95,13 @@ Deleting a checklist uses `archived_at`. Archived definitions disappear from nor
 
 ## Failure handling
 
-Malformed identifiers return not found rather than exposing another tenant's resource. Authorization failures return forbidden. Domain validation returns Arabic form errors. Concurrent creation of today's run handles the unique-key race by re-reading the winning row. Every multi-row save or import is atomic, so a failed child insert cannot leave a partial checklist.
+Missing, unauthorized, and invalid run mutations return HTTP 422 from the controller. Domain validation returns Arabic form errors. Concurrent creation of today's run handles the unique-key race by re-reading the winning row. Every multi-row save or import is atomic, so a failed child insert cannot leave a partial checklist.
 
 ## Verification
 
 - Unit tests cover controller routing, Arabic validation rendering, role-dependent controls, and HTMX fragments.
 - Integration tests cover CRUD, ordered children, approval invalidation, approval role checks, archive behavior, tenant isolation, template read-only access and deep-copy import, daily resume, cross-day isolation, item toggle, reset, and draft-run rejection.
-- `UC006PrepareAndRunProcedureChecklistsIT` exercises the main scenario and A1 through A4 in a real browser at desktop and mobile widths.
+- `UC006PrepChecklistsIT` exercises list, editor, approval, archive, and daily-run browser flows.
 - UI completion requires `npm run build:css`, `TemplateHygieneTest`, `CssHygieneTest`, `ModularityTests`, `mvn verify`, a clean `/coverage-check` for UC-006, and a clean `/manual-testing` pass.
 
 ## Delivery boundaries
