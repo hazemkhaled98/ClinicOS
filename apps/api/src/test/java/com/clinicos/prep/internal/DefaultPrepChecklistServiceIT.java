@@ -75,6 +75,8 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThatThrownBy(() -> service.save(clinicA, assistant, null, new ChecklistRequest("كشف", List.of())))
                 .hasMessage("أضف قسمًا واحدًا على الأقل");
+
+        assertThat(service.list(clinicA)).isEmpty();
     }
 
     @Test
@@ -157,6 +159,19 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
         var reset = service.reset(clinicA, assistant, checklist.id());
 
         assertThat(reset.checkedCount()).isZero();
+    }
+
+    @Test
+    void A2_managerCanWithdrawApproval() {
+        var checklist = approvedChecklist();
+
+        TenantContext.set(clinicA);
+        var withdrawn = service.unapprove(clinicA, manager, checklist.id());
+
+        assertThat(withdrawn.status()).isEqualTo("draft");
+        assertThat(withdrawn.approvedBy()).isNull();
+        assertThatThrownBy(() -> service.today(clinicA, assistant, checklist.id()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private PrepChecklistService.Checklist draftChecklist() {

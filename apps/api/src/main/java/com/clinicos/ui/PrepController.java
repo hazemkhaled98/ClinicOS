@@ -249,6 +249,9 @@ public class PrepController {
     }
 
     public static class ChecklistForm {
+        private static final com.fasterxml.jackson.databind.ObjectMapper JSON =
+                new com.fasterxml.jackson.databind.ObjectMapper();
+
         private String name;
         private List<SectionForm> sections = new ArrayList<>();
 
@@ -277,6 +280,14 @@ public class PrepController {
 
         public void setSections(List<SectionForm> sections) {
             this.sections = sections == null ? new ArrayList<>() : sections;
+        }
+
+        public String getSectionsJson() {
+            try {
+                return JSON.writeValueAsString(sections);
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                return "[]";
+            }
         }
     }
 

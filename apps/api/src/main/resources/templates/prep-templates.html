@@ -2,8 +2,56 @@
 <html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('قوالب قوائم التحضير')}"></head>
 <body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }">
-<main class="w-full min-h-screen flex flex-col bg-surface"><header th:replace="~{fragments/topbar :: topbar}"></header><section class="flex-1 p-8 sm:p-10 max-w-6xl w-full mx-auto clinicos-section">
-<a href="/prep" class="text-sm font-bold text-emerald-700">← قوائم التحضير</a><h1 class="mt-4 text-2xl sm:text-3xl font-extrabold text-teal-900">📚 قوالب جاهزة</h1><p class="mt-1 text-sm text-on-surface-variant">ابدأ بسرعة بقائمة معدّة مسبقاً ثم عدّلها قبل الاعتماد.</p>
-<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><article th:each="template : ${templates}" class="clinicos-card p-5 flex flex-col gap-4"><h2 class="font-extrabold text-teal-900" th:text="${template.name()}">كشف وتشخيص</h2><p class="text-sm text-on-surface-variant"><span th:text="${#lists.size(template.sections())}">2</span> أقسام</p><form method="post" th:action="@{/prep/templates/{code}/import(code=${template.code()})}" class="mt-auto"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="clinicos-btn w-full" type="submit">استيراد القالب</button></form></article><div th:if="${#lists.isEmpty(templates)}" class="clinicos-card p-10 sm:col-span-2 lg:col-span-3 clinicos-empty-state"><p class="font-bold text-teal-900">لا توجد قوالب جاهزة</p></div></div>
-</section></main><div th:replace="~{fragments/drawer :: drawer}"></div><div th:replace="~{fragments/toast :: toast}"></div>
-</body></html>
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <a href="/prep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-teal-700 bg-neutral-100 hover:bg-neutral-200 transition-colors mb-6">
+        <span>←</span>
+        <span>قائمة التحضير</span>
+      </a>
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">📚 قوالب جاهزة</h1>
+        <p class="text-sm text-on-surface-variant">ابدأ بسرعة بقائمة معدّة مسبقاً ثم عدّلها حسب عيادتك قبل الاعتماد.</p>
+      </div>
+      <div class="clinicos-card p-6 mb-8">
+        <div class="flex items-start gap-3 bg-neutral-50 border border-neutral-200 rounded-lg p-3.5 ps-4">
+          <div class="flex-shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+              <path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" fill-rule="evenodd"></path>
+            </svg>
+          </div>
+          <p class="text-xs sm:text-sm leading-relaxed text-teal-900 font-medium">
+            القوالب الجاهزة نقطة بداية سريعة وليست مرجع طبي نهائي. بعد الاستيراد، المدير لازم يراجعها ويعدّلها حسب عيادته ويعتمدها قبل الاستخدام.
+          </p>
+        </div>
+      </div>
+      <div th:if="${!#lists.isEmpty(templates)}" class="space-y-4">
+        <article th:each="template : ${templates}" class="clinicos-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:shadow-lg transition-shadow">
+          <div class="space-y-2.5 flex-1">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="clinicos-chip clinicos-chip--success text-xs font-semibold">قالب جاهز</span>
+              <h2 class="text-xl font-bold text-teal-900" th:text="${template.name()}">إكزامينيشن</h2>
+            </div>
+            <div class="flex items-center gap-2 text-xs sm:text-sm font-semibold text-on-surface-variant">
+              <span th:text="${#lists.size(template.sections())}">2</span> أقسام
+              <span class="text-neutral-300">•</span>
+              <span th:text="${template.itemCount()}">9</span> عنصر
+            </div>
+          </div>
+          <form method="post" th:action="@{/prep/templates/{code}/import(code=${template.code()})}" class="flex-shrink-0 w-full md:w-auto">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="clinicos-btn w-full md:w-auto" type="submit">استيراد للعيادة</button>
+          </form>
+        </article>
+      </div>
+      <div th:if="${#lists.isEmpty(templates)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">📦</div>
+        <p class="font-bold text-teal-900 text-xl">لا توجد قوالب جاهزة</p>
+        <p class="mt-2 text-sm text-on-surface-variant">يتم إضافة المزيد من القوالب قريباً</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>

@@ -59,9 +59,20 @@ public interface PrepChecklistService {
         }
     }
 
-    record Checklist(UUID id, String name, String status, UUID approvedBy, List<Section> sections) { }
+    record Checklist(UUID id, String name, String status, UUID approvedBy, List<Section> sections) {
+        public int itemCount() {
+            return sections.stream().mapToInt(section -> section.items().size()).sum();
+        }
+    }
+
     record Section(UUID id, String title, List<Item> items) { }
     record Item(UUID id, String name, boolean checked) { }
-    record Template(String code, String name, List<Section> sections) { }
+
+    record Template(String code, String name, List<Section> sections) {
+        public int itemCount() {
+            return sections.stream().mapToInt(section -> section.items().size()).sum();
+        }
+    }
+
     record Run(UUID id, LocalDate runDate, int checkedCount, int totalCount, List<Section> sections) { }
 }

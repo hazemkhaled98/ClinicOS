@@ -4,27 +4,69 @@
 <body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
   <main class="w-full min-h-screen flex flex-col bg-surface">
     <header th:replace="~{fragments/topbar :: topbar}"></header>
-    <section class="flex-1 p-8 sm:p-10 max-w-6xl w-full mx-auto clinicos-section">
-      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker">عيادتي</p>
-      <div class="flex flex-wrap items-end justify-between gap-4">
-        <div><h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">تحضير الجلسات</h1><p class="mt-1 text-sm text-on-surface-variant">قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة</p></div>
-        <div class="flex flex-wrap gap-2"><a href="/prep/templates" class="clinicos-btn clinicos-btn--secondary">📚 قوالب جاهزة</a><a href="/prep/checklists/new" class="clinicos-btn">+ قائمة جديدة</a></div>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">تحضير الجلسات</h1>
+        <p class="text-sm text-on-surface-variant">قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة</p>
       </div>
-      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article th:each="checklist : ${checklists}" class="clinicos-card p-5 flex flex-col gap-4">
-          <div class="flex items-start justify-between gap-3"><h2 class="font-extrabold text-teal-900" th:text="${checklist.name()}">كشف وتشخيص</h2><span class="clinicos-chip" th:classappend="${checklist.status() == 'approved'} ? ' clinicos-chip--success' : ' clinicos-chip--warning'" th:text="${checklist.status() == 'approved'} ? 'معتمدة' : 'بانتظار الاعتماد'">بانتظار الاعتماد</span></div>
-          <p class="text-sm text-on-surface-variant"><span th:text="${#lists.size(checklist.sections())}">2</span> أقسام · عناصر التحضير</p>
+      <div class="clinicos-card p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
+              <h2 class="text-xl font-bold text-teal-900">قوائم تحضير الإجراءات</h2>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed ps-4">حضّر أدوات ومواد كل إجراء بالترتيب من غير ما تنسى حاجة. أي قائمة جديدة يعتمدها المدير قبل الاستخدام.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 sm:shrink-0">
+            <a href="/prep/templates" class="clinicos-btn clinicos-btn--secondary">📑 قوالب جاهزة</a>
+            <a href="/prep/checklists/new" class="clinicos-btn">+ إجراء جديد</a>
+          </div>
+        </div>
+      </div>
+      <div th:if="${!#lists.isEmpty(checklists)}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <article th:each="checklist : ${checklists}" class="clinicos-card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1">
+              <h2 class="font-extrabold text-teal-900 text-xl" th:text="${checklist.name()}">كشف وتشخيص</h2>
+            </div>
+            <span class="clinicos-chip" th:classappend="${checklist.status() == 'approved'} ? ' clinicos-chip--success' : ' clinicos-chip--warning'" th:text="${checklist.status() == 'approved'} ? 'معتمدة' : 'بانتظار'">بانتظار</span>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant">
+            <span th:text="${#lists.size(checklist.sections())}">2</span> أقسام ·
+            <span th:text="${checklist.itemCount()}">9</span> عنصر
+          </p>
           <div class="flex flex-wrap gap-2 mt-auto">
-            <a th:if="${checklist.status() == 'approved'}" th:href="@{/prep/checklists/{id}/run(id=${checklist.id()})}" class="clinicos-btn px-3 py-2 text-xs">بدء التحضير</a>
-            <a th:href="@{/prep/checklists/{id}/edit(id=${checklist.id()})}" class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs">تعديل</a>
-            <form th:if="${canApprove and checklist.status() != 'approved'}" method="post" th:action="@{/prep/checklists/{id}/approve(id=${checklist.id()})}" class="inline"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="clinicos-btn px-3 py-2 text-xs" type="submit">اعتماد</button></form>
-            <form method="post" th:action="@{/prep/checklists/{id}/archive(id=${checklist.id()})}" class="inline"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs" type="submit">أرشفة</button></form>
+            <a th:if="${checklist.status() == 'approved'}" th:href="@{/prep/checklists/{id}/run(id=${checklist.id()})}" class="clinicos-btn px-3 py-2 text-xs flex-1 sm:flex-none">بدء الجلسة</a>
+            <a th:href="@{/prep/checklists/{id}/edit(id=${checklist.id()})}" class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs flex-1 sm:flex-none">تعديل</a>
+            <form th:if="${canApprove and checklist.status() != 'approved'}" method="post" th:action="@{/prep/checklists/{id}/approve(id=${checklist.id()})}" class="inline flex-1 sm:flex-none">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn px-3 py-2 text-xs w-full sm:w-auto" type="submit">اعتماد</button>
+            </form>
+            <form th:if="${canApprove and checklist.status() == 'approved'}" method="post" th:action="@{/prep/checklists/{id}/unapprove(id=${checklist.id()})}" class="inline flex-1 sm:flex-none">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn clinicos-btn--warning px-3 py-2 text-xs w-full sm:w-auto" type="submit">سحب الاعتماد</button>
+            </form>
+            <form method="post" th:action="@{/prep/checklists/{id}/archive(id=${checklist.id()})}" class="inline flex-1 sm:flex-none" hx-boost="true" hx-confirm="هل أنت متأكد من أرشفة هذه القائمة؟">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs w-full sm:w-auto" type="submit">أرشفة</button>
+            </form>
           </div>
         </article>
-        <div th:if="${#lists.isEmpty(checklists)}" class="clinicos-card p-10 sm:col-span-2 lg:col-span-3 clinicos-empty-state"><div class="text-4xl mb-2">📋</div><p class="font-bold text-teal-900">لا توجد قوائم تحضير بعد</p><p class="mt-1 text-sm text-on-surface-variant">أنشئ قائمة أو استورد قالباً جاهزاً.</p></div>
+      </div>
+      <div th:if="${#lists.isEmpty(checklists)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">📋</div>
+        <p class="font-bold text-teal-900 text-xl">لا توجد قوائم تحضير بعد</p>
+        <p class="mt-2 text-sm text-on-surface-variant">أنشئ قائمة جديدة أو استورد قالباً جاهزاً للبدء السريع.</p>
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a href="/prep/checklists/new" class="clinicos-btn">+ إجراء جديد</a>
+          <a href="/prep/templates" class="clinicos-btn clinicos-btn--secondary">قوالب جاهزة</a>
+        </div>
       </div>
     </section>
   </main>
-  <div th:replace="~{fragments/drawer :: drawer}"></div><div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
 </body>
 </html>

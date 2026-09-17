@@ -147,6 +147,17 @@ class PrepControllerTest {
     }
 
     @Test
+    void unapproveUsesManagerActorAndLogs() {
+        allowLinkedEmployee();
+
+        String view = controller.unapprove(CHECKLIST, session("manager"), model);
+
+        assertThat(view).isEqualTo("redirect:/prep");
+        verify(checklistService).unapprove(CLINIC, new Actor(MEMBERSHIP, "manager", EMPLOYEE), CHECKLIST);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.unapprove", "prep_checklist");
+    }
+
+    @Test
     void runAndToggleRenderCurrentProgress() {
         allowLinkedEmployee();
         Run run = new Run(UUID.randomUUID(), LocalDate.now(), 1, 1, checklist("approved").sections());
