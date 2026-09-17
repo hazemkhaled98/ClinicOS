@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "JavaDocs": { "type": "remote", "url": "https://www.javadocs.dev/mcp", "enabled": true },
+    "github": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "enabled": true,
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PAT}"
+      }
+    }
+  },
+  "skills": {
+    "paths": [
+      "C:/Users/hazem/.claude/plugins/marketplaces/ai-unified-process-marketplace/aiup-core/skills",
+      "C:/Users/hazem/.claude/plugins/marketplaces/ai-unified-process-marketplace/aiup-vaadin-jooq/skills"
+    ]
+  }
+}

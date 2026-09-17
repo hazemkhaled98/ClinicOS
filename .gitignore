@@ -23,13 +23,15 @@
 hs_err_pid*
 replay_pid*
 
-# Claude Code local session state
-.claude/
-.opencode/
-.agents/
-.serena/
-.mcp.json
-skills-lock.json
+# Claude Code local-only state (machine paths, local session cache)
+.claude/settings.local.json
+.claude/pr-sentinel-state.json
+.claude/.headroom_wrap_*.json
+.claude/.headroom_wrap_*.lock
+
+# Vendored skill binaries (platform-specific, downloaded on first run)
+.claude/skills/impeccable/scripts/bin/
+
 docs/plans/
 
 # Local agent/tooling state
