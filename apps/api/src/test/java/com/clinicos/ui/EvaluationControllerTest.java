@@ -275,6 +275,20 @@ class EvaluationControllerTest {
     }
 
     @Test
+    void overrideAllowedOnClosedMonth() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        YearMonth lastMonth = YearMonth.now().minusMonths(1);
+
+        String view = controller.override(emp, lastMonth.toString(), "fanni", "70", session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        verify(evaluationService).setOverride(CLINIC, emp, lastMonth, Category.FANNI,
+                new BigDecimal("70"), MEMBERSHIP);
+    }
+
+    @Test
     void overrideUnknownCategoryShowsError() {
         allowView();
         UUID emp = UUID.randomUUID();

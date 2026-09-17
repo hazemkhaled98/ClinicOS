@@ -211,7 +211,7 @@
       <div class="p-6 clinicos-card">
         <h2 class="text-lg font-extrabold text-teal-900 mb-1">حد أدنى يدوي</h2>
         <p class="text-sm text-on-surface-variant mb-4">ارفع نتيجة فئة تعتقد أنها أقل من الواقع (0–100). يُطبَّق كحد أدنى عند الحساب.</p>
-        <form th:if="${!isClosed}" class="flex flex-wrap items-end gap-3"
+        <form class="flex flex-wrap items-end gap-3"
               th:attr="hx-post=|/evaluation/${selectedId}/override|"
               hx-target="#evaluation-grid" hx-swap="outerHTML">
           <input type="hidden" name="month" th:value="${month}">
@@ -221,7 +221,7 @@
           <input type="number" name="floorValue" min="0" max="100" step="0.01" required class="clinicos-input w-28" placeholder="70">
           <button type="submit" class="clinicos-btn px-4 py-2 text-xs">حفظ الحد الأدنى</button>
         </form>
-        <p th:if="${isClosed}" class="text-sm text-neutral-600">الشهر مقفل — افتحه أولاً لتعديل الحدود الدنيا.</p>
+        <p th:if="${isClosed and view.frozen()}" class="text-sm text-neutral-600">الشهر مقفل ومجمّد — يُطبَّق الحد الأدنى عند فتح الشهر وإعادة التقييم.</p>
       </div>
     </div>
 
