@@ -18,21 +18,21 @@ public interface PrepChecklistService {
     Run reset(UUID clinicId, Actor actor, UUID checklistId);
 
     static void validate(ChecklistRequest request) {
-        if (request == null || request.name() == null || request.name().trim().isEmpty()) {
+        if (request == null || request.name() == null || request.name().isBlank()) {
             throw new IllegalArgumentException("أدخل اسم القائمة");
         }
         if (request.sections() == null || request.sections().isEmpty()) {
             throw new IllegalArgumentException("أضف قسمًا واحدًا على الأقل");
         }
         for (var section : request.sections()) {
-            if (section == null || section.title() == null || section.title().trim().isEmpty()) {
+            if (section == null || section.title() == null || section.title().isBlank()) {
                 throw new IllegalArgumentException("أدخل اسم القسم");
             }
             if (section.items() == null || section.items().isEmpty()) {
                 throw new IllegalArgumentException("يجب أن يحتوي كل قسم على عنصر واحد على الأقل");
             }
             for (var item : section.items()) {
-                if (item == null || item.name() == null || item.name().trim().isEmpty()) {
+                if (item == null || item.name() == null || item.name().isBlank()) {
                     throw new IllegalArgumentException("أدخل اسم العنصر");
                 }
             }
@@ -40,21 +40,25 @@ public interface PrepChecklistService {
     }
 
     record Actor(UUID membershipId, String roleCode, UUID employeeId) { }
+
     record ChecklistRequest(String name, List<SectionRequest> sections) {
         public ChecklistRequest {
             name = name == null ? null : name.trim();
         }
     }
+
     record SectionRequest(String title, List<ItemRequest> items) {
         public SectionRequest {
             title = title == null ? null : title.trim();
         }
     }
+
     record ItemRequest(String name) {
         public ItemRequest {
             name = name == null ? null : name.trim();
         }
     }
+
     record Checklist(UUID id, String name, String status, UUID approvedBy, List<Section> sections) { }
     record Section(UUID id, String title, List<Item> items) { }
     record Item(UUID id, String name, boolean checked) { }
