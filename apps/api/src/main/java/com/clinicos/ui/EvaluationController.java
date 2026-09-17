@@ -92,7 +92,7 @@ public class EvaluationController {
     @PostMapping("/evaluation/{employeeId}/completion/{dailyRecordId}/{taskId}/approve")
     public String approveCompletion(@PathVariable UUID employeeId, @PathVariable UUID dailyRecordId,
             @PathVariable UUID taskId, @RequestParam String month, HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "completion",
+        return handleAction(session, model, employeeId, month,
                 "eval.approve", "daily_task_completion", "تم اعتماد الإنجاز ✔",
                 clinicId -> dailyWorkService.approveReview(clinicId, dailyRecordId, taskId,
                         AdminAccess.membershipId(session)));
@@ -102,7 +102,7 @@ public class EvaluationController {
     public String rejectCompletion(@PathVariable UUID employeeId, @PathVariable UUID dailyRecordId,
             @PathVariable UUID taskId, @RequestParam String month, @RequestParam(required = false) String reason,
             HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "completion",
+        return handleAction(session, model, employeeId, month,
                 "eval.reject", "daily_task_completion", "تم رفض الإنجاز",
                 clinicId -> dailyWorkService.rejectReview(clinicId, dailyRecordId, taskId,
                         AdminAccess.membershipId(session), reason));
@@ -111,7 +111,7 @@ public class EvaluationController {
     @PostMapping("/evaluation/{employeeId}/assignment/{assignmentId}/approve")
     public String approveAssignment(@PathVariable UUID employeeId, @PathVariable UUID assignmentId,
             @RequestParam String month, HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "assignment",
+        return handleAction(session, model, employeeId, month,
                 "eval.approve", "task_assignment", "تم اعتماد المهمة ✔",
                 clinicId -> assignmentService.approve(clinicId, assignmentId, AdminAccess.membershipId(session)));
     }
@@ -120,7 +120,7 @@ public class EvaluationController {
     public String rejectAssignment(@PathVariable UUID employeeId, @PathVariable UUID assignmentId,
             @RequestParam String month, @RequestParam(required = false) String reason,
             HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "assignment",
+        return handleAction(session, model, employeeId, month,
                 "eval.reject", "task_assignment", "تم رفض المهمة",
                 clinicId -> assignmentService.reject(clinicId, assignmentId,
                         AdminAccess.membershipId(session), reason));
@@ -139,7 +139,7 @@ public class EvaluationController {
             Toasts.fromErrors(model, Map.of("assignment", "اسم المهمة مطلوب"), "تم تعيين المهمة ✔");
             return GRID;
         }
-        return handleAction(session, model, employeeId, month, "assignment",
+        return handleAction(session, model, employeeId, month,
                 "eval.assign", "task_assignment", "تم تعيين المهمة ✔",
                 clinicId -> {
                     LocalDate due = dueDate == null || dueDate.isBlank() ? null : LocalDate.parse(dueDate.trim());
@@ -152,7 +152,7 @@ public class EvaluationController {
     public String override(@PathVariable UUID employeeId, @RequestParam String month,
             @RequestParam String category, @RequestParam String floorValue,
             HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "override",
+        return handleAction(session, model, employeeId, month,
                 "eval.override", "performance_override", "تم حفظ الحد الأدنى ✔",
                 clinicId -> {
                     Category cat = Category.fromCode(category.trim());
@@ -168,14 +168,14 @@ public class EvaluationController {
     @PostMapping("/evaluation/{employeeId}/unlock")
     public String unlock(@PathVariable UUID employeeId, @RequestParam String month,
             HttpSession session, Model model) {
-        return handleAction(session, model, employeeId, month, "unlock",
+        return handleAction(session, model, employeeId, month,
                 "eval.unlock", "evaluation_snapshot", "تم فتح الشهر لإعادة التقييم ✔",
                 clinicId -> evaluationService.unlock(clinicId, employeeId, parseMonth(month),
                         AdminAccess.membershipId(session)));
     }
 
     private String handleAction(HttpSession session, Model model, UUID employeeId, String month,
-            String errorKey, String logAction, String logEntity, String successMessage,
+            String logAction, String logEntity, String successMessage,
             Consumer<UUID> action) {
         if (!canView(session)) {
             return "redirect:/";
@@ -187,7 +187,7 @@ public class EvaluationController {
             activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
         } catch (IllegalArgumentException | EvaluationConflictException e) {
             log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
-            errors.put(errorKey, e.getMessage());
+            errors.put("error", e.getMessage());
         }
         renderGrid(model, clinicId, employeeId, parseMonth(month));
         Toasts.fromErrors(model, errors, successMessage);
@@ -198,7 +198,13 @@ public class EvaluationController {
         model.addAttribute("month", month.toString());
         model.addAttribute("selectedId", employeeId);
         model.addAttribute("isClosed", month.isBefore(YearMonth.now()));
-        EvaluationView view = buildView(clinicId, employeeId, month);
+        EvaluationView view;
+        try {
+            view = buildView(clinicId, employeeId, month);
+        } catch (EvaluationConflictException e) {
+            view = null;
+            model.addAttribute("conflictMessage", e.getMessage());
+        }
         model.addAttribute("view", view);
         model.addAttribute("completions", buildCompletions(clinicId, employeeId, month));
         model.addAttribute("assignments", buildAssignments(clinicId, employeeId, month));
@@ -249,20 +255,16 @@ public class EvaluationController {
     }
 
     private EvaluationView buildView(UUID clinicId, UUID employeeId, YearMonth month) {
-        try {
-            MonthlyEvaluation ev = evaluationService.evaluate(clinicId, employeeId, month);
-            if (ev == null) {
-                return null;
-            }
-            List<ComponentView> components = ev.components().stream()
-                    .map(c -> new ComponentView(c.category().code(), c.category().arabicName(),
-                            c.rawScore(), c.weight(), c.included(), c.overrideFloor()))
-                    .toList();
-            return new EvaluationView(ev.finalScore(), ev.coverage(), ev.tierName(),
-                    ev.incentiveAmount(), ev.basePay(), ev.totalPay(), ev.daysLogged(), ev.frozen(), components);
-        } catch (EvaluationConflictException e) {
+        MonthlyEvaluation ev = evaluationService.evaluate(clinicId, employeeId, month);
+        if (ev == null) {
             return null;
         }
+        List<ComponentView> components = ev.components().stream()
+                .map(c -> new ComponentView(c.category().code(), c.category().arabicName(),
+                        c.rawScore(), c.weight(), c.included(), c.overrideFloor()))
+                .toList();
+        return new EvaluationView(ev.finalScore(), ev.coverage(), ev.tierName(),
+                ev.incentiveAmount(), ev.basePay(), ev.totalPay(), ev.daysLogged(), ev.frozen(), components);
     }
 
     private static YearMonth parseMonth(String raw) {

@@ -24,8 +24,11 @@
         <div class="mt-6 clinicos-card p-6 sm:p-8">
           <div class="clinicos-empty-state">
             <div class="text-4xl mb-2">✨</div>
-            <p class="font-bold text-teal-900 text-base">لا توجد بيانات كافية لهذا الشهر بعد.</p>
-            <p class="mt-1 text-sm text-on-surface-variant">سجّل حضورك وأنجز مهامك اليومية ليظهر تقييمك هنا.</p>
+            <p class="font-bold text-teal-900 text-base" th:if="${conflictMessage != null}" th:text="${conflictMessage}">الشهر مقفل للتقييم بالفعل</p>
+            <th:block th:if="${conflictMessage == null}">
+              <p class="font-bold text-teal-900 text-base">لا توجد بيانات كافية لهذا الشهر بعد.</p>
+              <p class="mt-1 text-sm text-on-surface-variant">سجّل حضورك وأنجز مهامك اليومية ليظهر تقييمك هنا.</p>
+            </th:block>
           </div>
         </div>
       </th:block>

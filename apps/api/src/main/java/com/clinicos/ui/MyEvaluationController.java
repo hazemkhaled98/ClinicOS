@@ -62,7 +62,13 @@ public class MyEvaluationController {
         model.addAttribute("nextDisabled", selectedMonth.equals(YearMonth.now()));
         model.addAttribute("isCurrentMonth", selectedMonth.equals(YearMonth.now()));
 
-        MyEvaluationView view = buildView(clinicId, employee.id(), selectedMonth);
+        MyEvaluationView view;
+        try {
+            view = buildView(clinicId, employee.id(), selectedMonth);
+        } catch (EvaluationConflictException e) {
+            view = null;
+            model.addAttribute("conflictMessage", e.getMessage());
+        }
         model.addAttribute("view", view);
         model.addAttribute("hasData", view != null && view.daysLogged() > 0);
 
@@ -88,24 +94,20 @@ public class MyEvaluationController {
     }
 
     private MyEvaluationView buildView(UUID clinicId, UUID employeeId, YearMonth month) {
-        try {
-            MonthlyEvaluation ev = evaluationService.evaluate(clinicId, employeeId, month);
-            if (ev == null) {
-                return null;
-            }
-            List<ComponentView> components = ev.components().stream()
-                    .map(c -> new ComponentView(c.category().code(), c.category().arabicName(),
-                            c.rawScore(), c.weight(), c.included()))
-                    .toList();
-            List<String> coverageGaps = ev.components().stream()
-                    .filter(c -> !c.included())
-                    .map(c -> c.category().arabicName())
-                    .toList();
-            return new MyEvaluationView(ev.finalScore(), ev.coverage(), ev.tierName(),
-                    ev.incentiveAmount(), ev.totalPay(), ev.daysLogged(), ev.frozen(), components, coverageGaps);
-        } catch (EvaluationConflictException e) {
+        MonthlyEvaluation ev = evaluationService.evaluate(clinicId, employeeId, month);
+        if (ev == null) {
             return null;
         }
+        List<ComponentView> components = ev.components().stream()
+                .map(c -> new ComponentView(c.category().code(), c.category().arabicName(),
+                        c.rawScore(), c.weight(), c.included()))
+                .toList();
+        List<String> coverageGaps = ev.components().stream()
+                .filter(c -> !c.included())
+                .map(c -> c.category().arabicName())
+                .toList();
+        return new MyEvaluationView(ev.finalScore(), ev.coverage(), ev.tierName(),
+                ev.incentiveAmount(), ev.totalPay(), ev.daysLogged(), ev.frozen(), components, coverageGaps);
     }
 
     private static YearMonth parseMonth(String raw) {
