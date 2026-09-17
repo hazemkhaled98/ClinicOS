@@ -1,7 +1,5 @@
 {
   "detector": {
-    "ignoreRules": [],
-    "ignoreFiles": [],
     "ignoreValues": [
       {
         "rule": "flat-type-hierarchy",
