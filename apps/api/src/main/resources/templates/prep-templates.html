@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('قوالب قوائم التحضير')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }">
+<main class="w-full min-h-screen flex flex-col bg-surface"><header th:replace="~{fragments/topbar :: topbar}"></header><section class="flex-1 p-8 sm:p-10 max-w-6xl w-full mx-auto clinicos-section">
+<a href="/prep" class="text-sm font-bold text-emerald-700">← قوائم التحضير</a><h1 class="mt-4 text-2xl sm:text-3xl font-extrabold text-teal-900">📚 قوالب جاهزة</h1><p class="mt-1 text-sm text-on-surface-variant">ابدأ بسرعة بقائمة معدّة مسبقاً ثم عدّلها قبل الاعتماد.</p>
+<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><article th:each="template : ${templates}" class="clinicos-card p-5 flex flex-col gap-4"><h2 class="font-extrabold text-teal-900" th:text="${template.name()}">كشف وتشخيص</h2><p class="text-sm text-on-surface-variant"><span th:text="${#lists.size(template.sections())}">2</span> أقسام</p><form method="post" th:action="@{/prep/templates/{code}/import(code=${template.code()})}" class="mt-auto"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="clinicos-btn w-full" type="submit">استيراد القالب</button></form></article><div th:if="${#lists.isEmpty(templates)}" class="clinicos-card p-10 sm:col-span-2 lg:col-span-3 clinicos-empty-state"><p class="font-bold text-teal-900">لا توجد قوالب جاهزة</p></div></div>
+</section></main><div th:replace="~{fragments/drawer :: drawer}"></div><div th:replace="~{fragments/toast :: toast}"></div>
+</body></html>

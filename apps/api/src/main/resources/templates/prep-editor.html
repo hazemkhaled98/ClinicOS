@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تعديل قائمة التحضير')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }">
+<main class="w-full min-h-screen flex flex-col bg-surface"><header th:replace="~{fragments/topbar :: topbar}"></header><section class="flex-1 p-8 sm:p-10 max-w-4xl w-full mx-auto clinicos-section">
+<a href="/prep" class="text-sm font-bold text-emerald-700">← قوائم التحضير</a><h1 class="mt-4 text-2xl sm:text-3xl font-extrabold text-teal-900">قائمة تحضير جديدة</h1><p th:if="${formError != null}" class="mt-3 rounded-xl bg-danger-50 p-3 text-sm font-bold text-danger-700" th:text="${formError}">خطأ</p>
+<form method="post" th:action="${checklistId == null} ? @{/prep/checklists} : @{/prep/checklists/{id}(id=${checklistId})}" th:object="${form}" class="mt-8 flex flex-col gap-6" x-data="{ sections: [{title: '', items: [{name: ''}]}] }">
+<label class="flex flex-col gap-1 text-sm font-bold text-on-surface-variant">اسم القائمة<input th:field="*{name}" required class="clinicos-input" placeholder="مثال: كشف وتشخيص"></label>
+<fieldset th:if="${#lists.isEmpty(form.sections)}" class="clinicos-card p-5"><legend class="px-2 font-extrabold text-teal-900">القسم 1</legend><input name="sections[0].title" required class="clinicos-input" placeholder="اسم القسم"><label class="mt-4 block text-sm font-bold text-on-surface-variant">العنصر<input name="sections[0].items[0].name" required class="clinicos-input mt-1" placeholder="اسم الأداة أو المادة"></label></fieldset>
+<div class="flex flex-col gap-4" th:each="section,si : *{sections}"><fieldset class="clinicos-card p-5"><legend class="px-2 font-extrabold text-teal-900">القسم <span th:text="${si.index + 1}">1</span></legend><input th:field="*{sections[__${si.index}__].title}" required class="clinicos-input" placeholder="اسم القسم"><div class="mt-4 flex flex-col gap-2" th:each="item,ii : ${section.items}"><label class="text-sm font-bold text-on-surface-variant">العنصر<input th:field="*{sections[__${si.index}__].items[__${ii.index}__].name}" required class="clinicos-input mt-1" placeholder="اسم الأداة أو المادة"></label></div></fieldset></div>
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><div class="flex flex-wrap gap-2"><button type="submit" class="clinicos-btn">حفظ القائمة</button><a href="/prep" class="clinicos-btn clinicos-btn--secondary">إلغاء</a></div>
+</form></section></main><div th:replace="~{fragments/drawer :: drawer}"></div><div th:replace="~{fragments/toast :: toast}"></div>
+</body></html>
