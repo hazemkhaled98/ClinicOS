@@ -90,7 +90,7 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void BRG20_nextDayIsIndependent() {
+ void BRG20_nextDayIsIndependent() throws Exception {
         var checklist = approvedChecklist();
         var itemId = checklist.sections().getFirst().items().getFirst().id();
 
