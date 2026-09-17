@@ -1,5 +1,6 @@
 package com.clinicos.ui;
 
+import static com.clinicos.shared.jooq.tables.Attachment.ATTACHMENT;
 import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
 import static com.clinicos.shared.jooq.tables.DailyRecord.DAILY_RECORD;
 import static com.clinicos.shared.jooq.tables.DailyTaskCompletion.DAILY_TASK_COMPLETION;
@@ -103,30 +104,45 @@ class UC004EvaluateAndVerifyEmployeePerformanceIT extends AbstractBrowserIT {
                     .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                     .execute();
 
-            UUID approveTaskId = insertTask(connection, clinicId, employeeId, "تعقيم الأدوات");
-            UUID rejectTaskId = insertTask(connection, clinicId, employeeId, "ترتيب ملفات المرضى");
-            UUID completedTaskId = insertTask(connection, clinicId, employeeId, "تطهير الأسطح");
+            UUID approveTaskId = insertTask(connection, clinicId, employeeId, "تعقيم الأدوات", false);
+            UUID rejectTaskId = insertTask(connection, clinicId, employeeId, "ترتيب ملفات المرضى", false);
+            UUID completedTaskId = insertTask(connection, clinicId, employeeId, "تطهير الأسطح", false);
+            UUID photoTaskId = insertTask(connection, clinicId, employeeId, "تعقيم غرفة العمليات", true);
 
             seedAttendanceOnly(connection, clinicId, employeeId, today);
-            seedCompletion(connection, clinicId, employeeId, approveTaskId, today, TaskReviewStatus.pending);
-            seedCompletion(connection, clinicId, employeeId, rejectTaskId, today, TaskReviewStatus.pending);
-            seedCompletion(connection, clinicId, employeeId, completedTaskId, today, TaskReviewStatus.approved);
+            seedCompletion(connection, clinicId, employeeId, approveTaskId, today, TaskReviewStatus.pending, null);
+            seedCompletion(connection, clinicId, employeeId, rejectTaskId, today, TaskReviewStatus.pending, null);
+            seedCompletion(connection, clinicId, employeeId, completedTaskId, today, TaskReviewStatus.approved, null);
+            UUID photoId = insertAttachment(connection, clinicId);
+            seedCompletion(connection, clinicId, employeeId, photoTaskId, today, TaskReviewStatus.pending, photoId);
 
             UUID assignmentId = insertSubmittedAssignment(connection, clinicId, employeeId,
-                    "حضور ورشة تعقيم الأسنان");
+                    "حضور ورشة تعقيم الأسنان", null);
+            UUID rejectAssignmentId = insertSubmittedAssignment(connection, clinicId, employeeId,
+                    "تنظيف مخزن الأدوية", insertAttachment(connection, clinicId));
 
-            return new Seed(slug, username, rawPassword, employeeId, assignmentId);
+            return new Seed(slug, username, rawPassword, employeeId, assignmentId, rejectAssignmentId);
         }
     }
 
-    private UUID insertTask(Connection connection, UUID clinicId, UUID employeeId, String name) throws Exception {
+    private UUID insertTask(Connection connection, UUID clinicId, UUID employeeId, String name, boolean requiresPhoto)
+            throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
                 .insertInto(TASK_DEFINITION, TASK_DEFINITION.CLINIC_ID, TASK_DEFINITION.NAME,
                         TASK_DEFINITION.DIMENSION, TASK_DEFINITION.FREQUENCY, TASK_DEFINITION.REQUIRES_PHOTO,
                         TASK_DEFINITION.EMPLOYEE_ID, TASK_DEFINITION.DISPLAY_ORDER)
-                .values(clinicId, name, TaskDimension.fanni, TaskFrequency.daily, false, employeeId, 1)
+                .values(clinicId, name, TaskDimension.fanni, TaskFrequency.daily, requiresPhoto, employeeId, 1)
                 .returningResult(TASK_DEFINITION.ID)
                 .fetchOne(TASK_DEFINITION.ID);
+    }
+
+    private UUID insertAttachment(Connection connection, UUID clinicId) {
+        return DSL.using(connection, SQLDialect.POSTGRES)
+                .insertInto(ATTACHMENT, ATTACHMENT.CLINIC_ID, ATTACHMENT.STORAGE_KEY, ATTACHMENT.CONTENT_TYPE,
+                        ATTACHMENT.BYTE_SIZE)
+                .values(clinicId, "test/" + uniqueSuffix() + ".jpg", "image/jpeg", 1024)
+                .returningResult(ATTACHMENT.ID)
+                .fetchOne(ATTACHMENT.ID);
     }
 
     private void seedAttendanceOnly(Connection connection, UUID clinicId, UUID employeeId, LocalDate workDate) {
@@ -144,7 +160,7 @@ class UC004EvaluateAndVerifyEmployeePerformanceIT extends AbstractBrowserIT {
     }
 
     private void seedCompletion(Connection connection, UUID clinicId, UUID employeeId, UUID taskId,
-            LocalDate workDate, TaskReviewStatus reviewStatus) {
+            LocalDate workDate, TaskReviewStatus reviewStatus, UUID photoId) {
         DSLContext dsl = DSL.using(connection, SQLDialect.POSTGRES);
         UUID recordId = dsl.select(DAILY_RECORD.ID)
                 .from(DAILY_RECORD)
@@ -153,17 +169,18 @@ class UC004EvaluateAndVerifyEmployeePerformanceIT extends AbstractBrowserIT {
                 .fetchOne(DAILY_RECORD.ID);
         dsl.insertInto(DAILY_TASK_COMPLETION, DAILY_TASK_COMPLETION.DAILY_RECORD_ID,
                 DAILY_TASK_COMPLETION.TASK_DEFINITION_ID, DAILY_TASK_COMPLETION.DONE,
-                DAILY_TASK_COMPLETION.REVIEW_STATUS)
-                .values(recordId, taskId, true, reviewStatus)
+                DAILY_TASK_COMPLETION.REVIEW_STATUS, DAILY_TASK_COMPLETION.PHOTO_ID)
+                .values(recordId, taskId, true, reviewStatus, photoId)
                 .execute();
     }
 
-    private UUID insertSubmittedAssignment(Connection connection, UUID clinicId, UUID employeeId, String name)
-            throws Exception {
+    private UUID insertSubmittedAssignment(Connection connection, UUID clinicId, UUID employeeId, String name,
+            UUID proofPhotoId) throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
                 .insertInto(TASK_ASSIGNMENT, TASK_ASSIGNMENT.CLINIC_ID, TASK_ASSIGNMENT.EMPLOYEE_ID,
-                        TASK_ASSIGNMENT.NAME, TASK_ASSIGNMENT.PROPOSED_BY, TASK_ASSIGNMENT.DONE_AT)
-                .values(clinicId, employeeId, name, AssignmentProposer.manager, OffsetDateTime.now())
+                        TASK_ASSIGNMENT.NAME, TASK_ASSIGNMENT.PROPOSED_BY, TASK_ASSIGNMENT.DONE_AT,
+                        TASK_ASSIGNMENT.PROOF_PHOTO_ID)
+                .values(clinicId, employeeId, name, AssignmentProposer.manager, OffsetDateTime.now(), proofPhotoId)
                 .returningResult(TASK_ASSIGNMENT.ID)
                 .fetchOne(TASK_ASSIGNMENT.ID);
     }
@@ -205,6 +222,15 @@ class UC004EvaluateAndVerifyEmployeePerformanceIT extends AbstractBrowserIT {
         submittedRow.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("اعتماد")).click();
         PlaywrightAssertions.assertThat(page().locator("#toast-root")).containsText("تم اعتماد المهمة");
         PlaywrightAssertions.assertThat(rowContaining("حضور ورشة تعقيم الأسنان").getByText("مُعتمد")).isVisible();
+
+        PlaywrightAssertions.assertThat(rowContaining("تعقيم غرفة العمليات").getByText("⬆ صورة الإثبات")).isVisible();
+
+        Locator rejectAssignmentRow = rowContaining("تنظيف مخزن الأدوية");
+        PlaywrightAssertions.assertThat(rejectAssignmentRow.getByText("⬆ صورة الإثبات")).isVisible();
+        rejectAssignmentRow.locator("input[name=reason]").fill("لم تكتمل المهمة فعلياً");
+        rejectAssignmentRow.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("رفض")).click();
+        PlaywrightAssertions.assertThat(page().locator("#toast-root")).containsText("تم رفض المهمة");
+        PlaywrightAssertions.assertThat(rowContaining("تنظيف مخزن الأدوية").getByText("مرفوض")).isVisible();
     }
 
     private Locator rowContaining(String text) {
@@ -212,6 +238,6 @@ class UC004EvaluateAndVerifyEmployeePerformanceIT extends AbstractBrowserIT {
     }
 
     private record Seed(String slug, String username, String rawPassword, UUID employeeId,
-            UUID assignmentId) {
+            UUID assignmentId, UUID rejectAssignmentId) {
     }
 }
