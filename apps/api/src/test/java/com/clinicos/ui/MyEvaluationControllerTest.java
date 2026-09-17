@@ -167,6 +167,7 @@ class MyEvaluationControllerTest {
 
         assertThat(view).isEqualTo("my-evaluation");
         assertThat(model.getAttribute("hasData")).isEqualTo(false);
+        assertThat(model.getAttribute("conflictMessage")).isEqualTo("الشهر مقفل");
     }
 
     @Test

@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
@@ -279,7 +280,7 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         long conflicted = 0;
         for (Future<MonthlyEvaluation> f : futures) {
             try {
-                MonthlyEvaluation result = f.get();
+                MonthlyEvaluation result = f.get(10, TimeUnit.SECONDS);
                 assertThat(result.finalScore()).isEqualByComparingTo("68.57");
                 succeeded++;
             } catch (ExecutionException e) {

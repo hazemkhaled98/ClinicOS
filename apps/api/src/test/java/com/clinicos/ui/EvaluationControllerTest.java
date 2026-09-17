@@ -76,6 +76,20 @@ class EvaluationControllerTest {
     }
 
     @Test
+    void evaluationConflictDuringRenderSurfacesConflictMessage() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        when(evaluationService.evaluate(eq(CLINIC), eq(emp), any()))
+                .thenThrow(new EvaluationService.EvaluationConflictException("الشهر مقفل للتقييم بالفعل"));
+
+        String view = controller.evaluation(null, emp.toString(), session(), model);
+
+        assertThat(view).isEqualTo("evaluation-page");
+        assertThat(model.getAttribute("view")).isNull();
+        assertThat(model.getAttribute("conflictMessage")).isEqualTo("الشهر مقفل للتقييم بالفعل");
+    }
+
+    @Test
     void redirectsHomeWithoutPermission() {
         denyView();
 

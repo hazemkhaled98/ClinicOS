@@ -48,7 +48,6 @@ public interface EvaluationService {
             int daysLogged,
             boolean frozen) {
 
-        /** Base pay plus incentive; not stored, always derived from the two. */
         public BigDecimal totalPay() {
             return basePay.add(incentiveAmount);
         }
@@ -60,7 +59,6 @@ public interface EvaluationService {
             BigDecimal weight,
             BigDecimal overrideFloor) {
 
-        /** A category with no raw score is excluded from the final average (BR-G14/BR-G15). */
         public boolean included() {
             return rawScore != null;
         }

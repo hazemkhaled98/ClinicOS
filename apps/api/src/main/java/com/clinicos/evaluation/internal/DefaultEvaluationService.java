@@ -77,6 +77,8 @@ public class DefaultEvaluationService implements EvaluationService {
         MonthData md = evaluationInput.forMonth(clinicId, employeeId, month);
         EmployeeService.Employee employee = employeeService.findById(clinicId, employeeId);
         if (employee == null) {
+            log.warn("evaluation requested for unknown employee: clinicId={}, employeeId={}, month={}",
+                    clinicId, employeeId, month);
             return null;
         }
         ClinicSettings settings = clinicSettings.get(clinicId);
