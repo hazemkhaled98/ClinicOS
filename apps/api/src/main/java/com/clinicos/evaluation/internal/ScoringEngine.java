@@ -225,7 +225,8 @@ public final class ScoringEngine {
         if (selfApproved == 0) {
             initRaw = in.loggedDates().size() >= 3 ? zero() : null;
         } else {
-            initRaw = pct(selfApproved, 3);
+            BigDecimal raw = pct(selfApproved, 3);
+            initRaw = raw.compareTo(hundred()) > 0 ? hundred() : raw;
         }
         BigDecimal ibda3Rate = dimRate(taskRates, in.tasks(), "ibda3");
         return meanTwo(initRaw, ibda3Rate);
@@ -244,7 +245,7 @@ public final class ScoringEngine {
     }
 
     private static BigDecimal volumeScore(EngineInput in, EngineConfig cfg) {
-        if (cfg.volumeTarget() == null) {
+        if (cfg.volumeTarget() == null || cfg.volumeTarget().signum() == 0) {
             return null;
         }
         List<LocalDate> workDays = cfg.workDays();

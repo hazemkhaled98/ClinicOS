@@ -321,6 +321,24 @@ class ScoringEngineTest {
     }
 
     @Test
+    void initiative_moreThanThreeApprovedSelfProposals_stillCapsAt100() {
+        List<LocalDate> logged = List.of(d(1), d(2), d(3));
+        List<AssignmentRecord> assignments = List.of(
+                assignment("approved", "self", d(5), d(4)),
+                assignment("approved", "self", d(6), d(5)),
+                assignment("approved", "self", d(7), d(6)),
+                assignment("approved", "self", d(8), d(7)));
+        TaskDef ibda3T = task("ابتكار", "ibda3", "daily", null, null);
+        List<Completion> completions = List.of(done("ابتكار", d(1)), done("ابتكار", d(2)), done("ابتكار", d(3)));
+
+        EngineResult result = ScoringEngine.evaluate(
+                input(List.of(ibda3T), completions, logged, List.of(), assignments), config(), Map.of());
+
+        // min(4/3*100,100)=100, ibda3 dim=100 → mean 100 (uncapped would be 133.33)
+        assertThat(component(result, IBDA3).rawScore()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
     void initiative_zeroSelfProposalsAfterThreeLoggedDays_scores0() {
         List<LocalDate> logged = List.of(d(1), d(2), d(3));
         TaskDef ibda3T = task("ابتكار", "ibda3", "daily", null, null);
@@ -354,6 +372,17 @@ class ScoringEngineTest {
     @Test
     void volume_noTargetConfigured_rateNull() {
         EngineConfig cfg = config(null, List.of(d(1)));
+
+        EngineResult result = ScoringEngine.evaluate(
+                input(noTasks(), List.of(), List.of(), List.of(), List.of(), d(1), bd(5000)), cfg, Map.of());
+
+        assertThat(component(result, VOLUME).included()).isFalse();
+        assertThat(component(result, VOLUME).rawScore()).isNull();
+    }
+
+    @Test
+    void volume_zeroTargetConfigured_rateNullNoDivideByZero() {
+        EngineConfig cfg = config(BigDecimal.ZERO, List.of(d(1)));
 
         EngineResult result = ScoringEngine.evaluate(
                 input(noTasks(), List.of(), List.of(), List.of(), List.of(), d(1), bd(5000)), cfg, Map.of());

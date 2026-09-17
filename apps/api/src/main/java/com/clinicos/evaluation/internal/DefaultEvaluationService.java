@@ -17,6 +17,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,6 +45,8 @@ import com.clinicos.staff.api.EvaluationInputService.MonthData;
 @Service
 public class DefaultEvaluationService implements EvaluationService {
 
+    private static final Logger log = LoggerFactory.getLogger(DefaultEvaluationService.class);
+
     private final EvaluationInputService evaluationInput;
     private final EmployeeService employeeService;
     private final ClinicSettingsService clinicSettings;
@@ -66,14 +70,7 @@ public class DefaultEvaluationService implements EvaluationService {
 
     @Override
     public MonthlyEvaluation evaluate(UUID clinicId, UUID employeeId, YearMonth month) {
-        return transactionTemplate.execute(status -> {
-            try {
-                return doEvaluate(clinicId, employeeId, month);
-            } catch (DataIntegrityViolationException e) {
-                throw new EvaluationConflictException(
-                        "الشهر مقفل للتقييم بالفعل؛ افتحه أولاً من شاشة التقييم ثم أعد الحساب");
-            }
-        });
+        return transactionTemplate.execute(status -> doEvaluate(clinicId, employeeId, month));
     }
 
     private MonthlyEvaluation doEvaluate(UUID clinicId, UUID employeeId, YearMonth month) {
@@ -117,15 +114,22 @@ public class DefaultEvaluationService implements EvaluationService {
                 .fetchOne();
         if (snap == null) {
             UUID snapshotId = UUID.randomUUID();
-            dsl.insertInto(EVALUATION_SNAPSHOT)
-                    .set(EVALUATION_SNAPSHOT.ID, snapshotId)
-                    .set(EVALUATION_SNAPSHOT.CLINIC_ID, clinicId)
-                    .set(EVALUATION_SNAPSHOT.EMPLOYEE_ID, employeeId)
-                    .set(EVALUATION_SNAPSHOT.PERIOD_MONTH, firstOfMonth)
-                    .set(EVALUATION_SNAPSHOT.FINAL_SCORE, result.finalScore())
-                    .set(EVALUATION_SNAPSHOT.INCENTIVE_AMOUNT, result.incentiveAmount())
-                    .execute();
-            insertComponents(snapshotId, result);
+            try {
+                dsl.insertInto(EVALUATION_SNAPSHOT)
+                        .set(EVALUATION_SNAPSHOT.ID, snapshotId)
+                        .set(EVALUATION_SNAPSHOT.CLINIC_ID, clinicId)
+                        .set(EVALUATION_SNAPSHOT.EMPLOYEE_ID, employeeId)
+                        .set(EVALUATION_SNAPSHOT.PERIOD_MONTH, firstOfMonth)
+                        .set(EVALUATION_SNAPSHOT.FINAL_SCORE, result.finalScore())
+                        .set(EVALUATION_SNAPSHOT.INCENTIVE_AMOUNT, result.incentiveAmount())
+                        .execute();
+                insertComponents(snapshotId, result);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("evaluation snapshot write rejected: clinicId={}, employeeId={}, month={}",
+                        clinicId, employeeId, firstOfMonth, e);
+                throw new EvaluationConflictException(
+                        "الشهر مقفل للتقييم بالفعل؛ افتحه أولاً من شاشة التقييم ثم أعد الحساب");
+            }
             return toEvaluation(employee, md, result, overrides, true);
         }
         if (snap.getUnlockedAt() == null) {

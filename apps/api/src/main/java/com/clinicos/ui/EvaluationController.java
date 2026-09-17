@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +43,7 @@ import jakarta.servlet.http.HttpSession;
 public class EvaluationController {
 
     private static final String GRID = "evaluation :: reviewGrid";
+    private static final Logger log = LoggerFactory.getLogger(EvaluationController.class);
 
     private final LayoutModel layoutModel;
     private final EmployeeService employeeService;
@@ -182,7 +185,8 @@ public class EvaluationController {
         try {
             action.accept(clinicId);
             activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException | EvaluationConflictException e) {
+            log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
             errors.put(errorKey, e.getMessage());
         }
         renderGrid(model, clinicId, employeeId, parseMonth(month));
