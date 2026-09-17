@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugin": ["./plugins/impeccable-hooks.ts"],
   "mcp": {
     "JavaDocs": { "type": "remote", "url": "https://www.javadocs.dev/mcp", "enabled": true },
     "github": {
@@ -10,11 +11,5 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PAT}"
       }
     }
-  },
-  "skills": {
-    "paths": [
-      "C:/Users/hazem/.claude/plugins/marketplaces/ai-unified-process-marketplace/aiup-core/skills",
-      "C:/Users/hazem/.claude/plugins/marketplaces/ai-unified-process-marketplace/aiup-vaadin-jooq/skills"
-    ]
   }
 }

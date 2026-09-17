@@ -163,7 +163,7 @@ mvn spring-boot:run
 
 **Mid-phase slices:** commit each slice, but do **not** flip the phase status.
 
-**Before marking any phase `done`:** run the `/coverage-check` skill against the target use case to verify all implementation and test coverage gaps are closed. If the skill reports any missing items, **do not mark the phase complete** — flag the gaps, address them, and re-run `/coverage-check` until clean.
+**Coverage check is a feature-plan step:** run `/coverage-check` after finishing each feature's implementation, as part of the feature plan — it verifies implementation and test gaps against the spec and feeds subsequent slices. It is not a gate for marking a use case `done`.
 
 **After a phase's PR is merged:** mark that phase `done` in the status table in `docs/roadmap.md` — that file is the single source of truth for phase status, not this one.
 
