@@ -127,6 +127,37 @@ class MyEvaluationControllerTest {
     }
 
     @Test
+    void resolvesEmployeeFromOwnSessionOnly_neverMixesTwoMemberships() {
+        allowView();
+        UUID otherMembership = UUID.randomUUID();
+        UUID otherEmployeeId = UUID.randomUUID();
+        when(employeeService.findByMembership(CLINIC, otherMembership)).thenReturn(new Employee(
+                otherEmployeeId, "سارة", new BigDecimal("4000"), new BigDecimal("400"), null, null, false, null, null));
+        MonthlyEvaluation ownEv = new MonthlyEvaluation(
+                new BigDecimal("50"), new BigDecimal("1"), List.of(), "جيد",
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
+        MonthlyEvaluation otherEv = new MonthlyEvaluation(
+                new BigDecimal("90"), new BigDecimal("1"), List.of(), "ممتاز",
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 10, false);
+        when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ownEv);
+        when(evaluationService.evaluate(CLINIC, otherEmployeeId, YearMonth.now())).thenReturn(otherEv);
+
+        HttpSession ownSession = session();
+        controller.myEvaluation(null, ownSession, model);
+        assertThat(model.getAttribute("employeeName")).isEqualTo("أحمد");
+
+        HttpSession otherSession = mock(HttpSession.class);
+        when(otherSession.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
+        when(otherSession.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(otherMembership);
+        Model otherModel = new ExtendedModelMap();
+        controller.myEvaluation(null, otherSession, otherModel);
+        assertThat(otherModel.getAttribute("employeeName")).isEqualTo("سارة");
+        MyEvaluationController.MyEvaluationView otherView =
+                (MyEvaluationController.MyEvaluationView) otherModel.getAttribute("view");
+        assertThat(otherView.finalScore()).isEqualByComparingTo("90");
+    }
+
+    @Test
     void unlockConflictShowsNoData() {
         allowView();
         when(evaluationService.evaluate(any(), any(), any()))
@@ -155,6 +186,30 @@ class MyEvaluationControllerTest {
         assertThat(view).isEqualTo("my-evaluation");
         assertThat(model.getAttribute("streak")).isEqualTo(4);
         assertThat((List<String>) model.getAttribute("earnedBadges")).contains("نجم الأسبوع");
+        List<MyEvaluationController.GoalView> goals =
+                (List<MyEvaluationController.GoalView>) model.getAttribute("goals");
+        assertThat(goals).hasSize(1);
+        assertThat(goals.get(0).title()).isEqualTo("إنجاز أسبوعي");
+        assertThat(goals.get(0).percent()).isEqualTo(60);
+    }
+
+    @Test
+    void goalPercentDoesNotDivideByZeroTarget() {
+        allowView();
+        MonthlyEvaluation ev = new MonthlyEvaluation(
+                new BigDecimal("70"), new BigDecimal("1"), List.of(), "جيد",
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 15, false);
+        when(evaluationService.evaluate(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(ev);
+        when(gamificationService.get(CLINIC)).thenReturn(
+                new GamificationSettings(true, true, true, true, false, false));
+        when(evaluationService.gamification(CLINIC, EMPLOYEE_ID, YearMonth.now())).thenReturn(
+                new Gamification(List.of(new GoalProgress("إنجاز أسبوعي", 0, 0)), 0, List.of()));
+
+        controller.myEvaluation(null, session(), model);
+
+        List<MyEvaluationController.GoalView> goals =
+                (List<MyEvaluationController.GoalView>) model.getAttribute("goals");
+        assertThat(goals.get(0).percent()).isEqualTo(0);
     }
 
     private void allowView() {
