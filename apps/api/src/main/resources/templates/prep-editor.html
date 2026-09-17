@@ -39,12 +39,12 @@
                   <span class="hidden sm:inline">القسم</span>
                 </button>
               </div>
-              <div class="space-y-3">
+              <div class="divide-y divide-neutral-100">
                 <template x-for="(item, ii) in section.items" :key="ii">
-                  <div class="flex items-center gap-2.5 sm:gap-4">
+                  <div class="flex items-center gap-2.5 sm:gap-4 py-3 first:pt-0 last:pb-0">
                     <span class="w-7 text-center font-bold text-xs sm:text-sm text-neutral-400 select-none shrink-0" x-text="ii + 1">1</span>
-                    <input :name="'sections[' + si + '].items[' + ii + '].name'" x-model="item.name" required class="clinicos-input flex-grow" placeholder="اسم الأداة أو المادة">
-                    <button class="p-2 text-neutral-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors" type="button" title="حذف العنصر" aria-label="حذف العنصر" @click="section.items.splice(ii, 1)" x-show="section.items.length > 1">
+                    <input :name="'sections[' + si + '].items[' + ii + '].name'" x-model="item.name" required class="clinicos-input min-w-0 flex-grow" placeholder="اسم الأداة أو المادة">
+                    <button class="inline-flex w-11 h-11 shrink-0 items-center justify-center text-neutral-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors" type="button" title="حذف العنصر" aria-label="حذف العنصر" @click="section.items.splice(ii, 1)" x-show="section.items.length > 1">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                       </svg>

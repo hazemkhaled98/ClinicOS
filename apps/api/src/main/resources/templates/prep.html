@@ -25,7 +25,7 @@
         </div>
       </div>
       <div th:if="${!#lists.isEmpty(checklists)}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article th:each="checklist : ${checklists}" class="clinicos-card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow">
+        <article th:each="checklist : ${checklists}" class="clinicos-card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow" th:classappend="${checklist.status() != 'approved'} ? ' bg-warning-50/30 border-warning-200'">
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1">
               <h2 class="font-extrabold text-teal-900 text-xl" th:text="${checklist.name()}">كشف وتشخيص</h2>

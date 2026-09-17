@@ -47,11 +47,14 @@
               </svg>
               <span th:text="|لسه ${run.totalCount() - run.checkedCount()} عناصر ناقصة — حضّرهم قبل ما تبدأ|">لسه 5 عنصر ناقص</span>
             </div>
-            <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-success-50 border border-success-200 text-success-900 text-xs sm:text-sm font-semibold" th:if="${run.checkedCount() >= run.totalCount()}">
+            <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-lg bg-success-50 border border-success-200 text-success-900 text-xs sm:text-sm font-semibold" th:if="${run.checkedCount() >= run.totalCount()}">
+              <div class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-success-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
               </svg>
               <span>رائع! كل العناصر جاهزة لبدء الجلسة</span>
+              </div>
+              <a href="/prep" class="clinicos-btn px-3 py-2 text-xs">العودة للقوائم</a>
             </div>
           </div>
         </div>
