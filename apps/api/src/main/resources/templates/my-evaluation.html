@@ -85,7 +85,7 @@
       <th:block th:if="${goals != null}">
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div th:if="${gamificationSettings.showWeeklyGoals() and !#lists.isEmpty(goals)}" class="p-6 clinicos-card flex flex-col gap-3">
-            <h2 class="text-lg font-extrabold text-teal-900">أهداف الأسبوع</h2>
+            <h2 class="text-xl font-extrabold text-teal-900">أهداف الأسبوع</h2>
             <div th:each="goal : ${goals}" class="flex flex-col gap-1">
               <div class="flex justify-between text-sm font-bold text-neutral-600">
                 <span th:text="${goal.title()}">هدف</span>
@@ -97,7 +97,7 @@
             </div>
           </div>
           <div class="p-6 clinicos-card flex flex-col gap-3">
-            <h2 th:if="${gamificationSettings.showStreaks()}" class="text-lg font-extrabold text-teal-900">مواظبة متتالية</h2>
+            <h2 th:if="${gamificationSettings.showStreaks()}" class="text-xl font-extrabold text-teal-900">مواظبة متتالية</h2>
             <p th:if="${gamificationSettings.showStreaks()}" class="text-3xl font-black text-teal-800"><span th:text="${streak}">4</span> <span class="text-sm font-bold text-neutral-500">أيام</span></p>
             <div th:if="${gamificationSettings.showBadges() and !#lists.isEmpty(earnedBadges)}">
               <p class="text-sm font-bold text-on-surface-variant mb-2">شارات هذا الشهر</p>
