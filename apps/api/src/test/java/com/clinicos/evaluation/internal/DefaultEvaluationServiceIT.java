@@ -42,9 +42,11 @@ import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.clinicconfig.api.GamificationService;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.evaluation.api.EvaluationService;
 import com.clinicos.evaluation.api.EvaluationService.ComponentScore;
+import com.clinicos.evaluation.api.EvaluationService.Gamification;
 import com.clinicos.evaluation.api.EvaluationService.MonthlyEvaluation;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.TaskDimension;
@@ -70,6 +72,9 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private WorkCalendarService workCalendarService;
+
+    @Autowired
+    private GamificationService gamificationService;
 
     @Autowired
     private DSLContext dsl;
@@ -219,6 +224,29 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(evaluation.frozen()).isFalse();
         assertThat(evaluation.finalScore()).isNotNull();
         assertThat(snapshotCount()).isZero();
+    }
+
+    @Test
+    void gamification_computesRealStreakAndBadgesFromAttendanceAndCompletions() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", now.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        LocalDate today = LocalDate.now();
+        seedWorkday(clinicA, employeeId, taskId, today);
+        seedWorkday(clinicA, employeeId, taskId, today.minusDays(1));
+        seedWorkday(clinicA, employeeId, taskId, today.minusDays(2));
+        gamificationService.updateGoal(clinicA, 1, "إنجاز أسبوعي", 2);
+        gamificationService.updateThreshold(clinicA, "بطل الأسبوع", 3);
+
+        Gamification result = evaluationService.gamification(clinicA, employeeId, now);
+
+        assertThat(result.streak()).isEqualTo(3);
+        assertThat(result.goals()).hasSize(1);
+        assertThat(result.goals().get(0).current()).isEqualTo(3);
+        assertThat(result.earnedBadges()).contains("بطل الأسبوع");
     }
 
     @Test
