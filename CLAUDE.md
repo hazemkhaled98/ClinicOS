@@ -179,7 +179,7 @@ mvn spring-boot:run
 | 1c — Design system reconciliation | in progress |
 | 2 — UC-002 Employees/roles | not started |
 | 3 — UC-003 Daily work/attendance | in progress |
-| 4 — UC-004/005 Evaluation | not started |
+| 4 — UC-004/005 Evaluation | done |
 | 5 — UC-006 Prep checklists | not started |
 | 6 — UC-007 Academy | not started |
 | 7a–7d — UC-008 Inventory | not started |
