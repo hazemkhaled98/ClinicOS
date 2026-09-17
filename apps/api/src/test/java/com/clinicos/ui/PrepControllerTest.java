@@ -1,6 +1,7 @@
 package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,8 +17,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.prep.PrepChecklistService;
@@ -184,6 +187,28 @@ class PrepControllerTest {
         assertThat(view).isEqualTo("prep-run :: runContent");
         assertThat(model.getAttribute("run")).isEqualTo(run);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.reset", "prep_run");
+    }
+
+    @Test
+    void toggleReturnsClientErrorInsteadOfRenderingRunFragmentWithoutRun() {
+        allowLinkedEmployee();
+        when(checklistService.toggle(any(), any(), any(), any(), any(Boolean.class)))
+                .thenThrow(new IllegalArgumentException("القائمة غير موجودة"));
+
+        assertThatThrownBy(() -> controller.toggle(CHECKLIST, ITEM, true, session("assistant"), model))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));
+    }
+
+    @Test
+    void resetReturnsClientErrorInsteadOfRenderingRunFragmentWithoutRun() {
+        allowLinkedEmployee();
+        when(checklistService.reset(any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("القائمة غير موجودة"));
+
+        assertThatThrownBy(() -> controller.reset(CHECKLIST, session("assistant"), model))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));
     }
 
     @Test

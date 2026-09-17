@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.prep.PrepChecklistService;
@@ -169,10 +171,10 @@ public class PrepController {
             model.addAttribute("checklistId", id);
             model.addAttribute("run", checklistService.toggle(clinicId(session), actor(session), id, itemId, checked));
             log(session, "prep.toggle", "prep_run_item");
+            return RUN_CONTENT;
         } catch (IllegalArgumentException exception) {
-            Toasts.error(model, exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage(), exception);
         }
-        return RUN_CONTENT;
     }
 
     @PostMapping("/prep/checklists/{id}/run/reset")
@@ -184,10 +186,10 @@ public class PrepController {
             model.addAttribute("checklistId", id);
             model.addAttribute("run", checklistService.reset(clinicId(session), actor(session), id));
             log(session, "prep.reset", "prep_run");
+            return RUN_CONTENT;
         } catch (IllegalArgumentException exception) {
-            Toasts.error(model, exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage(), exception);
         }
-        return RUN_CONTENT;
     }
 
     private String transition(UUID id, HttpSession session, Model model, String action,
@@ -286,7 +288,7 @@ public class PrepController {
             try {
                 return JSON.writeValueAsString(sections);
             } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-                return "[]";
+                throw new IllegalStateException("تعذر تحميل عناصر القائمة", e);
             }
         }
     }
