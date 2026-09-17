@@ -197,11 +197,11 @@ The hardest phase — the scoring engine lives here.
 
 ### Phase 5 — UC-006 Prepare and run procedure checklists
 
-BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `prep_run` → `prep_run_item`. Approval gate before a checklist is usable; at least one section with one item; run progress tracked per day. The built-in template library (`📚 قوالب جاهزة`) is backlog.
+BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `prep_run` → `prep_run_item`. Approval gate before a checklist is usable; at least one section with one item; run progress tracked per day. Built-in template library (`📚 قوالب جاهزة`) implemented — manager can import a starter template then edit/approve.
 
-- [ ] Checklist CRUD with approval gate
-- [ ] Sections and items management
-- [ ] Run tracking per day
+- [x] Checklist CRUD with approval gate (create/edit/approve/unapprove/archive)
+- [x] Sections and items management (Alpine-driven dynamic add/remove in the editor)
+- [x] Run tracking per day (per-employee/day upsert, resumable same-day, isolated next-day)
 
 ### Phase 6 — UC-007 Complete onboarding academy training
 
