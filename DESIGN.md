@@ -144,6 +144,9 @@ The design uses moderate corner radii to project approachability and visual refi
 ### Buttons
 - **Primary Action**: Background `#0a2e29`, text `#ffffff`, border radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text); in-app dense controls may use smaller heights. Hover state darkens toward `#051a17`; active state engages a 1px inner inset ring (`--shadow-inset`).
 - **Secondary Action**: Background `#ffffff`, border 1px solid `#e2e8f0`, text `#0a2e29`. Hover applies background `#f6faf8`.
+- **Primary (selected state)**: The active/selected item in a chip set. Solid `teal-900` with white text — the current brand color — so it clearly pops against tinted unselected controls. Hover deepens to `teal-950`.
+- **Soft (unselected/ghost)**: The resting/untoggled state of selectable controls (chips, month nav). Background `teal-100`, border 1px `teal-600`, text `teal-700`. Hover snaps to `teal-900` with white text — identical to the selected solid — so the element feels like it's about to become the active choice.
+- **Warning Action**: Soft amber for cautionary but non-destructive actions (e.g. unlocking a frozen month). Background `warning-50`, border 1px solid `warning-600`, text `warning-600`. Read as "proceed with care", never as irrecoverable.
 - **Destructive Action**: Background `bg-danger-50`, border 1px solid `border-danger-600`, text `text-danger-600`.
 
 ### Data Grids & Tabular Views

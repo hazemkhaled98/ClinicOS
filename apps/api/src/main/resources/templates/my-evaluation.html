@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تقييمي')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-900 via-teal-850 to-teal-800 text-white shadow-xl p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold text-teal-200 mb-1">تقييم الأداء الشخصي</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">أهلاً <span th:text="${employeeName}">أحمد</span> 👋</h1>
+          </div>
+          <div class="flex items-center gap-3">
+            <a th:href="@{/my-evaluation(month=${prevMonth})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر السابق">⇐ السابق</a>
+            <span class="text-base font-extrabold" th:text="${month}">2026-09</span>
+            <a th:if="${!nextDisabled}" th:href="@{/my-evaluation(month=${nextMonth})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر التالي">التالي ⇒</a>
+          </div>
+        </div>
+      </div>
+
+      <th:block th:if="${!hasData}">
+        <div class="mt-6 clinicos-card p-6 sm:p-8">
+          <div class="clinicos-empty-state">
+            <div class="text-4xl mb-2">✨</div>
+            <p class="font-bold text-teal-900 text-base" th:if="${conflictMessage != null}" th:text="${conflictMessage}">الشهر مقفل للتقييم بالفعل</p>
+            <th:block th:if="${conflictMessage == null}">
+              <p class="font-bold text-teal-900 text-base">لا توجد بيانات كافية لهذا الشهر بعد.</p>
+              <p class="mt-1 text-sm text-on-surface-variant">سجّل حضورك وأنجز مهامك اليومية ليظهر تقييمك هنا.</p>
+            </th:block>
+          </div>
+        </div>
+      </th:block>
+
+      <th:block th:if="${hasData}">
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div class="p-6 clinicos-card flex flex-col items-center gap-1 text-center">
+            <p class="text-sm text-on-surface-variant font-bold">النتيجة النهائية</p>
+            <p class="text-4xl font-black text-teal-800" th:text="${#numbers.formatDecimal(view.finalScore(), 1, 2)}">68.57</p>
+            <span th:if="${view.tierName() != null}" class="mt-2 rounded-full px-4 py-1 text-sm font-extrabold bg-warning-50 text-warning-600" th:text="${view.tierName()}">جيد</span>
+            <span th:if="${view.frozen()}" class="clinicos-chip clinicos-chip--warning mt-1">مجمّد (شهر مقفل)</span>
+            <span th:if="${!view.frozen()}" class="clinicos-chip clinicos-chip--info mt-1">مباشر</span>
+          </div>
+          <div class="p-6 clinicos-card flex flex-col gap-1">
+            <p class="text-sm font-bold text-on-surface-variant">أيام مُسجّلة</p>
+            <p class="text-lg font-extrabold text-teal-900" th:text="${view.daysLogged()}">30</p>
+            <p class="text-sm text-neutral-600">تغطية التقييم: <span th:if="${view.coverage() != null}" th:text="${#numbers.formatDecimal(view.coverage() * 100, 0, 0)} + '%'">70%</span><span th:if="${view.coverage() == null}">—</span></p>
+            <div th:if="${!#lists.isEmpty(view.coverageGaps())}" class="mt-2">
+              <p class="text-xs font-bold text-warning-600 mb-1">فئات غير مكتملة البيانات:</p>
+              <span th:each="gap : ${view.coverageGaps()}" class="clinicos-chip clinicos-chip--warning me-1" th:text="${gap}">التشغيل</span>
+            </div>
+          </div>
+          <div class="p-6 clinicos-card flex flex-col gap-3">
+            <p class="text-sm font-bold text-on-surface-variant">الحافز والإجمالي</p>
+            <div class="flex justify-between"><span class="text-sm text-neutral-600">حافز الأداء</span><span class="font-extrabold text-emerald-700" th:text="${#numbers.formatDecimal(view.incentiveAmount(), 1, 2)}">500.00</span></div>
+            <div class="flex justify-between border-t border-neutral-100 pt-3"><span class="text-sm font-bold text-neutral-600">الإجمالي</span><span class="font-black text-teal-900" th:text="${#numbers.formatDecimal(view.totalPay(), 1, 2)}">5500.00</span></div>
+          </div>
+        </div>
+
+        <div class="mt-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+          <table class="clinicos-table clinicos-table--comfortable">
+            <thead>
+              <tr>
+                <th class="text-start font-extrabold">الفئة</th>
+                <th class="text-end font-extrabold">الدرجة</th>
+                <th class="text-end font-extrabold">الحالة</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-100">
+              <tr th:each="row : ${view.components()}">
+                <td class="font-bold text-teal-900" th:text="${row.name()}">الفني</td>
+                <td class="text-end font-extrabold text-teal-900" th:if="${row.rawScore() != null}" th:text="${#numbers.formatDecimal(row.rawScore(), 1, 2)}">100.00</td>
+                <td class="text-end text-neutral-500" th:if="${row.rawScore() == null}">—</td>
+                <td class="text-end">
+                  <span th:if="${row.included()}" class="clinicos-chip clinicos-chip--info">ضمن التقييم</span>
+                  <span th:if="${!row.included()}" class="clinicos-chip clinicos-chip--warning">مستبعد (لا بيانات)</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </th:block>
+
+      <th:block th:if="${goals != null}">
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div th:if="${gamificationSettings.showWeeklyGoals() and !#lists.isEmpty(goals)}" class="p-6 clinicos-card flex flex-col gap-3">
+            <h2 class="text-xl font-extrabold text-teal-900">أهداف الأسبوع</h2>
+            <div th:each="goal : ${goals}" class="flex flex-col gap-1">
+              <div class="flex justify-between text-sm font-bold text-neutral-600">
+                <span th:text="${goal.title()}">هدف</span>
+                <span><span th:text="${goal.current()}">3</span> / <span th:text="${goal.target()}">5</span></span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-neutral-100 overflow-hidden">
+                <div class="h-full rounded-full bg-teal-600" th:style="'width:' + ${goal.percent()} + '%'"></div>
+              </div>
+            </div>
+          </div>
+          <div class="p-6 clinicos-card flex flex-col gap-3">
+            <h2 th:if="${gamificationSettings.showStreaks()}" class="text-xl font-extrabold text-teal-900">مواظبة متتالية</h2>
+            <p th:if="${gamificationSettings.showStreaks()}" class="text-3xl font-black text-teal-800"><span th:text="${streak}">4</span> <span class="text-sm font-bold text-neutral-500">أيام</span></p>
+            <div th:if="${gamificationSettings.showBadges() and !#lists.isEmpty(earnedBadges)}">
+              <p class="text-sm font-bold text-on-surface-variant mb-2">شارات هذا الشهر</p>
+              <span th:each="badge : ${earnedBadges}" class="clinicos-chip clinicos-chip--success me-1" th:text="${badge}">نجم الأسبوع</span>
+            </div>
+          </div>
+        </div>
+      </th:block>
+
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>

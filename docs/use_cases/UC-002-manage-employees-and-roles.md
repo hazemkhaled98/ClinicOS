@@ -18,7 +18,7 @@
 2. The manager selects an employee from the list, or starts registering a new one.
 3. The manager enters or edits the employee's name, role (assistant or receptionist), base pay, maximum incentive, and work shift.
 4. The manager saves the changes.
-5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role. (Computation of evaluation, academy and inventory impact is deferred to Phase 4 / Phase 6 / Phase 7; only the role-based task list is reflected now.)
+5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role. (Academy and inventory impact is deferred to Phase 6 / Phase 7; the role-based task list and evaluation are reflected now.)
 6. The manager reviews or adjusts clinic-wide settings that affect every employee's evaluation: the task list per role, evaluation category weights, monthly operating target, grace period for lateness, and gamification/badge thresholds.
 7. The manager reviews or edits which user accounts exist, which employee each account is linked to, and what permissions each account/role has.
 
@@ -50,7 +50,7 @@
 3. The system records who unlocked the month and when.
 4. Use case continues at step 7.
 
-> **Deferred:** A2, A3, BR-002, BR-003, BR-004 and the evaluation/academy/inventory computation in step 5 are scheduled with the evaluation engine in Phase 4 (UC-004/UC-005); academy reflection moves to Phase 6, inventory reflection to Phase 7. They do not block this use case being marked Implemented.
+> **Deferred:** academy and inventory reflection in step 5 move to Phase 6 and Phase 7 respectively. They do not block this use case being marked Implemented.
 
 ## Postconditions
 

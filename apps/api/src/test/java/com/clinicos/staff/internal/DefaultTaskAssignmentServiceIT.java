@@ -170,6 +170,106 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(proposed.status()).isEqualTo("pending");
     }
 
+    @Test
+    void listForMonth_returnsOnlyMonthAssignments() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID currentA = seedAssignment(clinicA, employeeId, "هذا الشهر", LocalDate.now(), AssignmentStatus.approved);
+        UUID currentB = seedAssignment(clinicA, employeeId, "هذا الشهر أيضاً", null, AssignmentStatus.pending);
+        UUID previous = seedAssignmentAt(clinicA, employeeId, "الشهر الماضي", LocalDate.now(),
+                AssignmentStatus.approved, java.time.LocalDate.now().minusMonths(1).withDayOfMonth(15).atTime(9, 0));
+
+        List<Assignment> assignments = taskAssignmentService.listForMonth(clinicA, employeeId, java.time.YearMonth.now());
+
+        assertThat(assignments).extracting(Assignment::id).containsExactlyInAnyOrder(currentA, currentB);
+        assertThat(assignments).noneMatch(a -> a.id().equals(previous));
+    }
+
+    @Test
+    void listForMonth_crossClinicEmployee_returnsEmpty() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeA = createEmployee(clinicA, "أحمد");
+
+        TenantContext.set(clinicB);
+        UUID employeeB = createEmployee(clinicB, "محمد");
+        seedAssignment(clinicB, employeeB, "مهمة عيادة B", LocalDate.now(), AssignmentStatus.approved);
+
+        TenantContext.set(clinicA);
+        List<Assignment> assignments = taskAssignmentService.listForMonth(clinicA, employeeA, java.time.YearMonth.now());
+        assertThat(assignments).isEmpty();
+    }
+
+    @Test
+    void approve_pendingAssignment_setsApproved() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.pending);
+
+        Assignment approved = taskAssignmentService.approve(clinicA, assignmentId, insertApproverMembership());
+
+        assertThat(approved.status()).isEqualTo("approved");
+        assertThat(approved.approvedAt()).isNotNull();
+        assertThat(approved.doneAt()).isNull();
+    }
+
+    @Test
+    void approve_alreadyReviewed_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.approved);
+
+        assertThatThrownBy(() -> taskAssignmentService.approve(clinicA, assignmentId, insertApproverMembership()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ليست بانتظار الاعتماد");
+    }
+
+    @Test
+    void reject_pendingAssignment_setsRejected() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.pending);
+
+        Assignment rejected = taskAssignmentService.reject(clinicA, assignmentId, insertApproverMembership(), "غير مناسب");
+
+        assertThat(rejected.status()).isEqualTo("rejected");
+        assertThat(rejected.approvedAt()).isNotNull();
+    }
+
+    @Test
+    void reject_blankReason_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.pending);
+
+        assertThatThrownBy(() -> taskAssignmentService.reject(clinicA, assignmentId, insertApproverMembership(), " "))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("سبب الرفض مطلوب");
+    }
+
+    private UUID seedAssignmentAt(UUID clinicId, UUID employeeId, String name, LocalDate dueDate,
+            AssignmentStatus status, java.time.LocalDateTime assignedAt) throws Exception {
+        try (Connection conn = superuser()) {
+            return DSL.using(conn, SQLDialect.POSTGRES)
+                    .insertInto(TASK_ASSIGNMENT)
+                    .set(TASK_ASSIGNMENT.CLINIC_ID, clinicId)
+                    .set(TASK_ASSIGNMENT.EMPLOYEE_ID, employeeId)
+                    .set(TASK_ASSIGNMENT.NAME, name)
+                    .set(TASK_ASSIGNMENT.PROPOSED_BY, AssignmentProposer.manager)
+                    .set(TASK_ASSIGNMENT.DUE_DATE, dueDate)
+                    .set(TASK_ASSIGNMENT.STATUS, status)
+                    .set(TASK_ASSIGNMENT.ASSIGNED_AT, assignedAt.atOffset(java.time.OffsetDateTime.now().getOffset()))
+                    .returningResult(TASK_ASSIGNMENT.ID)
+                    .fetchOne(TASK_ASSIGNMENT.ID);
+        }
+    }
+
+    private UUID insertApproverMembership() throws Exception {
+        try (Connection conn = superuser()) {
+            UUID userId = TestFixtures.insertUser(conn, clinicA);
+            return TestFixtures.insertMembership(conn, clinicA, userId, "manager");
+        }
+    }
+
     private UUID seedAssignment(UUID clinicId, UUID employeeId, String name, LocalDate dueDate,
             AssignmentStatus status) throws Exception {
         try (Connection conn = superuser()) {

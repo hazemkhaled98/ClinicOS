@@ -179,7 +179,7 @@ class EmployeeDayControllerTest {
         allowEmployees();
         stubLinkedEmployee();
         Assignment pending = new Assignment(UUID.randomUUID(), "ترتيب ملفات المرضى",
-                LocalDate.now(), "pending", null, null);
+                LocalDate.now(), "pending", null, null, null, null);
         when(assignmentService.propose(eq(CLINIC), eq(EMPLOYEE), any(), eq(Proposer.SELF)))
                 .thenReturn(pending);
         when(assignmentService.today(CLINIC, EMPLOYEE)).thenReturn(List.of(pending));

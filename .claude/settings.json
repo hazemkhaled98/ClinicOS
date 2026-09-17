@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": false,
+    "aiup-core@ai-unified-process-marketplace": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/tenant_guard.py\" 2>/dev/null || true",
+            "statusMessage": "Checking tenant/RLS guard"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/tailwind_reminder.py\" 2>/dev/null || true",
+            "statusMessage": "Checking Tailwind rebuild reminder"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\hazem\\.claude\\hooks\\design-council-nudge.ps1\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

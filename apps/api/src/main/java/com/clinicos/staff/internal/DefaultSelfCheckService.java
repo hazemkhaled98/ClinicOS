@@ -4,6 +4,8 @@ import static com.clinicos.shared.jooq.tables.SelfCheck.SELF_CHECK;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.util.List;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -28,6 +30,17 @@ public class DefaultSelfCheckService implements SelfCheckService {
     @Override
     public DayAttendance today(UUID clinicId, UUID employeeId) {
         return transactionTemplate.execute(status -> readToday(clinicId, employeeId));
+    }
+
+    @Override
+    public List<DayAttendance> forMonth(UUID clinicId, UUID employeeId, YearMonth month) {
+        return transactionTemplate.execute(status -> dsl.selectFrom(SELF_CHECK)
+                .where(SELF_CHECK.CLINIC_ID.eq(clinicId))
+                .and(SELF_CHECK.EMPLOYEE_ID.eq(employeeId))
+                .and(SELF_CHECK.WORK_DATE.greaterOrEqual(month.atDay(1)))
+                .and(SELF_CHECK.WORK_DATE.lessThan(month.plusMonths(1).atDay(1)))
+                .orderBy(SELF_CHECK.WORK_DATE.asc())
+                .fetch(this::toDayAttendance));
     }
 
     @Override

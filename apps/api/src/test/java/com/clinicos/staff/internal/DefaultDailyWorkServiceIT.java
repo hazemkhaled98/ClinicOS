@@ -317,6 +317,113 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
                 .hasMessageContaining("المهمة غير موجودة");
     }
 
+    @Test
+    void forDate_returnsReviewState() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, employeeId);
+        dailyWorkService.complete(clinicA, employeeId, taskId, null);
+        UUID dailyRecordId = todayRecordId(employeeId);
+
+        dailyWorkService.approveReview(clinicA, dailyRecordId, taskId, insertManagerMembership());
+
+        DailyTask task = dailyWorkService.forDate(clinicA, employeeId, LocalDate.now()).stream()
+                .filter(t -> t.taskDefinitionId().equals(taskId)).findFirst().orElseThrow();
+        assertThat(task.done()).isTrue();
+        assertThat(task.reviewStatus()).isEqualTo("approved");
+        assertThat(task.reviewReason()).isNull();
+        assertThat(task.reviewedAt()).isNotNull();
+    }
+
+    @Test
+    void rejectReview_setsReason() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, employeeId);
+        dailyWorkService.complete(clinicA, employeeId, taskId, null);
+        UUID dailyRecordId = todayRecordId(employeeId);
+
+        dailyWorkService.rejectReview(clinicA, dailyRecordId, taskId, insertManagerMembership(), "صوره غير واضحة");
+
+        DailyTask task = dailyWorkService.forDate(clinicA, employeeId, LocalDate.now()).stream()
+                .filter(t -> t.taskDefinitionId().equals(taskId)).findFirst().orElseThrow();
+        assertThat(task.reviewStatus()).isEqualTo("rejected");
+        assertThat(task.reviewReason()).isEqualTo("صوره غير واضحة");
+        assertThat(task.reviewedAt()).isNotNull();
+    }
+
+    @Test
+    void approveReview_notDone_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        dailyWorkService.forDate(clinicA, employeeId, LocalDate.now());
+        UUID dailyRecordId = todayRecordId(employeeId);
+
+        assertThatThrownBy(() -> dailyWorkService.approveReview(clinicA, dailyRecordId, taskId, insertManagerMembership()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("غير مكتملة");
+    }
+
+    @Test
+    void rejectReview_blankReason_throws() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, employeeId);
+        dailyWorkService.complete(clinicA, employeeId, taskId, null);
+        UUID dailyRecordId = todayRecordId(employeeId);
+
+        assertThatThrownBy(() -> dailyWorkService.rejectReview(clinicA, dailyRecordId, taskId, insertManagerMembership(), "  "))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("سبب الرفض مطلوب");
+    }
+
+    @Test
+    void completeAfterApprove_resetsReviewToPending() throws Exception {
+        TenantContext.set(clinicA);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
+        selfCheckService.checkIn(clinicA, employeeId);
+        dailyWorkService.complete(clinicA, employeeId, taskId, null);
+        UUID dailyRecordId = todayRecordId(employeeId);
+        dailyWorkService.approveReview(clinicA, dailyRecordId, taskId, insertManagerMembership());
+
+        dailyWorkService.complete(clinicA, employeeId, taskId, null);
+
+        DailyTask task = dailyWorkService.forDate(clinicA, employeeId, LocalDate.now()).stream()
+                .filter(t -> t.taskDefinitionId().equals(taskId)).findFirst().orElseThrow();
+        assertThat(task.done()).isTrue();
+        assertThat(task.reviewStatus()).isEqualTo("pending");
+        assertThat(task.reviewReason()).isNull();
+    }
+
+    private UUID todayRecordId(UUID employeeId) throws Exception {
+        try (Connection conn = superuser()) {
+            return DSL.using(conn, SQLDialect.POSTGRES)
+                    .select(DAILY_RECORD.ID)
+                    .from(DAILY_RECORD)
+                    .where(DAILY_RECORD.CLINIC_ID.eq(clinicA))
+                    .and(DAILY_RECORD.EMPLOYEE_ID.eq(employeeId))
+                    .and(DAILY_RECORD.WORK_DATE.eq(LocalDate.now()))
+                    .fetchOne(DAILY_RECORD.ID);
+        }
+    }
+
+    private UUID insertManagerMembership() throws Exception {
+        try (Connection conn = superuser()) {
+            UUID userId = TestFixtures.insertUser(conn, clinicA);
+            return TestFixtures.insertMembership(conn, clinicA, userId, "manager");
+        }
+    }
+
     private void archiveTask(UUID taskId) throws Exception {
         try (Connection conn = superuser()) {
             DSL.using(conn, SQLDialect.POSTGRES)
