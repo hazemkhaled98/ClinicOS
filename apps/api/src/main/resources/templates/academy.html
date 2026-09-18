@@ -6,7 +6,7 @@
     <header th:replace="~{fragments/topbar :: topbar}"></header>
     <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
       <div class="space-y-1.5 mb-8">
-        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">الأكاديمية</h1>
+        <h1 class="text-3xl font-bold text-teal-900 tracking-tight">الأكاديمية</h1>
         <p class="text-sm text-on-surface-variant">البرامج التدريبية — تأهيل وتقييم كل موظف على منهج العيادة</p>
       </div>
 
@@ -28,10 +28,10 @@
       </div>
 
       <div th:if="${!#lists.isEmpty(employees)}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article th:each="emp : ${employees}" class="clinicos-card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow">
+        <article th:each="emp : ${employees}" class="clinicos-card p-5 flex flex-col gap-4 hover:bg-teal-50 transition-colors">
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1">
-              <h2 class="font-extrabold text-teal-900 text-xl" th:text="${emp.name()}">موظف</h2>
+              <h2 class="font-bold text-teal-900 text-xl" th:text="${emp.name()}">موظف</h2>
               <p class="text-xs text-on-surface-variant mt-1" th:text="${audiences[emp.id()] != null ? audiences[emp.id()].literal : 'core'}">core</p>
             </div>
           </div>

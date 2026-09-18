@@ -9,7 +9,7 @@
         <span>←</span>
         <span>المنهج</span>
       </a>
-      <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight mb-2"
+      <h1 class="text-3xl font-bold text-teal-900 tracking-tight mb-2"
           th:text="${form.id() != null} ? 'تعديل وحدة' : 'وحدة جديدة'">تعديل وحدة</h1>
 
       <form method="post" th:action="@{/academy/units}" th:object="${form}" class="mt-8 space-y-6"
@@ -22,8 +22,8 @@
             }" @submit="syncSections(); syncQuestions()">
 
         <input type="hidden" th:field="*{id}">
-        <input type="hidden" name="sectionsJson" th:ref="sectionsJson" value="[]">
-        <input type="hidden" name="questionsJson" th:ref="questionsJson" value="[]">
+        <input type="hidden" name="sectionsJson" x-ref="sectionsJson" value="[]">
+        <input type="hidden" name="questionsJson" x-ref="questionsJson" value="[]">
 
         <div class="clinicos-card p-6">
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-6">
@@ -66,17 +66,19 @@
         <div class="clinicos-card p-6">
           <div class="flex items-center gap-2 mb-4 pb-3 border-b border-surface-border">
             <span class="text-lg">📄</span>
-            <h4 class="text-base font-bold text-on-surface">المحتوى (الأقسام)</h4>
+            <h2 class="text-base font-bold text-on-surface">المحتوى (الأقسام)</h2>
           </div>
           <template x-for="(section, si) in sections" :key="si">
             <div class="p-4 bg-surface-muted/30 border border-surface-border rounded-xl mb-4">
               <div class="flex items-center justify-between gap-3 mb-3">
-                <input x-model="section.h" required class="clinicos-input flex-1" placeholder="عنوان القسم">
+                <label class="sr-only" :for="'section-title-' + si">عنوان القسم</label>
+                <input x-model="section.h" :id="'section-title-' + si" required class="clinicos-input flex-1" placeholder="عنوان القسم">
                 <button type="button" class="clinicos-btn--warning text-xs" @click="sections.splice(si, 1)" x-show="sections.length > 1">حذف</button>
               </div>
               <template x-for="(point, pi) in section.points" :key="pi">
                 <div class="flex items-center gap-2 mb-2">
-                  <input x-model="section.points[pi]" class="clinicos-input flex-1" placeholder="نقطة">
+                  <label class="sr-only" :for="'section-point-' + si + '-' + pi">نقطة</label>
+                  <input x-model="section.points[pi]" :id="'section-point-' + si + '-' + pi" class="clinicos-input flex-1" placeholder="نقطة">
                   <button type="button" class="text-xs text-danger-600 hover:text-danger-700" @click="section.points.splice(pi, 1)" x-show="section.points.length > 1">✕</button>
                 </div>
               </template>
@@ -89,21 +91,22 @@
         <div class="clinicos-card p-6">
           <div class="flex items-center gap-2 mb-4 pb-3 border-b border-surface-border">
             <span class="text-lg">🧠</span>
-            <h4 class="text-base font-bold text-on-surface">الأسئلة</h4>
+            <h2 class="text-base font-bold text-on-surface">الأسئلة</h2>
           </div>
           <template x-for="(q, qi) in questions" :key="qi">
             <div class="p-4 bg-surface-muted/30 border border-surface-border rounded-xl mb-4">
               <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex-1">
-                  <label class="clinicos-label mb-1 text-xs">السؤال</label>
-                  <input x-model="q.prompt" required class="clinicos-input" placeholder="لو مش متأكد من خطوة...؟">
+                  <label class="clinicos-label mb-1 text-xs" :for="'question-prompt-' + qi">السؤال</label>
+                  <input x-model="q.prompt" :id="'question-prompt-' + qi" required class="clinicos-input" placeholder="لو مش متأكد من خطوة...؟">
                 </div>
                 <button type="button" class="clinicos-btn--warning text-xs mt-5" @click="questions.splice(qi, 1)" x-show="questions.length > 1">حذف السؤال</button>
               </div>
               <template x-for="(opt, oi) in q.options" :key="oi">
                 <div class="flex items-center gap-2 mb-2">
-                  <input type="radio" :name="'correctIndex_' + qi" :value="oi" :checked="q.correctIndex === oi" @change="q.correctIndex = oi" class="accent-teal-600">
-                  <input x-model="q.options[oi]" class="clinicos-input flex-1" :placeholder="'الاختيار ' + (oi+1)">
+                  <input type="radio" :name="'correctIndex_' + qi" :value="oi" :checked="q.correctIndex === oi" @change="q.correctIndex = oi" :aria-label="'الإجابة الصحيحة للاختيار ' + (oi + 1)" class="accent-teal-600">
+                  <label class="sr-only" :for="'question-option-' + qi + '-' + oi" x-text="'نص الاختيار ' + (oi + 1)"></label>
+                  <input x-model="q.options[oi]" :id="'question-option-' + qi + '-' + oi" class="clinicos-input flex-1" :placeholder="'الاختيار ' + (oi+1)">
                   <button type="button" class="text-xs text-danger-600" @click="q.options.splice(oi, 1); if(q.correctIndex >= q.options.length) q.correctIndex = 0" x-show="q.options.length > 2">✕</button>
                 </div>
               </template>

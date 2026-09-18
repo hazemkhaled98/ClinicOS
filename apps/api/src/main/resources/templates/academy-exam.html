@@ -6,20 +6,20 @@
     <header th:replace="~{fragments/topbar :: topbar}"></header>
     <section class="flex-1 p-8 sm:p-10 max-w-3xl w-full mx-auto clinicos-section">
       <div class="space-y-1.5 mb-8">
-        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">الامتحان النهائي</h1>
+        <h1 class="text-3xl font-bold text-teal-900 tracking-tight">الامتحان النهائي</h1>
         <p class="text-sm text-on-surface-variant">درجة النجاح:
           <span th:text="${exam.passScore()}">70</span>‎% — أجب على كل الأسئلة لاجتياز المنهج.</p>
       </div>
 
       <form method="post" th:action="@{/academy/exam}" class="space-y-4">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <article th:each="q : ${exam.questions()}" class="clinicos-card p-5">
-          <h2 class="font-extrabold text-teal-900 mb-3 text-lg" th:text="${q.prompt()}">سؤال</h2>
+        <fieldset th:each="q : ${exam.questions()}" class="clinicos-card p-5">
+          <legend class="font-bold text-teal-900 mb-3 text-lg" th:text="${q.prompt()}">سؤال</legend>
           <div th:each="opt, os : ${q.options()}" class="flex items-center gap-3 py-2 border-t border-surface-border">
-            <input type="radio" th:name="'q_' + ${q.id()}" th:value="${os.index}" class="accent-teal-600">
-            <label class="text-sm text-on-surface cursor-pointer" th:text="${opt}"></label>
+            <input type="radio" th:id="${'q_' + q.id() + '_' + os.index}" th:name="${'q_' + q.id()}" th:value="${os.index}" class="accent-teal-600">
+            <label class="text-sm text-on-surface cursor-pointer" th:for="${'q_' + q.id() + '_' + os.index}" th:text="${opt}"></label>
           </div>
-        </article>
+        </fieldset>
         <div class="flex flex-wrap gap-3 pt-2">
           <button type="submit" class="clinicos-btn">تسليم الإجابات</button>
           <a href="/academy/me" class="clinicos-btn clinicos-btn--secondary">↩ رجوع</a>

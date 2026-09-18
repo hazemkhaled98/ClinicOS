@@ -7,7 +7,7 @@
     <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
       <div class="flex items-center justify-between mb-8">
         <div class="space-y-1.5">
-          <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">إدارة المنهج</h1>
+          <h1 class="text-3xl font-bold text-teal-900 tracking-tight">إدارة المنهج</h1>
           <p class="text-sm text-on-surface-variant">الوحدات، الأهداف، والمحتوى التدريبي لكل دور</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
@@ -24,7 +24,7 @@
           <div class="flex items-start gap-3">
             <span class="text-3xl" th:text="${unit.icon() ?: '📘'}">📘</span>
             <div>
-              <h2 class="font-extrabold text-teal-900 text-lg" th:text="${unit.title()}">وحدة</h2>
+              <h2 class="font-bold text-teal-900 text-lg" th:text="${unit.title()}">وحدة</h2>
               <p class="text-xs text-on-surface-variant mt-1">
                 <span th:text="${unit.appliesTo().literal}">core</span> ·
                 <span th:text="${unit.requiresPhoto()} ? 'بصورة' : 'بدون صورة'">بدون صورة</span>

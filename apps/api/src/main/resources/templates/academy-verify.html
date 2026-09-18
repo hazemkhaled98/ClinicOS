@@ -7,7 +7,7 @@
     <section class="flex-1 p-8 sm:p-10 max-w-4xl w-full mx-auto clinicos-section">
       <div class="flex items-center justify-between mb-8">
         <div class="space-y-1.5">
-          <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">التحقق الأكاديمي</h1>
+          <h1 class="text-3xl font-bold text-teal-900 tracking-tight">التحقق الأكاديمي</h1>
           <p class="text-sm text-on-surface-variant">تقديمات صور الإنجاز بانتظار المراجعة</p>
         </div>
         <a href="/academy" class="clinicos-btn clinicos-btn--secondary">↩ رجوع</a>
@@ -17,7 +17,7 @@
         <article th:each="s : ${pending}" class="clinicos-card p-5">
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1">
-              <h2 class="font-extrabold text-teal-900 text-lg" th:text="${s.employeeName()}">موظف</h2>
+              <h2 class="font-bold text-teal-900 text-lg" th:text="${s.employeeName()}">موظف</h2>
               <p class="text-sm text-on-surface-variant mt-1" th:text="${s.icon() ?: '📘'} + ' ' + ${s.unitTitle()}">وحدة</p>
             </div>
             <span class="clinicos-chip clinicos-chip--warning">بانتظار</span>
@@ -30,7 +30,8 @@
             </form>
             <form method="post" th:action="@{/academy/submissions/{id}/reject(id=${s.id()})}" class="inline">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-              <input type="text" name="reason" required placeholder="سبب الرفض" class="clinicos-input w-40">
+              <label class="sr-only" th:for="${'reject-reason_' + s.id()}">سبب الرفض</label>
+              <input type="text" th:id="${'reject-reason_' + s.id()}" name="reason" required placeholder="سبب الرفض" class="clinicos-input w-40">
               <button class="clinicos-btn clinicos-btn--warning px-3 py-2 text-xs" type="submit">رفض</button>
             </form>
           </div>
