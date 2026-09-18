@@ -203,6 +203,9 @@ public class AcademyController {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
+        if (!canVerify(session)) {
+            return "redirect:/academy";
+        }
         renderQueue(session, model);
         return QUEUE;
     }
@@ -211,6 +214,9 @@ public class AcademyController {
     public String verify(@PathVariable UUID id, HttpSession session, Model model) {
         if (!hasSession(session)) {
             return "redirect:/login";
+        }
+        if (!canVerify(session)) {
+            return "redirect:/academy";
         }
         try {
             academyService.verify(clinicId(session), actor(session), id);
@@ -227,6 +233,9 @@ public class AcademyController {
     public String reject(@PathVariable UUID id, @RequestParam String reason, HttpSession session, Model model) {
         if (!hasSession(session)) {
             return "redirect:/login";
+        }
+        if (!canVerify(session)) {
+            return "redirect:/academy";
         }
         try {
             academyService.reject(clinicId(session), actor(session), id, reason);

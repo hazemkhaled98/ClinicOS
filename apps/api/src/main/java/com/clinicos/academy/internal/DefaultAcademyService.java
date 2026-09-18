@@ -63,7 +63,7 @@ public class DefaultAcademyService implements AcademyService {
     public List<TraineeUnit> myCurriculum(UUID clinicId, Actor actor) {
         return transactionTemplate.execute(tx -> {
             requireEmployee(clinicId, actor);
-            return curriculumFor(clinicId, actor.employeeId(), actorToAudience(actor));
+            return requiredCurriculum(clinicId, actor);
         });
     }
 
@@ -257,8 +257,7 @@ public class DefaultAcademyService implements AcademyService {
     public Exam exam(UUID clinicId, Actor actor) {
         return transactionTemplate.execute(status -> {
             requireEmployee(clinicId, actor);
-            var coveredUnits = fetchCompletedUnitIds(clinicId, actor.employeeId());
-            if (coveredUnits.isEmpty()) throw missing("لم تُكمل أي وحدة بعد — لا يمكن إعداد الامتحان");
+            var coveredUnits = completedCurriculumUnitIds(clinicId, actor);
             var passScore = dsl.select(CLINIC_SETTINGS.ACADEMY_PASS_SCORE)
                     .from(CLINIC_SETTINGS).where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId)).fetchOneInto(int.class);
             var questions = dsl.selectFrom(ACADEMY_QUESTION)
@@ -277,13 +276,15 @@ public class DefaultAcademyService implements AcademyService {
         return transactionTemplate.execute(status -> {
             requireEmployee(clinicId, actor);
             if (answers.isEmpty()) throw missing("أجب على كل الأسئلة");
+            var coveredUnits = completedCurriculumUnitIds(clinicId, actor);
             var passScore = dsl.select(CLINIC_SETTINGS.ACADEMY_PASS_SCORE)
                     .from(CLINIC_SETTINGS).where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId)).fetchOneInto(int.class);
-            var allQuestions = dsl.selectFrom(ACADEMY_QUESTION)
-                    .where(ACADEMY_QUESTION.ID.in(answers.keySet()))
-                    .fetch();
-            int total = answers.size();
-            if (total != allQuestions.size()) throw missing("بعض الأسئلة غير موجودة");
+            var questionIds = dsl.select(ACADEMY_QUESTION.ID).from(ACADEMY_QUESTION)
+                    .where(ACADEMY_QUESTION.UNIT_ID.in(coveredUnits))
+                    .fetchSet(ACADEMY_QUESTION.ID);
+            if (!questionIds.equals(answers.keySet())) throw missing("أسئلة الامتحان غير صالحة");
+            var allQuestions = dsl.selectFrom(ACADEMY_QUESTION).where(ACADEMY_QUESTION.ID.in(questionIds)).fetch();
+            int total = allQuestions.size();
             int correct = 0;
             for (var q : allQuestions) {
                 var selected = answers.get(q.getId());
@@ -311,22 +312,50 @@ public class DefaultAcademyService implements AcademyService {
             requireEmployee(clinicId, actor);
             var units = myCurriculum(clinicId, actor);
             if (units.stream().anyMatch(u -> !"done".equals(u.status()))) throw missing("أكمل كل الوحدات أولاً");
-            var attempt = dsl.selectFrom(ACADEMY_EXAM_ATTEMPT)
-                    .where(ACADEMY_EXAM_ATTEMPT.CLINIC_ID.eq(clinicId))
-                    .and(ACADEMY_EXAM_ATTEMPT.EMPLOYEE_ID.eq(actor.employeeId()))
-                    .and(ACADEMY_EXAM_ATTEMPT.PASSED.isTrue())
-                    .orderBy(ACADEMY_EXAM_ATTEMPT.ATTEMPTED_AT.desc())
-                    .limit(1)
-                    .fetchOne();
-            if (attempt == null) throw missing("اجتز الامتحان أولًا — لا توجد شهادة بعد");
+            var questionCount = dsl.fetchCount(ACADEMY_QUESTION,
+                    ACADEMY_QUESTION.UNIT_ID.in(units.stream().map(TraineeUnit::id).toList()));
+            OffsetDateTime passedAt = OffsetDateTime.now();
+            if (questionCount > 0) {
+                var attempt = dsl.selectFrom(ACADEMY_EXAM_ATTEMPT)
+                        .where(ACADEMY_EXAM_ATTEMPT.CLINIC_ID.eq(clinicId))
+                        .and(ACADEMY_EXAM_ATTEMPT.EMPLOYEE_ID.eq(actor.employeeId()))
+                        .and(ACADEMY_EXAM_ATTEMPT.PASSED.isTrue())
+                        .orderBy(ACADEMY_EXAM_ATTEMPT.ATTEMPTED_AT.desc())
+                        .limit(1)
+                        .fetchOne();
+                if (attempt == null) throw missing("اجتز الامتحان أولًا — لا توجد شهادة بعد");
+                passedAt = attempt.getAttemptedAt();
+            }
             var employee = dsl.selectFrom(EMPLOYEE)
                     .where(EMPLOYEE.ID.eq(actor.employeeId())).fetchOne();
             String name = employee != null ? employee.getName() : "موظف";
             var titles = units.stream().map(TraineeUnit::title).toList();
             var passScore = dsl.select(CLINIC_SETTINGS.ACADEMY_PASS_SCORE)
                     .from(CLINIC_SETTINGS).where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId)).fetchOneInto(int.class);
-            return new Certificate(name, titles, passScore == 0 ? 70 : passScore, attempt.getAttemptedAt());
+            return new Certificate(name, titles, passScore == 0 ? 70 : passScore, passedAt);
         });
+    }
+
+    private List<UUID> completedCurriculumUnitIds(UUID clinicId, Actor actor) {
+        var units = requiredCurriculum(clinicId, actor);
+        if (units.isEmpty()) {
+            throw missing("لا يوجد منهج تدريبي");
+        }
+        if (units.stream().anyMatch(unit -> !"done".equals(unit.status()))) {
+            throw missing("أكمل كل الوحدات أولاً");
+        }
+        return units.stream().map(TraineeUnit::id).toList();
+    }
+
+    private List<TraineeUnit> requiredCurriculum(UUID clinicId, Actor actor) {
+        var audience = actorToAudience(actor);
+        var units = curriculumFor(clinicId, actor.employeeId(), audience);
+        if (units.stream().noneMatch(unit -> unit.appliesTo() == AcademyAudience.core)
+                || (audience != AcademyAudience.core
+                        && units.stream().noneMatch(unit -> unit.appliesTo() == audience))) {
+            throw missing("لم يتم إعداد المنهج لهذه الوظيفة");
+        }
+        return units;
     }
 
     @Override
