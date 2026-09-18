@@ -93,47 +93,6 @@ join public.app_user u on u.clinic_id = e.clinic_id and u.username = e.name
 where m.clinic_id = e.clinic_id
   and m.user_id = u.id;
 
-do $catalog$
-begin
-    if (select count(*) from public.prep_template) <> 3
-       or (select count(*) from public.prep_template_item) <> 33
-       or not exists (
-           select 1 from public.prep_template_section
-           where title = 'الأوبتريشن (الحشو)'
-       ) then
-        truncate table public.prep_template restart identity cascade;
-        insert into public.prep_template (code, name, display_order)
-        values
-            ('examination', 'إكزامينيشن (كشف وتشخيص)', 1),
-            ('anesthesia', 'أنستيزيا (تخدير موضعي)', 2),
-            ('endo', 'إندو (سحب عصب)', 3);
-
-        insert into public.prep_template_section (template_id, title, display_order)
-        select t.id, x.title, x.ord
-        from public.prep_template t
-        cross join lateral unnest(case t.code
-            when 'examination' then array['تجهيز عام', 'دياجنوزيس']
-            when 'anesthesia' then array['الأنستيزيا']
-            else array['تجهيز عام', 'أنستيزيا', 'أكسيس وتنظيف الكانالز', 'الأوبتريشن (الحشو)', 'إنهاء وتعقيم']
-        end) with ordinality x(title, ord);
-
-        insert into public.prep_template_item (section_id, name, display_order)
-        select s.id, x.name, x.ord
-        from public.prep_template t
-        join public.prep_template_section s on s.template_id = t.id
-        cross join lateral unnest(case t.code || ':' || s.display_order
-            when 'examination:1' then array['ميرور (مرآة فحص)', 'إكسبلورر (مسبار)', 'تويزر (ملقط)', 'جلوفز ومناديل', 'كوب ومحلول مضمضة']
-            when 'examination:2' then array['خافض لسان/تشيك ريتراكتور', 'جوز (شاش معقّم)', 'إنترا-أورال كاميرا (لو متاح)', 'كارت تسجيل الحالة']
-            when 'anesthesia:1' then array['توبيكال جل (تخدير سطحي)', 'أسبيريتنج سرنجة', 'كاربيول أنستيتيك (كبسولة بنج)', 'نيدل مناسبة (شورت/لونج)', 'قطن وجوز']
-            when 'endo:1' then array['ميرور وإكسبلورر وتويزر', 'سكشن (شفّاط)', 'رَبر دام + فريم']
-            when 'endo:2' then array['توبيكال جل', 'سرنجة وكاربيول ونيدل']
-            when 'endo:3' then array['تيربين هاند بيس + بَرز', 'كي-فايلز (هاند فايلز) بمقاسات', 'روتاري فايلز (لو متاح)', 'هيبوكلورايت (NaOCl)', 'إريجيشن سرنجة', 'EDTA', 'بيبر بوينتس', 'إيبكس لوكيتور']
-            when 'endo:4' then array['جوتا بركا بوينتس', 'سيلر (معجون حشو)', 'سبريدر/بلجر', 'تمبوراري فيلينج']
-            else array['إكس-راي للتأكد', 'تعقيم الأدوات']
-        end) with ordinality x(name, ord);
-    end if;
-end $catalog$;
-
 create temp table _seed_scope (clinic_id uuid);
 insert into _seed_scope values (:'clinic_id'::uuid);
 
