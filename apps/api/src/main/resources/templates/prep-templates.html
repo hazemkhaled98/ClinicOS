@@ -38,7 +38,7 @@
               <span th:text="${template.itemCount()}">9</span> عنصر
             </div>
             <div class="pt-1 flex items-center gap-2 text-xs text-on-surface-variant bg-neutral-50 border border-neutral-100 rounded-lg px-3 py-2 w-fit max-w-full">
-              <span class="text-neutral-400 font-medium shrink-0">الأقسام:</span>
+              <span class="text-on-surface-variant font-medium shrink-0">الأقسام:</span>
               <span class="font-medium truncate" th:text="${#strings.listJoin(template.sections().![title], ' · ')}">تجهيز عام · دياجنوزيس</span>
             </div>
           </div>
