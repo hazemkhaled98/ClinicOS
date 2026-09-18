@@ -282,7 +282,8 @@ public class DefaultAcademyService implements AcademyService {
             var questionIds = dsl.select(ACADEMY_QUESTION.ID).from(ACADEMY_QUESTION)
                     .where(ACADEMY_QUESTION.UNIT_ID.in(coveredUnits))
                     .fetchSet(ACADEMY_QUESTION.ID);
-            if (!questionIds.equals(answers.keySet())) throw missing("أسئلة الامتحان غير صالحة");
+            if (!questionIds.containsAll(answers.keySet())) throw missing("أسئلة الامتحان غير صالحة");
+            if (!questionIds.equals(answers.keySet())) throw missing("أجب على كل الأسئلة");
             var allQuestions = dsl.selectFrom(ACADEMY_QUESTION).where(ACADEMY_QUESTION.ID.in(questionIds)).fetch();
             int total = allQuestions.size();
             int correct = 0;
@@ -362,6 +363,9 @@ public class DefaultAcademyService implements AcademyService {
     public void importDefaultCurriculum(UUID clinicId, Actor actor) {
         transactionTemplate.executeWithoutResult(status -> {
             requireVerifier(clinicId, actor);
+            if (dsl.fetchCount(ACADEMY_UNIT, ACADEMY_UNIT.CLINIC_ID.eq(clinicId)) > 0) {
+                throw missing("المنهج مستورد بالفعل");
+            }
             var templates = dsl.selectFrom(ACADEMY_TEMPLATE_UNIT)
                     .orderBy(ACADEMY_TEMPLATE_UNIT.DISPLAY_ORDER.asc())
                     .fetch();

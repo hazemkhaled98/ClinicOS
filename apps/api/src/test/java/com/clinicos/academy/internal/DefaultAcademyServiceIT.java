@@ -207,7 +207,7 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThatThrownBy(() -> service.submitExam(clinicA, assistant, answers))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("أسئلة الامتحان");
+                .hasMessageContaining("أجب على كل");
     }
 
     @Test
@@ -283,6 +283,12 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void importDeepCopiesCatalog() {
         TenantContext.set(clinicA);
+        transactionTemplate.executeWithoutResult(tx -> {
+            dsl.deleteFrom(ACADEMY_QUESTION).where(ACADEMY_QUESTION.UNIT_ID.in(
+                    dsl.select(ACADEMY_UNIT.ID).from(ACADEMY_UNIT)
+                            .where(ACADEMY_UNIT.CLINIC_ID.eq(clinicA)))).execute();
+            dsl.deleteFrom(ACADEMY_UNIT).where(ACADEMY_UNIT.CLINIC_ID.eq(clinicA)).execute();
+        });
         int beforeA = transactionTemplate.execute(tx -> dsl.fetchCount(ACADEMY_UNIT, ACADEMY_UNIT.CLINIC_ID.eq(clinicA)));
         int beforeB = transactionTemplate.execute(tx -> dsl.fetchCount(ACADEMY_UNIT, ACADEMY_UNIT.CLINIC_ID.eq(clinicB)));
         service.importDefaultCurriculum(clinicA, owner);
@@ -297,6 +303,10 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
         Integer questionCount = transactionTemplate.execute(tx -> dsl.fetchCount(ACADEMY_QUESTION,
                 ACADEMY_QUESTION.UNIT_ID.eq(imported.getId())));
         assertThat(questionCount).isGreaterThan(0);
+
+        assertThatThrownBy(() -> service.importDefaultCurriculum(clinicA, owner))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("مستورد");
     }
 
     @Test

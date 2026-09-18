@@ -253,6 +253,9 @@ public class AcademyController {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
+        if (!canEdit(session)) {
+            return "redirect:/academy";
+        }
         renderCurriculum(session, model);
         return CURRICULUM;
     }
@@ -279,6 +282,9 @@ public class AcademyController {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
+        if (!canEdit(session)) {
+            return "redirect:/academy";
+        }
         model.addAttribute("layout", layoutModel.forRequest(session, "academy"));
         try {
             model.addAttribute("form", UnitForm.from(academyService.unit(clinicId(session), unitId)));
@@ -294,6 +300,9 @@ public class AcademyController {
     public String newUnit(HttpSession session, Model model) {
         if (!hasSession(session)) {
             return "redirect:/login";
+        }
+        if (!canEdit(session)) {
+            return "redirect:/academy";
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "academy"));
         model.addAttribute("form", new UnitForm());

@@ -20,9 +20,11 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.academy.AcademyService;
+import com.clinicos.academy.AcademyService.Unit;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.AttachmentService;
+import com.clinicos.shared.jooq.enums.AcademyAudience;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
 
@@ -101,6 +103,30 @@ class AcademyControllerTest {
         verify(academyService, never()).pendingSubmissions(any());
     }
 
+    @Test
+    void UC007_traineeCannotOpenCurriculumEditorRoutes() {
+        UUID unitId = UUID.randomUUID();
+
+        assertThat(controller.editUnit(unitId, session(), model)).isEqualTo("redirect:/academy");
+        assertThat(controller.newUnit(session(), model)).isEqualTo("redirect:/academy");
+        assertThat(controller.curriculum(session(), model)).isEqualTo("redirect:/academy");
+        verify(academyService, never()).unit(any(), any());
+        verify(academyService, never()).curriculum(any());
+    }
+
+    @Test
+    void UC007_editorCanOpenCurriculumEditorRoutes() {
+        UUID unitId = UUID.randomUUID();
+        HttpSession session = session("manager");
+        when(academyService.unit(CLINIC, unitId)).thenReturn(unit());
+        when(academyService.curriculum(CLINIC)).thenReturn(List.of());
+
+        assertThat(controller.curriculum(session, model)).isEqualTo("academy-curriculum");
+        assertThat(controller.newUnit(session, model)).isEqualTo("academy-unit-editor");
+        assertThat(controller.editUnit(unitId, session, model)).isEqualTo("academy-unit-editor");
+        verify(academyService).unit(CLINIC, unitId);
+    }
+
     private static HttpSession session() {
         return session("assistant");
     }
@@ -116,5 +142,10 @@ class AcademyControllerTest {
     private static Employee employee() {
         return new Employee(EMPLOYEE, "مساعد", BigDecimal.ZERO, BigDecimal.ZERO,
                 LocalTime.MIN, LocalTime.MAX, true, LocalDate.now(), null);
+    }
+
+    private static Unit unit() {
+        return new Unit(UUID.randomUUID(), AcademyAudience.assistant, "📘", "وحدة",
+                "هدف", List.of(), "مهمة", true, "open", List.of());
     }
 }
