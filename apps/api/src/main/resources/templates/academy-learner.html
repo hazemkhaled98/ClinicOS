@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('المنهج')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="flex items-center justify-between mb-8">
+        <div class="space-y-1.5">
+          <h1 class="text-3xl font-bold text-teal-900 tracking-tight" th:text="${track != null ? track.employeeName() : ''}">منهج الموظف</h1>
+          <p class="text-sm text-on-surface-variant">الوحدات المشتركة + وحدات الدور — أنجزها بالترتيب</p>
+        </div>
+        <a href="/academy" class="clinicos-btn clinicos-btn--secondary">↩ رجوع</a>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(track.units())}" class="space-y-4">
+        <article th:each="unit : ${track.units()}" class="clinicos-card p-5 flex flex-col gap-3"
+                 th:classappend="${unit.status() == 'locked'} ? ' opacity-60' : ''">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 flex items-start gap-3">
+              <span class="text-3xl" th:text="${unit.icon() ?: '📘'}">📘</span>
+              <div>
+                <h2 class="font-bold text-teal-900 text-xl" th:text="${unit.title()}">وحدة</h2>
+                <p class="text-xs text-on-surface-variant mt-1" th:text="${unit.goal()}">هدف</p>
+              </div>
+            </div>
+            <span class="clinicos-chip"
+                  th:classappend="${unit.status() == 'done'} ? ' clinicos-chip--success' : (${unit.status() == 'open'} ? ' clinicos-chip--warning' : ' clinicos-chip')"
+                  th:text="${unit.status() == 'done'} ? 'مكتملة' : (${unit.status() == 'open'} ? 'متاحة' : 'مقفلة')">متاحة</span>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-auto">
+            <form th:if="${unit.requiresPhoto() and unit.status() == 'open'}" method="post"
+                  th:action="@{/academy/units/{id}/photo(id=${unit.id()})}" enctype="multipart/form-data" class="inline">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <label class="clinicos-label sr-only" th:for="${'photo_' + unit.id()}">صورة الإنجاز</label>
+              <input type="file" th:id="${'photo_' + unit.id()}" name="photo" accept="image/*" required>
+              <button class="clinicos-btn px-3 py-2 text-xs" type="submit">📷 رفع صورة الإنجاز</button>
+            </form>
+            <form th:if="${!unit.requiresPhoto() and unit.status() == 'open'}" method="post"
+                  th:action="@{/academy/units/{id}/done(id=${unit.id()})}" class="inline">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn px-3 py-2 text-xs" type="submit">إتمام الوحدة</button>
+            </form>
+          </div>
+        </article>
+      </div>
+
+      <div th:if="${#lists.isEmpty(track.units())}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">🎓</div>
+        <p class="font-bold text-teal-900 text-xl">لا توجد وحدات بعد</p>
+      </div>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/academy/exam" class="clinicos-btn">📝 أداء الامتحان</a>
+        <a href="/academy/certificate" class="clinicos-btn clinicos-btn--secondary">📜 شهادتي</a>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

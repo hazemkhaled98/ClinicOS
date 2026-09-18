@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('الأكاديمية')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-bold text-teal-900 tracking-tight">الأكاديمية</h1>
+        <p class="text-sm text-on-surface-variant">البرامج التدريبية — تأهيل وتقييم كل موظف على منهج العيادة</p>
+      </div>
+
+      <div class="clinicos-card p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
+              <h2 class="text-xl font-bold text-teal-900">أعضاء الفريق</h2>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed ps-4">تابع تقدم كل موظف في المنهج، واعرض ملفه الأكاديمي.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3 sm:shrink-0">
+            <a href="/academy/verify" th:if="${canVerify}" class="clinicos-btn clinicos-btn--secondary">✅ انتظار التحقق</a>
+            <a href="/academy/curriculum" th:if="${canVerify}" class="clinicos-btn clinicos-btn--secondary">📚 المنهج</a>
+            <a href="/academy/me" class="clinicos-btn">🎓 منهجي</a>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(employees)}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <article th:each="emp : ${employees}" class="clinicos-card p-5 flex flex-col gap-4 hover:bg-teal-50 transition-colors">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1">
+              <h2 class="font-bold text-teal-900 text-xl" th:text="${emp.name()}">موظف</h2>
+              <p class="text-xs text-on-surface-variant mt-1" th:text="${audiences[emp.id()] != null ? audiences[emp.id()].literal : 'core'}">core</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-auto">
+            <a th:href="@{/academy/learners/{id}(id=${emp.id()})}" class="clinicos-btn px-3 py-2 text-xs flex-1 sm:flex-none">عرض الملف الأكاديمي</a>
+          </div>
+        </article>
+      </div>
+
+      <div th:if="${#lists.isEmpty(employees)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">🎓</div>
+        <p class="font-bold text-teal-900 text-xl">لا يوجد موظفون بعد</p>
+        <p class="mt-2 text-sm text-on-surface-variant">أضف موظفاً جديداً لبدء تأهيله.</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

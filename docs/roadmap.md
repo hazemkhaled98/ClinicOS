@@ -101,7 +101,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 3 — UC-003 Daily work/attendance | done | Slices 3a–3f: V20 work calendar (`clinic_settings.working_weekdays` weekday mask + `clinic_holiday` table), MinIO object storage + `AttachmentService`, staff attendance/daily-task/assignment services, `/employees` daily-work screen + photo/frequency task fields, admin work-calendar UI (weekday mask + holidays), A5 (offline recording) marked not applicable · Evaluation units (A1/A2/A3 scoring counts, step-8/Post-S-1 figure reflection) deferred to Phase 4 with UC-004/UC-005 — attendance is captured, labelled, and persisted only. PR #15 |
 | 4 — UC-004/005 Evaluation | done | Slices 4a–4d on `feat/uc004-evaluation`: V22 task-review columns + staff `EvaluationInputService`; `ScoringEngine` (pure, BR-by-BR tested) + `DefaultEvaluationService` (lazy freeze-on-read, unlock/refreeze); manager `تقييم وتحقّق` review screen (task/assignment approve-reject, override, unlock) replacing the `quick-access` placeholder; employee `تقييمي` screen with gamification (weekly goals, streak, badges). Closes the deferred UC-002 evaluation-engine units (A2 floor overrides, A3 unlock/recalc, BR-002 freeze-write-once, BR-003 floor rule, BR-004 incentive-by-tier) and UC-003's deferred figure reflection. `/pr-sentinel` review + `/coverage-check` UC-004/UC-005 clean (manual-floor-override-on-closed-month template gap, proof-photo review test, real gamification-arithmetic test all closed). PR #17. |
 | 5 — UC-006 Prep checklists | done | Slices on `feat/uc006-prep-checklists` (PR #18): prep checklist CRUD with approval gate (manager approval/unapprove, owner-without-employee approve path), sections/items management (Alpine.js-driven editor, template-library import from built-in catalog), per-day run tracking with toggle/reset, missing-employee actionable error. `/pr-sentinel` + `/coverage-check` UC-006 clean. |
-| 6 — UC-007 Academy | not started | |
+| 6 — UC-007 Academy | in progress | `feat/uc007-academy` (un-PR'd): V24 curriculum seed + template catalog, `DefaultAcademyService` (`curriculumFor` with role scoping + sequential unlock, photo submission/verification, exam pool from covered units, certificate), `AcademyController` + Thymeleaf views (writer/learner/verify/unit-editor/exam/certificate), `DefaultAcademyServiceIT` 14 gre (photo FK guard, cross-tenant isolation, sequential unlock). Pending `/manual-testing` + PR. |
 | 7a–7d — UC-008 Inventory | not started | |
 | 8 — UC-009 Admin dashboard | not started | |
 | 9 — Hardening/release | not started | |
@@ -207,10 +207,10 @@ BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `pr
 
 BR-G21, BR-G22, BR-G23, BR-G24. `academy_unit`, `academy_question`, `academy_step_submission`, `academy_exam_attempt`. Curriculum = shared core + role units; practical steps need verifier-confirmed photos; exam pool drawn only from covered units; certificate derived from a passing attempt, printed via `window.print()` and the legacy `@media print` rules.
 
-- [ ] Curriculum units with teaching content (V-migration needed)
-- [ ] Practical steps with photo verification
-- [ ] Exam pool from covered units only
-- [ ] Certificate generation and print
+- [x] Curriculum units with teaching content (V-migration needed)
+- [x] Practical steps with photo verification
+- [x] Exam pool from covered units only
+- [x] Certificate generation and print
 
 Legacy extras — quiz kinds (`فهم` / `قرار` / `اكتشف الغلط`), trainer daily rating, the `تقرير القرار` decision report — go to backlog.
 

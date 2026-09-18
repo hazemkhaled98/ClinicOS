@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('المنهج')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="flex items-center justify-between mb-8">
+        <div class="space-y-1.5">
+          <h1 class="text-3xl font-bold text-teal-900 tracking-tight">إدارة المنهج</h1>
+          <p class="text-sm text-on-surface-variant">الوحدات، الأهداف، والمحتوى التدريبي لكل دور</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <form method="post" th:action="@{/academy/curriculum/import}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="clinicos-btn clinicos-btn--secondary">📥 استيراد المنهج الافتراضي</button>
+          </form>
+          <a th:if="${canEdit}" href="/academy/units/new" class="clinicos-btn">+ وحدة جديدة</a>
+        </div>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(units)}" class="space-y-3">
+        <article th:each="unit : ${units}" class="clinicos-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <span class="text-3xl" th:text="${unit.icon() ?: '📘'}">📘</span>
+            <div>
+              <h2 class="font-bold text-teal-900 text-lg" th:text="${unit.title()}">وحدة</h2>
+              <p class="text-xs text-on-surface-variant mt-1">
+                <span th:text="${unit.appliesTo().literal}">core</span> ·
+                <span th:text="${unit.requiresPhoto()} ? 'بصورة' : 'بدون صورة'">بدون صورة</span>
+              </p>
+            </div>
+          </div>
+          <a th:if="${canEdit}" th:href="@{/academy/units/{id}/edit(id=${unit.id()})}" class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs sm:shrink-0">تعديل</a>
+        </article>
+      </div>
+
+      <div th:if="${#lists.isEmpty(units)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">📚</div>
+        <p class="font-bold text-teal-900 text-xl">لا يوجد منهج بعد</p>
+        <p class="mt-2 text-sm text-on-surface-variant">استورد المنهج الافتراضي أو أنشئ وحداتك الخاصة.</p>
+        <div th:if="${canEdit}" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <form method="post" th:action="@{/academy/curriculum/import}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="clinicos-btn">📥 استيراد المنهج الافتراضي</button>
+          </form>
+          <a href="/academy/units/new" class="clinicos-btn clinicos-btn--secondary">+ وحدة جديدة</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('الشهادة')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-3xl w-full mx-auto clinicos-section">
+      <div th:if="${certificate != null}" class="clinicos-card p-8 border-2 border-teal-600/30 text-center">
+        <div class="text-6xl mb-4">🎓</div>
+        <h1 class="text-3xl font-bold text-teal-900">شهادة إتمام</h1>
+        <p class="mt-4 text-on-surface-variant">تُمنح هذه الشهادة إلى</p>
+        <p class="mt-1 text-xl font-bold text-teal-900" th:text="${certificate.employeeName()}">الاسم</p>
+        <p class="mt-6 text-sm text-on-surface-variant">لإتمامه برنامج العيادة التدريبي بنجاح (درجة النجاح
+          <span th:text="${certificate.passScore()}">70</span>‎%) على الوحدات:</p>
+        <ul class="mt-4 space-y-1 text-sm text-on-surface">
+          <li th:each="t : ${certificate.curriculumTitles()}" th:text="${t}">وحدة</li>
+        </ul>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <a href="/academy/me" class="clinicos-btn">↩ رجوع للمنهج</a>
+        </div>
+      </div>
+      <div th:if="${certificate == null}" class="clinicos-empty-state p-16 text-center">
+        <div class="text-5xl mb-4">📜</div>
+        <p class="font-bold text-teal-900 text-xl" th:text="${result != null and result.passed()} ? 'تهانينا! اجتزت الامتحان' : 'لا توجد شهادة بعد'">لا توجد شهادة بعد</p>
+        <p class="mt-2 text-sm text-on-surface-variant" th:text="${result != null} ? ('نتيجتك: ' + ${result.score} + '‎%') : 'أكمل كل الوحدات واجتز الامتحان للحصول على الشهادة.'">أكمل كل الوحدات واجتز الامتحان.</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <a href="/academy/exam" class="clinicos-btn">📝 أداء الامتحان</a>
+          <a href="/academy/me" class="clinicos-btn clinicos-btn--secondary">↩ رجوع</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>
