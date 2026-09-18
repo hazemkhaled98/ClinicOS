@@ -253,9 +253,12 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
     }
 
     private void requireApprover(UUID clinicId, Actor actor) {
-        requireEmployee(clinicId, actor);
+        if (actor == null || actor.membershipId() == null) {
+            throw new IllegalArgumentException("غير مصرح");
+        }
         if (!dsl.fetchExists(dsl.selectOne().from(MEMBERSHIP).join(ROLE).on(MEMBERSHIP.ROLE_ID.eq(ROLE.ID))
-                .where(MEMBERSHIP.ID.eq(actor.membershipId())).and(ROLE.CODE.in("owner", "manager")))) {
+                .where(MEMBERSHIP.ID.eq(actor.membershipId())).and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active)).and(ROLE.CODE.in("owner", "manager")))) {
             throw new IllegalArgumentException("غير مصرح");
         }
     }

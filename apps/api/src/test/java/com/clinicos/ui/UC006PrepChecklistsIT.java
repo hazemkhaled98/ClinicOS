@@ -77,11 +77,9 @@ class UC006PrepChecklistsIT extends AbstractBrowserIT {
             UUID managerMembershipId = TestFixtures.insertMembership(connection, clinicId, managerId, "manager");
             UUID assistantMembershipId = TestFixtures.insertMembership(connection, clinicId, assistantId, "assistant");
 
-            UUID ownerEmpId = TestFixtures.insertEmployee(connection, clinicId, "owner");
             UUID managerEmpId = TestFixtures.insertEmployee(connection, clinicId, "manager");
             UUID assistantEmpId = TestFixtures.insertEmployee(connection, clinicId, "assistant");
 
-            TestFixtures.linkMembershipToEmployee(connection, ownerMembershipId, ownerEmpId);
             TestFixtures.linkMembershipToEmployee(connection, managerMembershipId, managerEmpId);
             TestFixtures.linkMembershipToEmployee(connection, assistantMembershipId, assistantEmpId);
         }
@@ -113,6 +111,24 @@ class UC006PrepChecklistsIT extends AbstractBrowserIT {
             page().navigate(getUrl() + "prep/templates");
             PlaywrightAssertions.assertThat(page().getByText("قوالب جاهزة").first()).isVisible();
             PlaywrightAssertions.assertThat(page().locator("button:has-text('استيراد للعيادة')").first()).isVisible();
+        }
+
+        @Test
+        @DisplayName("Assistant can import a template as a draft and edit it")
+        void assistantCanImportTemplate() throws Exception {
+            String clinicSlug = seedTestData();
+            loginAsRole("assistant", clinicSlug, "password");
+
+            page().navigate(getUrl() + "prep/templates");
+            page().locator("button:has-text('استيراد للعيادة')").first().click();
+            page().waitForURL(url -> url.contains("/prep/checklists/") && url.endsWith("/edit"));
+
+            PlaywrightAssertions.assertThat(page().getByLabel("اسم الإجراء"))
+                    .hasValue("إكزامينيشن (كشف وتشخيص)");
+            PlaywrightAssertions.assertThat(page().locator("input[placeholder*='عنوان القسم']"))
+                    .hasCount(2);
+            PlaywrightAssertions.assertThat(page().locator("input[placeholder*='اسم الأداة']"))
+                    .hasCount(9);
         }
     }
 
@@ -159,6 +175,27 @@ class UC006PrepChecklistsIT extends AbstractBrowserIT {
 
             page().navigate(getUrl() + "prep");
             PlaywrightAssertions.assertThat(page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("اعتماد"))).not().isVisible();
+        }
+
+        @Test
+        @DisplayName("Owner can approve without an employee record")
+        void ownerCanApproveWithoutEmployee() throws Exception {
+            String clinicSlug = seedTestData();
+            loginAsRole("assistant", clinicSlug, "password");
+            page().navigate(getUrl() + "prep/checklists/new");
+            page().getByLabel("اسم الإجراء").fill("اعتماد المالك");
+            page().locator("input[placeholder*='عنوان القسم']").first().fill("قسم");
+            page().locator("input[placeholder*='اسم الأداة']").first().fill("أداة");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("حفظ القائمة")).click();
+            page().waitForURL(url -> url.contains("/prep"));
+
+            page().context().clearCookies();
+            loginAsRole("owner", clinicSlug, "password");
+            page().navigate(getUrl() + "prep");
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("اعتماد")).click();
+            page().waitForURL(url -> url.contains("/prep"));
+
+            PlaywrightAssertions.assertThat(page().locator("a[href*='/run']")).isVisible();
         }
 
         @Test

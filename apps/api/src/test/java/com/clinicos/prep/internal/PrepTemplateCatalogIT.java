@@ -30,8 +30,14 @@ class PrepTemplateCatalogIT extends AbstractPostgresIntegrationTest {
                 .where(PREP_TEMPLATE.CODE.eq("endo"))
                 .orderBy(PREP_TEMPLATE_SECTION.DISPLAY_ORDER)
                 .fetch(PREP_TEMPLATE_SECTION.TITLE))
-                .containsExactly("تجهيز عام", "أكسيس وتنظيف الكانالز");
-        assertThat(dsl.selectCount().from(PREP_TEMPLATE_ITEM).fetchOne(0)).isEqualTo(18);
+                .containsExactly("تجهيز عام", "أنستيزيا", "أكسيس وتنظيف الكانالز", "الأوبتريشن (الحشو)", "إنهاء وتعقيم");
+        assertThat(dsl.selectCount().from(PREP_TEMPLATE_SECTION).where(PREP_TEMPLATE_SECTION.TEMPLATE_ID.eq(
+                dsl.select(PREP_TEMPLATE.ID).from(PREP_TEMPLATE).where(PREP_TEMPLATE.CODE.eq("examination"))))
+                .fetchOne(0)).isEqualTo(2);
+        assertThat(dsl.selectCount().from(PREP_TEMPLATE_SECTION).where(PREP_TEMPLATE_SECTION.TEMPLATE_ID.eq(
+                dsl.select(PREP_TEMPLATE.ID).from(PREP_TEMPLATE).where(PREP_TEMPLATE.CODE.eq("anesthesia"))))
+                .fetchOne(0)).isEqualTo(1);
+        assertThat(dsl.selectCount().from(PREP_TEMPLATE_ITEM).fetchOne(0)).isEqualTo(33);
         assertThat((Boolean) dsl.fetchValue(
                 "select has_table_privilege(current_user, 'prep_template', 'insert')", Boolean.class))
                 .isFalse();

@@ -1,5 +1,7 @@
 package com.clinicos.prep.internal;
 
+import static com.clinicos.shared.jooq.tables.PrepTemplate.PREP_TEMPLATE;
+import static com.clinicos.shared.jooq.tables.PrepTemplateSection.PREP_TEMPLATE_SECTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.jooq.DSLContext;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
@@ -27,6 +30,9 @@ import com.clinicos.shared.TenantContext;
 class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
     @Autowired
     private PrepChecklistService service;
+
+    @Autowired
+    private DSLContext dsl;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -67,6 +73,20 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         assertThatThrownBy(() -> service.approve(clinicA, assistant, checklist.id()))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void BRG18_ownerCanApproveWithoutEmployee() throws Exception {
+        var checklist = draftChecklist();
+        Actor ownerWithoutEmployee;
+        try (var connection = superuser()) {
+            var membershipId = TestFixtures.insertMembership(connection, clinicA,
+                    TestFixtures.insertUser(connection, clinicA, "owner" + UUID.randomUUID(), "password", "active"), "owner");
+            ownerWithoutEmployee = new Actor(membershipId, "owner", null);
+        }
+
+        TenantContext.set(clinicA);
+        assertThat(service.approve(clinicA, ownerWithoutEmployee, checklist.id()).status()).isEqualTo("approved");
     }
 
     @Test
@@ -116,8 +136,14 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
         var imported = service.importTemplate(clinicA, assistant, "examination");
 
         assertThat(imported.status()).isEqualTo("draft");
-        assertThat(imported.sections()).isNotEmpty();
+        assertThat(imported.sections()).hasSize(2);
+        assertThat(imported.itemCount()).isEqualTo(9);
         assertThat(imported.sections().getFirst().items()).isNotEmpty();
+        assertThat(imported.sections().getFirst().id())
+                .isNotEqualTo(dsl.select(PREP_TEMPLATE_SECTION.ID).from(PREP_TEMPLATE_SECTION)
+                        .join(PREP_TEMPLATE).on(PREP_TEMPLATE.ID.eq(PREP_TEMPLATE_SECTION.TEMPLATE_ID))
+                        .where(PREP_TEMPLATE.CODE.eq("examination"))
+                        .orderBy(PREP_TEMPLATE_SECTION.DISPLAY_ORDER).limit(1).fetchOne(PREP_TEMPLATE_SECTION.ID));
     }
 
     @Test

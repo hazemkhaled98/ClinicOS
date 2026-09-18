@@ -224,10 +224,8 @@ public class PrepController {
         UUID clinicId = clinicId(session);
         UUID membershipId = (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID);
         Employee employee = employeeService.findByMembership(clinicId, membershipId);
-        if (employee == null) {
-            throw new IllegalArgumentException("حسابك غير مرتبط بملف موظف");
-        }
-        return new Actor(membershipId, (String) session.getAttribute(SessionKeys.ROLE_CODE), employee.id());
+        return new Actor(membershipId, (String) session.getAttribute(SessionKeys.ROLE_CODE),
+                employee == null ? null : employee.id());
     }
 
     private void log(HttpSession session, String action, String entityType) {
