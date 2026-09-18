@@ -93,6 +93,16 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void crossTenantTraineeCurriculumIsRejected() {
+        TenantContext.set(clinicA);
+
+        assertThatThrownBy(() -> service.traineeCurriculum(
+                clinicA, manager, clinicBAssistant.employeeId(), AcademyAudience.assistant))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("الموظف غير موجود");
+    }
+
+    @Test
     void BRG21_requiresConfiguredRoleSpecificCurriculum() {
         TenantContext.set(clinicA);
         removeCurriculum(AcademyAudience.assistant);

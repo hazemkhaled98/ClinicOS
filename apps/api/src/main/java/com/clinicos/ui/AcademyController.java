@@ -91,9 +91,13 @@ public class AcademyController {
                     employeeId, employeeName(session),
                     academyService.myCurriculum(clinicId(session), actor(session))));
         } else {
-            var audience = academyService.audienceOf(clinicId(session), employeeId);
-            model.addAttribute("track",
-                    academyService.traineeCurriculum(clinicId(session), actor(session), employeeId, audience));
+            try {
+                var audience = academyService.audienceOf(clinicId(session), employeeId);
+                model.addAttribute("track",
+                        academyService.traineeCurriculum(clinicId(session), actor(session), employeeId, audience));
+            } catch (IllegalArgumentException e) {
+                return "redirect:/academy";
+            }
         }
         return LEARNER;
     }

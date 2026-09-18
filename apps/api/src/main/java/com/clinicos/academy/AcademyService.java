@@ -41,6 +41,7 @@ public interface AcademyService {
             String goal,
             List<Section> content,
             String photoTask,
+            boolean requiresPhoto,
             int questionCount,
             String status) {
     }

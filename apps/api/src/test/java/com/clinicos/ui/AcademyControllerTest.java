@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.academy.AcademyService;
+import com.clinicos.academy.AcademyService.TraineeUnit;
 import com.clinicos.academy.AcademyService.Unit;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.shared.ActivityLogService;
@@ -72,11 +74,24 @@ class AcademyControllerTest {
 
     @Test
     void UC007_authenticatedTraineeCanOpenOwnCurriculum() {
+        var unit = new TraineeUnit(UUID.randomUUID(), AcademyAudience.assistant, "📘", "عنوان", "هدف",
+                List.of(), "مهمة", true, 0, "open");
         when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
-        when(academyService.myCurriculum(any(), any())).thenReturn(List.of());
+        when(academyService.myCurriculum(any(), any())).thenReturn(List.of(unit));
 
         assertThat(controller.myLearning(session(), model)).isEqualTo("academy-learner");
-        verify(academyService).myCurriculum(any(), any());
+        var track = (AcademyService.TraineeTrack) model.getAttribute("track");
+        assertThat(track.units()).extracting(TraineeUnit::requiresPhoto).containsExactly(true);
+    }
+
+    @Test
+    void UC007_crossTenantLearnerRedirectsToAcademy() {
+        UUID otherClinicEmployee = UUID.randomUUID();
+        when(academyService.traineeCurriculum(any(), any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("الموظف غير موجود"));
+
+        assertThat(controller.learner(otherClinicEmployee, session("manager"), model))
+                .isEqualTo("redirect:/academy");
     }
 
     @Test
@@ -126,6 +141,16 @@ class AcademyControllerTest {
         assertThat(controller.editUnit(unitId, session, model)).isEqualTo("academy-unit-editor");
         verify(academyService).unit(CLINIC, unitId);
     }
+
+    @Test
+    void UC007_editorTemplateUsesBeanPropertyForUnitId() throws Exception {
+        try (var template = getClass().getResourceAsStream("/templates/academy-unit-editor.html")) {
+            assertThat(template).isNotNull();
+            assertThat(new String(template.readAllBytes(), StandardCharsets.UTF_8))
+                    .contains("th:text=\"${form.id != null}");
+        }
+    }
+
 
     private static HttpSession session() {
         return session("assistant");
