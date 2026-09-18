@@ -242,8 +242,11 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
     }
 
     private void requireEmployee(UUID clinicId, Actor actor) {
-        if (actor == null || actor.membershipId() == null || actor.employeeId() == null) {
+        if (actor == null || actor.membershipId() == null) {
             throw new IllegalArgumentException("غير مصرح");
+        }
+        if (actor.employeeId() == null) {
+            throw new IllegalArgumentException("حسابك غير مرتبط بملف موظف. تواصل مع مدير العيادة.");
         }
         if (!dsl.fetchExists(dsl.selectOne().from(MEMBERSHIP)
                 .where(MEMBERSHIP.ID.eq(actor.membershipId())).and(MEMBERSHIP.CLINIC_ID.eq(clinicId))

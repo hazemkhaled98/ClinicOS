@@ -90,6 +90,35 @@ class DefaultPrepChecklistServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void BRG18_suspendedManagerCannotApprove() throws Exception {
+        var checklist = draftChecklist();
+
+        try (var connection = superuser(); var statement = connection.prepareStatement(
+                "update membership set status = 'suspended' where id = ?")) {
+            statement.setObject(1, manager.membershipId());
+            statement.executeUpdate();
+        }
+
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> service.approve(clinicA, manager, checklist.id()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void BRG20_userWithoutEmployeeGetsActionableError() throws Exception {
+        Actor ownerWithoutEmployee;
+        try (var connection = superuser()) {
+            var membershipId = TestFixtures.insertMembership(connection, clinicA,
+                    TestFixtures.insertUser(connection, clinicA, "owner" + UUID.randomUUID(), "password", "active"), "owner");
+            ownerWithoutEmployee = new Actor(membershipId, "owner", null);
+        }
+
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> service.today(clinicA, ownerWithoutEmployee, UUID.randomUUID()))
+                .hasMessage("حسابك غير مرتبط بملف موظف. تواصل مع مدير العيادة.");
+    }
+
+    @Test
     void BRG19_emptyStructureRejected() {
         TenantContext.set(clinicA);
 
