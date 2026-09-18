@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تعديل قائمة التحضير')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+      <a href="/prep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-teal-700 bg-neutral-100 hover:bg-neutral-200 transition-colors mb-6">
+        <span>←</span>
+        <span>قائمة التحضير</span>
+      </a>
+      <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight mb-2" th:text="${checklistId == null} ? 'قائمة تحضير جديدة' : 'تعديل القائمة'">قائمة تحضير جديدة</h1>
+      <p th:if="${formError != null}" class="mt-3 rounded-lg bg-danger-50 border border-danger-200 p-4 text-sm font-bold text-danger-700" th:text="${formError}">خطأ</p>
+      <form method="post" th:action="${checklistId == null} ? @{/prep/checklists} : @{/prep/checklists/{id}(id=${checklistId})}" th:object="${form}" class="mt-8 space-y-6"
+            th:attr="data-sections=${form.sectionsJson}"
+            x-data="{ sections: (JSON.parse($el.dataset.sections || '[]').length ? JSON.parse($el.dataset.sections) : [{ title: '', items: [{ name: '' }] }]) }">
+        <!-- Procedure Name Card -->
+        <div class="clinicos-card p-6">
+          <div class="max-w-2xl">
+            <label class="clinicos-label mb-3" for="name">اسم الإجراء</label>
+            <input th:field="*{name}" required class="clinicos-input text-base font-semibold" placeholder="مثال: إكزامينيشن (كشف وتشخيص)">
+          </div>
+        </div>
+        <!-- Sections Container -->
+        <div class="space-y-4">
+          <template x-for="(section, si) in sections" :key="si">
+            <div class="clinicos-card p-6 overflow-hidden">
+              <div class="flex items-center justify-between gap-4 pb-4 border-b border-neutral-200 mb-4">
+                <div class="flex items-center gap-3 flex-1">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-teal-100 text-teal-900 border border-teal-200">
+                    <span x-text="'القسم ' + (si + 1)">القسم 1</span>
+                  </span>
+                  <input :name="'sections[' + si + '].title'" x-model="section.title" required class="clinicos-input flex-1" placeholder="عنوان القسم">
+                </div>
+                <button class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-danger-600 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors border border-transparent hover:border-danger-100" type="button" title="حذف القسم" @click="sections.splice(si, 1)" x-show="sections.length > 1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                  <span class="hidden sm:inline">القسم</span>
+                </button>
+              </div>
+              <div class="divide-y divide-neutral-100">
+                <template x-for="(item, ii) in section.items" :key="ii">
+                  <div class="flex items-center gap-2.5 sm:gap-4 py-3 first:pt-0 last:pb-0">
+                    <span class="w-7 text-center font-bold text-xs sm:text-sm text-neutral-400 select-none shrink-0" x-text="ii + 1">1</span>
+                    <input :name="'sections[' + si + '].items[' + ii + '].name'" x-model="item.name" required class="clinicos-input min-w-0 flex-grow" placeholder="اسم الأداة أو المادة">
+                    <button class="inline-flex w-11 h-11 shrink-0 items-center justify-center text-neutral-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors" type="button" title="حذف العنصر" aria-label="حذف العنصر" @click="section.items.splice(ii, 1)" x-show="section.items.length > 1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </template>
+              </div>
+              <div class="pt-3 flex justify-end">
+                <button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 text-teal-600 border border-dashed border-teal-300 font-bold text-xs sm:text-sm transition-all" type="button" @click="section.items.push({ name: '' })">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                  <span>عنصر</span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+        <!-- Form Actions -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-200">
+          <button type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border border-neutral-200 text-on-surface bg-white hover:bg-neutral-50 font-bold text-sm shadow-sm transition-colors" @click="sections.push({ title: '', items: [{ name: '' }] })">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+            <span>إضافة قسم جديد</span>
+          </button>
+          <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+            <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-sm text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition-colors">حفظ القائمة</button>
+            <button type="submit" class="w-full sm:w-auto px-8 py-3 rounded-lg font-bold text-sm text-white bg-teal-600 hover:bg-teal-700 shadow-md shadow-teal-600/20 transition-all">إرسال للاعتماد</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>

@@ -96,7 +96,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 |---|---|---|
 | 0 — Scaffolding | done | |
 | 1 — UC-001 Login + Phase 1b sign-up | done | PR #5 merged; UI migrated to Thymeleaf/HTMX on `refactor/thymeleaf-htmx` (see Phase 1 migration note) |
-| 1c — Design system reconciliation | in progress | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
+| 1c — Design system reconciliation | done | DESIGN.md/tokens.css reconciled, shared components.css + /dev/styleguide, hygiene test guards added on branch `design/system-reconciliation` |
 | 2 — UC-002 Employees/roles | done | Slices 2a–2e: V16 user-admin functions, V17 tenant-scoped role_permission, V18 gamification tables, service interfaces + implementations, UI controllers + templates, unit + IT tests · Slice 2f: users-tab cleanup — duplicate username/email renders a field error (no 500), add form is account-fields only (every user auto-becomes an employee), row role is read-only, role editing moved to the Settings employee row · Slice 2g `feat/uc002-role-hierarchy`: role hierarchy enforcement (BR-005, RoleRanks rank guard), A1 archive now unlinks + suspends the linked account to block login, manager scoping of employee/permission editing, actor-aware controllers/templates + tests; evaluation-engine units (A2/A3/BR-002/BR-003/BR-004, step-5 eval reflection) deferred to Phase 4 with UC-004/UC-005 |
 | 3 — UC-003 Daily work/attendance | done | Slices 3a–3f: V20 work calendar (`clinic_settings.working_weekdays` weekday mask + `clinic_holiday` table), MinIO object storage + `AttachmentService`, staff attendance/daily-task/assignment services, `/employees` daily-work screen + photo/frequency task fields, admin work-calendar UI (weekday mask + holidays), A5 (offline recording) marked not applicable · Evaluation units (A1/A2/A3 scoring counts, step-8/Post-S-1 figure reflection) deferred to Phase 4 with UC-004/UC-005 — attendance is captured, labelled, and persisted only. PR #15 |
 | 4 — UC-004/005 Evaluation | done | Slices 4a–4d on `feat/uc004-evaluation`: V22 task-review columns + staff `EvaluationInputService`; `ScoringEngine` (pure, BR-by-BR tested) + `DefaultEvaluationService` (lazy freeze-on-read, unlock/refreeze); manager `تقييم وتحقّق` review screen (task/assignment approve-reject, override, unlock) replacing the `quick-access` placeholder; employee `تقييمي` screen with gamification (weekly goals, streak, badges). Closes the deferred UC-002 evaluation-engine units (A2 floor overrides, A3 unlock/recalc, BR-002 freeze-write-once, BR-003 floor rule, BR-004 incentive-by-tier) and UC-003's deferred figure reflection. `/pr-sentinel` review + `/coverage-check` UC-004/UC-005 clean (manual-floor-override-on-closed-month template gap, proof-photo review test, real gamification-arithmetic test all closed). PR #17. |
@@ -197,11 +197,11 @@ The hardest phase — the scoring engine lives here.
 
 ### Phase 5 — UC-006 Prepare and run procedure checklists
 
-BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `prep_run` → `prep_run_item`. Approval gate before a checklist is usable; at least one section with one item; run progress tracked per day. The built-in template library (`📚 قوالب جاهزة`) is backlog.
+BR-G18, BR-G19, BR-G20. `prep_checklist` → `prep_section` → `prep_item`, `prep_run` → `prep_run_item`. Approval gate before a checklist is usable; at least one section with one item; run progress tracked per day. Built-in template library (`📚 قوالب جاهزة`) implemented — manager can import a starter template then edit/approve.
 
-- [ ] Checklist CRUD with approval gate
-- [ ] Sections and items management
-- [ ] Run tracking per day
+- [x] Checklist CRUD with approval gate (create/edit/approve/unapprove/archive)
+- [x] Sections and items management (Alpine-driven dynamic add/remove in the editor)
+- [x] Run tracking per day (per-employee/day upsert, resumable same-day, isolated next-day)
 
 ### Phase 6 — UC-007 Complete onboarding academy training
 

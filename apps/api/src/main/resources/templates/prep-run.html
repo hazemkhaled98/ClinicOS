@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تشغيل قائمة التحضير')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+      <a href="/prep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-teal-700 bg-neutral-100 hover:bg-neutral-200 transition-colors mb-6">
+        <span>←</span>
+        <span>قوائم التحضير</span>
+      </a>
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">تحضير الجلسات</h1>
+        <p class="text-sm text-on-surface-variant">قوائم أدوات ومواد كل إجراء — حضّر بدقة من غير ما تنسى حاجة</p>
+      </div>
+      <div th:fragment="runContent" id="run-content" class="space-y-6">
+        <!-- Header Card with Progress -->
+        <div class="clinicos-card p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-neutral-200 mb-4">
+            <div class="flex items-center gap-2">
+              <a href="/prep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-teal-700 text-xs sm:text-sm font-semibold hover:bg-neutral-50 hover:text-teal-900 transition-all shadow-sm">
+                <span>→</span>
+                <span>رجوع</span>
+              </a>
+              <div class="inline-flex items-center px-3 py-1.5 rounded-lg bg-neutral-100 text-teal-900 font-bold text-sm sm:text-base border border-neutral-200">
+                <span th:text="${run.sections().get(0).title()}">الإجراء</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-on-surface-variant">التقدم</span>
+              <span class="text-sm font-extrabold text-teal-900 bg-neutral-100 px-2.5 py-0.5 rounded-full border border-neutral-200">
+                <span th:text="${run.checkedCount()}">0</span>/<span th:text="${run.totalCount()}">9</span>
+              </span>
+            </div>
+          </div>
+          <!-- Progress Bar -->
+          <div class="space-y-2">
+            <div class="w-full bg-neutral-100 h-2.5 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-l from-success-600 to-teal-600 h-full rounded-full transition-all duration-300 ease-out" th:style="|width: ${run.totalCount() == 0 ? 0 : (run.checkedCount() * 100 / run.totalCount())}%|"></div>
+            </div>
+          </div>
+          <!-- Status Alert -->
+          <div id="alert-section" class="mt-4">
+            <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-warning-50 border border-warning-200 text-warning-900 text-xs sm:text-sm font-medium" th:if="${run.checkedCount() < run.totalCount()}">
+              <svg class="w-4 h-4 text-warning-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
+              <span th:text="|لسه ${run.totalCount() - run.checkedCount()} عناصر ناقصة — حضّرهم قبل ما تبدأ|">لسه 5 عنصر ناقص</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-lg bg-success-50 border border-success-200 text-success-900 text-xs sm:text-sm font-semibold" th:if="${run.checkedCount() >= run.totalCount()}">
+              <div class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-success-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
+              <span>رائع! كل العناصر جاهزة لبدء الجلسة</span>
+              </div>
+              <a href="/prep" class="clinicos-btn px-3 py-2 text-xs">العودة للقوائم</a>
+            </div>
+          </div>
+        </div>
+        <!-- Checklist Sections -->
+        <div class="space-y-6">
+          <div th:each="section : ${run.sections()}" class="clinicos-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-2xl font-bold text-teal-900 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-teal-600 inline-block"></span>
+                <span th:text="${section.title()}">القسم</span>
+              </h2>
+              <span class="text-xs font-semibold text-on-surface-variant" th:text="|${section.items().size()} عنصر|">5 عناصر</span>
+            </div>
+            <div class="space-y-2.5">
+              <label th:each="item : ${section.items()}" class="checklist-item flex items-center justify-between p-3.5 rounded-lg border border-neutral-200 hover:border-neutral-300 cursor-pointer select-none transition-colors">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" th:checked="${item.checked()}" class="w-5 h-5 text-teal-600 rounded border-neutral-300 focus:ring-teal-600 cursor-pointer transition" th:attr="hx-post=|/prep/checklists/${checklistId}/run/items/${item.id()}|,hx-vals=|{&quot;checked&quot;: ${!item.checked()}}|" hx-target="#run-content" hx-swap="outerHTML">
+                  <span class="text-sm font-semibold" th:classappend="${item.checked()} ? 'line-through text-neutral-400' : 'text-teal-900'" th:text="${item.name()}">أداة</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <!-- Action Footer -->
+        <div class="mt-8 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-200">
+          <p class="text-xs text-on-surface-variant font-medium text-center sm:text-end">يتم حفظ التقدم تلقائياً لكل عيادة وموقع عمل</p>
+          <form method="post" th:attr="hx-post=|/prep/checklists/${checklistId}/run/reset|" hx-target="#run-content" hx-swap="outerHTML" class="w-full sm:w-auto">
+            <button class="clinicos-btn clinicos-btn--secondary w-full sm:w-auto px-4 py-2 text-xs font-semibold" type="submit">إعادة ضبط</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>
