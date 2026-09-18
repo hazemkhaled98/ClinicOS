@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('تعديل الوحدة')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-4xl w-full mx-auto clinicos-section">
+      <a href="/academy/curriculum" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-teal-700 bg-neutral-100 hover:bg-neutral-200 transition-colors mb-6">
+        <span>←</span>
+        <span>المنهج</span>
+      </a>
+      <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight mb-2"
+          th:text="${form.id() != null} ? 'تعديل وحدة' : 'وحدة جديدة'">تعديل وحدة</h1>
+
+      <form method="post" th:action="@{/academy/units}" th:object="${form}" class="mt-8 space-y-6"
+            th:attr="data-sections=${form.sectionsJson}, data-questions=${form.questionsJson}"
+            x-data="{
+              sections: (JSON.parse($el.dataset.sections || '[]').length ? JSON.parse($el.dataset.sections) : [{ h: '', points: [''] }]),
+              questions: (JSON.parse($el.dataset.questions || '[]').length ? JSON.parse($el.dataset.questions) : [{ prompt: '', options: ['', ''], correctIndex: 0, displayOrder: 1 }]),
+              syncSections() { this.$refs.sectionsJson.value = JSON.stringify(this.sections) },
+              syncQuestions() { this.$refs.questionsJson.value = JSON.stringify(this.questions) }
+            }" @submit="syncSections(); syncQuestions()">
+
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" name="sectionsJson" th:ref="sectionsJson" value="[]">
+        <input type="hidden" name="questionsJson" th:ref="questionsJson" value="[]">
+
+        <div class="clinicos-card p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-6">
+            <div class="sm:col-span-2">
+              <label class="clinicos-label mb-1.5" for="icon">أيقونة</label>
+              <input id="icon" th:field="*{icon}" class="clinicos-input h-[42px] text-xl text-center" placeholder="🚀">
+            </div>
+            <div class="sm:col-span-10">
+              <label class="clinicos-label mb-1.5" for="title">عنوان الوحدة</label>
+              <input id="title" th:field="*{title}" required class="clinicos-input font-semibold" placeholder="عقلية النجاح والمبادرة">
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <label class="clinicos-label mb-1.5" for="goal">الهدف</label>
+            <textarea id="goal" th:field="*{goal}" rows="2" class="clinicos-input" placeholder="تطلع من الوحدة..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="clinicos-label mb-1.5" for="appliesTo">الفئة المستهدفة</label>
+              <select id="appliesTo" th:field="*{appliesTo}" class="clinicos-input">
+                <option value="core">الجميع (core)</option>
+                <option value="assistant">أسيستنت (assistant)</option>
+                <option value="receptionist">استقبال (receptionist)</option>
+              </select>
+            </div>
+            <div class="flex items-end gap-3 pb-1">
+              <label class="clinicos-label">هل تتطلب صورة؟</label>
+              <input type="checkbox" th:field="*{requiresPhoto}" class="accent-teal-600 w-5 h-5 rounded">
+            </div>
+          </div>
+
+          <div>
+            <label class="clinicos-label mb-1.5" for="photoTask">مهام التصوير</label>
+            <textarea id="photoTask" th:field="*{photoTask}" rows="2" class="clinicos-input" placeholder="صوّر تراي مجهّز..."></textarea>
+          </div>
+        </div>
+
+        <div class="clinicos-card p-6">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-surface-border">
+            <span class="text-lg">📄</span>
+            <h4 class="text-base font-bold text-on-surface">المحتوى (الأقسام)</h4>
+          </div>
+          <template x-for="(section, si) in sections" :key="si">
+            <div class="p-4 bg-surface-muted/30 border border-surface-border rounded-xl mb-4">
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <input x-model="section.h" required class="clinicos-input flex-1" placeholder="عنوان القسم">
+                <button type="button" class="clinicos-btn--warning text-xs" @click="sections.splice(si, 1)" x-show="sections.length > 1">حذف</button>
+              </div>
+              <template x-for="(point, pi) in section.points" :key="pi">
+                <div class="flex items-center gap-2 mb-2">
+                  <input x-model="section.points[pi]" class="clinicos-input flex-1" placeholder="نقطة">
+                  <button type="button" class="text-xs text-danger-600 hover:text-danger-700" @click="section.points.splice(pi, 1)" x-show="section.points.length > 1">✕</button>
+                </div>
+              </template>
+              <button type="button" class="clinicos-btn clinicos-btn--secondary text-xs mt-2" @click="section.points.push('')">+ نقطة</button>
+            </div>
+          </template>
+          <button type="button" class="clinicos-btn clinicos-btn--secondary w-full mt-2" @click="sections.push({ h: '', points: [''] })">+ قسم جديد</button>
+        </div>
+
+        <div class="clinicos-card p-6">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-surface-border">
+            <span class="text-lg">🧠</span>
+            <h4 class="text-base font-bold text-on-surface">الأسئلة</h4>
+          </div>
+          <template x-for="(q, qi) in questions" :key="qi">
+            <div class="p-4 bg-surface-muted/30 border border-surface-border rounded-xl mb-4">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex-1">
+                  <label class="clinicos-label mb-1 text-xs">السؤال</label>
+                  <input x-model="q.prompt" required class="clinicos-input" placeholder="لو مش متأكد من خطوة...؟">
+                </div>
+                <button type="button" class="clinicos-btn--warning text-xs mt-5" @click="questions.splice(qi, 1)" x-show="questions.length > 1">حذف السؤال</button>
+              </div>
+              <template x-for="(opt, oi) in q.options" :key="oi">
+                <div class="flex items-center gap-2 mb-2">
+                  <input type="radio" :name="'correctIndex_' + qi" :value="oi" :checked="q.correctIndex === oi" @change="q.correctIndex = oi" class="accent-teal-600">
+                  <input x-model="q.options[oi]" class="clinicos-input flex-1" :placeholder="'الاختيار ' + (oi+1)">
+                  <button type="button" class="text-xs text-danger-600" @click="q.options.splice(oi, 1); if(q.correctIndex >= q.options.length) q.correctIndex = 0" x-show="q.options.length > 2">✕</button>
+                </div>
+              </template>
+              <button type="button" class="clinicos-btn clinicos-btn--secondary text-xs mt-2" @click="q.options.push('')">+ خيار</button>
+            </div>
+          </template>
+          <button type="button" class="clinicos-btn clinicos-btn--secondary w-full mt-2" @click="questions.push({ prompt: '', options: ['', ''], correctIndex: 0, displayOrder: questions.length + 1 })">+ سؤال جديد</button>
+        </div>
+
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-surface-border">
+          <a href="/academy/curriculum" class="clinicos-btn clinicos-btn--secondary">إلغاء</a>
+          <button type="submit" class="clinicos-btn">💾 حفظ التعديلات</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>
