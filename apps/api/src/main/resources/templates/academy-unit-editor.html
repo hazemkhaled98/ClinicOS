@@ -10,7 +10,7 @@
         <span>المنهج</span>
       </a>
       <h1 class="text-3xl font-bold text-teal-900 tracking-tight mb-2"
-          th:text="${form.id() != null} ? 'تعديل وحدة' : 'وحدة جديدة'">تعديل وحدة</h1>
+          th:text="${form.id != null} ? 'تعديل وحدة' : 'وحدة جديدة'">تعديل وحدة</h1>
 
       <form method="post" th:action="@{/academy/units}" th:object="${form}" class="mt-8 space-y-6"
             th:attr="data-sections=${form.sectionsJson}, data-questions=${form.questionsJson}"

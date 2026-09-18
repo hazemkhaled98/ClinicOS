@@ -138,7 +138,7 @@ public class DefaultAcademyService implements AcademyService {
             var sections = parseJsonbSections(u.getContent());
             result.add(new TraineeUnit(
                     u.getId(), u.getAppliesTo(), u.getIcon(), u.getTitle(), u.getGoal(),
-                    sections, u.getPhotoTask(),
+                    sections, u.getPhotoTask(), photoRequired,
                     dsl.fetchCount(ACADEMY_QUESTION, ACADEMY_QUESTION.UNIT_ID.eq(u.getId())),
                     status));
         }
