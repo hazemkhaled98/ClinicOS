@@ -94,7 +94,7 @@ public class DefaultInventoryService implements InventoryService {
             var onHand = onHandAt(location);
             return dsl.select(
                     INVENTORY_ITEM.ID, INVENTORY_ITEM.NAME, INVENTORY_ITEM.UOM,
-                    INVENTORY_ITEM.UNIT_COST, onHand)
+                    INVENTORY_ITEM.UNIT_COST, INVENTORY_ITEM.STORE_ALERT, INVENTORY_ITEM.TRAY_ALERT, onHand)
                     .from(INVENTORY_ITEM)
                     .where(INVENTORY_ITEM.CLINIC_ID.eq(clinicId))
                     .and(INVENTORY_ITEM.ARCHIVED_AT.isNull())
