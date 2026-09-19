@@ -29,7 +29,9 @@ import com.clinicos.inventory.PurchasingService.ReturnLineRequest;
 import com.clinicos.inventory.PurchasingService.SupplierRequest;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.LocationKind;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.MovementReason;
+import com.clinicos.shared.jooq.enums.PoStatus;
 
 @SpringBootTest(classes = Application.class)
 class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
@@ -205,6 +207,83 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThatThrownBy(() -> purchasingService.decideReturn(clinicA, assistant, pending.id(), true))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void BRG27_returnCeilingAccumulatesAcrossDecisions() {
+        TenantContext.set(clinicA);
+        order = placeOrderAndReceive(10);
+        var line = orderLineId(order, 0);
+        var first = purchasingService.requestReturn(clinicA, assistant, order,
+                List.of(new ReturnLineRequest(line, new BigDecimal("6"))));
+        purchasingService.decideReturn(clinicA, manager, first.id(), true);
+
+        assertThatThrownBy(() -> purchasingService.requestReturn(clinicA, assistant, order,
+                List.of(new ReturnLineRequest(line, new BigDecimal("7")))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("الكمية المرتجعة أكبر من المتاح للإرجاع من هذه الطلبية");
+        assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("4");
+    }
+
+    @Test
+    void receivePersistsLotDeliveryCostAndMultipleLinesPerOrder() {
+        TenantContext.set(clinicA);
+        var item2 = inventoryService.createItem(clinicA, assistant,
+                new ItemRequest("مادة حشو", "عبوة", 1, new BigDecimal("8"), 2, 2)).id();
+        order = purchasingService.placeOrder(clinicA, assistant, supplier,
+                List.of(new OrderLineRequest(item, new BigDecimal("4"), new BigDecimal("10")),
+                        new OrderLineRequest(item2, new BigDecimal("2"), new BigDecimal("20")))).id();
+        UUID line0 = orderLineId(order, 0);
+        UUID line1 = orderLineId(order, 1);
+
+        var received = purchasingService.receive(clinicA, assistant, order,
+                List.of(new ReceiptLine(line0, new BigDecimal("4"), "LOT-1", new BigDecimal("1.5")),
+                        new ReceiptLine(line1, new BigDecimal("2"), null, null)),
+                insertAttachment(clinicA));
+
+        assertThat(received.status()).isEqualTo("received");
+        assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("4");
+        assertThat(stockOnHand(item2, LocationKind.store)).isEqualByComparingTo("2");
+        var stored = purchasingService.orders(clinicA, java.util.Set.of(PoStatus.received)).stream()
+                .filter(o -> o.id().equals(order)).findFirst().orElseThrow();
+        assertThat(stored.total()).isEqualByComparingTo("81.50");
+        assertThat(stored.lines().get(0).lotNumber()).isEqualTo("LOT-1");
+        assertThat(stored.lines().get(0).deliveryCost()).isEqualByComparingTo("1.5");
+        assertThat(stored.lines().get(1).qtyReceived()).isEqualByComparingTo("2");
+    }
+
+    @Test
+    void saveSupplierWithExistingIdUpdatesAndUnknownIdThrows() {
+        TenantContext.set(clinicA);
+        var updated = purchasingService.saveSupplier(clinicA, manager, supplier,
+                new SupplierRequest("الريادة المحدّثة", "011", "201", 5, new BigDecimal("5"), false));
+
+        assertThat(updated.id()).isEqualTo(supplier);
+        assertThat(purchasingService.suppliers(clinicA, false))
+                .anyMatch(s -> s.id().equals(supplier) && s.name().equals("الريادة المحدّثة"));
+        assertThatThrownBy(() -> purchasingService.saveSupplier(clinicA, manager, UUID.randomUUID(),
+                new SupplierRequest("مفقود", null, null, 1, new BigDecimal("1"), false)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("المورد غير موجود");
+    }
+
+    @Test
+    void suspendedMembershipIsRejectedOnDecideReturn() throws Exception {
+        TenantContext.set(clinicA);
+        order = placeOrderAndReceive(10);
+        var pending = purchasingService.requestReturn(clinicA, assistant, order,
+                List.of(new ReturnLineRequest(orderLineId(order, 0), new BigDecimal("4"))));
+        Actor suspended;
+        try (var connection = superuser()) {
+            var membership = TestFixtures.insertMembership(connection, clinicA,
+                    TestFixtures.insertUser(connection, clinicA, "suspended" + UUID.randomUUID(), "pw", "suspended"),
+                    "manager", MembershipStatus.suspended);
+            suspended = new Actor(membership, "manager");
+        }
+
+        assertThatThrownBy(() -> purchasingService.decideReturn(clinicA, suspended, pending.id(), true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("غير مصرح — تتطلب صلاحيات مدير");
     }
 
     @Test

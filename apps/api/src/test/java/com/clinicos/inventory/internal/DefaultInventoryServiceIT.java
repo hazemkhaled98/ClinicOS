@@ -28,6 +28,7 @@ import com.clinicos.inventory.InventoryService.ItemRequest;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.LocationKind;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.MovementReason;
 
 @SpringBootTest(classes = Application.class)
@@ -211,6 +212,107 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(inventoryService.items(clinicB, false)).isEmpty();
         assertThat(inventoryService.stock(clinicB, LocationKind.store)).isEmpty();
+    }
+
+    @Test
+    void transferClampsToSourceOnHandAndWritesTwoRows() {
+        TenantContext.set(clinicA);
+        seedMovement(clinicA, item, LocationKind.store, new BigDecimal("10"), MovementReason.receipt);
+        long before = movementCount(item);
+
+        inventoryService.transfer(clinicA, assistant, item, LocationKind.store, LocationKind.tray, new BigDecimal("15"));
+
+        assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("0");
+        assertThat(stockOnHand(item, LocationKind.tray)).isEqualByComparingTo("10");
+        assertThat(movementCount(item)).isEqualTo(before + 2);
+    }
+
+    @Test
+    void transferWithInvalidQtyThrows() {
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> inventoryService.transfer(clinicA, assistant, item,
+                LocationKind.store, LocationKind.tray, BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("الكمية المراد تحويلها غير صالحة");
+    }
+
+    @Test
+    void adjustForWritesMovementWithActorName() {
+        TenantContext.set(clinicA);
+        inventoryService.adjustFor(clinicA, assistant, item, LocationKind.store,
+                new BigDecimal("4"), MovementReason.receipt, null, null);
+
+        var entry = inventoryService.ledger(clinicA, 1).get(0);
+        assertThat(entry.itemName()).isEqualTo("كمبوزيت");
+        assertThat(entry.qtyDelta()).isEqualByComparingTo("4");
+        assertThat(entry.reason()).isEqualTo("receipt");
+        assertThat(entry.actorName()).isEqualTo("assistant");
+    }
+
+    @Test
+    void adjustForWithMissingReasonThrows() {
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> inventoryService.adjustFor(clinicA, assistant, item,
+                LocationKind.store, new BigDecimal("4"), null, null, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("حركة المخزون غير صالحة");
+    }
+
+    @Test
+    void pendingChangeRequestsAndApprovalsListOnlyPending() {
+        TenantContext.set(clinicA);
+        inventoryService.requestItemChange(clinicA, assistant, item, ChangeRequestKind.edit,
+                new ItemRequest("اسم معدّل", "عبوة", null, new BigDecimal("55"), null, null));
+
+        assertThat(inventoryService.pendingChangeRequests(clinicA)).hasSize(1)
+                .allMatch(c -> c.status().equals("pending"));
+        assertThat(inventoryService.pendingApprovals(clinicA)).hasSize(1)
+                .allMatch(a -> a.source().equals("change_request") && a.entity().equals("item"));
+    }
+
+    @Test
+    void createItemMissingFieldsThrowsArabicMessage() {
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> inventoryService.createItem(clinicA, assistant,
+                new ItemRequest(" ", "عبوة", 1, null, null, null)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("الاسم ووحدة القياس والتكلفة مطلوبة");
+    }
+
+    @Test
+    void requestItemChangeMissingKindOrPayloadThrowsArabicMessages() {
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> inventoryService.requestItemChange(clinicA, assistant, item, null,
+                new ItemRequest("اسم", "عبوة", null, new BigDecimal("5"), null, null)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("نوع الطلب غير محدد");
+        assertThatThrownBy(() -> inventoryService.requestItemChange(clinicA, assistant, item,
+                ChangeRequestKind.edit, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("البيانات المقترحة للتعديل مطلوبة");
+    }
+
+    @Test
+    void suspendedMembershipIsRejectedOnEveryEntryPoint() throws Exception {
+        TenantContext.set(clinicA);
+        Actor suspended;
+        try (var connection = superuser()) {
+            var membership = TestFixtures.insertMembership(connection, clinicA,
+                    TestFixtures.insertUser(connection, clinicA, "suspended" + UUID.randomUUID(), "pw", "suspended"),
+                    "manager", MembershipStatus.suspended);
+            suspended = new Actor(membership, "manager");
+        }
+
+        assertThatThrownBy(() -> inventoryService.applyItemChange(clinicA, suspended, UUID.randomUUID(), true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("غير مصرح — تتطلب صلاحيات مدير");
+        assertThatThrownBy(() -> inventoryService.createItem(clinicA, suspended,
+                new ItemRequest("س", "عبوة", 1, new BigDecimal("1"), null, null)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("غير مصرح");
+        assertThatThrownBy(() -> inventoryService.transfer(clinicA, suspended, item,
+                LocationKind.store, LocationKind.tray, new BigDecimal("1")))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private UUID newItem() {

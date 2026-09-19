@@ -1,9 +1,12 @@
 package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +51,43 @@ class AnalyticsControllerTest {
         when(analytics.dashboard(CLINIC)).thenReturn(new InventoryAnalyticsService.Dashboard(1, 2, 3,
                 java.math.BigDecimal.ONE, java.math.BigDecimal.TEN));
         assertThat(controller.dashboard(session, new ExtendedModelMap())).isEqualTo("inventory-dash");
+    }
+
+    @Test
+    void eachAnalyticsRouteCallsItsServiceAndRenders() {
+        when(analytics.profit(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.profit(null, null, session("profit"), new ExtendedModelMap())).isEqualTo("inventory-profit");
+        verify(analytics).profit(CLINIC, null, null);
+
+        when(analytics.consumption(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.analytics(null, null, session("analytics"), new ExtendedModelMap())).isEqualTo("inventory-analytics");
+        verify(analytics).consumption(CLINIC, null, null);
+
+        when(analytics.waste(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.waste(null, null, session("waste"), new ExtendedModelMap())).isEqualTo("inventory-waste");
+        verify(analytics).waste(CLINIC, null, null);
+
+        when(analytics.doctors(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.doctors(null, null, session("doctors"), new ExtendedModelMap())).isEqualTo("inventory-doctors");
+        verify(analytics).doctors(CLINIC, null, null);
+
+        when(analytics.suppliers(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.suppliers(null, null, session("supAnalysis"), new ExtendedModelMap())).isEqualTo("inventory-supplier-analytics");
+        verify(analytics).suppliers(CLINIC, null, null);
+
+        when(analytics.itemPrices(CLINIC, null, null)).thenReturn(List.of());
+        assertThat(controller.items(null, null, session("itemAnalysis"), new ExtendedModelMap())).isEqualTo("inventory-item-analysis");
+        verify(analytics).itemPrices(CLINIC, null, null);
+    }
+
+    @Test
+    void routesPassParsedDatesThroughToTheService() {
+        LocalDate from = LocalDate.of(2026, 1, 1);
+        LocalDate to = LocalDate.of(2026, 1, 31);
+        when(analytics.profit(CLINIC, from, to)).thenReturn(List.of());
+
+        assertThat(controller.profit(from, to, session("profit"), new ExtendedModelMap())).isEqualTo("inventory-profit");
+        verify(analytics).profit(CLINIC, from, to);
     }
 
     private HttpSession session(String... codes) {

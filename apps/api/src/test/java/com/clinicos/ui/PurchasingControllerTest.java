@@ -30,6 +30,7 @@ import com.clinicos.inventory.PurchasingService;
 import com.clinicos.inventory.PurchasingService.Order;
 import com.clinicos.inventory.PurchasingService.OrderLineRequest;
 import com.clinicos.inventory.PurchasingService.ReceiveLine;
+import com.clinicos.inventory.PurchasingService.ReturnLineRequest;
 import com.clinicos.inventory.PurchasingService.Supplier;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.AttachmentService;
@@ -198,6 +199,55 @@ class PurchasingControllerTest {
         verify(purchasingService).saveSupplier(CLINIC, new Actor(MEMBERSHIP, "manager"), null,
                 new PurchasingService.SupplierRequest("الريادة", null, "201000000000", null, null, false));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.supplier.save", "supplier");
+    }
+
+    @Test
+    void requestReturnFiltersNonPositiveQtyLinesAndLogs() {
+        HttpSession session = session("assistant", "returns");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+        UUID lineA = UUID.randomUUID();
+        UUID lineB = UUID.randomUUID();
+        UUID lineC = UUID.randomUUID();
+        when(purchasingService.requestReturn(eq(CLINIC), any(), eq(ORDER), any())).thenReturn(null);
+
+        String view = controller.requestReturn(ORDER, List.of(lineA, lineB, lineC),
+                java.util.Arrays.asList(new BigDecimal("3"), BigDecimal.ZERO, null), session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/returns");
+        verify(purchasingService).requestReturn(eq(CLINIC), any(), eq(ORDER), ArgumentMatchers
+                .<List<ReturnLineRequest>>argThat(lines -> lines.size() == 1
+                        && lines.get(0).orderLineId().equals(lineA)
+                        && lines.get(0).qty().compareTo(new BigDecimal("3")) == 0));
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.return.request", "supplier_return");
+    }
+
+    @Test
+    void requestReturnServiceRejectionFlashesErrorAndDoesNotLog() {
+        HttpSession session = session("assistant", "returns");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+        when(purchasingService.requestReturn(any(), any(), any(), any()))
+                .thenThrow(new IllegalArgumentException("الكمية المرتجعة غير صالحة"));
+
+        String view = controller.requestReturn(ORDER, List.of(UUID.randomUUID()),
+                List.of(new BigDecimal("3")), session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/returns");
+        verify(redirect).addFlashAttribute("toastType", "error");
+        verify(redirect).addFlashAttribute("toastMessage", "الكمية المرتجعة غير صالحة");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
+    }
+
+    @Test
+    void requestReturnWithoutPermissionRedirectsToInventory() {
+        HttpSession session = session("assistant");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.requestReturn(ORDER, List.of(UUID.randomUUID()),
+                List.of(new BigDecimal("3")), session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory");
+        verify(purchasingService, never()).requestReturn(any(), any(), any(), any());
     }
 
     private static List<Order> placedOrders() {

@@ -33,6 +33,7 @@ import com.clinicos.procedures.ProceduresService.ProcedureRequest;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.LocationKind;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.MovementReason;
 
 @SpringBootTest(classes = Application.class)
@@ -198,6 +199,21 @@ class DefaultProceduresServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicB);
         assertThat(proceduresService.procedures(clinicB, false)).isEmpty();
         assertThat(proceduresService.cases(clinicB, null, null, null)).isEmpty();
+    }
+
+    @Test
+    void suspendedMembershipIsRejectedOnDecideChange() throws Exception {
+        Actor suspended;
+        try (var connection = superuser()) {
+            var membership = TestFixtures.insertMembership(connection, clinicA,
+                    TestFixtures.insertUser(connection, clinicA, "suspended" + UUID.randomUUID(), "pw", "suspended"),
+                    "manager", MembershipStatus.suspended);
+            suspended = new Actor(membership, "manager");
+        }
+
+        assertThatThrownBy(() -> proceduresService.decideChange(clinicA, suspended, UUID.randomUUID(), true))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("غير مصرح — تتطلب صلاحيات مدير");
     }
 
     private void seedTray(BigDecimal qty) {

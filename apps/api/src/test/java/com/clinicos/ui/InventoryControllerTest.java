@@ -3,6 +3,7 @@ package com.clinicos.ui;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -243,6 +244,35 @@ class InventoryControllerTest {
         assertThat(view).isEqualTo("redirect:/inventory/approvals");
         verify(inventoryService).applyItemChange(CLINIC, new Actor(MEMBERSHIP, "manager"), REQUEST, false);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.approval.reject", "inventory_change_request");
+    }
+
+    @Test
+    void decideWithSupplierReturnSourceRoutesToPurchasing() {
+        HttpSession session = session("owner", "approvals");
+
+        String view = controller.decide(REQUEST, true, "supplier_return", session, new ExtendedModelMap());
+
+        assertThat(view).isEqualTo("redirect:/inventory/approvals");
+        verify(purchasingService).decideReturn(CLINIC, new Actor(MEMBERSHIP, "owner"), REQUEST, true);
+        verify(proceduresService, never()).decideChange(any(), any(), any(), anyBoolean());
+        verify(inventoryService, never()).applyItemChange(any(), any(), any(), anyBoolean());
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.approval.approve", "inventory_change_request");
+    }
+
+    @Test
+    void decideWithProcedureSourceRoutesToProceduresDecision() {
+        for (String source : List.of("procedure", "procedure_bom", "procedure_case")) {
+            org.mockito.Mockito.reset(proceduresService, purchasingService, inventoryService, activityLogService);
+            HttpSession session = session("owner", "approvals");
+
+            String view = controller.decide(REQUEST, false, source, session, new ExtendedModelMap());
+
+            assertThat(view).isEqualTo("redirect:/inventory/approvals");
+            verify(proceduresService).decideChange(CLINIC, new Actor(MEMBERSHIP, "owner"), REQUEST, false);
+            verify(purchasingService, never()).decideReturn(any(), any(), any(), anyBoolean());
+            verify(inventoryService, never()).applyItemChange(any(), any(), any(), anyBoolean());
+            verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.approval.reject", "inventory_change_request");
+        }
     }
 
     @Test
