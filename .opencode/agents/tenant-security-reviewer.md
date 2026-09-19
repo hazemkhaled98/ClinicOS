@@ -1,6 +1,7 @@
 ---
 name: tenant-security-reviewer
 description: Use when a diff touches the `shared` module, `TenantConnectionListener`, `TenantContext`, `TenantConfig`, raw JDBC, or any new/changed jOOQ DSLContext call — reviews for the multi-tenant RLS invariant (every transaction must SET LOCAL app.clinic_id before any query) before merge. Also use as a pre-merge gate for any phase touching cross-tenant data access.
+hidden: true
 permission:
   edit: deny
   write: deny
