@@ -26,23 +26,23 @@
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <label class="flex flex-col gap-1.5">
             <span class="clinicos-label">اسم المورّد</span>
-            <input type="text" name="form.name" class="clinicos-input" required placeholder="مؤسسة الريادة">
+            <input type="text" name="name" class="clinicos-input" required placeholder="مؤسسة الريادة">
           </label>
           <label class="flex flex-col gap-1.5">
             <span class="clinicos-label">رقم التواصل</span>
-            <input type="text" name="form.contact" class="clinicos-input" placeholder="01000000000">
+            <input type="text" name="contact" class="clinicos-input" placeholder="01000000000">
           </label>
           <label class="flex flex-col gap-1.5">
             <span class="clinicos-label">رقم واتساب</span>
-            <input type="text" name="form.whatsapp" class="clinicos-input" placeholder="201000000000">
+            <input type="text" name="whatsapp" class="clinicos-input" placeholder="201000000000">
           </label>
           <label class="flex flex-col gap-1.5">
             <span class="clinicos-label">مدة التوريد (أيام)</span>
-            <input type="number" name="form.leadDays" min="0" step="1" class="clinicos-input">
+            <input type="number" name="leadDays" min="0" step="1" class="clinicos-input">
           </label>
           <label class="flex flex-col gap-1.5">
             <span class="clinicos-label">التقييم (0–5)</span>
-            <input type="number" name="form.rating" min="0" max="5" step="0.1" class="clinicos-input">
+            <input type="number" name="rating" min="0" max="5" step="0.1" class="clinicos-input">
           </label>
           <div class="sm:col-span-2 lg:col-span-3 items-end">
             <button class="clinicos-btn" type="submit">+ إضافة المورّد</button>
@@ -83,29 +83,29 @@
               <td colspan="6" class="bg-neutral-50">
                 <form method="post" th:action="@{/inventory/suppliers}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-3">
                   <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                  <input type="hidden" name="form.id" th:value="${s.id()}">
+                  <input type="hidden" name="id" th:value="${s.id()}">
                   <label class="flex flex-col gap-1.5">
                     <span class="clinicos-label">اسم المورّد</span>
-                    <input type="text" name="form.name" class="clinicos-input" required th:value="${s.name()}">
+                    <input type="text" name="name" class="clinicos-input" required th:value="${s.name()}">
                   </label>
                   <label class="flex flex-col gap-1.5">
                     <span class="clinicos-label">رقم التواصل</span>
-                    <input type="text" name="form.contact" class="clinicos-input" th:value="${s.contact()}">
+                    <input type="text" name="contact" class="clinicos-input" th:value="${s.contact()}">
                   </label>
                   <label class="flex flex-col gap-1.5">
                     <span class="clinicos-label">رقم واتساب</span>
-                    <input type="text" name="form.whatsapp" class="clinicos-input" th:value="${s.whatsapp()}">
+                    <input type="text" name="whatsapp" class="clinicos-input" th:value="${s.whatsapp()}">
                   </label>
                   <label class="flex flex-col gap-1.5">
                     <span class="clinicos-label">مدة التوريد (أيام)</span>
-                    <input type="number" name="form.leadDays" min="0" step="1" class="clinicos-input" th:value="${s.leadDays()}">
+                    <input type="number" name="leadDays" min="0" step="1" class="clinicos-input" th:value="${s.leadDays()}">
                   </label>
                   <label class="flex flex-col gap-1.5">
                     <span class="clinicos-label">التقييم (0–5)</span>
-                    <input type="number" name="form.rating" min="0" max="5" step="0.1" class="clinicos-input" th:value="${s.rating()}">
+                    <input type="number" name="rating" min="0" max="5" step="0.1" class="clinicos-input" th:value="${s.rating()}">
                   </label>
                   <label class="flex items-center gap-2 self-end py-2">
-                    <input type="checkbox" name="form.archived" value="true" class="size-4 text-teal-600" th:checked="${s.archived()}">
+                    <input type="checkbox" name="archived" value="true" class="size-4 text-teal-600" th:checked="${s.archived()}">
                     <span class="clinicos-label mb-0">مؤرشف</span>
                   </label>
                   <div class="sm:col-span-2 lg:col-span-3 flex flex-wrap items-center gap-2">
