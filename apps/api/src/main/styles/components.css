@@ -325,4 +325,73 @@
     justify-content: center;
     text-align: center;
   }
+
+  .clinicos-list-row {
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .clinicos-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: var(--color-neutral-100);
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+  }
+
+  .clinicos-stepper button {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    color: var(--color-on-surface);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clinicos-stepper button:hover {
+    background-color: var(--color-neutral-100);
+  }
+
+  .clinicos-stepper input {
+    width: 3rem;
+    text-align: center;
+    background-color: transparent;
+    border: 0;
+    font-weight: 700;
+    color: var(--color-teal-900);
+    -moz-appearance: textfield;
+  }
+
+  .clinicos-stepper input::-webkit-inner-spin-button,
+  .clinicos-stepper input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .clinicos-accordion {
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.75rem;
+    background-color: var(--color-surface-elevated);
+  }
+
+  .clinicos-accordion__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .clinicos-accordion__body {
+    border-block-start: 1px solid var(--color-neutral-200);
+    padding: 1rem;
+  }
 }

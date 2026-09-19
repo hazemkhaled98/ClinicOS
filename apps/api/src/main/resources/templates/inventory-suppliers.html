@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('الموردين')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false"
+      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+        <div class="space-y-1.5">
+          <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">الموردين</h1>
+          <p class="text-sm text-on-surface-variant">دليل المورّدين وبيانات التواصل معهم.</p>
+        </div>
+        <a th:href="${includeArchived} ? @{/inventory/suppliers} : @{/inventory/suppliers(includeArchived=true)}"
+           class="clinicos-btn clinicos-btn--secondary">
+          <span th:text="${includeArchived} ? 'إخفاء المؤرشفة' : 'عرض المؤرشفة'">عرض المؤرشفة</span>
+        </a>
+      </div>
+
+      <div class="clinicos-card p-6 mb-8">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
+          <h2 class="text-xl font-bold text-teal-900">إضافة مورّد</h2>
+        </div>
+        <form method="post" th:action="@{/inventory/suppliers}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <label class="flex flex-col gap-1.5">
+            <span class="clinicos-label">اسم المورّد</span>
+            <input type="text" name="form.name" class="clinicos-input" required placeholder="مؤسسة الريادة">
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="clinicos-label">رقم التواصل</span>
+            <input type="text" name="form.contact" class="clinicos-input" placeholder="01000000000">
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="clinicos-label">رقم واتساب</span>
+            <input type="text" name="form.whatsapp" class="clinicos-input" placeholder="201000000000">
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="clinicos-label">مدة التوريد (أيام)</span>
+            <input type="number" name="form.leadDays" min="0" step="1" class="clinicos-input">
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="clinicos-label">التقييم (0–5)</span>
+            <input type="number" name="form.rating" min="0" max="5" step="0.1" class="clinicos-input">
+          </label>
+          <div class="sm:col-span-2 lg:col-span-3 items-end">
+            <button class="clinicos-btn" type="submit">+ إضافة المورّد</button>
+          </div>
+        </form>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(suppliers)}" class="clinicos-card overflow-hidden">
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start">المورّد</th>
+              <th class="text-start">التواصل</th>
+              <th class="text-start">ما بعد</th>
+              <th class="text-start">التقييم</th>
+              <th class="text-start">الحالة</th>
+              <th class="text-end">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody th:each="s : ${suppliers}" x-data="{ edit: false }">
+            <tr>
+              <td class="text-start font-bold text-teal-900" th:text="${s.name()}">مورّد</td>
+              <td class="text-start">
+                <span class="block text-sm" th:text="${s.contact()}">—</span>
+                <span th:if="${s.whatsapp() != null}" class="text-xs text-on-surface-variant" th:text="${'واتساب: ' + s.whatsapp()}">واتساب</span>
+              </td>
+              <td class="text-start" th:text="${s.leadDays() != null ? (s.leadDays() + ' يوم') : '—'}">—</td>
+              <td class="text-start" th:text="${s.rating() != null ? #numbers.formatDecimal(s.rating(), 1, 1) + ' / 5' : '—'}">—</td>
+              <td class="text-start">
+                <span th:if="${s.archived()}" class="clinicos-chip clinicos-chip--info">مؤرشف</span>
+                <span th:if="${!s.archived()}" class="clinicos-chip clinicos-chip--success">نشط</span>
+              </td>
+              <td class="text-end">
+                <button type="button" @click="edit = true" class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs">تعديل</button>
+              </td>
+            </tr>
+            <tr x-show="edit" x-cloak>
+              <td colspan="6" class="bg-neutral-50">
+                <form method="post" th:action="@{/inventory/suppliers}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-3">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <input type="hidden" name="form.id" th:value="${s.id()}">
+                  <label class="flex flex-col gap-1.5">
+                    <span class="clinicos-label">اسم المورّد</span>
+                    <input type="text" name="form.name" class="clinicos-input" required th:value="${s.name()}">
+                  </label>
+                  <label class="flex flex-col gap-1.5">
+                    <span class="clinicos-label">رقم التواصل</span>
+                    <input type="text" name="form.contact" class="clinicos-input" th:value="${s.contact()}">
+                  </label>
+                  <label class="flex flex-col gap-1.5">
+                    <span class="clinicos-label">رقم واتساب</span>
+                    <input type="text" name="form.whatsapp" class="clinicos-input" th:value="${s.whatsapp()}">
+                  </label>
+                  <label class="flex flex-col gap-1.5">
+                    <span class="clinicos-label">مدة التوريد (أيام)</span>
+                    <input type="number" name="form.leadDays" min="0" step="1" class="clinicos-input" th:value="${s.leadDays()}">
+                  </label>
+                  <label class="flex flex-col gap-1.5">
+                    <span class="clinicos-label">التقييم (0–5)</span>
+                    <input type="number" name="form.rating" min="0" max="5" step="0.1" class="clinicos-input" th:value="${s.rating()}">
+                  </label>
+                  <label class="flex items-center gap-2 self-end py-2">
+                    <input type="checkbox" name="form.archived" value="true" class="size-4 text-teal-600" th:checked="${s.archived()}">
+                    <span class="clinicos-label mb-0">مؤرشف</span>
+                  </label>
+                  <div class="sm:col-span-2 lg:col-span-3 flex flex-wrap items-center gap-2">
+                    <button class="clinicos-btn px-3 py-2 text-xs" type="submit">حفظ</button>
+                    <button type="button" @click="edit = false" class="clinicos-btn clinicos-btn--ghost px-3 py-2 text-xs">إلغاء</button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div th:if="${#lists.isEmpty(suppliers)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">🤝</div>
+        <p class="font-bold text-teal-900 text-xl">لا يوجد موردون</p>
+        <p class="mt-2 text-sm text-on-surface-variant">أضف أول مورّد من النموذج أعلاه.</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

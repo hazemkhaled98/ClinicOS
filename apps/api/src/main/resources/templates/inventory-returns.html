@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('المرتجعات')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false"
+      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">المرتجعات</h1>
+        <p class="text-sm text-on-surface-variant">سجّل إرجاع كميات لمورّد — بانتظار موافقة المدير قبل خصم المخزون.</p>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(orders)}">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
+          <h2 class="text-xl font-bold text-teal-900">طلب إرجاع جديد</h2>
+        </div>
+        <form th:each="o : ${orders}" method="post" th:action="@{/inventory/returns}"
+              class="clinicos-card p-6 mb-6"
+              @submit="document.querySelectorAll('[data-rrow]').forEach(r => { const v = r.querySelector('input[name=qty]'); v.disabled = !(+v.value > 0); })">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <input type="hidden" name="orderId" th:value="${o.id()}">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-teal-900" th:text="${o.supplierName()}">مورّد</h3>
+            <span class="text-sm text-on-surface-variant" th:text="${#temporals.format(o.receivedAt(), 'dd/MM/yyyy')}">—</span>
+          </div>
+          <table class="clinicos-table">
+            <thead>
+              <tr>
+                <th class="text-start">الصنف</th>
+                <th class="text-end">المستلم</th>
+                <th class="text-end">الإرجاع</th>
+              </tr>
+            </thead>
+            <tbody th:each="line : ${o.lines()}">
+              <tr data-rrow>
+                <input type="hidden" name="orderLineId" th:value="${line.id()}">
+                <td class="text-start">
+                  <span class="block font-bold text-teal-900" th:text="${line.itemName()}">كمبوزيت</span>
+                  <span class="block text-xs text-on-surface-variant" th:text="${line.uom()}">عبوة</span>
+                </td>
+                <td class="text-end clinicos-table-numeric" th:text="${line.qtyReceived() != null ? #numbers.formatDecimal(line.qtyReceived(), 1, 0) : '0'}">0</td>
+                <td class="text-end">
+                  <div class="clinicos-stepper" data-stepper>
+                    <button type="button" @click="const i = $el.parentElement.querySelector('input[name=qty]'); i.value = +i.value - 1">−</button>
+                    <input type="number" name="qty" min="0" step="1" value="0" class="stepper-input">
+                    <button type="button" @click="const i = $el.parentElement.querySelector('input[name=qty]'); i.value = +i.value + 1">+</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4 flex justify-end">
+            <button class="clinicos-btn clinicos-btn--danger" type="submit">إرسال طلب الإرجاع</button>
+          </div>
+        </form>
+      </div>
+
+      <div th:if="${#lists.isEmpty(orders)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">📤</div>
+        <p class="font-bold text-teal-900 text-xl">لا توجد طلبيات مستلمة للإرجاع</p>
+        <p class="mt-2 text-sm text-on-surface-variant">المرتجعات بتبقى من الطلبيات المستلمة.</p>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(returns)}" class="clinicos-card overflow-hidden mt-8">
+        <div class="flex items-center gap-2 p-6 pb-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-warning-600 inline-block"></span>
+          <h2 class="text-xl font-bold text-teal-900">طلبات إرجاع بانتظار الموافقة</h2>
+        </div>
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start">المورّد</th>
+              <th class="text-end">الكميات</th>
+              <th class="text-start">تاريخ الطلب</th>
+              <th class="text-start">الحالة</th>
+            </tr>
+          </thead>
+          <tbody th:each="r : ${returns}">
+            <tr>
+              <td class="text-start">
+                <span class="block font-bold text-teal-900" th:text="${r.supplierName()}">مورّد</span>
+              </td>
+              <td class="text-end">
+                <div th:each="line : ${r.lines()}" class="text-sm">
+                  <span th:text="${line.itemName()}">صنف</span>
+                  <span class="text-on-surface-variant">×</span>
+                  <span th:text="${#numbers.formatDecimal(line.qty(), 1, 0)}">0</span>
+                </div>
+              </td>
+              <td class="text-start" th:text="${#temporals.format(r.requestedAt(), 'dd/MM/yyyy HH:mm')}">—</td>
+              <td class="text-start"><span class="clinicos-chip clinicos-chip--warning">بانتظار الموافقة</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

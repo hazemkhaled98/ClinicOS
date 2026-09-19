@@ -54,6 +54,10 @@ public interface InventoryService {
             BigDecimal qtyDelta, String reason, String actorName, OffsetDateTime createdAt) {
     }
 
+    record PendingApproval(UUID id, String source, String entity, String kind, String title,
+            String summary, String requestedByName, OffsetDateTime requestedAt) {
+    }
+
     /** Full catalogue; excludes archived items unless {@code includeArchived}. */
     List<Item> items(UUID clinicId, boolean includeArchived);
 
@@ -70,12 +74,17 @@ public interface InventoryService {
     /** The pending change-request queue, newest first. */
     List<ChangeRequest> pendingChangeRequests(UUID clinicId);
 
+    List<PendingApproval> pendingApprovals(UUID clinicId);
+
     /** Manager-only decision: approve applies the change / soft-deletes; reject discards. */
     ChangeRequest applyItemChange(UUID clinicId, Actor actor, UUID requestId, boolean approve);
 
     /** Issue stock at a location, clamped to what is actually on hand (UC-008 A3). */
     IssueResult issue(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
             BigDecimal requestedQty);
+
+    IssueResult issueFor(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
+            BigDecimal requestedQty, String refType, UUID refId);
 
     /** Move stock between the two locations (two ledger rows, clamped to the source). */
     void transfer(UUID clinicId, Actor actor, UUID itemId, LocationKind from, LocationKind to,
@@ -84,6 +93,10 @@ public interface InventoryService {
     /** Record a stocktake correction as a single compensating 'count' ledger row. */
     void adjustCount(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
             BigDecimal newCount);
+
+    void adjustFor(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
+            BigDecimal qtyDelta, com.clinicos.shared.jooq.enums.MovementReason reason,
+            String refType, UUID refId);
 
     /** Newest-first ledger for the audit-log screen; a simple limit-based page. */
     List<MovementEntry> ledger(UUID clinicId, int limit);

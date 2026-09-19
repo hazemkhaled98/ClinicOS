@@ -26,6 +26,8 @@ import com.clinicos.inventory.InventoryService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.InventoryService.ItemRequest;
 import com.clinicos.inventory.InventoryService.IssueResult;
+import com.clinicos.inventory.PurchasingService;
+import com.clinicos.procedures.ProceduresService;
 import com.clinicos.shared.ActivityLogService;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.LocationKind;
@@ -44,6 +46,8 @@ class InventoryControllerTest {
     private LayoutModel layoutModel;
     private InventoryService inventoryService;
     private ActivityLogService activityLogService;
+    private PurchasingService purchasingService;
+    private ProceduresService proceduresService;
     private InventoryController controller;
     private Model model;
 
@@ -52,7 +56,10 @@ class InventoryControllerTest {
         layoutModel = mock(LayoutModel.class);
         inventoryService = mock(InventoryService.class);
         activityLogService = mock(ActivityLogService.class);
-        controller = new InventoryController(layoutModel, inventoryService, activityLogService);
+        purchasingService = mock(PurchasingService.class);
+        proceduresService = mock(ProceduresService.class);
+        controller = new InventoryController(layoutModel, inventoryService, activityLogService,
+                purchasingService, proceduresService);
         model = new ExtendedModelMap();
         when(inventoryService.stock(any(), any())).thenReturn(List.of());
     }
@@ -209,6 +216,22 @@ class InventoryControllerTest {
         assertThat(view).isEqualTo("redirect:/inventory/approvals");
         verify(inventoryService).applyItemChange(CLINIC, new Actor(MEMBERSHIP, "owner"), REQUEST, true);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.approval.approve", "inventory_change_request");
+    }
+
+    @Test
+    void procedureApprovalKeepsProcedureSourceForDecisionRouting() {
+        HttpSession session = session("manager", "approvals");
+        when(inventoryService.pendingApprovals(CLINIC)).thenReturn(List.of());
+        when(proceduresService.pendingChanges(CLINIC)).thenReturn(List.of(
+                new ProceduresService.PendingChange(REQUEST, "procedure", "edit", "تعديل", "ملخص", null)));
+        when(purchasingService.pendingReturns(CLINIC)).thenReturn(List.of());
+
+        controller.approvals(session, model);
+
+        @SuppressWarnings("unchecked")
+        var approvals = (List<InventoryService.PendingApproval>) model.getAttribute("approvals");
+        assertThat(approvals).singleElement().extracting(InventoryService.PendingApproval::source)
+                .isEqualTo("procedure");
     }
 
     @Test

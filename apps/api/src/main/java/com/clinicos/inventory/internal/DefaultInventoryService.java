@@ -176,6 +176,22 @@ public class DefaultInventoryService implements InventoryService {
     }
 
     @Override
+    public List<PendingApproval> pendingApprovals(UUID clinicId) {
+        return transactionTemplate.execute(status -> dsl.select(
+                INVENTORY_CHANGE_REQUEST.ID, INVENTORY_CHANGE_REQUEST.KIND,
+                INVENTORY_CHANGE_REQUEST.REQUESTED_AT, INVENTORY_ITEM.NAME)
+                .from(INVENTORY_CHANGE_REQUEST)
+                .join(INVENTORY_ITEM).on(INVENTORY_CHANGE_REQUEST.ITEM_ID.eq(INVENTORY_ITEM.ID))
+                .where(INVENTORY_CHANGE_REQUEST.CLINIC_ID.eq(clinicId))
+                .and(INVENTORY_CHANGE_REQUEST.STATUS.eq(ChangeRequestStatus.pending))
+                .and(INVENTORY_CHANGE_REQUEST.ENTITY.eq(com.clinicos.shared.jooq.enums.ChangeRequestEntity.item))
+                .orderBy(INVENTORY_CHANGE_REQUEST.REQUESTED_AT.desc())
+                .fetch(r -> new PendingApproval(r.get(INVENTORY_CHANGE_REQUEST.ID), "change_request", "item",
+                        r.get(INVENTORY_CHANGE_REQUEST.KIND).getLiteral(), r.get(INVENTORY_ITEM.NAME),
+                        "طلب تعديل صنف", null, r.get(INVENTORY_CHANGE_REQUEST.REQUESTED_AT))));
+    }
+
+    @Override
     public ChangeRequest applyItemChange(UUID clinicId, Actor actor, UUID requestId, boolean approve) {
         return transactionTemplate.execute(status -> {
             requireManager(clinicId, actor);
@@ -209,6 +225,12 @@ public class DefaultInventoryService implements InventoryService {
     @Override
     public IssueResult issue(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
             BigDecimal requestedQty) {
+        return issueFor(clinicId, actor, itemId, location, requestedQty, null, null);
+    }
+
+    @Override
+    public IssueResult issueFor(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
+            BigDecimal requestedQty, String refType, UUID refId) {
         return transactionTemplate.execute(status -> {
             requireActiveActor(clinicId, actor);
             requireItem(clinicId, itemId);
@@ -229,7 +251,8 @@ public class DefaultInventoryService implements InventoryService {
                 clamped = false;
             }
             if (issued.signum() > 0) {
-                recordMovement(clinicId, actor, itemId, location, issued.negate(), MovementReason.issue);
+                recordMovement(clinicId, actor, itemId, location, issued.negate(), MovementReason.issue,
+                        refType, refId);
             }
             return new IssueResult(itemId, location, requestedQty, issued, clamped);
         });
@@ -247,8 +270,8 @@ public class DefaultInventoryService implements InventoryService {
             var onHand = onHand(clinicId, itemId, from);
             var moved = onHand.signum() <= 0 ? BigDecimal.ZERO : qty.min(onHand);
             if (moved.signum() > 0) {
-                recordMovement(clinicId, actor, itemId, from, moved.negate(), MovementReason.transfer);
-                recordMovement(clinicId, actor, itemId, to, moved, MovementReason.transfer);
+                recordMovement(clinicId, actor, itemId, from, moved.negate(), MovementReason.transfer, null, null);
+                recordMovement(clinicId, actor, itemId, to, moved, MovementReason.transfer, null, null);
             }
         });
     }
@@ -264,8 +287,21 @@ public class DefaultInventoryService implements InventoryService {
             }
             var delta = newCount.subtract(onHand(clinicId, itemId, location));
             if (delta.signum() != 0) {
-                recordMovement(clinicId, actor, itemId, location, delta, MovementReason.count);
+                recordMovement(clinicId, actor, itemId, location, delta, MovementReason.count, null, null);
             }
+        });
+    }
+
+    @Override
+    public void adjustFor(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
+            BigDecimal qtyDelta, MovementReason reason, String refType, UUID refId) {
+        transactionTemplate.executeWithoutResult(status -> {
+            requireActiveActor(clinicId, actor);
+            requireItem(clinicId, itemId);
+            if (location == null || qtyDelta == null || qtyDelta.signum() == 0 || reason == null) {
+                throw missing("حركة المخزون غير صالحة");
+            }
+            recordMovement(clinicId, actor, itemId, location, qtyDelta, reason, refType, refId);
         });
     }
 
@@ -349,7 +385,7 @@ public class DefaultInventoryService implements InventoryService {
     }
 
     private void recordMovement(UUID clinicId, Actor actor, UUID itemId, LocationKind location,
-            BigDecimal qtyDelta, MovementReason reason) {
+            BigDecimal qtyDelta, MovementReason reason, String refType, UUID refId) {
         dsl.insertInto(STOCK_MOVEMENT)
                 .set(STOCK_MOVEMENT.ID, UUID.randomUUID())
                 .set(STOCK_MOVEMENT.CLINIC_ID, clinicId)
@@ -357,6 +393,8 @@ public class DefaultInventoryService implements InventoryService {
                 .set(STOCK_MOVEMENT.LOCATION, location)
                 .set(STOCK_MOVEMENT.QTY_DELTA, qtyDelta)
                 .set(STOCK_MOVEMENT.REASON, reason)
+                .set(STOCK_MOVEMENT.REF_TYPE, refType)
+                .set(STOCK_MOVEMENT.REF_ID, refId)
                 .set(STOCK_MOVEMENT.CREATED_BY, actor.membershipId())
                 .execute();
     }

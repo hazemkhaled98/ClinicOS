@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.inventory.InventoryService;
+import com.clinicos.inventory.PurchasingService;
+import com.clinicos.procedures.ProceduresService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.InventoryService.ItemRequest;
 import com.clinicos.shared.ActivityLogService;
@@ -36,18 +39,43 @@ public class InventoryController {
             new SubArea("items", "manage", "الأصناف"),
             new SubArea("tray", "tray", "صينية التحضير"),
             new SubArea("issue", "issue", "صرف المخزون"),
+            new SubArea("orders", "orders", "النواقص والطلب"),
+            new SubArea("receive", "receive", "الاستلام"),
+            new SubArea("received", "received", "سجل الاستلام"),
+            new SubArea("returns", "returns", "المرتجعات"),
+            new SubArea("suppliers", "suppliers", "الموردين"),
+            new SubArea("procs", "procs", "قوائم الإجراءات"),
+            new SubArea("myprocs", "myprocs", "سجل إجراءاتي"),
+            new SubArea("dash", "dash", "لوحة المخزون"),
+            new SubArea("profit", "profit", "الربحية"),
+            new SubArea("analytics", "analytics", "تحليل الاستهلاك"),
+            new SubArea("waste", "waste", "الهدر"),
+            new SubArea("doctors", "doctors", "تحليل الأطباء"),
+            new SubArea("supAnalysis", "supAnalysis", "تحليل الموردين"),
+            new SubArea("itemAnalysis", "itemAnalysis", "تحليل الأصناف"),
             new SubArea("ledger", "ledger", "سجل الحركة"),
             new SubArea("approvals", "approvals", "طلبات الموافقة"));
 
     private final LayoutModel layoutModel;
     private final InventoryService inventoryService;
     private final ActivityLogService activityLogService;
+    private final PurchasingService purchasingService;
+    private final ProceduresService proceduresService;
 
     public InventoryController(LayoutModel layoutModel, InventoryService inventoryService,
             ActivityLogService activityLogService) {
+        this(layoutModel, inventoryService, activityLogService, null, null);
+    }
+
+    @Autowired
+    public InventoryController(LayoutModel layoutModel, InventoryService inventoryService,
+            ActivityLogService activityLogService, PurchasingService purchasingService,
+            ProceduresService proceduresService) {
         this.layoutModel = layoutModel;
         this.inventoryService = inventoryService;
         this.activityLogService = activityLogService;
+        this.purchasingService = purchasingService;
+        this.proceduresService = proceduresService;
     }
 
     @GetMapping("/inventory")
@@ -166,26 +194,55 @@ public class InventoryController {
         }
         model.addAttribute("layout", layoutModel.forRequest(session, AREA));
         model.addAttribute("requests", inventoryService.pendingChangeRequests(clinicId(session)));
+        model.addAttribute("approvals", renderApprovals(clinicId(session)));
         return "inventory-approvals";
     }
 
     @PostMapping("/inventory/approvals/{id}/decide")
     public String decide(@PathVariable UUID id, @RequestParam boolean approve,
             HttpSession session, Model model) {
+        return decide(id, approve, "change_request", session, model);
+    }
+
+    @PostMapping(value = "/inventory/approvals/{id}/decide", params = "source")
+    public String decide(@PathVariable UUID id, @RequestParam boolean approve,
+            @RequestParam(defaultValue = "change_request") String source,
+            HttpSession session, Model model) {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "approvals")) {
             return "redirect:/inventory";
         }
         try {
-            inventoryService.applyItemChange(clinicId(session), actor(session), id, approve);
+            if ("supplier_return".equals(source)) {
+                purchasingService.decideReturn(clinicId(session), actor(session), id, approve);
+            } else if ("procedure".equals(source) || "procedure_bom".equals(source) || "procedure_case".equals(source)) {
+                proceduresService.decideChange(clinicId(session), actor(session), id, approve);
+            } else {
+                inventoryService.applyItemChange(clinicId(session), actor(session), id, approve);
+            }
             log(session, approve ? "inventory.approval.approve" : "inventory.approval.reject",
                     "inventory_change_request");
             return "redirect:/inventory/approvals";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("layout", layoutModel.forRequest(session, AREA));
             model.addAttribute("requests", inventoryService.pendingChangeRequests(clinicId(session)));
+            model.addAttribute("approvals", renderApprovals(clinicId(session)));
             Toasts.error(model, exception.getMessage());
             return "inventory-approvals";
         }
+    }
+
+    private List<InventoryService.PendingApproval> renderApprovals(UUID clinicId) {
+        if (purchasingService == null || proceduresService == null) {
+            return inventoryService.pendingApprovals(clinicId);
+        }
+        var all = new java.util.ArrayList<InventoryService.PendingApproval>(inventoryService.pendingApprovals(clinicId));
+        all.addAll(proceduresService.pendingChanges(clinicId).stream()
+                .map(change -> new InventoryService.PendingApproval(change.id(), change.entity(), change.entity(),
+                        change.kind(), change.title(), change.summary(), null, change.requestedAt())).toList());
+        all.addAll(purchasingService.pendingReturns(clinicId).stream()
+                .map(request -> new InventoryService.PendingApproval(request.id(), "supplier_return", "supplier_return",
+                        "return", request.supplierName(), "طلب مرتجع بانتظار القرار", null, request.requestedAt())).toList());
+        return all;
     }
 
     private void renderItems(HttpSession session, Model model, boolean includeArchived) {
