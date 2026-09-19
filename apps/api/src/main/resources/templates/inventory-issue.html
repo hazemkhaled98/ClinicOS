@@ -37,7 +37,7 @@
                   <span th:if="${!line.belowAlert()}" class="clinicos-chip clinicos-chip--success">متوفر</span>
                 </td>
                 <td class="text-end">
-                  <form method="post" th:action="@{/inventory/issue}" hx-post="/inventory/issue" hx-target="#stock-table" hx-swap="outerHTML" class="inline-flex flex-wrap items-center gap-2 justify-end">
+                  <form method="post" th:action="@{/inventory/issue}" hx-post="/inventory/issue" hx-target="#stock-table" hx-swap="outerHTML swap:150ms" class="inline-flex flex-wrap items-center gap-2 justify-end">
                     <input type="hidden" name="itemId" th:value="${line.id()}">
                     <label class="flex items-center gap-2">
                       <span class="text-xs text-on-surface-variant shrink-0">الكمية</span>
