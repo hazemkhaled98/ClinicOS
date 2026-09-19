@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('قوائم الإجراءات')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+        <div><h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">قوائم الإجراءات</h1><p class="text-sm text-on-surface-variant">وصفات الإجراءات وتكلفة المواد، والتعديلات تحتاج موافقة المدير.</p></div>
+        <a class="clinicos-btn clinicos-btn--secondary" th:href="${includeArchived} ? @{/inventory/procs} : @{/inventory/procs(includeArchived=true)}" th:text="${includeArchived} ? 'إخفاء المؤرشفة' : 'عرض المؤرشفة'">عرض المؤرشفة</a>
+      </div>
+      <div class="clinicos-card p-6 mb-8">
+        <h2 class="text-xl font-bold text-teal-900 mb-5">إجراء جديد</h2>
+        <form method="post" th:action="@{/inventory/procs}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <label class="flex flex-col gap-1.5"><span class="clinicos-label">اسم الإجراء</span><input class="clinicos-input" name="name" required></label>
+          <label class="flex flex-col gap-1.5"><span class="clinicos-label">السعر</span><input class="clinicos-input" name="price" type="number" min="0" step="0.01" required></label>
+          <label class="flex flex-col gap-1.5"><span class="clinicos-label">تكلفة العمالة</span><input class="clinicos-input" name="laborCost" type="number" min="0" step="0.01" value="0" required></label>
+          <label class="flex flex-col gap-1.5"><span class="clinicos-label">أتعاب الطبيب</span><input class="clinicos-input" name="doctorFee" type="number" min="0" step="0.01" value="0" required></label>
+          <div class="sm:col-span-2 lg:col-span-4"><button class="clinicos-btn" type="submit">+ حفظ الإجراء</button></div>
+        </form>
+      </div>
+      <div th:if="${!#lists.isEmpty(procedures)}" class="space-y-3">
+        <article th:each="procedure : ${procedures}" class="clinicos-card p-5" x-data="{ open: false }">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <button type="button" class="text-start" @click="open = !open"><h2 class="font-bold text-teal-900 text-lg" th:text="${procedure.name()}">إجراء</h2><span class="text-xs text-on-surface-variant">مواد ≈ <span th:text="${procedure.estimatedMaterialCost()}">0</span> ج.م</span></button>
+            <div class="flex flex-wrap gap-2"><span th:if="${procedure.archived()}" class="clinicos-chip clinicos-chip--info">مؤرشف</span><button type="button" class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs" @click="open = !open">عرض الوصفة</button></div>
+          </div>
+          <div x-show="open" x-cloak class="mt-5 border-t border-outline pt-4">
+            <div class="grid gap-2 sm:grid-cols-3 text-sm mb-4"><span>السعر: <b th:text="${#numbers.formatDecimal(procedure.price(), 1, 2)}">0</b></span><span>العمالة: <b th:text="${#numbers.formatDecimal(procedure.laborCost(), 1, 2)}">0</b></span><span>أتعاب الطبيب: <b th:text="${#numbers.formatDecimal(procedure.doctorFee(), 1, 2)}">0</b></span></div>
+            <div class="overflow-x-auto"><table class="clinicos-table"><thead><tr><th>الصنف</th><th>الوحدة</th><th>الكمية</th><th>التكلفة الحالية</th></tr></thead><tbody><tr th:each="line : ${procedure.bom()}" class="border-t border-outline"><td th:text="${line.itemName()}">صنف</td><td th:text="${line.uom()}">وحدة</td><td th:text="${line.qty()}">1</td><td th:text="${#numbers.formatDecimal(line.unitCost(), 1, 2)}">0</td></tr></tbody></table></div>
+            <form method="post" th:action="@{/inventory/procs/{id}/change(id=${procedure.id()})}" class="mt-4 flex gap-2"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><input type="hidden" name="kind" value="delete"><button class="clinicos-btn clinicos-btn--danger px-3 py-2 text-xs" type="submit">طلب حذف</button></form>
+          </div>
+        </article>
+      </div>
+      <div th:if="${#lists.isEmpty(procedures)}" class="clinicos-empty-state p-16"><p class="font-bold text-teal-900 text-xl">مفيش إجراءات معتمدة لسه.</p></div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div><div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>

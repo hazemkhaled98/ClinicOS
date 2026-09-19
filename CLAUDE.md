@@ -78,6 +78,7 @@ All business queries go through the generated jOOQ metamodel (`DSLContext`); `Te
 - V13: `signup_clinic_with_owner` — `SECURITY DEFINER` self-service sign-up (clinic + owner atomically, before a tenant exists; the only door for `app_rw` to create a clinic)
 - V14: `app_user.clinic_id` NOT NULL + `unique (clinic_id, username)` — usernames are per-clinic, not global; auth key becomes (clinic_slug, username) via `app_user_credentials_lookup_by_clinic_username`; sign-up returns the clinic slug (the login screen's clinic code)
 - V20: `clinic_settings.working_weekdays` (ISO weekday mask, default Sat-Thu) + `clinic_holiday` table (clinic-wide or per-employee, RLS-protected) — the authoritative work-calendar source for UC-003 A3
+- V25: two-hop cross-tenant FK guards on inventory child tables without their own `clinic_id` (`purchase_order_line.item_id`, `procedure_bom.item_id`, `procedure_case_item.item_id` via `assert_same_clinic_via_parent`) + bespoke three-hop guard on `supplier_return_line.purchase_order_line_id`
 
 ## Object Storage (MinIO)
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('سجل الاستلام')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false"
+      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">سجل الاستلام</h1>
+        <p class="text-sm text-on-surface-variant">الطلبيات المستلمة وتفاصيلها — مع صورة الفاتورة.</p>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(orders)}" class="clinicos-card overflow-hidden">
+        <table class="clinicos-table clinicos-table--comfortable">
+          <thead>
+            <tr>
+              <th class="text-start">المورّد</th>
+              <th class="text-end">الإجمالي</th>
+              <th class="text-start">تاريخ الاستلام</th>
+              <th class="text-start">الأصناف</th>
+              <th class="text-end">الفاتورة</th>
+            </tr>
+          </thead>
+          <tbody th:each="o : ${orders}">
+            <tr>
+              <td class="text-start">
+                <span class="block font-bold text-teal-900" th:text="${o.supplierName()}">مورّد</span>
+              </td>
+              <td class="text-end clinicos-table-numeric" th:text="${#numbers.formatDecimal(o.total(), 1, 2)}">0.00</td>
+              <td class="text-start" th:text="${o.receivedAt() != null ? #temporals.format(o.receivedAt(), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+              <td class="text-start">
+                <div th:each="line : ${o.lines()}" class="text-sm">
+                  <span class="text-teal-900" th:text="${line.itemName()}">صنف</span>
+                  <span class="text-on-surface-variant">×</span>
+                  <span th:text="${line.qtyReceived() != null ? #numbers.formatDecimal(line.qtyReceived(), 1, 0) : '0'}">0</span>
+                  <span th:if="${line.lotNumber() != null}" class="clinicos-chip clinicos-chip--info ms-2" th:text="${'تشغيلة ' + line.lotNumber()}">تشغيلة</span>
+                </div>
+              </td>
+              <td class="text-end">
+                <a th:if="${o.invoicePhotoId() != null}" th:href="@{/attachments/{id}(id=${o.invoicePhotoId()})}" target="_blank"
+                   class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs">فتح الفاتورة</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div th:if="${#lists.isEmpty(orders)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">🗃️</div>
+        <p class="font-bold text-teal-900 text-xl">لا توجد طلبيات مستلمة</p>
+        <p class="mt-2 text-sm text-on-surface-variant">حين تستلم طلبية هتظهر هنا مع الفاتورة.</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

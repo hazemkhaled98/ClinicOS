@@ -1,5 +1,6 @@
 package com.clinicos.ui;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import com.clinicos.identity.api.SessionKeys;
@@ -34,5 +35,10 @@ final class AdminAccess {
 
     static String roleCode(HttpSession session) {
         return (String) session.getAttribute(SessionKeys.ROLE_CODE);
+    }
+
+    static boolean hasCode(HttpSession session, String code) {
+        Object permissions = session.getAttribute(SessionKeys.PERMISSIONS);
+        return permissions instanceof Collection<?> codes && codes.contains(code);
     }
 }

@@ -153,11 +153,13 @@ The design uses moderate corner radii to project approachability and visual refi
 - **Header**: Background `#f4f7f6`, text color `#0a2e29` (70% opacity), font size `11px`, font weight `600`, border-bottom 1px solid `#e1e8e5`.
 - **Rows**: Alternating row hover fill (`#f9fbfb`). Row-level action buttons remain visible on hover or persistent via three-dot context triggers.
 - **Cell Alignment**: Text content follows layout alignment (right-aligned for Arabic). Numerical metrics, monetary values, and phone numbers are strictly left-aligned or positioned with fixed-width tabular formatting.
+- **List Row** (`clinicos-list-row`): card-shell strippable row used when a screen is best read as stacked rows rather than a grid. White `#ffffff` fill, 1px solid border `#e2e8f0`, radius `rounded-xl`, padding `20px`. Title `text-teal-900` bold atop a `text-on-surface-variant` detail line; inline controls (quantity steppers, unit-cost inputs) sit at the inline-end on large screens and wrap below on narrow.
 
 ### Input Fields & Controls
 - **Input Housing**: Background `#ffffff`, border 1px solid `#e2e8f0`, radius `rounded-xl`. Auth/marketing screens: height `52px` (py-3.5 + sm text), font size `14px`; in-app dense inputs may use smaller heights.
 - **State Behavior**: Focus state applies an active border of `1.5px solid #0a2e29` with zero ambient outer glow. Error state switches the border to `border-danger-600`.
 - **Labels**: Positioned persistently above inputs (`font-size: 12px`, weight `600`, color `#0a2e29`).
+- **Stepper** (`clinicos-stepper`): compact −/+ quantity control wrapping a `type=number` field. Shell `bg-neutral-100` with 1px solid `#e2e8f0` border, radius `rounded-xl`. The −/+ buttons are white squares (1px `#e2e8f0` border, radius `rounded-lg`, `32px`) with bold `#0a2e29` glyphs; hover fills `#f6faf8`. The number field is transparent, centered, bold `#0a2e29`, fixed `48px` width with native spin buttons suppressed (numeric keyboards only).
 
 ### Gamification & Staff Performance Modules
 - **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `bg-neutral-300`, active stroke `text-success-600` (or `text-warning-600` when behind schedule).
@@ -194,3 +196,6 @@ These are the canonical colors for all UI elements; hex values used in Stitch co
 ## Comps Are Wireframes
 
 Design comp files (`ClinicOS Design/<NN>_<screen>/code.html`) serve as layout references and information architecture guides. Extract copy and structural decisions from them, but never port over raw hex values, Tailwind config overrides, inline `<style>` blocks, font-family declarations, or physical-direction utilities (`pl-`, `pr-`, `left-`, `right-`, `border-l`, `border-r`, etc.). Every color, spacing, and styling primitive used in a Thymeleaf template must come from this document's authorized token set (`tokens.css` and `components.css`). Comp files remain read-only on disk and are never edited during implementation.
+### Accordion
+
+Use `clinicos-accordion` with `clinicos-accordion__row` and `clinicos-accordion__body` for expandable procedure recipes.

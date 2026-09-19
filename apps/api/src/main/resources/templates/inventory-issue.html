@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('صرف المخزون')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">صرف المخزون</h1>
+        <p class="text-sm text-on-surface-variant">صرف كميات من المخزن للتراي — يتقيد بالرصيد المتاح تلقائياً.</p>
+      </div>
+      <div th:fragment="stockTable" id="stock-table"
+           th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+        <div th:if="${!#lists.isEmpty(stock)}" class="clinicos-card overflow-hidden">
+          <table class="clinicos-table clinicos-table--comfortable">
+            <thead>
+              <tr>
+                <th class="text-start">الصنف</th>
+                <th class="text-end">سعر الوحدة</th>
+                <th class="text-end">المتاح</th>
+                <th class="text-start">الحالة</th>
+                <th class="text-end">صرف</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="line : ${stock}">
+                <td class="text-start">
+                  <span class="block font-bold text-teal-900" th:text="${line.name()}">كمبوزيت</span>
+                  <span class="block text-xs text-on-surface-variant" th:text="${line.uom()}">عبوة</span>
+                </td>
+                <td class="text-end clinicos-table-numeric">
+                  <span th:text="${line.unitCost() != null ? #numbers.formatDecimal(line.unitCost(), 1, 2) : '—'}">—</span>
+                </td>
+                <td class="text-end clinicos-table-numeric" th:text="${line.onHand() != null ? #numbers.formatDecimal(line.onHand(), 1, 0) : '—'}">0</td>
+                <td class="text-start">
+                  <span th:if="${line.belowAlert()}" class="clinicos-chip clinicos-chip--warning">منخفض</span>
+                  <span th:if="${!line.belowAlert()}" class="clinicos-chip clinicos-chip--success">متوفر</span>
+                </td>
+                <td class="text-end">
+                  <form method="post" th:action="@{/inventory/issue}" hx-post="/inventory/issue" hx-target="#stock-table" hx-swap="outerHTML swap:150ms" class="inline-flex flex-wrap items-center gap-2 justify-end">
+                    <input type="hidden" name="itemId" th:value="${line.id()}">
+                    <label class="flex items-center gap-2">
+                      <span class="text-xs text-on-surface-variant shrink-0">الكمية</span>
+                      <input type="number" name="requestedQty" min="0" step="0.01" inputmode="decimal" required class="clinicos-input w-28">
+                    </label>
+                    <button class="clinicos-btn px-3 py-2 text-xs" type="submit">صرف</button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div th:if="${#lists.isEmpty(stock)}" class="clinicos-empty-state p-16">
+          <div class="text-5xl mb-4">📤</div>
+          <p class="font-bold text-teal-900 text-xl">لا يوجد رصيد للصرف</p>
+          <p class="mt-2 text-sm text-on-surface-variant">أنشئ أصناف في «جرد الأصناف» ليظهر رصيدها هنا.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

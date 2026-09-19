@@ -1,3 +1,37 @@
+param(
+    [switch]$Background
+)
+
+if ($Background) {
+    $staleIds = @(Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match "clinicos" } |
+        ForEach-Object ProcessId)
+    foreach ($id in $staleIds) {
+        taskkill /PID $id /T /F > $null 2>&1
+    }
+    if ($staleIds) { Start-Sleep -Seconds 2 }
+    $logPath = Join-Path $env:TEMP 'clinicos-dev-up.log'
+    $errorPath = Join-Path $env:TEMP 'clinicos-dev-up.err'
+    $pwsh = (Get-Command pwsh).Source
+    $command = "start `"ClinicOS`" /b `"$pwsh`" -NoProfile -File `"$PSCommandPath`" > `"$logPath`" 2> `"$errorPath`""
+    Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', $command) -WorkingDirectory $PSScriptRoot -WindowStyle Hidden
+    $ready = $false
+    for ($i = 0; $i -lt 60; $i++) {
+        try {
+            Invoke-WebRequest -Uri 'http://localhost:8080/login' -UseBasicParsing -TimeoutSec 2 | Out-Null
+            $ready = $true
+            break
+        } catch {
+            Start-Sleep -Seconds 2
+        }
+    }
+    if (-not $ready) {
+        throw "ClinicOS did not become ready at http://localhost:8080/login within 120s"
+    }
+    Write-Host "ClinicOS ready at http://localhost:8080" -ForegroundColor Green
+    exit 0
+}
+
 # ClinicOS dev: docker up (postgres+minio) -> ensure app_rw role -> run app.
 # Idempotent; safe on fresh volumes and fresh clusters alike.
 Set-Location $PSScriptRoot

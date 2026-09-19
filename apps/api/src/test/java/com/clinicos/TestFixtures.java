@@ -113,9 +113,14 @@ public final class TestFixtures {
     }
 
     public static UUID insertMembership(Connection connection, UUID clinicId, UUID userId, String roleCode) throws Exception {
+        return insertMembership(connection, clinicId, userId, roleCode, MembershipStatus.active);
+    }
+
+    public static UUID insertMembership(Connection connection, UUID clinicId, UUID userId, String roleCode,
+            MembershipStatus status) throws Exception {
         return DSL.using(connection, SQLDialect.POSTGRES)
                 .insertInto(MEMBERSHIP, MEMBERSHIP.CLINIC_ID, MEMBERSHIP.USER_ID, MEMBERSHIP.ROLE_ID, MEMBERSHIP.STATUS)
-                .select(DSL.select(val(clinicId), val(userId), ROLE.ID, val(MembershipStatus.active))
+                .select(DSL.select(val(clinicId), val(userId), ROLE.ID, val(status))
                         .from(ROLE)
                         .where(ROLE.CODE.eq(roleCode)))
                 .returningResult(MEMBERSHIP.ID)
