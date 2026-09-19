@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>لوحة التحكم</title>
+</head>
+<body>
+
+<div th:fragment="volumeCard"
+     id="volume-card" class="p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <div class="flex items-center justify-between flex-wrap gap-2 mb-5">
+    <h2 class="text-xl font-extrabold text-teal-900">📈 حجم الإنتاج الشهري</h2>
+  </div>
+
+   <div th:if="${volumePace.paceTarget() == null}" class="mb-4 flex items-center gap-2.5 px-4 py-3 rounded-lg bg-info-50 border border-info-600 text-info-600 text-xs sm:text-sm font-medium">
+     لم يتم تحديد هدف شهري — مكوّن حجم الإنتاج غير محتسب في نتائج الموظفين هذا الشهر.
+  </div>
+
+   <form class="flex flex-wrap items-end gap-3" th:attr="hx-post='/admin-dashboard/overview/volume'" hx-target="#volume-card" hx-swap="outerHTML">
+     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+     <input type="hidden" name="month" th:value="${month}">
+    <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
+      حجم الإنتاج المتراكم للشهر
+      <input type="number" min="0" step="0.01" inputmode="decimal" name="amount"
+             class="clinicos-input w-44 clinicos-table-numeric"
+             th:value="${volumeForm.getAmount()}">
+    </label>
+    <button type="submit" class="clinicos-btn">حفظ الرقم</button>
+  </form>
+
+   <div th:if="${volumePace.paceTarget() != null}" class="mt-5 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+      <span class="text-on-surface-variant">
+        آخر تحديث: <span class="font-bold text-teal-900 clinicos-table-numeric" th:text="${volumePace.actual() != null ? volumePace.actual() : '0'}">0</span>
+        — المستهدف حتى الآن (<span th:text="${volumePace.workingDaysElapsed()}">5</span>/<span th:text="${volumePace.workingDaysInMonth()}">22</span> يوم):
+        <span class="font-bold text-teal-900 clinicos-table-numeric" th:text="${volumePace.paceTarget()}">20000</span>
+        / <span class="clinicos-table-numeric" th:text="${volumePace.monthlyTarget()}">80000</span>
+      </span>
+      <span class="font-medium text-on-surface-variant">الوصول للهدف الشهري</span>
+    </div>
+    <div class="clinicos-progress-track">
+      <div class="clinicos-progress-fill"
+           th:classappend="${volumePace.actual() != null and volumePace.actual() < volumePace.monthlyTarget()} ? ' clinicos-progress-fill--warning' : ''"
+           th:style="|width: ${volumePace.pct()}%|"></div>
+    </div>
+    <div class="bg-neutral-50/80 rounded-xl p-4 border border-neutral-200 text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+      سجّل الرقم الفعلي المتراكم لحد دلوقتي (إنت اللي بتعدّله بنفسك مع مرور الأسابيع — مش بيتجمّع تلقائيًا).
+      الهدف شهري (<span class="font-bold clinicos-table-numeric" th:text="${volumePace.monthlyTarget()}">80000</span>)، والنسبة دي بتدخل في تقييم كل الموظفين.
+    </div>
+  </div>
+</div>
+
+<div th:fragment="teamCard" id="team-card" class="space-y-6">
+  <section class="overflow-hidden rounded-2xl border border-neutral-200 bg-surface-elevated p-6 sm:p-8" data-purpose="team-summary">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <h2 class="flex items-center gap-2 text-lg font-extrabold text-teal-900">👥 ملخص الفريق</h2>
+      <span class="text-xs text-on-surface-variant">شهر <span class="font-bold text-teal-900" th:text="${month}">2026-09</span></span>
+    </div>
+    <div class="grid grid-cols-2 gap-4 max-w-md">
+      <div class="clinicos-stat-tile">
+        <div class="clinicos-stat-tile__icon">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </div>
+        <span class="clinicos-stat-tile__value" th:text="${headcount}">3</span>
+      </div>
+      <div class="clinicos-stat-tile">
+        <div class="clinicos-stat-tile__icon clinicos-stat-tile__icon--success">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </div>
+        <span class="clinicos-stat-tile__value" th:text="${avgScore != null ? avgScore : '—'}">35</span>
+      </div>
+    </div>
+  </section>
+
+  <section data-purpose="employee-performance-cards">
+    <h2 class="text-lg font-extrabold text-teal-900 mb-4">أداء الموظفين</h2>
+    <p th:if="${#lists.isEmpty(teamScores)}" class="py-8 text-center text-sm text-on-surface-variant clinicos-empty-state">لا توجد نتائج لعرضها هذا الشهر.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <article th:each="score : ${teamScores}" th:key="${score.employeeId()}"
+               class="rounded-2xl border border-neutral-200 bg-surface-elevated p-6 flex flex-col justify-between space-y-6 hover:shadow-sm transition">
+        <div>
+          <div class="flex items-start justify-between">
+            <div class="text-start">
+               <a th:href="@{/evaluation(month=${month},employee=${score.employeeId()})}"
+                  class="text-lg font-bold text-teal-900 hover:text-teal-700" th:text="${score.employeeName()}">ندى</a>
+              <p class="text-xs text-on-surface-variant font-medium mt-0.5" th:text="${score.roleCode()}">استقبال</p>
+            </div>
+            <span class="clinicos-avatar"
+                   th:text="${#strings.isEmpty(score.employeeName()) ? '؟' : #strings.substring(score.employeeName(), 0, 1)}">ن</span>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <span th:if="${score.finalScore() != null and score.finalScore() < 60}"
+                  class="clinicos-chip clinicos-chip--danger">يحتاج تطوير</span>
+            <span th:if="${score.finalScore() != null and score.finalScore() >= 60}"
+                  class="clinicos-chip clinicos-chip--success">أداء جيد</span>
+            <span th:if="${score.finalScore() == null}"
+                  class="clinicos-chip clinicos-chip--info">لا توجد نقاط بعد</span>
+
+            <div class="relative w-16 h-16 flex items-center justify-center" th:if="${score.finalScore() != null}">
+              <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64" role="img"
+                    th:attr="aria-label=${'نتيجة ' + score.employeeName() + ': ' + score.finalScore()}">
+                <circle class="clinicos-ring__track" cx="32" cy="32" fill="transparent" r="27" stroke-width="5"></circle>
+                <circle class="clinicos-ring__fill"
+                        th:classappend="${score.finalScore() < 60} ? ' clinicos-ring--warning' : ''"
+                        cx="32" cy="32" fill="transparent" r="27" stroke-width="5" stroke-linecap="round"
+                        th:attr="stroke-dasharray=${169.646},stroke-dashoffset=${169.646 * (1 - score.finalScore() / 100)}"></circle>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-sm font-bold text-on-surface leading-none clinicos-table-numeric" th:text="${score.finalScore()}">34</span>
+                <span class="text-[9px] text-on-surface-variant font-medium leading-none mt-0.5">من 100</span>
+              </div>
+            </div>
+            <span th:if="${score.finalScore() == null}" class="text-on-surface-variant text-sm">—</span>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-neutral-100 flex items-center justify-between text-xs text-on-surface-variant font-medium">
+          <span class="flex items-center gap-1">الدرجة: <span class="font-bold text-teal-900" th:text="${score.tierName() != null ? score.tierName() : '—'}">مطمح</span></span>
+          <span class="flex items-center gap-1">الحافز: <span class="clinicos-table-numeric" th:text="${score.incentiveAmount() != null ? score.incentiveAmount() : 0}">0</span></span>
+           <span class="flex items-center gap-1">الإجمالي: <span class="clinicos-table-numeric" th:text="${score.totalPay() != null ? score.totalPay() : '—'}">2500</span></span>
+           <span class="flex items-center gap-1"><span class="clinicos-table-numeric" th:text="${score.daysLogged()}">N</span> يوم</span>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>

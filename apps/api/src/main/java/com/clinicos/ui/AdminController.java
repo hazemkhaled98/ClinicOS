@@ -1,6 +1,10 @@
 package com.clinicos.ui;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +20,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.academy.AcademyService;
+import com.clinicos.academy.AcademyService.Actor;
+import com.clinicos.evaluation.api.EvaluationService;
+import com.clinicos.evaluation.api.EvaluationService.TeamScore;
+import com.clinicos.shared.ActivityLogService.Entry;
+import com.clinicos.shared.jooq.enums.AcademyAudience;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
@@ -50,21 +61,225 @@ public class AdminController {
     private final ClinicSettingsService clinicSettingsService;
     private final WorkCalendarService workCalendarService;
     private final UserAdminService userAdminService;
+    private final EvaluationService evaluationService;
+    private final AcademyService academyService;
 
     public AdminController(LayoutModel layoutModel, EmployeeService employeeService,
             ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService,
-            WorkCalendarService workCalendarService, UserAdminService userAdminService) {
+            WorkCalendarService workCalendarService, UserAdminService userAdminService,
+            EvaluationService evaluationService, AcademyService academyService) {
         this.layoutModel = layoutModel;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
         this.clinicSettingsService = clinicSettingsService;
         this.workCalendarService = workCalendarService;
         this.userAdminService = userAdminService;
+        this.evaluationService = evaluationService;
+        this.academyService = academyService;
     }
 
     @GetMapping("/admin-dashboard")
     public String index() {
-        return "redirect:/admin-dashboard/settings";
+        return "redirect:/admin-dashboard/overview";
+    }
+
+    @GetMapping("/admin-dashboard/overview")
+    public String overview(@RequestParam(required = false) String month, HttpSession session, Model model) {
+        if (!canAccessDashboard(session)) {
+            return "redirect:/";
+        }
+        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
+        model.addAttribute("section", NavSectionResolver.sectionByRoute("admin-dashboard"));
+        YearMonth selected = parseMonth(month);
+        UUID clinicId = AdminAccess.clinicId(session);
+        model.addAttribute("month", selected.toString());
+        model.addAttribute("currentMonth", YearMonth.now().toString());
+        model.addAttribute("prevMonth", selected.minusMonths(1).toString());
+        model.addAttribute("nextMonth", selected.plusMonths(1).toString());
+        model.addAttribute("nextDisabled", selected.equals(YearMonth.now()));
+        model.addAttribute("volumePace", evaluationService.volumePace(clinicId, selected));
+        model.addAttribute("volumeForm", new VolumeCapForm(selected));
+        List<TeamScore> team = evaluationService.teamScores(clinicId, selected);
+        model.addAttribute("teamScores", team);
+        model.addAttribute("headcount", team.size());
+        model.addAttribute("avgScore", averageScore(team));
+        return "admin/dashboard-page";
+    }
+
+    @GetMapping("/admin-dashboard/staff")
+    public String staff(@RequestParam(required = false) String employee, @RequestParam(required = false) String month,
+            HttpSession session, Model model) {
+        if (!canAccessDashboard(session)) {
+            return "redirect:/";
+        }
+        UUID clinicId = AdminAccess.clinicId(session);
+        List<EmployeeService.Employee> employees = employeeService.list(clinicId);
+        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
+        model.addAttribute("section", NavSectionResolver.sectionByRoute("admin-dashboard"));
+        model.addAttribute("employees", employees);
+        model.addAttribute("month", parseMonth(month).toString());
+        UUID employeeId = parseUuid(employee);
+        if (employeeId != null && employees.stream().anyMatch(item -> item.id().equals(employeeId))) {
+            Actor actor = new Actor(AdminAccess.membershipId(session), AdminAccess.roleCode(session),
+                    sessionEmployeeId(session, clinicId));
+            try {
+                AcademyAudience audience = academyService.audienceOf(clinicId, employeeId);
+                var track = academyService.traineeCurriculum(clinicId, actor, employeeId, audience);
+                long completed = track.units().stream().filter(unit -> "done".equals(unit.status())).count();
+                model.addAttribute("track", track);
+                model.addAttribute("completedUnits", completed);
+                model.addAttribute("totalUnits", track.units().size());
+                model.addAttribute("selectedEmployee", employeeId);
+                model.addAttribute("evaluation", evaluationService.evaluate(clinicId, employeeId, parseMonth(month)));
+            } catch (IllegalArgumentException e) {
+                return "redirect:/admin-dashboard/staff";
+            }
+        }
+        return "admin/employee-profile-page";
+    }
+
+    @GetMapping("/admin-dashboard/activity")
+    public String activity(@RequestParam(required = false) String day, @RequestParam(required = false) String category,
+            HttpSession session, Model model) {
+        if (!canAccessDashboard(session)) {
+            return "redirect:/";
+        }
+        LocalDate selected = parseDay(day);
+        model.addAttribute("layout", layoutModel.forRequest(session, "admin-dashboard"));
+        model.addAttribute("section", NavSectionResolver.sectionByRoute("admin-dashboard"));
+        model.addAttribute("day", selected);
+        model.addAttribute("category", category == null ? "all" : category);
+        model.addAttribute("categories", activityCategories());
+        model.addAttribute("labels", activityLabels());
+        model.addAttribute("entries", activityLogService.forDay(AdminAccess.clinicId(session), selected,
+                activityActions(category)));
+        return "admin/activity-page";
+    }
+
+    private UUID sessionEmployeeId(HttpSession session, UUID clinicId) {
+        EmployeeService.Employee employee = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
+        return employee == null ? null : employee.id();
+    }
+
+    private static UUID parseUuid(String value) {
+        try {
+            return value == null ? null : UUID.fromString(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static LocalDate parseDay(String value) {
+        try {
+            return value == null || value.isBlank() ? LocalDate.now() : LocalDate.parse(value);
+        } catch (java.time.format.DateTimeParseException e) {
+            return LocalDate.now();
+        }
+    }
+
+    private static Map<String, String> activityCategories() {
+        return Map.of("all", "الكل", "auth", "دخول النظام", "finance", "تعديلات مالية", "operations", "مواعيد وكشوفات");
+    }
+
+    private static Map<String, String> activityLabels() {
+        return Map.ofEntries(
+                Map.entry("login", "دخول النظام"), Map.entry("signup", "إنشاء العيادة"),
+                Map.entry("volume.record", "تسجيل حجم الإنتاج"), Map.entry("eval.override", "تعديل حد التقييم"),
+                Map.entry("eval.unlock", "فتح شهر للتقييم"), Map.entry("employee.update", "تعديل موظف"),
+                Map.entry("inventory.issue", "صرف مخزون"), Map.entry("inventory.receive", "استلام مخزون"),
+                Map.entry("permissions.update", "تحديث الصلاحيات"), Map.entry("user.create", "إنشاء مستخدم"),
+                Map.entry("user.suspend", "تعليق مستخدم"), Map.entry("user.reactivate", "إعادة تفعيل مستخدم"),
+                Map.entry("user.password_change", "تغيير كلمة المرور"), Map.entry("user.assign_role", "تعديل الدور"));
+    }
+
+    private static String activityActions(String category) {
+        return switch (category == null ? "all" : category) {
+        case "auth" -> "login,signup,user.create,user.suspend,user.reactivate,user.password_change,user.assign_role,permissions.update";
+        case "finance" -> "volume.record,eval.override,eval.unlock,employee.update,inventory.issue,inventory.receive,gamification";
+        case "operations" -> "selfcheck,task,assignment,prep,academy,eval.approve,eval.reject,eval.assign";
+        default -> "all";
+        };
+    }
+
+    @PostMapping("/admin-dashboard/overview/volume")
+    public String recordVolume(VolumeCapForm form, HttpSession session, Model model) {
+        if (!canAccessDashboard(session)) {
+            return "redirect:/";
+        }
+        YearMonth month = parseMonth(form.getMonth());
+        Map<String, String> fieldErrors = new HashMap<>();
+        BigDecimal amount = FormParsing.parseAmount(form.getAmount(), "amount", fieldErrors, "حجم الإنتاج غير صحيح");
+        if (fieldErrors.isEmpty()) {
+            try {
+                evaluationService.recordVolume(AdminAccess.clinicId(session), month, amount,
+                        AdminAccess.membershipId(session));
+                activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session),
+                    "volume.record", "operations_volume");
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("amount", e.getMessage());
+            }
+        }
+        Toasts.fromErrors(model, fieldErrors, "تم تسجيل حجم الإنتاج");
+        renderVolumeCard(model, session, month);
+        return "admin/dashboard :: volumeCard";
+    }
+
+    private void renderVolumeCard(Model model, HttpSession session, YearMonth month) {
+        model.addAttribute("volumePace", evaluationService.volumePace(AdminAccess.clinicId(session), month));
+        model.addAttribute("volumeForm", new VolumeCapForm(month));
+        model.addAttribute("month", month.toString());
+        model.addAttribute("currentMonth", YearMonth.now().toString());
+        model.addAttribute("nextDisabled", month.equals(YearMonth.now()));
+    }
+
+    private static BigDecimal averageScore(List<TeamScore> team) {
+        List<BigDecimal> scored = team.stream().map(TeamScore::finalScore)
+                .filter(java.util.Objects::nonNull).toList();
+        if (scored.isEmpty()) {
+            return null;
+        }
+        return scored.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(scored.size()), 1, java.math.RoundingMode.HALF_UP);
+    }
+
+    static YearMonth parseMonth(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return YearMonth.now();
+        }
+        try {
+            return YearMonth.parse(raw.trim());
+        } catch (DateTimeParseException e) {
+            return YearMonth.now();
+        }
+    }
+
+    static class VolumeCapForm {
+        private String month;
+        private String amount;
+
+        VolumeCapForm() {
+        }
+
+        VolumeCapForm(YearMonth month) {
+            this.month = month.toString();
+            this.amount = "";
+        }
+
+        public String getMonth() {
+            return month;
+        }
+
+        public void setMonth(String month) {
+            this.month = month;
+        }
+
+        public String getAmount() {
+            return amount;
+        }
+
+        public void setAmount(String amount) {
+            this.amount = amount;
+        }
     }
 
     @GetMapping("/admin-dashboard/settings")

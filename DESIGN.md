@@ -163,6 +163,10 @@ The design uses moderate corner radii to project approachability and visual refi
 
 ### Gamification & Staff Performance Modules
 - **Velocity Rings**: SVG-based concentric progress rings for daily target treatments and hygiene recalls. Track width `4px`, track background `bg-neutral-300`, active stroke `text-success-600` (or `text-warning-600` when behind schedule).
+- **Score Rings** (`clinicos-ring`): the employee score gauge on the admin dashboard. `clinicos-ring__track` uses `--color-neutral-300`; `clinicos-ring__fill` uses `--color-success-600` by default and `--color-warning-600` via `--warning` when the score trails a healthy threshold. `stroke-dashoffset` is driven inline from the score, rotated `-90deg` so the ring starts at the top. Mirror the gauge's pace logic in the server-side number, never recompute on the client.
+- **Dashboard Stat Tiles** (`clinicos-stat-tile`): compact KPI blocks (headcount, score average). Neutral tint fill (`bg-neutral-50`, 1px `border-neutral-200`, radius `rounded-xl`), a white icon squircle (`clinicos-stat-tile__icon`, teal glyph, `--success` variant for green glyphs), and a tabular-nums bold value.
+- **Progress Bars** (`clinicos-progress-track` / `clinicos-progress-fill`): linear completion/attainment meter. Track `bg-neutral-100`, radius `rounded-full`, `overflow-hidden`; fill is a leftward success→teal gradient (or solid `--color-warning-600` when behind target), width driven inline in percent.
+- **Initial Avatars** (`clinicos-avatar`): circular identity chip for staff rows and admin cards. `bg-teal-100 text-teal-700`, weight `700`, pill radius, `2.75rem`. First Arabic letter of the name.
 - **Streak Badges**: Pill-shaped container (`rounded-full`), background `bg-warning-50`, border 1px solid `border-warning-600`, displaying consecutive clinic operational days or positive review runs with an embedded icon.
 - **Daily Inspiration Banner**: Compact single-line banner at top of staff views with a light tint fill (`bg-info-50`), subtle 1px border (`border-info-600`), and `text-xs` typography to build positive momentum.
 

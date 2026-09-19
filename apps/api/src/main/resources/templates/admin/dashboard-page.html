@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('نظرة عامة')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
+      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker">عيادتي</p>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">لوحة التحكم</h1>
+      <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">نظرة شاملة على حجم الإنتاج وأداء الفريق خلال الشهر</p>
+      <nav th:replace="~{fragments/admin-tabs :: adminTabs('overview')}"></nav>
+
+      <div class="mt-6 flex flex-wrap items-center justify-between gap-4 p-4 clinicos-card">
+        <div class="flex items-center gap-3">
+          <a th:href="@{/admin-dashboard/overview(month=${prevMonth})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر السابق">⇐ السابق</a>
+          <span class="text-base font-extrabold text-teal-900" th:text="${month}">2026-09</span>
+          <a th:if="${!nextDisabled}" th:href="@{/admin-dashboard/overview(month=${nextMonth})}" class="clinicos-btn clinicos-btn--ghost" aria-label="الشهر التالي">التالي ⇒</a>
+        </div>
+        <span th:if="${month lt currentMonth}" class="clinicos-chip clinicos-chip--warning">شهر مقفل</span>
+        <span th:if="${month ge currentMonth}" class="clinicos-chip clinicos-chip--info">الشهر الحالي — يُحسب مباشرة</span>
+      </div>
+
+      <div class="mt-6" th:replace="~{admin/dashboard :: volumeCard}"></div>
+
+      <div class="mt-8" th:replace="~{admin/dashboard :: teamCard}"></div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

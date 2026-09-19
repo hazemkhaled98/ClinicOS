@@ -70,6 +70,60 @@ public interface EvaluationService {
     record GoalProgress(String title, int target, int current) {
     }
 
+    /** The clinic's recorded operating volume for a month, or null when none. */
+    BigDecimal volume(UUID clinicId, YearMonth month);
+
+    /** Upserts the clinic's operating volume for a month (UC-009 step 4). */
+    void recordVolume(UUID clinicId, YearMonth month, BigDecimal amount, UUID recordedByMembershipId);
+
+    /** Today's pace of actual volume against the month-so-far target (UC-009 step 2, BR-001). */
+    VolumePace volumePace(UUID clinicId, YearMonth month);
+
+    /**
+     * A clinic-wide live team summary for a month (UC-009 step 3): one row per
+     * staffed employee (owner excluded, BR-G17), each scored through the same
+     * engine as UC-004/UC-005. When no operating target is configured the
+     * volume component is skipped (A1 / BR-G15), mirroring the per-employee
+     * evaluation.
+     */
+    TeamScore teamScore(UUID clinicId, UUID employeeId, YearMonth month);
+
+    /** All staffed employees' scores for a month (owner excluded), lowest first. */
+    List<TeamScore> teamScores(UUID clinicId, YearMonth month);
+
+    record TeamScore(
+            UUID employeeId,
+            String employeeName,
+            String roleCode,
+            BigDecimal finalScore,
+            String tierName,
+            BigDecimal incentiveAmount,
+            BigDecimal totalPay,
+            int daysLogged) {
+    }
+
+    /**
+     * Derivative from the clinic-wide volume and the work calendar: how much of
+     * the month has elapsed and the pace-adjusted target for those working days.
+     */
+    record VolumePace(
+            BigDecimal monthlyTarget,
+            BigDecimal actual,
+            BigDecimal paceTarget,
+            int workingDaysElapsed,
+            int workingDaysInMonth) {
+
+        /** Attainment of the full monthly target, capped at 100, for the progress bar. */
+        public int pct() {
+            if (actual == null || monthlyTarget == null
+                    || monthlyTarget.signum() <= 0) {
+                return 0;
+            }
+            return Math.min(100, actual.multiply(BigDecimal.valueOf(100))
+                    .divideToIntegralValue(monthlyTarget).intValue());
+        }
+    }
+
     /** Raised when a frozen snapshot is edited without a preceding unlock. */
     class EvaluationConflictException extends RuntimeException {
         public EvaluationConflictException(String message) {

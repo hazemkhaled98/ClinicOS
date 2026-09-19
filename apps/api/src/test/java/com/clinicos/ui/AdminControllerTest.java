@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,8 @@ import org.springframework.ui.Model;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.academy.AcademyService;
+import com.clinicos.evaluation.api.EvaluationService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
@@ -41,6 +44,8 @@ class AdminControllerTest {
     private ClinicSettingsService clinicSettingsService;
     private WorkCalendarService workCalendarService;
     private UserAdminService userAdminService;
+    private EvaluationService evaluationService;
+    private AcademyService academyService;
     private AdminController controller;
     private Model model;
 
@@ -52,16 +57,50 @@ class AdminControllerTest {
         clinicSettingsService = mock(ClinicSettingsService.class);
         workCalendarService = mock(WorkCalendarService.class);
         userAdminService = mock(UserAdminService.class);
+        evaluationService = mock(EvaluationService.class);
+        academyService = mock(AcademyService.class);
         controller = new AdminController(layoutModel, employeeService, activityLogService,
-                clinicSettingsService, workCalendarService, userAdminService);
+                clinicSettingsService, workCalendarService, userAdminService, evaluationService, academyService);
         model = new ExtendedModelMap();
         when(workCalendarService.workingWeekdays(CLINIC)).thenReturn(List.of(6, 7, 1, 2, 3, 4));
         when(workCalendarService.listHolidays(CLINIC)).thenReturn(List.of());
     }
 
     @Test
-    void indexRedirectsToSettings() {
-        assertThat(controller.index()).isEqualTo("redirect:/admin-dashboard/settings");
+    void indexRedirectsToOverview() {
+        assertThat(controller.index()).isEqualTo("redirect:/admin-dashboard/overview");
+    }
+
+    @Test
+    void overviewRendersForCeo() {
+        HttpSession session = session();
+        allowDashboard();
+        when(evaluationService.volumePace(CLINIC, java.time.YearMonth.now()))
+                .thenReturn(new EvaluationService.VolumePace(null, null, null, 5, 22));
+        when(evaluationService.teamScores(CLINIC, java.time.YearMonth.now())).thenReturn(List.of());
+
+        assertThat(controller.overview(null, session, model)).isEqualTo("admin/dashboard-page");
+        assertThat(model.getAttribute("teamScores")).isEqualTo(List.of());
+    }
+
+    @Test
+    void staffWithoutSelectionRendersEmptyStateModel() {
+        HttpSession session = session();
+        allowDashboard();
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        assertThat(controller.staff(null, null, session, model)).isEqualTo("admin/employee-profile-page");
+        assertThat(model.getAttribute("track")).isNull();
+    }
+
+    @Test
+    void activityRendersSelectedDayAndCategory() {
+        HttpSession session = session();
+        allowDashboard();
+        when(activityLogService.forDay(eq(CLINIC), any(LocalDate.class), eq("all"))).thenReturn(List.of());
+
+        assertThat(controller.activity("2026-09-19", "all", session, model)).isEqualTo("admin/activity-page");
+        assertThat(model.getAttribute("day")).isEqualTo(LocalDate.of(2026, 9, 19));
     }
 
     @Test

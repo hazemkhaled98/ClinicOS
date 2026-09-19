@@ -6,14 +6,10 @@
 <body>
 <nav th:fragment="adminTabs(active)" class="flex flex-wrap gap-2 mb-8" aria-label="تبويبات لوحة التحكم">
   <a th:href="${active == 'overview'} ? '#' : '/admin-dashboard/overview'"
-     th:classappend="${active == 'overview'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
-     th:tabindex="${active == 'overview'} ? '0' : '-1'"
-     th:aria-disabled="${active != 'overview'} ? 'true' : null"
+     th:classappend="${active == 'overview'} ? ' clinicos-admin-tab--active' : ''"
      class="clinicos-admin-tab" aria-current="${active == 'overview'} ? 'page' : null">نظرة عامة</a>
   <a th:href="${active == 'staff'} ? '#' : '/admin-dashboard/staff'"
-     th:classappend="${active == 'staff'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
-     th:tabindex="${active == 'staff'} ? '0' : '-1'"
-     th:aria-disabled="${active != 'staff'} ? 'true' : null"
+     th:classappend="${active == 'staff'} ? ' clinicos-admin-tab--active' : ''"
      class="clinicos-admin-tab" aria-current="${active == 'staff'} ? 'page' : null">ملف الموظف</a>
   <a th:href="${active == 'tasks'} ? '#' : '/admin-dashboard/tasks'"
      th:classappend="${active == 'tasks'} ? ' clinicos-admin-tab--active' : ''"
@@ -28,9 +24,7 @@
      th:classappend="${active == 'goals'} ? ' clinicos-admin-tab--active' : ''"
      class="clinicos-admin-tab" aria-current="${active == 'goals'} ? 'page' : null">الأهداف والتحفيز</a>
   <a th:href="${active == 'activity'} ? '#' : '/admin-dashboard/activity'"
-     th:classappend="${active == 'activity'} ? ' clinicos-admin-tab--active' : ' clinicos-admin-tab--disabled'"
-     th:tabindex="${active == 'activity'} ? '0' : '-1'"
-     th:aria-disabled="${active != 'activity'} ? 'true' : null"
+     th:classappend="${active == 'activity'} ? ' clinicos-admin-tab--active' : ''"
      class="clinicos-admin-tab" aria-current="${active == 'activity'} ? 'page' : null">سجل النشاط</a>
   <a th:href="${active == 'permissions'} ? '#' : '/admin-dashboard/permissions'"
      th:classappend="${active == 'permissions'} ? ' clinicos-admin-tab--active' : ''"

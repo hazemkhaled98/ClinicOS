@@ -103,7 +103,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 5 — UC-006 Prep checklists | done | Slices on `feat/uc006-prep-checklists` (PR #18): prep checklist CRUD with approval gate (manager approval/unapprove, owner-without-employee approve path), sections/items management (Alpine.js-driven editor, template-library import from built-in catalog), per-day run tracking with toggle/reset, missing-employee actionable error. `/pr-sentinel` + `/coverage-check` UC-006 clean. |
 | 6 — UC-007 Academy | done | PR #19 (squash `a87b752`) on `feat/uc007-academy`: V24 curriculum seed + template catalog, `DefaultAcademyService` (`curriculumFor` with role scoping + sequential unlock, photo submission/verification, exam pool from covered units, certificate, exact-question-set exam submission), tenant checks inside transactions; `AcademyController` + Thymeleaf views (writer/learner/verify/unit-editor/exam/certificate); `DefaultAcademyServiceIT` + writer/learner tests (photo FK guard, cross-tenant isolation, sequential unlock, editor-role gate). `/pr-sentinel` (design + ponytail + correctness) + `/coverage-check` UC-007 clean. Corrections in-PR: gate curriculum editor reads behind editor role (was answer leak), idempotent default-curriculum import. |
 | 7a–7d — UC-008 Inventory | done | PR #21 merged (see Phase 7). V25 cross-tenant guards on inventory child tables; `InventoryService` + `DefaultInventoryService`; `InventoryController` + all 19 views (foundation screens 7a, purchasing 7b, procedures/costing 7c, approvals + analytics 7d). Role scoping rides the Phase 2 permission model (BR-G25); BR-G26 approval queue, BR-G27 return-ceiling (V10 trigger surfaced as a user error), BR-G28 unit-cost freeze. `/pr-sentinel` + `/coverage-check` clean; manual testing S1–S14 green — three in-PR defects fixed: supplier save binding, zero-qty-line 500 on orders/returns, delete-approval mislabel. |
-| 8 — UC-009 Admin dashboard | not started | |
+| 8 — UC-009 Admin dashboard | in progress | |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -227,12 +227,12 @@ Role scoping (BR-G25) rides on the permission model built in Phase 2.
 
 ### Phase 8 — UC-009 Admin dashboard and analytics
 
-BR-G29, BR-G30. `نظرة عامة` (monthly invoice total against a pace-adjusted target — scaled to elapsed working days, not the full month), employee cards with score ring and tier, team summary, supervision metrics; `ملف الموظف` with component bars, trend chart and the print-to-PDF report; `سجل النشاط` from `activity_log`. Manager/owner only.
+BR-G29, BR-G30. `نظرة عامة` (monthly invoice total against a pace-adjusted target — scaled to elapsed working days, not the full month), employee cards with score ring and tier, team summary; `ملف الموظف` with academy qualification progress and status; `سجل النشاط` from `activity_log`. Manager/owner only. Trend sparkline and print-to-PDF employee report remain backlog items.
 
-- [ ] Dashboard overview with pace-adjusted targets
-- [ ] Employee cards with score ring and tier
-- [ ] Employee file with component bars and trend chart
-- [ ] Activity log view
+- [x] Dashboard overview with pace-adjusted targets
+- [x] Employee cards with score ring and tier
+- [x] Employee file with academy qualification progress
+- [x] Activity log view
 
 ### Phase 9 — Hardening and release
 
