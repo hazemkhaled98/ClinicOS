@@ -191,7 +191,9 @@ public class DefaultInventoryService implements InventoryService {
                 .orderBy(INVENTORY_CHANGE_REQUEST.REQUESTED_AT.desc())
                 .fetch(r -> new PendingApproval(r.get(INVENTORY_CHANGE_REQUEST.ID), "change_request", "item",
                         r.get(INVENTORY_CHANGE_REQUEST.KIND).getLiteral(), r.get(INVENTORY_ITEM.NAME),
-                        "طلب تعديل صنف", null, r.get(INVENTORY_CHANGE_REQUEST.REQUESTED_AT))));
+                        r.get(INVENTORY_CHANGE_REQUEST.KIND) == ChangeRequestKind.delete
+                                ? "طلب حذف صنف" : "طلب تعديل صنف",
+                        null, r.get(INVENTORY_CHANGE_REQUEST.REQUESTED_AT))));
     }
 
     @Override
