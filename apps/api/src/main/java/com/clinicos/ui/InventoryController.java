@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -62,12 +61,6 @@ public class InventoryController {
     private final PurchasingService purchasingService;
     private final ProceduresService proceduresService;
 
-    public InventoryController(LayoutModel layoutModel, InventoryService inventoryService,
-            ActivityLogService activityLogService) {
-        this(layoutModel, inventoryService, activityLogService, null, null);
-    }
-
-    @Autowired
     public InventoryController(LayoutModel layoutModel, InventoryService inventoryService,
             ActivityLogService activityLogService, PurchasingService purchasingService,
             ProceduresService proceduresService) {
@@ -232,9 +225,6 @@ public class InventoryController {
     }
 
     private List<InventoryService.PendingApproval> renderApprovals(UUID clinicId) {
-        if (purchasingService == null || proceduresService == null) {
-            return inventoryService.pendingApprovals(clinicId);
-        }
         var all = new java.util.ArrayList<InventoryService.PendingApproval>(inventoryService.pendingApprovals(clinicId));
         all.addAll(proceduresService.pendingChanges(clinicId).stream()
                 .map(change -> new InventoryService.PendingApproval(change.id(), change.entity(), change.entity(),
