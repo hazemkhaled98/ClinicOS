@@ -10,6 +10,7 @@ import static com.clinicos.shared.jooq.tables.PurchaseOrderLine.PURCHASE_ORDER_L
 import static com.clinicos.shared.jooq.tables.StockMovement.STOCK_MOVEMENT;
 import static com.clinicos.shared.jooq.tables.Supplier.SUPPLIER;
 import static com.clinicos.shared.jooq.tables.SupplierReturn.SUPPLIER_RETURN;
+import static com.clinicos.shared.jooq.tables.SupplierReturnLine.SUPPLIER_RETURN_LINE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -143,8 +144,18 @@ public class DefaultInventoryAnalyticsService implements InventoryAnalyticsServi
                     .join(SUPPLIER).on(PURCHASE_ORDER.SUPPLIER_ID.eq(SUPPLIER.ID)).where(PURCHASE_ORDER.CLINIC_ID.eq(clinicId))
                     .and(range(PURCHASE_ORDER.PLACED_AT, from, to)).fetch();
             var grouped = new LinkedHashMap<String, BigDecimal[]>();
-            rows.forEach(row -> { var values = grouped.computeIfAbsent(row.get(SUPPLIER.NAME), unused -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO }); values[0] = values[0].add(BigDecimal.ONE); values[1] = values[1].add(row.get(PURCHASE_ORDER_LINE.UNIT_COST).multiply(row.get(PURCHASE_ORDER_LINE.QTY_ORDERED))); values[2] = values[2].add(row.get(PURCHASE_ORDER_LINE.UNIT_COST)); if (row.get(PURCHASE_ORDER.PLACED_AT) != null && row.get(PURCHASE_ORDER.RECEIVED_AT) != null) values[3] = values[3].add(BigDecimal.valueOf(java.time.Duration.between(row.get(PURCHASE_ORDER.PLACED_AT), row.get(PURCHASE_ORDER.RECEIVED_AT)).toDays())); });
-            return grouped.entrySet().stream().map(it -> { var v = it.getValue(); var count = v[0].longValue(); return new SupplierRow(it.getKey(), count, v[1], v[2].divide(v[0], 2, java.math.RoundingMode.HALF_UP), v[3].divide(v[0], 2, java.math.RoundingMode.HALF_UP), BigDecimal.ZERO); }).toList();
+            rows.forEach(row -> { var values = grouped.computeIfAbsent(row.get(SUPPLIER.NAME), unused -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO }); values[0] = values[0].add(BigDecimal.ONE); values[1] = values[1].add(row.get(PURCHASE_ORDER_LINE.UNIT_COST).multiply(row.get(PURCHASE_ORDER_LINE.QTY_ORDERED))); values[2] = values[2].add(row.get(PURCHASE_ORDER_LINE.UNIT_COST)); if (row.get(PURCHASE_ORDER.PLACED_AT) != null && row.get(PURCHASE_ORDER.RECEIVED_AT) != null) values[3] = values[3].add(BigDecimal.valueOf(java.time.Duration.between(row.get(PURCHASE_ORDER.PLACED_AT), row.get(PURCHASE_ORDER.RECEIVED_AT)).toDays())); values[4] = values[4].add(row.get(PURCHASE_ORDER_LINE.QTY_ORDERED)); });
+            var returned = new HashMap<String, BigDecimal>();
+            dsl.select(SUPPLIER.NAME, SUPPLIER_RETURN_LINE.QTY).from(SUPPLIER_RETURN_LINE)
+                    .join(SUPPLIER_RETURN).on(SUPPLIER_RETURN_LINE.SUPPLIER_RETURN_ID.eq(SUPPLIER_RETURN.ID))
+                    .join(PURCHASE_ORDER).on(SUPPLIER_RETURN.PURCHASE_ORDER_ID.eq(PURCHASE_ORDER.ID))
+                    .join(SUPPLIER).on(SUPPLIER_RETURN.SUPPLIER_ID.eq(SUPPLIER.ID))
+                    .where(SUPPLIER_RETURN.CLINIC_ID.eq(clinicId)).and(range(PURCHASE_ORDER.PLACED_AT, from, to))
+                    .fetch().forEach(row -> returned.merge(row.get(SUPPLIER.NAME), row.get(SUPPLIER_RETURN_LINE.QTY), BigDecimal::add));
+            return grouped.entrySet().stream().map(it -> { var v = it.getValue(); var count = v[0].longValue();
+                var rate = v[4].signum() == 0 ? BigDecimal.ZERO
+                        : returned.getOrDefault(it.getKey(), BigDecimal.ZERO).divide(v[4], 4, java.math.RoundingMode.HALF_UP);
+                return new SupplierRow(it.getKey(), count, v[1], v[2].divide(v[0], 2, java.math.RoundingMode.HALF_UP), v[3].divide(v[0], 2, java.math.RoundingMode.HALF_UP), rate); }).toList();
         });
     }
 
