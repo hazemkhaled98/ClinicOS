@@ -27,7 +27,7 @@
           <h2 class="text-xl font-bold text-teal-900">طلب توريد جديد</h2>
         </div>
         <form method="post" th:action="@{/inventory/orders}"
-              @submit="document.querySelectorAll('[data-row]').forEach(r => { const v = r.querySelector('input[name=qty]'); v.disabled = !(+v.value > 0); })">
+              @submit="document.querySelectorAll('[data-row]').forEach(r => { const v = r.querySelector('input[name=qty]'); const off = !(+v.value > 0); v.disabled = off; r.querySelector('input[name=itemId]').disabled = off; })">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <label class="flex flex-col gap-1.5 mb-5 max-w-md">
             <span class="clinicos-label">المورّد</span>

@@ -18,7 +18,7 @@
         </div>
         <form th:each="o : ${orders}" method="post" th:action="@{/inventory/returns}"
               class="clinicos-card p-6 mb-6"
-              @submit="document.querySelectorAll('[data-rrow]').forEach(r => { const v = r.querySelector('input[name=qty]'); v.disabled = !(+v.value > 0); })">
+              @submit="document.querySelectorAll('[data-rrow]').forEach(r => { const v = r.querySelector('input[name=qty]'); const off = !(+v.value > 0); v.disabled = off; r.querySelector('input[name=orderLineId]').disabled = off; })">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="orderId" th:value="${o.id()}">
           <div class="flex items-center justify-between mb-4">
