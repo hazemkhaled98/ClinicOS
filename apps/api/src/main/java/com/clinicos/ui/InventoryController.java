@@ -118,11 +118,16 @@ public class InventoryController {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "manage")) {
             return "redirect:/inventory";
         }
-        inventoryService.requestItemChange(clinicId(session), actor(session), id,
-                changeKind(kind), form.toRequest());
-        log(session, "inventory.item.request-change", "inventory_change_request");
-        redirect.addFlashAttribute("toastMessage", "بانتظار موافقة المدير");
-        redirect.addFlashAttribute("toastType", "success");
+        try {
+            inventoryService.requestItemChange(clinicId(session), actor(session), id,
+                    changeKind(kind), form.toRequest());
+            log(session, "inventory.item.request-change", "inventory_change_request");
+            redirect.addFlashAttribute("toastMessage", "بانتظار موافقة المدير");
+            redirect.addFlashAttribute("toastType", "success");
+        } catch (IllegalArgumentException exception) {
+            redirect.addFlashAttribute("toastMessage", exception.getMessage());
+            redirect.addFlashAttribute("toastType", "error");
+        }
         return "redirect:/inventory/items";
     }
 

@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.PurchasingService;
@@ -35,6 +38,7 @@ import jakarta.servlet.http.HttpSession;
 public class PurchasingController {
 
     private static final String AREA = "inventory";
+    private static final Logger log = LoggerFactory.getLogger(PurchasingController.class);
 
     private final LayoutModel layoutModel;
     private final PurchasingService purchasingService;
@@ -127,7 +131,11 @@ public class PurchasingController {
             return "redirect:/inventory/received";
         } catch (IllegalArgumentException exception) {
             if (photoId != null) {
-                attachmentService.delete(clinicId, photoId);
+                try {
+                    attachmentService.delete(clinicId, photoId);
+                } catch (RuntimeException cleanupFailure) {
+                    log.warn("failed to clean up orphaned invoice photo {} after rejected receipt: clinicId={}", photoId, clinicId, cleanupFailure);
+                }
             }
             model.addAttribute("layout", layoutModel.forRequest(session, AREA));
             model.addAttribute("orders", purchasingService.orders(clinicId, java.util.Set.of(placed)));

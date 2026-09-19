@@ -20,6 +20,8 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.JSONB;
 import org.jooq.TableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -44,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DefaultInventoryService implements InventoryService {
 
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(DefaultInventoryService.class);
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
@@ -450,7 +453,8 @@ public class DefaultInventoryService implements InventoryService {
         try {
             return JSONB.valueOf(JSON.writeValueAsString(request));
         } catch (Exception e) {
-            return JSONB.valueOf("{}");
+            log.error("failed to serialize item change payload: request={}", request, e);
+            throw new IllegalStateException("تعذر حفظ بيانات الطلب", e);
         }
     }
 

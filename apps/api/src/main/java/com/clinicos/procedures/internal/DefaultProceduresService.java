@@ -365,12 +365,12 @@ public class DefaultProceduresService implements ProceduresService {
 
     private JSONB serialize(Object value) {
         try { return JSONB.valueOf(JSON.writeValueAsString(value)); }
-        catch (Exception e) { throw missing("بيانات الطلب غير صالحة"); }
+        catch (Exception e) { throw missing("بيانات الطلب غير صالحة", e); }
     }
 
     private JsonNode parse(JSONB payload) {
         try { return JSON.readTree(payload.data()); }
-        catch (Exception e) { throw missing("بيانات الطلب غير صالحة"); }
+        catch (Exception e) { throw missing("بيانات الطلب غير صالحة", e); }
     }
 
     private void validateProcedure(ProcedureRequest request) {
@@ -409,4 +409,5 @@ public class DefaultProceduresService implements ProceduresService {
 
     private String blankToNull(String value) { return value == null || value.isBlank() ? null : value.trim(); }
     private IllegalArgumentException missing(String message) { return new IllegalArgumentException(message); }
+    private IllegalArgumentException missing(String message, Throwable cause) { return new IllegalArgumentException(message, cause); }
 }

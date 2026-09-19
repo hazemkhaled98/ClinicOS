@@ -243,6 +243,9 @@ public class DefaultPurchasingService implements PurchasingService {
                     if (line.qtyReceived() == null || line.qtyReceived().signum() < 0) {
                         throw missing("الكمية المستلمة غير صالحة");
                     }
+                    if (line.deliveryCost() != null && line.deliveryCost().signum() < 0) {
+                        throw missing("تكلفة التوصيل غير صالحة");
+                    }
                     dsl.update(PURCHASE_ORDER_LINE)
                             .set(PURCHASE_ORDER_LINE.QTY_RECEIVED,
                                     PURCHASE_ORDER_LINE.QTY_RECEIVED.plus(line.qtyReceived()))
@@ -348,6 +351,9 @@ public class DefaultPurchasingService implements PurchasingService {
                     var poLine = dsl.selectFrom(PURCHASE_ORDER_LINE)
                             .where(PURCHASE_ORDER_LINE.ID.eq(line.get(SUPPLIER_RETURN_LINE.PURCHASE_ORDER_LINE_ID)))
                             .fetchOne();
+                    if (poLine == null) {
+                        throw missing("سطر الطلبية غير موجود");
+                    }
                     recordMovement(clinicId, actor, poLine.getItemId(), LocationKind.store,
                             line.get(SUPPLIER_RETURN_LINE.QTY).negate(), MovementReason.return_,
                             "supplier_return", returnId);
