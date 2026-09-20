@@ -9,8 +9,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,11 +23,16 @@ import org.springframework.ui.Model;
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.academy.AcademyService;
+import com.clinicos.academy.AcademyService.TraineeTrack;
+import com.clinicos.academy.AcademyService.TraineeUnit;
 import com.clinicos.evaluation.api.EvaluationService;
+import com.clinicos.evaluation.api.EvaluationService.MonthlyEvaluation;
+import com.clinicos.evaluation.api.EvaluationService.VolumePace;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
+import com.clinicos.shared.jooq.enums.AcademyAudience;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
 import com.clinicos.staff.api.EmployeeService.EmployeeRequest;
@@ -91,6 +98,72 @@ class AdminControllerTest {
 
         assertThat(controller.staff(null, null, session, model)).isEqualTo("admin/employee-profile-page");
         assertThat(model.getAttribute("track")).isNull();
+    }
+
+    @Test
+    void staffWithSelectionRendersTrackAndEvaluation() {
+        HttpSession session = session();
+        allowDashboard();
+        Employee target = employee("محمود");
+        when(employeeService.list(CLINIC)).thenReturn(List.of(target));
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(null);
+        when(academyService.audienceOf(CLINIC, target.id())).thenReturn(AcademyAudience.assistant);
+        AcademyService.TraineeUnit doneUnit = new AcademyService.TraineeUnit(
+                UUID.randomUUID(), AcademyAudience.assistant, "🧼", "عنوان", "هدف", List.of(), null, false, 0, "done");
+        AcademyService.TraineeTrack track = new AcademyService.TraineeTrack(target.id(), "محمود", List.of(doneUnit));
+        when(academyService.traineeCurriculum(eq(CLINIC), any(AcademyService.Actor.class), eq(target.id()),
+                eq(AcademyAudience.assistant))).thenReturn(track);
+        var evaluation = new EvaluationService.MonthlyEvaluation(
+                new java.math.BigDecimal("80"), new java.math.BigDecimal("1"), List.of(), "جيد",
+                java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO, 10, true);
+        when(evaluationService.evaluate(eq(CLINIC), eq(target.id()), any(YearMonth.class))).thenReturn(evaluation);
+
+        String view = controller.staff(target.id().toString(), null, session, model);
+
+        assertThat(view).isEqualTo("admin/employee-profile-page");
+        assertThat(model.getAttribute("track")).isEqualTo(track);
+        assertThat(model.getAttribute("completedUnits")).isEqualTo(1L);
+        assertThat(model.getAttribute("totalUnits")).isEqualTo(1);
+        assertThat(model.getAttribute("selectedEmployee")).isEqualTo(target.id());
+        assertThat(model.getAttribute("evaluation")).isEqualTo(evaluation);
+    }
+
+    @Test
+    void recordVolumeSavesAndLogsActivity() {
+        HttpSession session = session();
+        allowDashboard();
+        AdminController.VolumeCapForm form = new AdminController.VolumeCapForm();
+        form.setMonth(YearMonth.now().toString());
+        form.setAmount("7000");
+        when(evaluationService.volumePace(eq(CLINIC), any(YearMonth.class)))
+                .thenReturn(new EvaluationService.VolumePace(
+                        new BigDecimal("20000"), new BigDecimal("7000"), new BigDecimal("5000"), 5, 22));
+
+        String view = controller.recordVolume(form, session, model);
+
+        assertThat(view).isEqualTo("admin/dashboard :: volumeCard");
+        verify(evaluationService).recordVolume(eq(CLINIC), any(YearMonth.class), eq(new BigDecimal("7000")), eq(MEMBERSHIP));
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "volume.record", "operations_volume");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+    }
+
+    @Test
+    void recordVolumeRejectsNegativeAmountWithoutSaving() {
+        HttpSession session = session();
+        allowDashboard();
+        AdminController.VolumeCapForm form = new AdminController.VolumeCapForm();
+        form.setMonth(YearMonth.now().toString());
+        form.setAmount("-500");
+        doThrow(new IllegalArgumentException("حجم الإنتاج يجب أن يكون رقماً غير سالب"))
+                .when(evaluationService).recordVolume(eq(CLINIC), any(YearMonth.class), any(BigDecimal.class), eq(MEMBERSHIP));
+        when(evaluationService.volumePace(eq(CLINIC), any(YearMonth.class)))
+                .thenReturn(new EvaluationService.VolumePace(null, null, null, 5, 22));
+
+        String view = controller.recordVolume(form, session, model);
+
+        assertThat(view).isEqualTo("admin/dashboard :: volumeCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     @Test

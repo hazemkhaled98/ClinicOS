@@ -9,8 +9,10 @@ import static com.clinicos.shared.jooq.tables.OperationsVolume.OPERATIONS_VOLUME
 import static com.clinicos.shared.jooq.tables.SelfCheck.SELF_CHECK;
 import static com.clinicos.shared.jooq.tables.TaskDefinition.TASK_DEFINITION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.time.LocalDate;
@@ -48,6 +50,8 @@ import com.clinicos.evaluation.api.EvaluationService;
 import com.clinicos.evaluation.api.EvaluationService.ComponentScore;
 import com.clinicos.evaluation.api.EvaluationService.Gamification;
 import com.clinicos.evaluation.api.EvaluationService.MonthlyEvaluation;
+import com.clinicos.evaluation.api.EvaluationService.TeamScore;
+import com.clinicos.evaluation.api.EvaluationService.VolumePace;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
@@ -320,6 +324,81 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(succeeded).isGreaterThan(0);
         assertThat(succeeded + conflicted).isEqualTo(threads);
         assertThat(snapshotCount()).isEqualTo(1);
+    }
+
+    @Test
+    void recordVolume_persistsAndUpserts() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID recorderId = membershipId(employeeId);
+
+        evaluationService.recordVolume(clinicA, now, new BigDecimal("7000"), recorderId);
+        assertThat(evaluationService.volume(clinicA, now)).isEqualByComparingTo("7000");
+
+        evaluationService.recordVolume(clinicA, now, new BigDecimal("9000"), recorderId);
+        assertThat(evaluationService.volume(clinicA, now)).isEqualByComparingTo("9000");
+    }
+
+    @Test
+    void recordVolume_negativeAmountRejectedWithoutPersisting() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID recorderId = membershipId(employeeId);
+
+        assertThatThrownBy(() -> evaluationService.recordVolume(clinicA, now, new BigDecimal("-100"), recorderId))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(evaluationService.volume(clinicA, now)).isNull();
+    }
+
+    @Test
+    void volumePace_computesPaceAdjustedTargetForElapsedWorkdays() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        seedVolume(clinicA, now, "5000");
+
+        VolumePace pace = evaluationService.volumePace(clinicA, now);
+
+        int elapsed = LocalDate.now().getDayOfMonth();
+        int total = now.lengthOfMonth();
+        BigDecimal expectedPaceTarget = new BigDecimal("20000").multiply(BigDecimal.valueOf(elapsed))
+                .divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
+
+        assertThat(pace.monthlyTarget()).isEqualByComparingTo("20000");
+        assertThat(pace.actual()).isEqualByComparingTo("5000");
+        assertThat(pace.workingDaysElapsed()).isEqualTo(elapsed);
+        assertThat(pace.workingDaysInMonth()).isEqualTo(total);
+        assertThat(pace.paceTarget()).isEqualByComparingTo(expectedPaceTarget);
+    }
+
+    @Test
+    void teamScores_populatedTeamExcludesOwnerAndIncludesScoredEmployee() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth june = YearMonth.of(2026, 6);
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", june.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        for (LocalDate day = june.atDay(1); !day.isAfter(june.atEndOfMonth()); day = day.plusDays(1)) {
+            seedWorkday(clinicA, employeeId, taskId, day);
+        }
+        seedVolume(clinicA, june, "20000");
+
+        List<TeamScore> team = evaluationService.teamScores(clinicA, june);
+
+        assertThat(team).hasSize(1);
+        TeamScore score = team.get(0);
+        assertThat(score.employeeId()).isEqualTo(employeeId);
+        assertThat(score.roleCode()).isEqualTo("assistant");
+        assertThat(score.finalScore()).isEqualByComparingTo("68.57");
+        assertThat(score.tierName()).isEqualTo("جيد");
+        assertThat(score.daysLogged()).isEqualTo(30);
     }
 
     private ComponentScore component(MonthlyEvaluation evaluation, String code) {
