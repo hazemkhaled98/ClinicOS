@@ -347,7 +347,12 @@ public class DefaultEvaluationService implements EvaluationService {
 
     @Override
     public TeamScore teamScore(UUID clinicId, UUID employeeId, YearMonth month) {
-        return transactionTemplate.execute(status -> doTeamScore(clinicId, employeeId, month));
+        EmployeeService.Employee employee = employeeService.findById(clinicId, employeeId);
+        if (employee == null) {
+            return null;
+        }
+        String roleCode = roleCodeOf(clinicId, employeeId);
+        return transactionTemplate.execute(status -> doTeamScore(clinicId, employee, roleCode, month));
     }
 
     @Override
@@ -358,27 +363,26 @@ public class DefaultEvaluationService implements EvaluationService {
                 .collect(Collectors.toMap(u -> u.employeeId(), u -> u.roleCode(), (a, b) -> a));
         return transactionTemplate.execute(status -> employees.stream()
                 .filter(e -> !"owner".equals(roles.get(e.id())))
-                .map(e -> doTeamScore(clinicId, e.id(), month))
+                .map(e -> doTeamScore(clinicId, e, roles.get(e.id()), month))
                 .filter(java.util.Objects::nonNull)
                 .sorted(java.util.Comparator.comparing(TeamScore::finalScore,
                         java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
                 .toList());
     }
 
-    private TeamScore doTeamScore(UUID clinicId, UUID employeeId, YearMonth month) {
-        EmployeeService.Employee employee = employeeService.findById(clinicId, employeeId);
-        if (employee == null) {
-            return null;
-        }
-        String roleCode = userAdminService.list(clinicId).stream()
+    private String roleCodeOf(UUID clinicId, UUID employeeId) {
+        return userAdminService.list(clinicId).stream()
                 .filter(u -> employeeId.equals(u.employeeId()))
                 .map(UserAdminService.UserSummary::roleCode)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private TeamScore doTeamScore(UUID clinicId, EmployeeService.Employee employee, String roleCode, YearMonth month) {
         if ("owner".equals(roleCode)) {
             return null;
         }
-        MonthlyEvaluation evaluation = doEvaluate(clinicId, employeeId, month);
+        MonthlyEvaluation evaluation = doEvaluate(clinicId, employee.id(), month);
         if (evaluation == null) {
             return null;
         }
