@@ -127,6 +127,12 @@ One-shot script (docker up + healthy wait + `app_rw` password + app run):
 
 Inspect this script for seed users when needed during dubbging or using playwright MCP. Don't Run the script yourself unless asked.
 
+Shutdown script (kills ClinicOS java, drops postgres+minio containers, quits Docker Desktop). Run it once the PR is closed or no more work is needed today:
+
+```bash
+./dev-down.ps1
+```
+
 ```bash
 ./seed-dev.ps1
 ```
