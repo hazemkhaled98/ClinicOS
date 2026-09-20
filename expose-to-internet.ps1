@@ -13,8 +13,23 @@ if (-not (Test-Path $cloudflared)) {
 }
 
 Write-Host "==> Starting Cloudflare quick tunnel" -ForegroundColor Cyan
+
+$cancelHandler = {
+    $_.Cancel = $true
+    Write-Host ""
+    $resp = Read-Host "Stop ClinicOS and the tunnel? (Y/N)"
+    if ($resp -eq 'Y' -or $resp -eq 'y') {
+        Write-Host "==> Stopping" -ForegroundColor Yellow
+        exit
+    }
+    Write-Host "==> Continuing" -ForegroundColor Cyan
+}
+[Console]::add_CancelKeyPress($cancelHandler)
+
 & $cloudflared tunnel --url http://localhost:8080 2>&1 | ForEach-Object {
     if ($_ -match 'https://[a-z0-9-]+\.trycloudflare\.com') {
         Write-Host "Public URL: $($Matches[0])" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "WARNING: closing this window stops the app and the tunnel. Use Ctrl+C to stop safely." -ForegroundColor Yellow
     }
 }
