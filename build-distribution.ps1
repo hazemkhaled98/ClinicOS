@@ -91,15 +91,27 @@ try {
     }
     Set-Content $envPath $envContent
 
+    Write-Host "==> Zipping dist folder" -ForegroundColor Cyan
+    $zipName = "clinicos-app-$appVersion.zip"
+    $zipPath = Join-Path $PSScriptRoot $zipName
+    if (Test-Path $zipPath) {
+        Remove-Item $zipPath -Force
+    }
+    Compress-Archive -Path "$distPath\*" -DestinationPath $zipPath
+    Remove-Item $distPath -Recurse -Force
+
     Write-Host ""
-    $tarSize = [math]::Round((Get-Item $tarPath).Length / 1MB, 1)
+    $zipSize = [math]::Round((Get-Item $zipPath).Length / 1MB, 1)
     Write-Host "Distribution build succeeded." -ForegroundColor Green
-    Write-Host "  Image:   clinicos-app:$appVersion" -ForegroundColor Green
-    Write-Host "  Archive: $tarPath ($tarSize MB)" -ForegroundColor Green
-    Write-Host "  Folder:  $distPath" -ForegroundColor Green
-    Write-Host "Zip the 'dist' folder and send it to the recipient." -ForegroundColor Green
+    Write-Host "  Image: clinicos-app:$appVersion" -ForegroundColor Green
+    Write-Host "  Zip:   $zipPath ($zipSize MB)" -ForegroundColor Green
+    Write-Host "Send $zipName to the recipient." -ForegroundColor Green
+    Write-Host "Press Enter to close this window" -ForegroundColor Gray
+    Read-Host | Out-Null
 } catch {
     Write-Host ""
     Write-Host "Distribution build FAILED: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Press Enter to close this window" -ForegroundColor Gray
+    Read-Host | Out-Null
     exit 1
 }

@@ -63,4 +63,5 @@ Write-Host ""
 Write-Host "ClinicOS is running at http://localhost:$appPort" -ForegroundColor Green
 Write-Host "First time here? Create your clinic at http://localhost:$appPort/signup" -ForegroundColor Green
 Write-Host ""
-Read-Host "Press Enter to close this window"
+Write-Host "Press Enter to close this window" -ForegroundColor Gray
+Read-Host | Out-Null

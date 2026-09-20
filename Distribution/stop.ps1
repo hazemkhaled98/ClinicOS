@@ -16,4 +16,5 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "ClinicOS stopped. Your data is safe -- run start.ps1 to resume." -ForegroundColor Green
-Read-Host "Press Enter to close this window"
+Write-Host "Press Enter to close this window" -ForegroundColor Gray
+Read-Host | Out-Null
