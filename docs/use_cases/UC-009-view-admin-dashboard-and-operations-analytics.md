@@ -20,6 +20,10 @@
 4. The manager records or updates the clinic's operating volume figure for the month.
 5. The manager drills into an individual employee's evaluation for more detail (see UC-004).
 
+The employee profile tab also provides the employee's academy qualification report. The overview scorecard links directly to `/evaluation?employee=<id>&month=<month>` for the detailed evaluation.
+
+The operating-volume figure is entered manually and resets as a new monthly period begins.
+
 ## Alternative Flows
 
 ### A1: No Operating Target Configured

@@ -17,6 +17,8 @@ Features present in `index_original.html` but **not** covered by UC-001…UC-009
 | 11 | **Reservations / holds on tray stock** | `stock_hold` | Legacy allows reserving tray items for upcoming procedures. |
 | 12 | **"Essential item" flag** on a prep checklist item (legacy shows `N أساسي`) | `prep_item.essential boolean` | Visual indicator in legacy prep runs. |
 | 13 | **Multi-photo per task** (before/after, multiple angles) | join table (e.g. `daily_task_completion_photo`) instead of the single `photo_id` FK column | `daily_task_completion` (V3) holds one `photo_id` per completion — a task can only ever have one proof photo, even when a manager wants multiple angles. |
+| 14 | **Admin dashboard trend sparkline** | persisted daily score series or an analytics read model | UC-009 ships scorecards and academy qualification progress; trend visualization deferred. |
+| 15 | **Print-to-PDF employee report** | report/export job and PDF storage or download endpoint | UC-009 employee profile remains browser-only until report requirements are defined. |
 
 ---
 

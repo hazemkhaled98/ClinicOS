@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head><title>ملف الموظف</title></head>
+<body>
+<div th:fragment="profile(employees, track, selectedEmployee, month, completedUnits, totalUnits, evaluation)" class="space-y-6">
+  <section class="clinicos-card p-5 sm:p-6" data-purpose="employee-filters">
+    <form method="get" action="/admin-dashboard/staff" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <label class="flex flex-col gap-1.5 text-xs font-semibold text-on-surface-variant">
+        الموظف
+        <select name="employee" class="clinicos-input">
+          <option value="">اختر موظفًا</option>
+          <option th:each="employee : ${employees}" th:value="${employee.id()}" th:selected="${employee.id().equals(selectedEmployee)}" th:text="${employee.name()}">ندى</option>
+        </select>
+      </label>
+      <label class="flex flex-col gap-1.5 text-xs font-semibold text-on-surface-variant">
+        الشهر
+        <input type="month" name="month" class="clinicos-input" th:value="${month}">
+      </label>
+      <button type="submit" class="clinicos-btn md:col-span-2 justify-self-start">عرض الملف</button>
+    </form>
+  </section>
+
+  <p th:if="${track == null}" class="clinicos-empty-state py-12 text-center">اختر موظفًا لعرض ملفه.</p>
+
+  <th:block th:if="${track != null}">
+    <div th:if="${evaluation != null and evaluation.daysLogged() == 0}" class="rounded-xl border border-warning-600 bg-warning-50 px-4 py-3 text-sm text-warning-600">
+      التقييم المبدئي غير مكتمل: لا توجد أيام مسجلة بعد.
+    </div>
+    <section class="clinicos-card overflow-hidden" data-purpose="academy-report-container">
+      <div class="p-5 sm:p-6 border-b border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5"><span class="text-2xl" role="img" aria-label="الأكاديمية">🎓</span><h2 class="text-lg sm:text-xl font-bold text-teal-900">تقرير التأهيل (الأكاديمية)</h2></div>
+        <span class="clinicos-chip clinicos-chip--success" th:if="${totalUnits > 0 and completedUnits == totalUnits}">مكتمل</span>
+        <span class="clinicos-chip clinicos-chip--warning" th:unless="${totalUnits > 0 and completedUnits == totalUnits}">قيد المتابعة</span>
+      </div>
+      <div class="p-5 sm:p-6 space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="clinicos-stat-tile"><span class="clinicos-stat-tile__value" th:text="${completedUnits + '/' + totalUnits}">0/0</span><span>إتقان المنهج</span></div>
+          <div class="clinicos-stat-tile"><span class="clinicos-stat-tile__value">—</span><span>سرعة الفهم</span></div>
+          <div class="clinicos-stat-tile"><span class="clinicos-stat-tile__value">—</span><span>مقابل المتوقع</span></div>
+        </div>
+        <div class="space-y-4">
+          <div th:each="unit : ${track.units()}" class="space-y-1.5">
+            <div class="flex items-center justify-between gap-3 text-sm"><span class="font-semibold text-teal-900" th:text="${unit.title()}">الوحدة</span><span class="text-xs text-on-surface-variant" th:text="${unit.status() == 'done' ? 'مكتمل' : 'لم يكتمل'}">لم يكتمل</span></div>
+            <div class="clinicos-progress-track"><div class="clinicos-progress-fill" th:classappend="${unit.status() != 'done'} ? ' clinicos-progress-fill--warning' : ''" th:style="${unit.status() == 'done'} ? 'width: 100%' : 'width: 0%'"></div></div>
+          </div>
+          <p th:if="${#lists.isEmpty(track.units())}" class="text-sm text-on-surface-variant">لا توجد وحدات أكاديمية لهذا الموظف.</p>
+        </div>
+      </div>
+    </section>
+  </th:block>
+</div>
+</body>
+</html>

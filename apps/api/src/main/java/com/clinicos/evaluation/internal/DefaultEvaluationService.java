@@ -2,9 +2,11 @@ package com.clinicos.evaluation.internal;
 
 import static com.clinicos.shared.jooq.tables.EvaluationComponent.EVALUATION_COMPONENT;
 import static com.clinicos.shared.jooq.tables.EvaluationSnapshot.EVALUATION_SNAPSHOT;
+import static com.clinicos.shared.jooq.tables.OperationsVolume.OPERATIONS_VOLUME;
 import static com.clinicos.shared.jooq.tables.PerformanceOverride.PERFORMANCE_OVERRIDE;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
@@ -36,6 +38,9 @@ import com.clinicos.evaluation.api.EvaluationService.ComponentScore;
 import com.clinicos.evaluation.api.EvaluationService.Gamification;
 import com.clinicos.evaluation.api.EvaluationService.GoalProgress;
 import com.clinicos.evaluation.api.EvaluationService.MonthlyEvaluation;
+import com.clinicos.evaluation.api.EvaluationService.TeamScore;
+import com.clinicos.evaluation.api.EvaluationService.VolumePace;
+import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.shared.jooq.enums.EvalCategory;
 import com.clinicos.shared.jooq.tables.records.EvaluationSnapshotRecord;
 import com.clinicos.staff.api.EmployeeService;
@@ -52,18 +57,20 @@ public class DefaultEvaluationService implements EvaluationService {
     private final ClinicSettingsService clinicSettings;
     private final WorkCalendarService workCalendar;
     private final GamificationService gamificationService;
+    private final UserAdminService userAdminService;
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
 
     public DefaultEvaluationService(EvaluationInputService evaluationInput, EmployeeService employeeService,
             ClinicSettingsService clinicSettings, WorkCalendarService workCalendar,
-            GamificationService gamificationService, DSLContext dsl,
+            GamificationService gamificationService, UserAdminService userAdminService, DSLContext dsl,
             TransactionTemplate transactionTemplate) {
         this.evaluationInput = evaluationInput;
         this.employeeService = employeeService;
         this.clinicSettings = clinicSettings;
         this.workCalendar = workCalendar;
         this.gamificationService = gamificationService;
+        this.userAdminService = userAdminService;
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
     }
@@ -297,6 +304,90 @@ public class DefaultEvaluationService implements EvaluationService {
                 .toList();
 
         return new Gamification(goals, streak, earnedBadges);
+    }
+
+    @Override
+    public BigDecimal volume(UUID clinicId, YearMonth month) {
+        return transactionTemplate.execute(status -> dsl.select(OPERATIONS_VOLUME.AMOUNT)
+                .from(OPERATIONS_VOLUME)
+                .where(OPERATIONS_VOLUME.CLINIC_ID.eq(clinicId))
+                .and(OPERATIONS_VOLUME.PERIOD_MONTH.eq(month.atDay(1)))
+                .fetchOneInto(BigDecimal.class));
+    }
+
+    @Override
+    public void recordVolume(UUID clinicId, YearMonth month, BigDecimal amount, UUID recordedByMembershipId) {
+        if (amount == null || amount.signum() < 0) {
+            throw new IllegalArgumentException("حجم الإنتاج يجب أن يكون رقماً غير سالب");
+        }
+        transactionTemplate.executeWithoutResult(status -> dsl.insertInto(OPERATIONS_VOLUME)
+                .set(OPERATIONS_VOLUME.CLINIC_ID, clinicId)
+                .set(OPERATIONS_VOLUME.PERIOD_MONTH, month.atDay(1))
+                .set(OPERATIONS_VOLUME.AMOUNT, amount)
+                .set(OPERATIONS_VOLUME.RECORDED_BY, recordedByMembershipId)
+                .onConflict(OPERATIONS_VOLUME.CLINIC_ID, OPERATIONS_VOLUME.PERIOD_MONTH)
+                .doUpdate()
+                .set(OPERATIONS_VOLUME.AMOUNT, amount)
+                .set(OPERATIONS_VOLUME.RECORDED_BY, recordedByMembershipId)
+                .set(OPERATIONS_VOLUME.RECORDED_AT, OffsetDateTime.now())
+                .execute());
+    }
+
+    @Override
+    public VolumePace volumePace(UUID clinicId, YearMonth month) {
+        BigDecimal monthlyTarget = clinicSettings.get(clinicId).volumeTarget();
+        LocalDate end = month.equals(YearMonth.now()) ? LocalDate.now() : month.atEndOfMonth();
+        int elapsed = workCalendar.workdaysBetween(clinicId, month.atDay(1), end, null);
+        int total = workCalendar.workdaysBetween(clinicId, month.atDay(1), month.atEndOfMonth(), null);
+        BigDecimal paceTarget = monthlyTarget == null || monthlyTarget.signum() <= 0 || total == 0 ? null
+                : monthlyTarget.multiply(BigDecimal.valueOf(elapsed))
+                        .divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
+        return new VolumePace(monthlyTarget, volume(clinicId, month), paceTarget, elapsed, total);
+    }
+
+    @Override
+    public TeamScore teamScore(UUID clinicId, UUID employeeId, YearMonth month) {
+        EmployeeService.Employee employee = employeeService.findById(clinicId, employeeId);
+        if (employee == null) {
+            return null;
+        }
+        String roleCode = roleCodeOf(clinicId, employeeId);
+        return transactionTemplate.execute(status -> doTeamScore(clinicId, employee, roleCode, month));
+    }
+
+    @Override
+    public List<TeamScore> teamScores(UUID clinicId, YearMonth month) {
+        List<EmployeeService.Employee> employees = employeeService.list(clinicId);
+        Map<UUID, String> roles = userAdminService.list(clinicId).stream()
+                .filter(u -> u.employeeId() != null)
+                .collect(Collectors.toMap(u -> u.employeeId(), u -> u.roleCode(), (a, b) -> a));
+        return transactionTemplate.execute(status -> employees.stream()
+                .filter(e -> !"owner".equals(roles.get(e.id())))
+                .map(e -> doTeamScore(clinicId, e, roles.get(e.id()), month))
+                .filter(java.util.Objects::nonNull)
+                .sorted(java.util.Comparator.comparing(TeamScore::finalScore,
+                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
+                .toList());
+    }
+
+    private String roleCodeOf(UUID clinicId, UUID employeeId) {
+        return userAdminService.list(clinicId).stream()
+                .filter(u -> employeeId.equals(u.employeeId()))
+                .map(UserAdminService.UserSummary::roleCode)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private TeamScore doTeamScore(UUID clinicId, EmployeeService.Employee employee, String roleCode, YearMonth month) {
+        if ("owner".equals(roleCode)) {
+            return null;
+        }
+        MonthlyEvaluation evaluation = doEvaluate(clinicId, employee.id(), month);
+        if (evaluation == null) {
+            return null;
+        }
+        return new TeamScore(employee.id(), employee.name(), roleCode, evaluation.finalScore(),
+                evaluation.tierName(), evaluation.incentiveAmount(), evaluation.totalPay(), evaluation.daysLogged());
     }
 
     @Override

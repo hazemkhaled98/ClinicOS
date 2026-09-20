@@ -333,6 +333,86 @@
     padding: 1.25rem;
   }
 
+  .clinicos-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background-color: var(--color-teal-100);
+    color: var(--color-teal-700);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .clinicos-stat-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background-color: var(--color-neutral-50);
+    border: 1px solid var(--color-neutral-200);
+  }
+
+  .clinicos-stat-tile__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-neutral-200);
+    color: var(--color-teal-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .clinicos-stat-tile__icon--success {
+    color: var(--color-success-600);
+  }
+
+  .clinicos-stat-tile__value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-on-surface);
+  }
+
+  .clinicos-progress-track {
+    width: 100%;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background-color: var(--color-neutral-100);
+    overflow: hidden;
+  }
+
+  .clinicos-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(to left, var(--color-success-600), var(--color-teal-600));
+    transition: width 300ms ease-out;
+  }
+
+  .clinicos-progress-fill--warning {
+    background: var(--color-warning-600);
+  }
+
+  .clinicos-ring__track {
+    stroke: var(--color-neutral-300);
+  }
+
+  .clinicos-ring__fill {
+    stroke: var(--color-success-600);
+    transition: stroke-dashoffset 350ms ease;
+  }
+
+  .clinicos-ring__fill.clinicos-ring--warning {
+    stroke: var(--color-warning-600);
+  }
+
   .clinicos-stepper {
     display: inline-flex;
     align-items: center;
