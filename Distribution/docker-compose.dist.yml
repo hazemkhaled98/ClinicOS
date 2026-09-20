@@ -1,15 +1,14 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: clinicos-postgres
     environment:
       POSTGRES_DB: clinicos
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: local-dev-only
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d clinicos"]
       interval: 5s
@@ -22,14 +21,10 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: clinicos-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"
-      - "9001:9001"
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_data:/data
     healthcheck:
@@ -39,13 +34,10 @@ services:
       retries: 3
 
   app:
-    profiles: ["full"]
-    build:
-      context: apps/api
-      dockerfile: ../../Distribution/Dockerfile
+    image: clinicos-app:${APP_VERSION:-0.1.0}
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,12 +46,14 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/clinicos
       SPRING_DATASOURCE_USERNAME: app_rw
-      SPRING_DATASOURCE_PASSWORD: local-dev-only
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD}
       SPRING_FLYWAY_USER: postgres
-      SPRING_FLYWAY_PASSWORD: local-dev-only
+      SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
       CLINICOS_STORAGE_ENDPOINT: http://minio:9000
-      CLINICOS_STORAGE_ACCESS_KEY: minioadmin
-      CLINICOS_STORAGE_SECRET_KEY: minioadmin
+      CLINICOS_STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER}
+      CLINICOS_STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      CLINICOS_STORAGE_BUCKET: clinicos-attachments
+      TZ: ${TZ:-Africa/Cairo}
 
 volumes:
   postgres_data:

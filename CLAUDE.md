@@ -137,6 +137,18 @@ mvn spring-boot:run
 # OpenAPI at http://localhost:8080/api-docs/ui
 ```
 
+## Distribution
+
+To hand the running application to someone with no repo/Git/Maven/Java/Node access, as a self-contained Docker package:
+
+```powershell
+./build-distribution.ps1
+```
+
+Builds the jar, builds the `clinicos-app` image from `Distribution/Dockerfile`, and assembles `dist/` (image tar + `docker-compose.yml` + recipient scripts). Zip `dist/` and send it — the recipient only needs Docker Desktop and runs `.\start.ps1`. See `Distribution/README.md` for the full recipient-facing instructions and `Distribution/docker-compose.dist.yml` for the shipped compose file (references a prebuilt image, no `build:`, no source access required).
+
+The root `docker-compose.yml`'s `app` service (profile `full`) is a separate, developer-only convenience for running the whole stack containerized against the live repo — it is not part of the distribution path.
+
 ## Key Files
 
 | File | Purpose |

@@ -1,0 +1,17 @@
+.git
+.idea
+.claude
+.agents
+.codex
+.opencode
+.serena
+.superpowers
+.impeccable
+.playwright-mcp
+node_modules
+target
+*.log
+*.tar
+dist
+Distribution/.env
+scratch

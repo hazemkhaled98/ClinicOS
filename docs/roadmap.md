@@ -293,6 +293,7 @@ Found in `index_original.html` but absent from both the UC docs and the V1–V10
 
 These apply to every phase; decide them once in Phase 0 rather than per-screen.
 
+- **Docker distribution.** `build-distribution.ps1` (repo root) packages the app as a standalone Docker image + compose stack in `dist/`, for handing to someone without repo/Maven/Java/Node access. See `Distribution/README.md`. Independent of the UC phase plan above — not a roadmap phase.
 - **Trigger errors are English `raise exception` text with SQLSTATE `P0001`** (frozen snapshot, return ceiling, append-only ledger, cross-tenant reference). Build one exception translator that maps them to Arabic user-facing messages, and cover each mapping with a test. Without it these surface as raw 500s.
 - **`app_rw` is created by V9 as `create role app_rw noinherit login` with no password.** Setting its password is an operational step outside Flyway (`alter role app_rw password …` from a privileged connection, or trust/peer auth locally). Handle it in `docker-compose` and document it for prod; do not add it to a migration where it would be committed in plaintext.
 - **The `permission` table has no seed rows.** V1 seeds the four roles only. Phase 1 must add a migration seeding the permission codes and the legacy default `role_permission` sets, plus the 19 inventory area codes ahead of Phase 7.
