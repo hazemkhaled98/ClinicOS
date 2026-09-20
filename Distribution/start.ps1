@@ -28,6 +28,9 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host "==> Cleaning up dangling images" -ForegroundColor Cyan
+docker image prune -f | Out-Null
+
 $appPort = "8080"
 if (Test-Path ".env") {
     $line = Get-Content ".env" | Where-Object { $_ -match "^APP_PORT=" }

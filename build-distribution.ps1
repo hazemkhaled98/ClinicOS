@@ -51,6 +51,9 @@ try {
         throw "Docker image build failed."
     }
 
+    Write-Host "==> Cleaning up dangling images" -ForegroundColor Cyan
+    docker image prune -f | Out-Null
+
     Write-Host "==> Recreating dist folder" -ForegroundColor Cyan
     $distPath = Join-Path $PSScriptRoot "dist"
     if (Test-Path $distPath) {

@@ -25,5 +25,8 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host "==> Cleaning up dangling images" -ForegroundColor Cyan
+docker image prune -f | Out-Null
+
 Write-Host "All ClinicOS data has been deleted. Run start.ps1 for a fresh install." -ForegroundColor Green
 Read-Host "Press Enter to close this window"
