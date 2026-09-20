@@ -234,18 +234,18 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
     void gamification_computesRealStreakAndBadgesFromAttendanceAndCompletions() throws Exception {
         TenantContext.set(clinicA);
         seedWeekdays(clinicA);
-        YearMonth now = YearMonth.now();
+        YearMonth june = YearMonth.of(2026, 6);
         UUID employeeId = createEmployee("أحمد");
         linkEmployeeToRole(employeeId, "assistant");
-        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", now.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
-        LocalDate today = LocalDate.now();
-        seedWorkday(clinicA, employeeId, taskId, today);
-        seedWorkday(clinicA, employeeId, taskId, today.minusDays(1));
-        seedWorkday(clinicA, employeeId, taskId, today.minusDays(2));
+        UUID taskId = seedTaskAt(clinicA, "assistant", "تنظيف", june.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        LocalDate asOf = june.atEndOfMonth();
+        seedWorkday(clinicA, employeeId, taskId, asOf);
+        seedWorkday(clinicA, employeeId, taskId, asOf.minusDays(1));
+        seedWorkday(clinicA, employeeId, taskId, asOf.minusDays(2));
         gamificationService.updateGoal(clinicA, 1, "إنجاز أسبوعي", 2);
         gamificationService.updateThreshold(clinicA, "بطل الأسبوع", 3);
 
-        Gamification result = evaluationService.gamification(clinicA, employeeId, now);
+        Gamification result = evaluationService.gamification(clinicA, employeeId, june);
 
         assertThat(result.streak()).isEqualTo(3);
         assertThat(result.goals()).hasSize(1);
