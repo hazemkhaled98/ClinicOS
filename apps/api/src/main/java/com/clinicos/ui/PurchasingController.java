@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.PurchasingService;
 import com.clinicos.inventory.PurchasingService.OrderLineRequest;
@@ -44,13 +45,16 @@ public class PurchasingController {
     private final PurchasingService purchasingService;
     private final ActivityLogService activityLogService;
     private final AttachmentService attachmentService;
+    private final ClinicSettingsService clinicSettingsService;
 
     public PurchasingController(LayoutModel layoutModel, PurchasingService purchasingService,
-            ActivityLogService activityLogService, AttachmentService attachmentService) {
+            ActivityLogService activityLogService, AttachmentService attachmentService,
+            ClinicSettingsService clinicSettingsService) {
         this.layoutModel = layoutModel;
         this.purchasingService = purchasingService;
         this.activityLogService = activityLogService;
         this.attachmentService = attachmentService;
+        this.clinicSettingsService = clinicSettingsService;
     }
 
     @GetMapping("/inventory/orders")
@@ -86,6 +90,8 @@ public class PurchasingController {
         try {
             var order = purchasingService.placeOrder(clinicId(session), actor(session), supplierId, lines);
             log(session, "inventory.order.place", "purchase_order");
+            redirect.addFlashAttribute("toastMessage", "تم وضع الطلب ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/inventory/orders?wa=" + order.id();
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("toastMessage", exception.getMessage());
@@ -101,6 +107,7 @@ public class PurchasingController {
         }
         model.addAttribute("layout", layoutModel.forRequest(session, AREA));
         model.addAttribute("orders", purchasingService.orders(clinicId(session), java.util.Set.of(placed)));
+        model.addAttribute("invoicePhotoRequired", clinicSettingsService.get(clinicId(session)).invoicePhotoRequired());
         return "inventory-receive";
     }
 
@@ -111,7 +118,7 @@ public class PurchasingController {
             @RequestParam List<BigDecimal> qtyReceived,
             @RequestParam(required = false) List<String> lotNumber,
             @RequestParam(required = false) List<BigDecimal> deliveryCost,
-            HttpSession session, Model model) {
+            HttpSession session, Model model, RedirectAttributes redirect) {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "receive")) {
             return "redirect:/inventory";
         }
@@ -128,6 +135,8 @@ public class PurchasingController {
             }
             purchasingService.receive(clinicId, actor(session), orderId, lines, photoId);
             log(session, "inventory.receive", "purchase_order");
+            redirect.addFlashAttribute("toastMessage", "تم تسجيل الاستلام ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/inventory/received";
         } catch (IllegalArgumentException exception) {
             if (photoId != null) {
@@ -139,6 +148,7 @@ public class PurchasingController {
             }
             model.addAttribute("layout", layoutModel.forRequest(session, AREA));
             model.addAttribute("orders", purchasingService.orders(clinicId, java.util.Set.of(placed)));
+            model.addAttribute("invoicePhotoRequired", clinicSettingsService.get(clinicId).invoicePhotoRequired());
             Toasts.error(model, exception.getMessage());
             return "inventory-receive";
         }

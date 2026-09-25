@@ -3,6 +3,7 @@ package com.clinicos.inventory.internal;
 import static com.clinicos.shared.jooq.tables.StockMovement.STOCK_MOVEMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -195,6 +196,29 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void BRG26_rejectedDeleteKeepsItemAndApprovedDeleteArchivesIt() {
+        TenantContext.set(clinicA);
+        var rejectedRequest = inventoryService.requestItemChange(clinicA, assistant, item,
+                ChangeRequestKind.delete, null);
+
+        var rejected = inventoryService.applyItemChange(clinicA, manager, rejectedRequest.id(), false);
+
+        assertThat(rejected.status()).isEqualTo("rejected");
+        assertThat(inventoryService.items(clinicA, false)).anyMatch(i -> i.id().equals(item));
+        assertThat(inventoryService.pendingChangeRequests(clinicA))
+                .noneMatch(request -> request.id().equals(rejectedRequest.id()));
+
+        var approvedRequest = inventoryService.requestItemChange(clinicA, assistant, item,
+                ChangeRequestKind.delete, null);
+        var approved = inventoryService.applyItemChange(clinicA, manager, approvedRequest.id(), true);
+
+        assertThat(approved.status()).isEqualTo("approved");
+        assertThat(inventoryService.items(clinicA, false)).noneMatch(i -> i.id().equals(item));
+        assertThat(inventoryService.items(clinicA, true))
+                .anyMatch(i -> i.id().equals(item) && i.archivedAt() != null);
+    }
+
+    @Test
     void A2_itemBelowAlertsIsFlagged() {
         TenantContext.set(clinicA);
         seedMovement(clinicA, item, LocationKind.store, new BigDecimal("2"), MovementReason.receipt);
@@ -225,6 +249,9 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("0");
         assertThat(stockOnHand(item, LocationKind.tray)).isEqualByComparingTo("10");
         assertThat(movementCount(item)).isEqualTo(before + 2);
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .extracting(entry -> entry.reason(), entry -> entry.location())
+                .contains(tuple("transfer", LocationKind.store), tuple("transfer", LocationKind.tray));
     }
 
     @Test
@@ -247,6 +274,23 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(entry.qtyDelta()).isEqualByComparingTo("4");
         assertThat(entry.reason()).isEqualTo("receipt");
         assertThat(entry.actorName()).isEqualTo("assistant");
+    }
+
+    @Test
+    void ledgerRecordsIssueAndCountDeltas() {
+        TenantContext.set(clinicA);
+        inventoryService.adjustFor(clinicA, assistant, item, LocationKind.store,
+                new BigDecimal("10"), MovementReason.receipt, null, null);
+        inventoryService.issue(clinicA, assistant, item, LocationKind.store, new BigDecimal("3"));
+        inventoryService.adjustCount(clinicA, assistant, item, LocationKind.store, new BigDecimal("4"));
+
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .extracting(entry -> entry.reason(),
+                        entry -> entry.qtyDelta().stripTrailingZeros().toPlainString())
+                .containsExactlyInAnyOrder(
+                        tuple("receipt", "10"),
+                        tuple("issue", "-3"),
+                        tuple("count", "-3"));
     }
 
     @Test

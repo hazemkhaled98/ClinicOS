@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.clinicos.identity.api.SessionKeys;
@@ -67,18 +68,21 @@ public class PrepController {
     }
 
     @PostMapping("/prep/templates/{code}/import")
-    public String importTemplate(@PathVariable String code, HttpSession session, Model model) {
+    public String importTemplate(@PathVariable String code, HttpSession session, Model model,
+            RedirectAttributes redirect) {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
         try {
             Checklist checklist = checklistService.importTemplate(clinicId(session), actor(session), code);
             log(session, "prep.import", "prep_checklist");
+            redirect.addFlashAttribute("toastMessage", "تم استيراد القالب ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/prep/checklists/" + checklist.id() + "/edit";
         } catch (IllegalArgumentException exception) {
             model.addAttribute("layout", layoutModel.forRequest(session, "prep"));
             model.addAttribute("templates", checklistService.templates());
-            model.addAttribute("formError", exception.getMessage());
+            Toasts.error(model, exception.getMessage());
             return "prep-templates";
         }
     }
@@ -109,13 +113,15 @@ public class PrepController {
 
     @PostMapping({"/prep/checklists", "/prep/checklists/{id}"})
     public String save(@PathVariable(required = false) UUID id, @ModelAttribute("form") ChecklistForm form,
-            HttpSession session, Model model) {
+            HttpSession session, Model model, RedirectAttributes redirect) {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
         try {
             checklistService.save(clinicId(session), actor(session), id, form.toRequest());
             log(session, id == null ? "prep.create" : "prep.edit", "prep_checklist");
+            redirect.addFlashAttribute("toastMessage", id == null ? "تمت إضافة القائمة ✔" : "تم حفظ القائمة ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/prep";
         } catch (IllegalArgumentException exception) {
             renderEditor(session, model, id, form);
@@ -125,23 +131,26 @@ public class PrepController {
     }
 
     @PostMapping("/prep/checklists/{id}/approve")
-    public String approve(@PathVariable UUID id, HttpSession session, Model model) {
+    public String approve(@PathVariable UUID id, HttpSession session, Model model,
+            RedirectAttributes redirect) {
         return transition(id, session, model, "prep.approve",
-                actor -> checklistService.approve(clinicId(session), actor, id));
+                actor -> checklistService.approve(clinicId(session), actor, id), redirect);
     }
 
     @PostMapping("/prep/checklists/{id}/unapprove")
-    public String unapprove(@PathVariable UUID id, HttpSession session, Model model) {
+    public String unapprove(@PathVariable UUID id, HttpSession session, Model model,
+            RedirectAttributes redirect) {
         return transition(id, session, model, "prep.unapprove",
-                actor -> checklistService.unapprove(clinicId(session), actor, id));
+                actor -> checklistService.unapprove(clinicId(session), actor, id), redirect);
     }
 
     @PostMapping("/prep/checklists/{id}/archive")
-    public String archive(@PathVariable UUID id, HttpSession session, Model model) {
+    public String archive(@PathVariable UUID id, HttpSession session, Model model,
+            RedirectAttributes redirect) {
         return transition(id, session, model, "prep.archive", actor -> {
             checklistService.archive(clinicId(session), actor, id);
             return null;
-        });
+        }, redirect);
     }
 
     @GetMapping("/prep/checklists/{id}/run")
@@ -171,6 +180,7 @@ public class PrepController {
             model.addAttribute("checklistId", id);
             model.addAttribute("run", checklistService.toggle(clinicId(session), actor(session), id, itemId, checked));
             log(session, "prep.toggle", "prep_run_item");
+            Toasts.success(model, "تم " + (checked ? "تأكيد" : "إلغاء") + " العنصر");
             return RUN_CONTENT;
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage(), exception);
@@ -186,6 +196,7 @@ public class PrepController {
             model.addAttribute("checklistId", id);
             model.addAttribute("run", checklistService.reset(clinicId(session), actor(session), id));
             log(session, "prep.reset", "prep_run");
+            Toasts.success(model, "تم إعادة تعيين القائمة");
             return RUN_CONTENT;
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage(), exception);
@@ -193,13 +204,22 @@ public class PrepController {
     }
 
     private String transition(UUID id, HttpSession session, Model model, String action,
-            java.util.function.Function<Actor, Checklist> operation) {
+            java.util.function.Function<Actor, Checklist> operation,
+            RedirectAttributes redirect) {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
         try {
             operation.apply(actor(session));
             log(session, action, "prep_checklist");
+            String message = switch(action) {
+                case "prep.approve" -> "تم اعتماد القائمة ✔";
+                case "prep.unapprove" -> "تم إلغاء الاعتماد";
+                case "prep.archive" -> "تم أرشفة القائمة";
+                default -> "تمت العملية ✔";
+            };
+            redirect.addFlashAttribute("toastMessage", message);
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/prep";
         } catch (IllegalArgumentException exception) {
             renderIndex(session, model);

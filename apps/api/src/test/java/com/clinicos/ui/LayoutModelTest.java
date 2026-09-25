@@ -1,8 +1,10 @@
 package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpSession;
@@ -39,5 +41,35 @@ class LayoutModelTest {
         MockHttpSession session = new MockHttpSession();
 
         assertThat(layoutModel.forRequest(session, null).nav()).isEmpty();
+    }
+
+    @Test
+    void forRequestWithClinicNameReturnsIt() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.CLINIC_NAME, "Al-Noor Clinic");
+
+        assertThat(layoutModel.forRequest(session, null).clinicName()).isEqualTo("Al-Noor Clinic");
+    }
+
+    @Test
+    void forRequestWithoutClinicNameReturnsDefault() {
+        MockHttpSession session = new MockHttpSession();
+
+        assertThat(layoutModel.forRequest(session, null).clinicName()).isEqualTo("عيادتي");
+    }
+
+    @Test
+    void forRequestWithBlankClinicNameReturnsDefault() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.CLINIC_NAME, "   ");
+
+        assertThat(layoutModel.forRequest(session, null).clinicName()).isEqualTo("عيادتي");
+    }
+
+    @Test
+    void layoutDataDoesNotExposeMutableNavigation() {
+        LayoutModel.LayoutData layout = new LayoutModel.LayoutData(new ArrayList<>(), "", "", "", "", null);
+
+        assertThatThrownBy(() -> layout.nav().add(null)).isInstanceOf(UnsupportedOperationException.class);
     }
 }

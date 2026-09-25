@@ -59,7 +59,8 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
                     settings.getVolumeTarget(),
                     settings.getAcademyPassScore(),
                     weights,
-                    tiers);
+                    tiers,
+                    settings.getInvoicePhotoRequired());
         });
     }
 
@@ -101,6 +102,14 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
         throwIfAny(fieldErrors);
         transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.VOLUME_TARGET, volumeTarget)
+                .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
+                .execute());
+    }
+
+    @Override
+    public void updateInvoicePhotoRequired(UUID clinicId, boolean required) {
+        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+                .set(CLINIC_SETTINGS.INVOICE_PHOTO_REQUIRED, required)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
     }

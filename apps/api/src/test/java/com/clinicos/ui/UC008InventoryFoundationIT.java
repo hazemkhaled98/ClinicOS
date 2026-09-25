@@ -2,11 +2,13 @@ package com.clinicos.ui;
 
 import static com.clinicos.shared.jooq.tables.InventoryItem.INVENTORY_ITEM;
 import static com.clinicos.shared.jooq.tables.StockMovement.STOCK_MOVEMENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -106,6 +108,53 @@ class UC008InventoryFoundationIT extends AbstractBrowserIT {
         PlaywrightAssertions.assertThat(page().getByText("كمبوزيت معدّل").first()).isVisible();
     }
 
+    @Test
+    @DisplayName("Receptionist accesses purchasing areas but not tray or issue")
+    void receptionistInventoryNavigation() throws Exception {
+        String clinicSlug = seedTestData();
+
+        loginAsRole("receptionist", clinicSlug, "password");
+        page().navigate(getUrl() + "inventory");
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("النواقص والطلب"))).isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(Pattern.compile("الاستلام$")))).isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("المرتجعات"))).isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("الموردين"))).isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("صينية التحضير"))).not().isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("صرف المخزون"))).not().isVisible();
+
+        assertRenders("inventory/orders");
+        assertRenders("inventory/receive");
+        assertRenders("inventory/returns");
+        assertRenders("inventory/suppliers");
+        assertRedirectsTo("inventory/tray", "inventory");
+        assertRedirectsTo("inventory/issue", "inventory");
+    }
+
+    @Test
+    @DisplayName("Manager accesses inventory approvals and analytics")
+    void managerInventoryNavigation() throws Exception {
+        String clinicSlug = seedTestData();
+
+        loginAsRole("manager", clinicSlug, "password");
+        page().navigate(getUrl() + "inventory");
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("طلبات الموافقة"))).isVisible();
+        PlaywrightAssertions.assertThat(page().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("تحليل الاستهلاك"))).isVisible();
+
+        assertRenders("inventory/approvals");
+        assertRenders("inventory/analytics");
+    }
+
+    private void assertRenders(String path) {
+        page().navigate(getUrl() + path);
+        assertEquals(getUrl() + path, page().url(), path + " must render for this role");
+        PlaywrightAssertions.assertThat(page().locator("main h1")).isVisible();
+    }
+
+    private void assertRedirectsTo(String path, String landing) {
+        page().navigate(getUrl() + path);
+        assertEquals(getUrl() + landing, page().url(), path + " must be denied for this role");
+    }
+
     private void loginAsRole(String username, String clinicCode, String password) {
         page().navigate(getUrl() + "login");
         page().getByLabel("كود العيادة").fill(clinicCode);
@@ -125,13 +174,21 @@ class UC008InventoryFoundationIT extends AbstractBrowserIT {
 
             UUID ownerId = TestFixtures.insertUser(connection, clinicId, "owner", passwordEncoder.encode("password"), "active");
             UUID assistantId = TestFixtures.insertUser(connection, clinicId, "assistant", passwordEncoder.encode("password"), "active");
+            UUID managerId = TestFixtures.insertUser(connection, clinicId, "manager", passwordEncoder.encode("password"), "active");
+            UUID receptionistId = TestFixtures.insertUser(connection, clinicId, "receptionist", passwordEncoder.encode("password"), "active");
             UUID ownerMembershipId = TestFixtures.insertMembership(connection, clinicId, ownerId, "owner");
             UUID assistantMembershipId = TestFixtures.insertMembership(connection, clinicId, assistantId, "assistant");
+            UUID managerMembershipId = TestFixtures.insertMembership(connection, clinicId, managerId, "manager");
+            UUID receptionistMembershipId = TestFixtures.insertMembership(connection, clinicId, receptionistId, "receptionist");
 
             UUID ownerEmpId = TestFixtures.insertEmployee(connection, clinicId, "owner");
             UUID assistantEmpId = TestFixtures.insertEmployee(connection, clinicId, "assistant");
+            UUID managerEmpId = TestFixtures.insertEmployee(connection, clinicId, "manager");
+            UUID receptionistEmpId = TestFixtures.insertEmployee(connection, clinicId, "receptionist");
             TestFixtures.linkMembershipToEmployee(connection, ownerMembershipId, ownerEmpId);
             TestFixtures.linkMembershipToEmployee(connection, assistantMembershipId, assistantEmpId);
+            TestFixtures.linkMembershipToEmployee(connection, managerMembershipId, managerEmpId);
+            TestFixtures.linkMembershipToEmployee(connection, receptionistMembershipId, receptionistEmpId);
 
             TestFixtures.seedRolePermissionDefaults(connection, clinicId);
 

@@ -21,7 +21,11 @@
         </div>
       </div>
 
-      <div th:if="${!#lists.isEmpty(shortages)}" class="clinicos-card p-6 mb-8">
+      <th:block th:if="${#lists.isEmpty(suppliers)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('🏢', 'لا توجد موردون', 'أضف مورّداً أولاً لتتمكن من طلب الأصناف.', @{/inventory/suppliers}, 'إضافة مورّد')}"></div>
+      </th:block>
+
+      <div th:if="${!#lists.isEmpty(suppliers) and !#lists.isEmpty(shortages)}" class="clinicos-card p-6 mb-8">
         <div class="flex items-center gap-2 mb-5">
           <span class="w-2.5 h-2.5 rounded-full bg-teal-600 inline-block"></span>
           <h2 class="text-xl font-bold text-teal-900">طلب توريد جديد</h2>
@@ -72,10 +76,8 @@
           </div>
         </form>
       </div>
-      <div th:if="${#lists.isEmpty(shortages)}" class="clinicos-empty-state p-16 mb-8">
-        <div class="text-5xl mb-4">✅</div>
-        <p class="font-bold text-teal-900 text-xl">لا توجد نواقص</p>
-        <p class="mt-2 text-sm text-on-surface-variant">كل الأصناف فوق حد التنبيه — ما عندك حاجة للطلب حالياً.</p>
+      <div th:if="${!#lists.isEmpty(suppliers) and #lists.isEmpty(shortages)}" class="mb-8">
+        <div th:replace="~{fragments/empty-state :: emptyState('✅', 'لا توجد نواقص', 'كل الأصناف فوق حد التنبيه — ما عندك حاجة للطلب حالياً.', null, '')}"></div>
       </div>
 
       <div th:if="${!#lists.isEmpty(orders)}" class="clinicos-card overflow-hidden">
@@ -104,6 +106,9 @@
           </tbody>
         </table>
       </div>
+      <th:block th:if="${!#lists.isEmpty(suppliers) and #lists.isEmpty(orders)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('📦', 'لا توجد طلبيات معلّقة', 'أرسل طلبية جديدة عندما تكون هناك نواقص.', null, '')}"></div>
+      </th:block>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

@@ -11,7 +11,7 @@ import com.clinicos.shared.jooq.enums.PoStatus;
 
 /**
  * Purchasing: supplier directory, shortage-driven ordering, receiving with a
- * mandatory invoice photo (UC-008 A4), and supplier returns under the BR-G27
+ * clinic-configured invoice photo requirement (UC-008 A4), and supplier returns under the BR-G27
  * receivable ceiling. Runs inside the clinic bound to the current thread's
  * {@code TenantContext}; callers must guarantee a tenant is bound first.
  */
@@ -84,7 +84,7 @@ public interface PurchasingService {
     /** Orders restricted to the given statuses (pending-receipt vs history). */
     List<Order> orders(UUID clinicId, Set<PoStatus> statuses);
 
-    /** Record receipt of lines against an order (invoice photo mandatory, A4). */
+    /** Record receipt of lines against an order (invoice photo policy, A4). */
     Order receive(UUID clinicId, Actor actor, UUID orderId, List<ReceiptLine> lines, UUID invoicePhotoId);
 
     /** File a pending return (BR-G26: no stock movement yet; BR-G27 ceiling). */

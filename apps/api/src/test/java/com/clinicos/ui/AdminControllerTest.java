@@ -183,7 +183,7 @@ class AdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of());
         var settings = new ClinicSettingsService.ClinicSettings(
                 java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
-                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of(), true);
         when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
 
         String view = controller.settings(session, model);
@@ -401,7 +401,7 @@ class AdminControllerTest {
                 new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", UUID.randomUUID(), assistantEmployee.id())));
         var settings = new ClinicSettingsService.ClinicSettings(
                 java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
-                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of(), true);
         when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
 
         controller.settings(session, model);
@@ -532,13 +532,13 @@ class AdminControllerTest {
 
     private void denyDashboard() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مدير", "19 مايو 2026", "admin-dashboard"));
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مدير", "19 مايو 2026", "admin-dashboard"));
     }
 
     private static LayoutModel.LayoutData ceoLayout() {
         return new LayoutModel.LayoutData(
                 List.of(NavSectionResolver.sectionByRoute("admin-dashboard")),
-                "أحمد", "المالك", "19 مايو 2026", "admin-dashboard");
+                "أحمد", "عيادتي", "المالك", "19 مايو 2026", "admin-dashboard");
     }
 
     private static HttpSession session() {

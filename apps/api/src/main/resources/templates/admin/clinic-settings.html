@@ -52,6 +52,22 @@
   </form>
 </div>
 
+<div th:fragment="invoicePhotoPolicyCard(invoicePhotoRequired)"
+     id="invoice-photo-policy-card" class="mt-6 p-6 sm:p-8 clinicos-card"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  <div class="flex flex-col gap-2 mb-6">
+    <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">سياسة صورة الفاتورة</h2>
+    <p class="text-sm text-on-surface-variant">حدّد إن كانت صورة فاتورة المورد مطلوبة عند تسجيل الاستلام.</p>
+  </div>
+  <form class="flex flex-wrap items-center gap-3" th:attr="hx-post='/admin-dashboard/settings/invoice-photo-policy'" hx-target="#invoice-photo-policy-card" hx-swap="outerHTML">
+    <label class="flex items-center gap-2 text-sm text-on-surface-variant">
+      <input type="checkbox" name="invoicePhotoRequired" value="true" class="accent-teal-600" th:checked="${invoicePhotoRequired}">
+      طلب صورة الفاتورة عند الاستلام
+    </label>
+    <button type="submit" class="clinicos-btn me-auto">حفظ السياسة</button>
+  </form>
+</div>
+
 <div th:fragment="dutyCard(dutyForm)"
      id="duty-card" class="mt-6 p-6 sm:p-8 clinicos-card"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">

@@ -169,6 +169,21 @@ class InventoryControllerTest {
     }
 
     @Test
+    void requestDeleteChangeRoutesDeleteKindToService() {
+        HttpSession session = session("assistant", "manage");
+        InventoryController.ItemForm form = new InventoryController.ItemForm();
+        form.setName("كمبوزيت معدّل");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.requestChange(ITEM, "delete", form, session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/items");
+        verify(inventoryService).requestItemChange(eq(CLINIC), eq(new Actor(MEMBERSHIP, "assistant")),
+                eq(ITEM), eq(ChangeRequestKind.delete), any());
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.item.request-change", "inventory_change_request");
+    }
+
+    @Test
     void issuePostMapsIllegalArgumentToUnprocessableEntity() {
         HttpSession session = session("assistant", "issue");
         when(inventoryService.issue(eq(CLINIC), any(), eq(ITEM), eq(LocationKind.store), any()))

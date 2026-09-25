@@ -372,12 +372,12 @@ class EvaluationControllerTest {
         when(layoutModel.forRequest(any(HttpSession.class), eq("evaluation")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(NavSectionResolver.sectionByRoute("evaluation")),
-                        "أحمد", "المدير", "19 مايو 2026", "evaluation"));
+                        "أحمد", "عيادتي", "المدير", "19 مايو 2026", "evaluation"));
     }
 
     private void denyView() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("evaluation")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "موظف", "19 مايو 2026", "evaluation"));
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "موظف", "19 مايو 2026", "evaluation"));
     }
 
     private static HttpSession session() {

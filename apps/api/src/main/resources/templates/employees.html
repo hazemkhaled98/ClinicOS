@@ -27,7 +27,7 @@
 
   <th:block th:unless="${day.noEmployee()}">
 
-    <p class="text-xs font-bold text-emerald-600 mb-1 clinicos-section-kicker">عيادتي</p>
+    <p class="text-xs font-bold text-emerald-600 mb-1 clinicos-section-kicker" th:text="${layout.clinicName}">عيادتي</p>
     <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">مهامي اليوم</h1>
     <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">تسجيل الحضور والانصراف وتأكيد المهام وإرفاق صور الإثبات</p>
 

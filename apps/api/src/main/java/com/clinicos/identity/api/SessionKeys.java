@@ -9,6 +9,7 @@ package com.clinicos.identity.api;
 public final class SessionKeys {
 
     public static final String CLINIC_ID = "clinicId";
+    public static final String CLINIC_NAME = "clinicName";
     public static final String MEMBERSHIP_ID = "membershipId";
     public static final String ROLE_CODE = "roleCode";
     public static final String PERMISSIONS = "permissions";

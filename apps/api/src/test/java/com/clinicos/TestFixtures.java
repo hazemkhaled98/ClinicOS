@@ -165,8 +165,8 @@ public final class TestFixtures {
                 "received", "itemAnalysis", "approvals", "ledger"};
         seedRolePermissions(dsl, clinicId, "owner", fullCatalog);
         seedRolePermissions(dsl, clinicId, "manager", fullCatalog);
-        seedRolePermissions(dsl, clinicId, "assistant", "emp", "tray", "issue", "procs", "myprocs", "manage");
-        seedRolePermissions(dsl, clinicId, "receptionist", "emp", "orders", "receive", "returns", "suppliers", "ledger");
+        seedRolePermissions(dsl, clinicId, "assistant", "emp", "tray", "issue", "myprocs", "manage");
+        seedRolePermissions(dsl, clinicId, "receptionist", "emp", "orders", "receive", "returns", "suppliers");
     }
 
     private static void seedRolePermissions(DSLContext dsl, UUID clinicId, String roleCode, String... permissionCodes) {

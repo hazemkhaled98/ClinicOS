@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.clinicos.academy.AcademyService;
 import com.clinicos.academy.AcademyService.Actor;
@@ -119,6 +120,7 @@ public class AcademyController {
             academyService.submitPhoto(clinicId(session), actor(session), unitId, photoId);
             activityLogService.log(clinicId(session), (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID),
                     "academy.submitPhoto", "academy_step_submission");
+            Toasts.success(model, "تم رفع الصورة ✔");
         } catch (IllegalArgumentException e) {
             if (photoId != null) {
                 attachmentService.delete(clinicId(session), photoId);
@@ -137,6 +139,7 @@ public class AcademyController {
             academyService.markDone(clinicId(session), actor(session), unitId);
             activityLogService.log(clinicId(session), (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID),
                     "academy.markDone", "academy_step_submission");
+            Toasts.success(model, "تم إكمال المرحلة ✔");
         } catch (IllegalArgumentException e) {
             Toasts.error(model, e.getMessage());
         }
@@ -230,6 +233,7 @@ public class AcademyController {
             academyService.verify(clinicId(session), actor(session), id);
             activityLogService.log(clinicId(session), (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID),
                     "academy.verify", "academy_step_submission");
+            Toasts.success(model, "تم اعتماد الإجابة ✔");
         } catch (IllegalArgumentException e) {
             Toasts.error(model, e.getMessage());
         }
@@ -249,6 +253,7 @@ public class AcademyController {
             academyService.reject(clinicId(session), actor(session), id, reason);
             activityLogService.log(clinicId(session), (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID),
                     "academy.reject", "academy_step_submission");
+            Toasts.success(model, "تم رفض الإجابة");
         } catch (IllegalArgumentException e) {
             Toasts.error(model, e.getMessage());
         }
@@ -318,7 +323,8 @@ public class AcademyController {
     }
 
     @PostMapping("/academy/units")
-    public String saveUnit(@ModelAttribute("form") UnitForm form, HttpSession session, Model model) {
+    public String saveUnit(@ModelAttribute("form") UnitForm form, HttpSession session, Model model,
+            RedirectAttributes redirect) {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
@@ -326,6 +332,8 @@ public class AcademyController {
             Unit saved = academyService.saveUnit(clinicId(session), actor(session), form.toRequest());
             activityLogService.log(clinicId(session), (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID),
                     "academy.saveUnit", "academy_unit");
+            redirect.addFlashAttribute("toastMessage", "تم حفظ المرحلة ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/academy/units/" + saved.id() + "/edit";
         } catch (IllegalArgumentException e) {
             renderCurriculum(session, model);

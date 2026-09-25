@@ -396,19 +396,19 @@ class EmployeeDayControllerTest {
 
     private static ClinicSettings settings() {
         return new ClinicSettings(LocalTime.of(9, 0), LocalTime.of(17, 0), 15, 26,
-                new BigDecimal("20000"), 70, List.of(), List.of());
+                new BigDecimal("20000"), 70, List.of(), List.of(), true);
     }
 
     private void allowEmployees() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("employees")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(NavSectionResolver.sectionByRoute("employees")),
-                        "أحمد", "مساعد", "19 مايو 2026", "employees"));
+                        "أحمد", "عيادتي", "مساعد", "19 مايو 2026", "employees"));
     }
 
     private void denyEmployees() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("employees")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مساعد",
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مساعد",
                         "19 مايو 2026", "employees"));
     }
 

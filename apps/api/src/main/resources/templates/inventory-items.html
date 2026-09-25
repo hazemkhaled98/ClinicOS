@@ -134,11 +134,9 @@
           </tbody>
         </table>
       </div>
-      <div th:if="${#lists.isEmpty(items)}" class="clinicos-empty-state p-16">
-        <div class="text-5xl mb-4">📦</div>
-        <p class="font-bold text-teal-900 text-xl">لا توجد أصناف</p>
-        <p class="mt-2 text-sm text-on-surface-variant">أضف أول صنف من النموذج أعلاه للبدء.</p>
-      </div>
+      <th:block th:if="${#lists.isEmpty(items)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('📦', 'لا توجد أصناف', 'أضف أول صنف من النموذج أعلاه للبدء.', null, '')}"></div>
+      </th:block>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

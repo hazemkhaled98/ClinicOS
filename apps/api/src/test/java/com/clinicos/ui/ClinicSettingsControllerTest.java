@@ -9,6 +9,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,6 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.mock.web.MockHttpSession;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
@@ -55,6 +60,7 @@ class ClinicSettingsControllerTest {
     private WorkCalendarService workCalendarService;
     private EmployeeService employeeService;
     private ClinicSettingsController controller;
+    private MockMvc mockMvc;
     private Model model;
 
     @BeforeEach
@@ -65,6 +71,7 @@ class ClinicSettingsControllerTest {
         employeeService = mock(EmployeeService.class);
         controller = new ClinicSettingsController(layoutModel, settingsService,
                 workCalendarService, employeeService);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         model = new ExtendedModelMap();
         when(settingsService.get(CLINIC)).thenReturn(settings(WEIGHTS, TIERS));
         when(workCalendarService.workingWeekdays(CLINIC)).thenReturn(List.of(6, 7, 1, 2, 3, 4));
@@ -167,6 +174,29 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: volumeCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateVolumeTarget(CLINIC, new BigDecimal("30000"));
+    }
+
+    @Test
+    void invoicePhotoPolicyDefaultsMissingRequestParameterToFalse() throws Exception {
+        allowDashboard();
+
+        mockMvc.perform(post("/admin-dashboard/settings/invoice-photo-policy")
+                .session(httpSession()))
+                .andExpect(status().isOk());
+
+        verify(settingsService).updateInvoicePhotoRequired(CLINIC, false);
+    }
+
+    @Test
+    void invoicePhotoPolicyBindsTrueRequestParameter() throws Exception {
+        allowDashboard();
+
+        mockMvc.perform(post("/admin-dashboard/settings/invoice-photo-policy")
+                .session(httpSession())
+                .param("invoicePhotoRequired", "true"))
+                .andExpect(status().isOk());
+
+        verify(settingsService).updateInvoicePhotoRequired(CLINIC, true);
     }
 
     @Test
@@ -331,24 +361,30 @@ class ClinicSettingsControllerTest {
 
     private static ClinicSettings settings(List<CategoryWeight> weights, List<Tier> tiers) {
         return new ClinicSettings(LocalTime.of(9, 0), LocalTime.of(17, 0), 15, 26,
-                new BigDecimal("20000"), 70, weights, tiers);
+                new BigDecimal("20000"), 70, weights, tiers, true);
     }
 
     private void allowDashboard() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(NavSectionResolver.sectionByRoute("admin-dashboard")),
-                        "أحمد", "المالك", "19 مايو 2026", "admin-dashboard"));
+                        "أحمد", "عيادتي", "المالك", "19 مايو 2026", "admin-dashboard"));
     }
 
     private void denyDashboard() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مدير", "19 مايو 2026", "admin-dashboard"));
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مدير", "19 مايو 2026", "admin-dashboard"));
     }
 
     private static HttpSession session() {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
+        return session;
+    }
+
+    private static MockHttpSession httpSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.CLINIC_ID, CLINIC);
         return session;
     }
 }

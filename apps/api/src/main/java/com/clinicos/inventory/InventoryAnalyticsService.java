@@ -10,8 +10,8 @@ public interface InventoryAnalyticsService {
             BigDecimal trayValue, BigDecimal storeValue) {
     }
 
-    record ProfitRow(String procedureName, BigDecimal revenue, BigDecimal cost,
-            BigDecimal margin, long caseCount) {
+    record ProfitRow(String procedureName, BigDecimal revenue, BigDecimal materialCost,
+            BigDecimal laborCost, BigDecimal doctorFee, BigDecimal margin, long caseCount) {
     }
 
     record ConsumptionRow(String itemName, BigDecimal consumed, BigDecimal onHand,
@@ -21,8 +21,8 @@ public interface InventoryAnalyticsService {
     record WasteRow(String month, String itemName, BigDecimal quantity, BigDecimal value) {
     }
 
-    record DoctorRow(String doctorName, long caseCount, BigDecimal revenue,
-            BigDecimal materialCost, BigDecimal margin) {
+    record DoctorRow(String doctorName, long caseCount, BigDecimal revenue, BigDecimal materialCost,
+            BigDecimal laborCost, BigDecimal doctorFee, BigDecimal margin) {
     }
 
     record SupplierRow(String supplierName, long orderCount, BigDecimal spend,

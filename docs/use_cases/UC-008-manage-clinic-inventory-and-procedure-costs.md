@@ -74,7 +74,7 @@
 
 ### BR-001: Inventory Access Is Scoped by Role
 
-An assistant sees only tray stock, issuing, and their own procedures; a receptionist sees only ordering, receiving, returns, and suppliers; the manager sees every area plus clinic-wide analytics and approvals.
+An assistant sees only tray stock, issuing, their own procedures, and the item catalogue, from which a stock change is filed (the reach step 5 requires; the approval queue itself stays manager-only); a receptionist sees only ordering, receiving, returns, and suppliers; the manager sees every area plus clinic-wide analytics and approvals.
 
 ### BR-002: Stock-Affecting Edits Require Manager Approval
 

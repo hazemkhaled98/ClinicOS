@@ -90,13 +90,17 @@ class DefaultProceduresServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(analyticsService.profit(clinicA, null, null)).singleElement()
                 .satisfies(row -> {
                     assertThat(row.procedureName()).isEqualTo("حشو");
-                    assertThat(row.cost()).isEqualByComparingTo("45");
+                    assertThat(row.materialCost()).isEqualByComparingTo("20");
+                    assertThat(row.laborCost()).isEqualByComparingTo("20");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("5");
                     assertThat(row.margin()).isEqualByComparingTo("55");
                 });
         assertThat(analyticsService.doctors(clinicA, null, null)).singleElement()
                 .satisfies(row -> {
                     assertThat(row.doctorName()).isEqualTo("د. أحمد");
                     assertThat(row.materialCost()).isEqualByComparingTo("20");
+                    assertThat(row.laborCost()).isEqualByComparingTo("20");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("5");
                     assertThat(row.margin()).isEqualByComparingTo("55");
                 });
     }
@@ -156,6 +160,24 @@ class DefaultProceduresServiceIT extends AbstractPostgresIntegrationTest {
                 .filter(it -> it.id().equals(record.id())).findFirst().orElseThrow();
         assertThat(reloaded.items()).singleElement()
                 .satisfies(item -> assertThat(item.qty()).isEqualByComparingTo("1"));
+    }
+
+    @Test
+    void approvedCaseEditThatReducesQuantityWritesAdjustmentLedgerRow() {
+        seedTray(new BigDecimal("5"));
+        var record = proceduresService.recordCase(clinicA, assistant,
+                new CaseDraft(procedure, employee, null, null, List.of(new CaseItemRequest(item, new BigDecimal("4")))));
+
+        var request = proceduresService.requestCaseChange(clinicA, assistant, record.id(), ChangeRequestKind.edit,
+                List.of(new CaseItemRequest(item, new BigDecimal("2"))));
+        proceduresService.decideChange(clinicA, manager, request, true);
+
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .anySatisfy(entry -> {
+                    assertThat(entry.reason()).isEqualTo("adjustment");
+                    assertThat(entry.qtyDelta()).isEqualByComparingTo("2");
+                    assertThat(entry.location()).isEqualTo(LocationKind.tray);
+                });
     }
 
     @Test

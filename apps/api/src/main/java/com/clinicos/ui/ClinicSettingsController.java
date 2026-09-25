@@ -17,6 +17,7 @@ import org.springframework.util.AutoPopulatingList;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Category;
@@ -92,6 +93,18 @@ public class ClinicSettingsController {
         Toasts.fromErrors(model, fieldErrors, "تم حفظ الهدف الشهري");
         model.addAttribute("volumeForm", form);
         return "admin/clinic-settings :: volumeCard";
+    }
+
+    @PostMapping("/admin-dashboard/settings/invoice-photo-policy")
+    public String updateInvoicePhotoPolicy(@RequestParam(defaultValue = "false") boolean invoicePhotoRequired,
+            HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session)) {
+            return "redirect:/";
+        }
+        clinicSettingsService.updateInvoicePhotoRequired(AdminAccess.clinicId(session), invoicePhotoRequired);
+        Toasts.success(model, "تم حفظ سياسة صورة الفاتورة");
+        model.addAttribute("invoicePhotoRequired", invoicePhotoRequired);
+        return "admin/clinic-settings :: invoicePhotoPolicyCard";
     }
 
     @PostMapping("/admin-dashboard/settings/duty")

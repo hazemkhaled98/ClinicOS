@@ -72,16 +72,26 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBrowserIT {
     }
 
     private String seedUserWithClinic(String username, String rawPassword) throws Exception {
+        return seedUserWithClinic(username, rawPassword, "Test Clinic " + username, "owner");
+    }
+
+    private String seedUserWithClinic(String username, String rawPassword, String clinicName) throws Exception {
+        return seedUserWithClinic(username, rawPassword, clinicName, "owner");
+    }
+
+    private String seedUserWithClinic(String username, String rawPassword, String clinicName, String roleCode)
+            throws Exception {
         String slug = "clinic-" + uniqueSuffix();
         try (Connection connection = DriverManager.getConnection(
                 PostgresTestSupport.POSTGRES.getJdbcUrl(),
                 PostgresTestSupport.POSTGRES.getUsername(),
                 PostgresTestSupport.POSTGRES.getPassword())) {
             UUID clinicId = TestFixtures.insertClinic(
-                    connection, "Test Clinic " + username, slug);
+                    connection, clinicName, slug);
             UUID userId = TestFixtures.insertUser(
                     connection, clinicId, username, passwordEncoder.encode(rawPassword), "active");
-            TestFixtures.insertMembership(connection, clinicId, userId);
+            TestFixtures.insertMembership(connection, clinicId, userId, roleCode);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicId);
         }
         return slug;
     }
@@ -238,6 +248,46 @@ class UC001LogInAndAccessTheSystemIT extends AbstractBrowserIT {
 
             assertThat(page().context().cookies().stream()
                     .noneMatch(cookie -> "lastSection".equals(cookie.name))).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Step 5: Dynamic clinic branding")
+    class DynamicClinicBranding {
+
+        @Test
+        @DisplayName("Dashboard displays the clinic name instead of hardcoded عيادتي")
+        void dashboardDisplaysClinicName() throws Exception {
+            String username = "branding-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicName = "عيادة النور - Al Noor Clinic";
+            String clinicSlug = seedUserWithClinic(username, rawPassword, clinicName);
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+            assertLandedInApp();
+
+            page().navigate(getUrl() + "admin-dashboard/overview");
+            page().waitForURL(url -> url.contains("admin-dashboard"));
+
+            PlaywrightAssertions.assertThat(page().locator(".clinicos-section-kicker")).containsText(clinicName.substring(0, clinicName.indexOf(" - ")));
+        }
+
+        @Test
+        @DisplayName("Employees page displays the clinic name instead of hardcoded عيادتي")
+        void employeesPageDisplaysClinicName() throws Exception {
+            String username = "branding2-" + uniqueSuffix();
+            String rawPassword = "correct-horse-battery-staple";
+            String clinicSlug = seedUserWithClinic(username, rawPassword, "Test Clinic " + username, "assistant");
+
+            page().navigate(getUrl() + "login");
+            login(username, rawPassword, clinicSlug);
+            assertLandedInApp();
+
+            page().navigate(getUrl() + "employees");
+            page().waitForURL(url -> url.contains("employees"));
+
+            PlaywrightAssertions.assertThat(page().locator(".clinicos-topbar-t2")).containsText("Test Clinic " + username);
         }
     }
 }

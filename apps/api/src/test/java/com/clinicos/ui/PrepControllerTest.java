@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.prep.PrepChecklistService;
@@ -101,8 +102,9 @@ class PrepControllerTest {
     void saveBuildsActorFromSessionAndLinkedEmployee() {
         allowLinkedEmployee();
         PrepController.ChecklistForm form = form();
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
-        String view = controller.save(null, form, session("assistant"), model);
+        String view = controller.save(null, form, session("assistant"), model, redirect);
 
         assertThat(view).isEqualTo("redirect:/prep");
         ArgumentCaptor<Actor> actor = ArgumentCaptor.forClass(Actor.class);
@@ -110,6 +112,8 @@ class PrepControllerTest {
                 org.mockito.ArgumentMatchers.isNull(), any());
         assertThat(actor.getValue()).isEqualTo(new Actor(MEMBERSHIP, "assistant", EMPLOYEE));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.create", "prep_checklist");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تمت إضافة القائمة ✔");
     }
 
     @Test
@@ -118,8 +122,9 @@ class PrepControllerTest {
         PrepController.ChecklistForm form = form();
         when(checklistService.save(any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException("أضف قسمًا واحدًا على الأقل"));
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
-        String view = controller.save(CHECKLIST, form, session("assistant"), model);
+        String view = controller.save(CHECKLIST, form, session("assistant"), model, redirect);
 
         assertThat(view).isEqualTo("prep-editor");
         assertThat(model.getAttribute("form")).isSameAs(form);
@@ -131,33 +136,56 @@ class PrepControllerTest {
     void importTemplateLogsAndRedirectsToEditor() {
         allowLinkedEmployee();
         when(checklistService.importTemplate(any(), any(), any())).thenReturn(checklist("draft"));
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
-        String view = controller.importTemplate("examination", session("assistant"), model);
+        String view = controller.importTemplate("examination", session("assistant"), model, redirect);
 
         assertThat(view).isEqualTo("redirect:/prep/checklists/" + CHECKLIST + "/edit");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.import", "prep_checklist");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم استيراد القالب ✔");
     }
 
     @Test
     void approveUsesOwnerActorAndLogs() {
         allowLinkedEmployee();
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
-        String view = controller.approve(CHECKLIST, session("owner"), model);
+        String view = controller.approve(CHECKLIST, session("owner"), model, redirect);
 
         assertThat(view).isEqualTo("redirect:/prep");
         verify(checklistService).approve(CLINIC, new Actor(MEMBERSHIP, "owner", EMPLOYEE), CHECKLIST);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.approve", "prep_checklist");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم اعتماد القائمة ✔");
     }
 
     @Test
     void unapproveUsesManagerActorAndLogs() {
         allowLinkedEmployee();
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
-        String view = controller.unapprove(CHECKLIST, session("manager"), model);
+        String view = controller.unapprove(CHECKLIST, session("manager"), model, redirect);
 
         assertThat(view).isEqualTo("redirect:/prep");
         verify(checklistService).unapprove(CLINIC, new Actor(MEMBERSHIP, "manager", EMPLOYEE), CHECKLIST);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.unapprove", "prep_checklist");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم إلغاء الاعتماد");
+    }
+
+    @Test
+    void archiveUsesOwnerActorLogsAndToasts() {
+        allowLinkedEmployee();
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.archive(CHECKLIST, session("owner"), model, redirect);
+
+        assertThat(view).isEqualTo("redirect:/prep");
+        verify(checklistService).archive(CLINIC, new Actor(MEMBERSHIP, "owner", EMPLOYEE), CHECKLIST);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.archive", "prep_checklist");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم أرشفة القائمة");
     }
 
     @Test
@@ -173,6 +201,7 @@ class PrepControllerTest {
         assertThat(page).isEqualTo("prep-run");
         assertThat(fragment).isEqualTo("prep-run :: runContent");
         assertThat(model.getAttribute("run")).isEqualTo(run);
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.toggle", "prep_run_item");
     }
 
@@ -186,6 +215,7 @@ class PrepControllerTest {
 
         assertThat(view).isEqualTo("prep-run :: runContent");
         assertThat(model.getAttribute("run")).isEqualTo(run);
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "prep.reset", "prep_run");
     }
 

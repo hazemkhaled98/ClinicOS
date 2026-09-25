@@ -79,7 +79,6 @@ public class EmployeeDayController {
         if (!canView(session)) {
             return "redirect:/";
         }
-        model.addAttribute("layout", layoutModel.forRequest(session, "employees"));
         renderGrid(model, session);
         return "employees-page";
     }
@@ -235,6 +234,7 @@ public class EmployeeDayController {
     }
 
     private void renderGrid(Model model, HttpSession session) {
+        model.addAttribute("layout", layoutModel.forRequest(session, "employees"));
         UUID clinicId = AdminAccess.clinicId(session);
         Employee employee = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
         DayView day;

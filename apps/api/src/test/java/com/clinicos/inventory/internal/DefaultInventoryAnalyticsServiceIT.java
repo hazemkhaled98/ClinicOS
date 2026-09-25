@@ -101,7 +101,7 @@ class DefaultInventoryAnalyticsServiceIT extends AbstractPostgresIntegrationTest
     }
 
     @Test
-    void profitAndDoctorsComputeRevenueCostMarginAndGroupByProcedureAndDoctor() {
+    void profitAndDoctorsSplitMaterialLaborAndDoctorFeeAndGroupByProcedureAndDoctor() {
         seedCase(item, "حشو", "د. أحمد", "100", "20", "5", "1");
         seedCase(item, "حشو", null, "100", "20", "5", "1");
         seedCase(item2(), "خلع", "د. أحمد", "150", "30", "10", "2");
@@ -110,14 +110,21 @@ class DefaultInventoryAnalyticsServiceIT extends AbstractPostgresIntegrationTest
                 .filteredOn(InventoryAnalyticsService.ProfitRow::procedureName, "حشو").singleElement()
                 .satisfies(row -> {
                     assertThat(row.revenue()).isEqualByComparingTo("200");
-                    assertThat(row.cost()).isEqualByComparingTo("70");
+                    assertThat(row.materialCost()).isEqualByComparingTo("20");
+                    assertThat(row.laborCost()).isEqualByComparingTo("40");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("10");
                     assertThat(row.margin()).isEqualByComparingTo("130");
+                    assertThat(row.materialCost().scale()).isEqualTo(2);
+                    assertThat(row.margin().scale()).isEqualTo(2);
                     assertThat(row.caseCount()).isEqualTo(2);
                 });
         assertThat(analytics.profit(clinicA, null, null))
                 .filteredOn(InventoryAnalyticsService.ProfitRow::procedureName, "خلع").singleElement()
                 .satisfies(row -> {
                     assertThat(row.revenue()).isEqualByComparingTo("150");
+                    assertThat(row.materialCost()).isEqualByComparingTo("16");
+                    assertThat(row.laborCost()).isEqualByComparingTo("30");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("10");
                     assertThat(row.margin()).isEqualByComparingTo("94");
                 });
 
@@ -127,11 +134,20 @@ class DefaultInventoryAnalyticsServiceIT extends AbstractPostgresIntegrationTest
                     assertThat(row.caseCount()).isEqualTo(2);
                     assertThat(row.revenue()).isEqualByComparingTo("250");
                     assertThat(row.materialCost()).isEqualByComparingTo("26");
+                    assertThat(row.laborCost()).isEqualByComparingTo("50");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("15");
                     assertThat(row.margin()).isEqualByComparingTo("159");
                 });
         assertThat(analytics.doctors(clinicA, null, null))
                 .filteredOn(InventoryAnalyticsService.DoctorRow::doctorName, "غير محدد").singleElement()
-                .satisfies(row -> assertThat(row.caseCount()).isEqualTo(1));
+                .satisfies(row -> {
+                    assertThat(row.caseCount()).isEqualTo(1);
+                    assertThat(row.revenue()).isEqualByComparingTo("100");
+                    assertThat(row.materialCost()).isEqualByComparingTo("10");
+                    assertThat(row.laborCost()).isEqualByComparingTo("20");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("5");
+                    assertThat(row.margin()).isEqualByComparingTo("65");
+                });
     }
 
     @Test

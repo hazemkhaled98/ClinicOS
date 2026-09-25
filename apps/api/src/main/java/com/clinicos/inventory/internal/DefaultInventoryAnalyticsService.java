@@ -78,13 +78,15 @@ public class DefaultInventoryAnalyticsService implements InventoryAnalyticsServi
             var rows = caseRows(clinicId, from, to);
             var result = new HashMap<String, BigDecimal[]>();
             for (var row : rows) {
-                var values = result.computeIfAbsent(row.procedureName, key -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO });
+                var values = result.computeIfAbsent(row.procedureName, key -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO });
                 values[0] = values[0].add(row.price);
-                values[1] = values[1].add(row.cost);
-                values[2] = values[2].add(row.price.subtract(row.cost));
-                values[3] = values[3].add(BigDecimal.ONE);
+                values[1] = values[1].add(row.materialCost);
+                values[2] = values[2].add(row.laborCost);
+                values[3] = values[3].add(row.doctorFee);
+                values[4] = values[4].add(BigDecimal.ONE);
             }
-            return result.entrySet().stream().map(entry -> new ProfitRow(entry.getKey(), entry.getValue()[0], entry.getValue()[1], entry.getValue()[2], entry.getValue()[3].longValue())).toList();
+            return result.entrySet().stream().map(entry -> { var v = entry.getValue();
+                return new ProfitRow(entry.getKey(), v[0], v[1], v[2], v[3], v[0].subtract(v[1]).subtract(v[2]).subtract(v[3]), v[4].longValue()); }).toList();
         });
     }
 
@@ -128,10 +130,11 @@ public class DefaultInventoryAnalyticsService implements InventoryAnalyticsServi
             var grouped = new HashMap<String, BigDecimal[]>();
             for (var row : rows) {
                 var key = row.doctorName == null || row.doctorName.isBlank() ? "غير محدد" : row.doctorName;
-                var values = grouped.computeIfAbsent(key, unused -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO });
-                values[0] = values[0].add(BigDecimal.ONE); values[1] = values[1].add(row.price); values[2] = values[2].add(row.materialCost); values[3] = values[3].add(row.price.subtract(row.cost));
+                var values = grouped.computeIfAbsent(key, unused -> new BigDecimal[] { BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO });
+                values[0] = values[0].add(BigDecimal.ONE); values[1] = values[1].add(row.price); values[2] = values[2].add(row.materialCost); values[3] = values[3].add(row.laborCost); values[4] = values[4].add(row.doctorFee);
             }
-            return grouped.entrySet().stream().map(it -> new DoctorRow(it.getKey(), it.getValue()[0].longValue(), it.getValue()[1], it.getValue()[2], it.getValue()[3])).toList();
+            return grouped.entrySet().stream().map(it -> { var v = it.getValue();
+                return new DoctorRow(it.getKey(), v[0].longValue(), v[1], v[2], v[3], v[4], v[1].subtract(v[2]).subtract(v[3]).subtract(v[4])); }).toList();
         });
     }
 
@@ -195,13 +198,16 @@ public class DefaultInventoryAnalyticsService implements InventoryAnalyticsServi
                 .where(PROCEDURE_CASE.CLINIC_ID.eq(clinicId)).and(range(PROCEDURE_CASE.PERFORMED_AT, from, to)).fetch();
         var grouped = new LinkedHashMap<UUID, CaseRow>();
         rows.forEach(row -> grouped.compute(row.get(PROCEDURE_CASE.ID), (id, old) -> {
-            var material = row.get(PROCEDURE_CASE_ITEM.QTY).multiply(row.get(PROCEDURE_CASE_ITEM.UNIT_COST_AT_TIME));
-            var cost = old == null ? material.add(row.get(PROCEDURE.LABOR_COST)).add(row.get(PROCEDURE.DOCTOR_FEE)) : old.cost.add(material);
+            var material = row.get(PROCEDURE_CASE_ITEM.QTY).multiply(row.get(PROCEDURE_CASE_ITEM.UNIT_COST_AT_TIME))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
             var materialCost = old == null ? material : old.materialCost.add(material);
-            return old == null ? new CaseRow(row.get(PROCEDURE.NAME), row.get(PROCEDURE_CASE.DOCTOR_NAME), row.get(PROCEDURE.PRICE), materialCost, cost) : new CaseRow(old.procedureName, old.doctorName, old.price, materialCost, cost);
+            return old == null ? new CaseRow(row.get(PROCEDURE.NAME), row.get(PROCEDURE_CASE.DOCTOR_NAME), row.get(PROCEDURE.PRICE), materialCost,
+                    row.get(PROCEDURE.LABOR_COST), row.get(PROCEDURE.DOCTOR_FEE))
+                    : new CaseRow(old.procedureName, old.doctorName, old.price, materialCost, old.laborCost, old.doctorFee);
         }));
         return new ArrayList<>(grouped.values());
     }
 
-    private record CaseRow(String procedureName, String doctorName, BigDecimal price, BigDecimal materialCost, BigDecimal cost) { }
+    private record CaseRow(String procedureName, String doctorName, BigDecimal price, BigDecimal materialCost,
+            BigDecimal laborCost, BigDecimal doctorFee) { }
 }

@@ -217,12 +217,12 @@ class MyEvaluationControllerTest {
         when(layoutModel.forRequest(any(HttpSession.class), eq("my-evaluation")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(com.clinicos.ui.nav.NavSectionResolver.sectionByRoute("my-evaluation")),
-                        "أحمد", "موظف", "19 مايو 2026", "my-evaluation"));
+                        "أحمد", "عيادتي", "موظف", "19 مايو 2026", "my-evaluation"));
     }
 
     private void denyView() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("my-evaluation")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مالك", "19 مايو 2026", "my-evaluation"));
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مالك", "19 مايو 2026", "my-evaluation"));
     }
 
     private static HttpSession session() {
