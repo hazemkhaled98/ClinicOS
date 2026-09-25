@@ -28,7 +28,7 @@ Single source of truth for business rules across all use cases. Global IDs assig
 | BR-G22 | Practical curriculum step needs verifier-confirmed proof photo to count complete. | UC-007 BR-002 |
 | BR-G23 | Final exam question pool built only from curriculum units the trainee has covered. | UC-007 BR-003 |
 | BR-G24 | Completion certificate available only after passing final exam (where curriculum requires one). | UC-007 BR-004 |
-| BR-G25 | Inventory access scoped by role: assistant → tray stock/issuing/own procedures; receptionist → ordering/receiving/returns/suppliers; manager → everything + clinic-wide analytics/approvals. | UC-008 BR-001 |
+| BR-G25 | Inventory access scoped by role: assistant → tray stock/issuing/own procedures/item catalogue (change filed from the catalogue, approval queue stays manager-only); receptionist → ordering/receiving/returns/suppliers; manager → everything + clinic-wide analytics/approvals. | UC-008 BR-001 |
 | BR-G26 | Stock-affecting edits (edit/delete stock item, supplier return) are queued, take effect only on manager approval. | UC-008 BR-002 |
 | BR-G27 | Return quantity against a delivery cannot exceed quantity received and not yet returned. | UC-008 BR-003 |
 | BR-G28 | Procedure total cost = issued items (bill of materials) + labor cost + doctor fee (if applicable). | UC-008 BR-004 |
