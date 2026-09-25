@@ -86,6 +86,8 @@ public class PurchasingController {
         try {
             var order = purchasingService.placeOrder(clinicId(session), actor(session), supplierId, lines);
             log(session, "inventory.order.place", "purchase_order");
+            redirect.addFlashAttribute("toastMessage", "تم وضع الطلب ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/inventory/orders?wa=" + order.id();
         } catch (IllegalArgumentException exception) {
             redirect.addFlashAttribute("toastMessage", exception.getMessage());
@@ -111,7 +113,7 @@ public class PurchasingController {
             @RequestParam List<BigDecimal> qtyReceived,
             @RequestParam(required = false) List<String> lotNumber,
             @RequestParam(required = false) List<BigDecimal> deliveryCost,
-            HttpSession session, Model model) {
+            HttpSession session, Model model, RedirectAttributes redirect) {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "receive")) {
             return "redirect:/inventory";
         }
@@ -128,6 +130,8 @@ public class PurchasingController {
             }
             purchasingService.receive(clinicId, actor(session), orderId, lines, photoId);
             log(session, "inventory.receive", "purchase_order");
+            redirect.addFlashAttribute("toastMessage", "تم تسجيل الاستلام ✔");
+            redirect.addFlashAttribute("toastType", "success");
             return "redirect:/inventory/received";
         } catch (IllegalArgumentException exception) {
             if (photoId != null) {

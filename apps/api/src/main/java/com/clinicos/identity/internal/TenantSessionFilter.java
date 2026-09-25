@@ -127,6 +127,7 @@ public class TenantSessionFilter extends OncePerRequestFilter {
             TenantContext.set(membership.clinicId());
             MembershipAccess access = permissionsService.accessFor(membership.membershipId());
             session.setAttribute(SessionKeys.CLINIC_ID, membership.clinicId());
+            session.setAttribute(SessionKeys.CLINIC_NAME, membership.clinicName());
             session.setAttribute(SessionKeys.MEMBERSHIP_ID, membership.membershipId());
             session.setAttribute(SessionKeys.ROLE_CODE, access.roleCode());
             session.setAttribute(SessionKeys.PERMISSIONS, List.copyOf(access.permissionCodes()));

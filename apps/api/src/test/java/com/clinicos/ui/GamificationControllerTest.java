@@ -224,12 +224,12 @@ class GamificationControllerTest {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(NavSectionResolver.sectionByRoute("admin-dashboard")),
-                        "أحمد", "المالك", "19 مايو 2026", "admin-dashboard"));
+                        "أحمد", "عيادتي", "المالك", "19 مايو 2026", "admin-dashboard"));
     }
 
     private void denyDashboard() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("admin-dashboard")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مدير", "19 مايو 2026", "admin-dashboard"));
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مدير", "19 مايو 2026", "admin-dashboard"));
     }
 
     private static HttpSession session() {

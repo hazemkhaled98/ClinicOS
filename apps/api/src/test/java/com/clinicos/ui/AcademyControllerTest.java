@@ -115,6 +115,26 @@ class AcademyControllerTest {
     }
 
     @Test
+    void UC007_verifyShowsSuccessToast() {
+        UUID submissionId = UUID.randomUUID();
+        when(academyService.pendingSubmissions(CLINIC)).thenReturn(List.of());
+
+        assertThat(controller.verify(submissionId, session("manager"), model)).isEqualTo("academy-verify");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم اعتماد الإجابة ✔");
+    }
+
+    @Test
+    void UC007_rejectShowsSuccessToast() {
+        UUID submissionId = UUID.randomUUID();
+        when(academyService.pendingSubmissions(CLINIC)).thenReturn(List.of());
+
+        assertThat(controller.reject(submissionId, "سبب", session("manager"), model)).isEqualTo("academy-verify");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم رفض الإجابة");
+    }
+
+    @Test
     void UC007_traineeCannotVerifyOrRejectSubmissions() {
         UUID submissionId = UUID.randomUUID();
 

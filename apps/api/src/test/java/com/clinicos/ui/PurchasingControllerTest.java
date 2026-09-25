@@ -117,6 +117,8 @@ class PurchasingControllerTest {
         verify(purchasingService).placeOrder(CLINIC, new Actor(MEMBERSHIP, "assistant"), SUPPLIER,
                 List.of(new OrderLineRequest(ITEM, new BigDecimal("10"), null)));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.order.place", "purchase_order");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم وضع الطلب ✔");
     }
 
     @Test
@@ -156,12 +158,16 @@ class PurchasingControllerTest {
                 .thenReturn(new AttachmentService.Attachment(ATTACHMENT, "key", "image/png", 1L));
         when(purchasingService.receive(eq(CLINIC), any(), eq(ORDER), any(), eq(ATTACHMENT)))
                 .thenReturn(placedOrders().get(0));
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
         String view = controller.receiveExec(ORDER, photo, List.of(UUID.randomUUID()),
-                List.of(new BigDecimal("7")), List.of("LOT-1"), Collections.singletonList(null), session, model);
+                List.of(new BigDecimal("7")), List.of("LOT-1"), Collections.singletonList(null), session, model,
+                redirect);
 
         assertThat(view).isEqualTo("redirect:/inventory/received");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.receive", "purchase_order");
+        verify(redirect).addFlashAttribute("toastType", "success");
+        verify(redirect).addFlashAttribute("toastMessage", "تم تسجيل الاستلام ✔");
     }
 
     @Test
@@ -174,9 +180,11 @@ class PurchasingControllerTest {
         when(purchasingService.receive(eq(CLINIC), any(), eq(ORDER), any(), any()))
                 .thenThrow(new IllegalArgumentException("الكمية المستلمة أكبر من المطلوبة"));
         when(purchasingService.orders(CLINIC, Set.of(PoStatus.placed))).thenReturn(List.of());
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
 
         String view = controller.receiveExec(ORDER, photo, List.of(UUID.randomUUID()),
-                List.of(new BigDecimal("99")), Collections.singletonList(null), Collections.singletonList(null), session, model);
+                List.of(new BigDecimal("99")), Collections.singletonList(null), Collections.singletonList(null), session, model,
+                redirect);
 
         assertThat(view).isEqualTo("inventory-receive");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");

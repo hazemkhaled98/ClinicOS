@@ -104,6 +104,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 6 — UC-007 Academy | done | PR #19 (squash `a87b752`) on `feat/uc007-academy`: V24 curriculum seed + template catalog, `DefaultAcademyService` (`curriculumFor` with role scoping + sequential unlock, photo submission/verification, exam pool from covered units, certificate, exact-question-set exam submission), tenant checks inside transactions; `AcademyController` + Thymeleaf views (writer/learner/verify/unit-editor/exam/certificate); `DefaultAcademyServiceIT` + writer/learner tests (photo FK guard, cross-tenant isolation, sequential unlock, editor-role gate). `/pr-sentinel` (design + ponytail + correctness) + `/coverage-check` UC-007 clean. Corrections in-PR: gate curriculum editor reads behind editor role (was answer leak), idempotent default-curriculum import. |
 | 7a–7d — UC-008 Inventory | done | PR #21 merged (see Phase 7). V25 cross-tenant guards on inventory child tables; `InventoryService` + `DefaultInventoryService`; `InventoryController` + all 19 views (foundation screens 7a, purchasing 7b, procedures/costing 7c, approvals + analytics 7d). Role scoping rides the Phase 2 permission model (BR-G25); BR-G26 approval queue, BR-G27 return-ceiling (V10 trigger surfaced as a user error), BR-G28 unit-cost freeze. `/pr-sentinel` + `/coverage-check` clean; manual testing S1–S14 green — three in-PR defects fixed: supplier save binding, zero-qty-line 500 on orders/returns, delete-approval mislabel. |
 | 8 — UC-009 Admin dashboard | done | Manual testing S1–S8 green (S7 A1 validated against a NULL volume target), coverage-check clean. PR #22. |
+| A — Backlog UI polish | done | Branch `feat/backlog-ui-polish`, no DDL. Dynamic clinic branding (`SessionKeys.CLINIC_NAME` + `LayoutModel.clinicName`, `عيادتي` replaced across authenticated templates), save-toast gaps closed, actionable empty states (`fragments/empty-state.html`) applied to inventory/academy screens. `mvn verify` green (302 tests) + `ModularityTests`/`CssHygieneTest`/`TemplateHygieneTest`. Fixed a production regression found via the IT suite: `EmployeeDayController`'s POST fragment responses (check-in/check-out/task-confirm/assignment-propose) were 500ing because `renderGrid` never populated `layout`, only the GET handler did. |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -233,6 +234,14 @@ BR-G29, BR-G30. `نظرة عامة` (monthly invoice total against a pace-adjust
 - [x] Employee cards with score ring and tier
 - [x] Employee file with academy qualification progress
 - [x] Activity log view
+
+### Phase A — Backlog UI polish
+
+Backlog items #4 (dynamic branding), #5 (save-toast gaps), #6 (actionable empty states) from `docs/backlog/feature-suggestions.md`. No DDL.
+
+- [x] Dynamic clinic branding — `SessionKeys.CLINIC_NAME` set in `TenantSessionFilter` from `Membership.clinicName`; `LayoutModel.LayoutData.clinicName` (fallback `عيادتي` when unbound); every authenticated template's hardcoded `عيادتي` replaced with `${layout.clinicName}`.
+- [x] Save-toast gaps — every POST/PUT/DELETE handler across `ui/*Controller` audited for a missing `Toasts.success`/`fromErrors` call; gaps filled using the existing mechanism.
+- [x] Actionable empty states — shared `fragments/empty-state.html :: emptyState(icon, title, hint, actionHref, actionLabel)` fragment; applied to inventory (items/orders/receive) and academy (curriculum/learner/verify) screens, action button rendered only when the actor has the linked permission.
 
 ### Phase 9 — Hardening and release
 

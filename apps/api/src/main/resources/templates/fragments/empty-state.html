@@ -1,0 +1,8 @@
+<div th:fragment="emptyState(icon, title, hint, actionHref, actionLabel)" xmlns:th="http://www.thymeleaf.org" class="clinicos-empty-state p-16">
+  <div class="text-5xl mb-4" th:text="${icon}">📦</div>
+  <p class="font-bold text-teal-900 text-xl" th:text="${title}">عنوان</p>
+  <p class="mt-2 text-sm text-on-surface-variant" th:text="${hint}">تفصيل</p>
+  <div th:if="${actionHref != null}" class="mt-6">
+    <a th:href="${actionHref}" class="clinicos-btn" th:text="${actionLabel}">إجراء</a>
+  </div>
+</div>

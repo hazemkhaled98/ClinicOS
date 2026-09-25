@@ -29,7 +29,7 @@ public class LayoutModel {
 
     private static final Locale ARABIC = Locale.of("ar");
 
-    public record LayoutData(List<NavSection> nav, String username, String role, String date, String activeRoute) {
+    public record LayoutData(List<NavSection> nav, String username, String clinicName, String role, String date, String activeRoute) {
     }
 
     public LayoutData forRequest(HttpSession httpSession, String activeRoute) {
@@ -38,11 +38,13 @@ public class LayoutModel {
         @SuppressWarnings("unchecked")
         List<String> codes = httpSession == null ? null
                 : (List<String>) httpSession.getAttribute(SessionKeys.PERMISSIONS);
+        String clinicName = httpSession == null ? null
+                : (String) httpSession.getAttribute(SessionKeys.CLINIC_NAME);
 
         List<NavSection> nav = (roleCode == null || codes == null) ? List.of()
                 : NavSectionResolver.resolve(new HashSet<>(codes), roleCode);
 
-        return new LayoutData(nav, username(), roleDisplayName(roleCode), arabicLongDate(LocalDate.now()), activeRoute);
+        return new LayoutData(nav, username(), clinicNameOrDefault(clinicName), roleDisplayName(roleCode), arabicLongDate(LocalDate.now()), activeRoute);
     }
 
     private static String username() {
@@ -51,6 +53,13 @@ public class LayoutModel {
             return user.getUsername();
         }
         return "";
+    }
+
+    private static String clinicNameOrDefault(String clinicName) {
+        if (clinicName == null || clinicName.isBlank()) {
+            return "عيادتي";
+        }
+        return clinicName;
     }
 
     public static String roleDisplayName(String roleCode) {

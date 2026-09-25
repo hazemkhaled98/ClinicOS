@@ -5,7 +5,7 @@
   <main class="w-full min-h-screen flex flex-col bg-surface">
     <header th:replace="~{fragments/topbar :: topbar}"></header>
     <section class="flex-1 p-8 sm:p-10 max-w-5xl w-full mx-auto clinicos-section">
-      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker">عيادتي</p>
+      <p class="text-xs font-bold text-emerald-600 mb-2 clinicos-section-kicker" th:text="${layout.clinicName}">عيادتي</p>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-teal-900 tracking-tight clinicos-section-title">الأهداف والتحفيز</h1>
       <p class="mt-1 text-sm text-on-surface-variant clinicos-section-sub">ضبط إعدادات نظام التحفيز والأهداف الأسبوعية والشارات</p>
       <nav th:replace="~{fragments/admin-tabs :: adminTabs('goals')}"></nav>

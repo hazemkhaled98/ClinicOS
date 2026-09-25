@@ -41,11 +41,7 @@
         </article>
       </div>
 
-      <div th:if="${#lists.isEmpty(employees)}" class="clinicos-empty-state p-16">
-        <div class="text-5xl mb-4">🎓</div>
-        <p class="font-bold text-teal-900 text-xl">لا يوجد موظفون بعد</p>
-        <p class="mt-2 text-sm text-on-surface-variant">أضف موظفاً جديداً لبدء تأهيله.</p>
-      </div>
+      <div th:if="${#lists.isEmpty(employees)}" th:replace="~{fragments/empty-state :: emptyState('🎓', 'لا يوجد موظفون بعد', 'أضف موظفاً جديداً لبدء تأهيله.', ${canVerify} ? @{/admin-dashboard/users} : null, 'إضافة موظفين')}"></div>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

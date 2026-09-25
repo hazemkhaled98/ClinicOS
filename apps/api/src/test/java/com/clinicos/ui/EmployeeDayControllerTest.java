@@ -403,12 +403,12 @@ class EmployeeDayControllerTest {
         when(layoutModel.forRequest(any(HttpSession.class), eq("employees")))
                 .thenReturn(new LayoutModel.LayoutData(
                         List.of(NavSectionResolver.sectionByRoute("employees")),
-                        "أحمد", "مساعد", "19 مايو 2026", "employees"));
+                        "أحمد", "عيادتي", "مساعد", "19 مايو 2026", "employees"));
     }
 
     private void denyEmployees() {
         when(layoutModel.forRequest(any(HttpSession.class), eq("employees")))
-                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "مساعد",
+                .thenReturn(new LayoutModel.LayoutData(List.of(), "أحمد", "عيادتي", "مساعد",
                         "19 مايو 2026", "employees"));
     }
 
