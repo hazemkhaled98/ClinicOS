@@ -114,6 +114,8 @@ class DefaultInventoryAnalyticsServiceIT extends AbstractPostgresIntegrationTest
                     assertThat(row.laborCost()).isEqualByComparingTo("40");
                     assertThat(row.doctorFee()).isEqualByComparingTo("10");
                     assertThat(row.margin()).isEqualByComparingTo("130");
+                    assertThat(row.materialCost().scale()).isEqualTo(2);
+                    assertThat(row.margin().scale()).isEqualTo(2);
                     assertThat(row.caseCount()).isEqualTo(2);
                 });
         assertThat(analytics.profit(clinicA, null, null))

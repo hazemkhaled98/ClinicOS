@@ -198,7 +198,8 @@ public class DefaultInventoryAnalyticsService implements InventoryAnalyticsServi
                 .where(PROCEDURE_CASE.CLINIC_ID.eq(clinicId)).and(range(PROCEDURE_CASE.PERFORMED_AT, from, to)).fetch();
         var grouped = new LinkedHashMap<UUID, CaseRow>();
         rows.forEach(row -> grouped.compute(row.get(PROCEDURE_CASE.ID), (id, old) -> {
-            var material = row.get(PROCEDURE_CASE_ITEM.QTY).multiply(row.get(PROCEDURE_CASE_ITEM.UNIT_COST_AT_TIME));
+            var material = row.get(PROCEDURE_CASE_ITEM.QTY).multiply(row.get(PROCEDURE_CASE_ITEM.UNIT_COST_AT_TIME))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
             var materialCost = old == null ? material : old.materialCost.add(material);
             return old == null ? new CaseRow(row.get(PROCEDURE.NAME), row.get(PROCEDURE_CASE.DOCTOR_NAME), row.get(PROCEDURE.PRICE), materialCost,
                     row.get(PROCEDURE.LABOR_COST), row.get(PROCEDURE.DOCTOR_FEE))
