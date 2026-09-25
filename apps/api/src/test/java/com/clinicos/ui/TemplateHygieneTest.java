@@ -111,6 +111,31 @@ class TemplateHygieneTest {
                 .isEmpty();
     }
 
+    @Test
+    void noTemplateCombinesConditionalRenderingWithFragmentReplacement() throws IOException, URISyntaxException {
+        List<Path> offenders = templateFiles()
+                .filter(path -> hasConditionalFragmentReplacement(readTemplate(path)))
+                .toList();
+
+        assertThat(offenders)
+                .withFailMessage(() -> "Templates must wrap conditional fragment replacements: " + offenders)
+                .isEmpty();
+    }
+
+    @Test
+    void detectsConditionalFragmentReplacementRegardlessOfAttributeOrder() {
+        assertThat(hasConditionalFragmentReplacement("<div th:replace=\"fragment\" th:if='${visible}'></div>"))
+                .isTrue();
+        assertThat(hasConditionalFragmentReplacement("<div th:unless='${hidden}' th:replace=\"fragment\"></div>"))
+                .isTrue();
+    }
+
+    private static boolean hasConditionalFragmentReplacement(String content) {
+        return Pattern.compile("<[^>]*(?=[^>]*\\sth:(?:if|unless)\\s*=)(?=[^>]*\\sth:replace\\s*=)[^>]*>")
+                .matcher(content)
+                .find();
+    }
+
     private static String readTemplate(Path path) {
         try {
             return Files.readString(path);

@@ -11,7 +11,9 @@
         <p class="text-sm text-on-surface-variant">سجّل الكميات الواردة مقابل الطلبية — صورة الفاتورة إلزامية.</p>
       </div>
 
-      <div th:if="${#lists.isEmpty(orders)}" th:replace="~{fragments/empty-state :: emptyState('📥', 'ما في طلبيات بانتظار الاستلام', 'اسحب طلبية من شاشة النواقص والطلب الأول.', @{/inventory/orders}, 'الذهاب للطلبات')}"></div>
+      <th:block th:if="${#lists.isEmpty(orders)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('📥', 'ما في طلبيات بانتظار الاستلام', 'اسحب طلبية من شاشة النواقص والطلب الأول.', @{/inventory/orders}, 'الذهاب للطلبات')}"></div>
+      </th:block>
 
       <form th:each="o : ${orders}" method="post" th:action="@{/inventory/receive}" enctype="multipart/form-data"
             class="clinicos-card overflow-hidden mb-6">

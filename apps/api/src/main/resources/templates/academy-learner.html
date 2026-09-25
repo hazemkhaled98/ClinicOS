@@ -46,7 +46,9 @@
         </article>
       </div>
 
-      <div th:if="${#lists.isEmpty(track.units())}" th:replace="~{fragments/empty-state :: emptyState('🎓', 'لا توجد وحدات بعد', '', null, '')}"></div>
+      <th:block th:if="${#lists.isEmpty(track.units())}">
+        <div th:replace="~{fragments/empty-state :: emptyState('🎓', 'لا توجد وحدات بعد', '', null, '')}"></div>
+      </th:block>
 
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="/academy/exam" class="clinicos-btn">📝 أداء الامتحان</a>

@@ -41,7 +41,9 @@
         </article>
       </div>
 
-      <div th:if="${#lists.isEmpty(employees)}" th:replace="~{fragments/empty-state :: emptyState('🎓', 'لا يوجد موظفون بعد', 'أضف موظفاً جديداً لبدء تأهيله.', ${canVerify} ? @{/admin-dashboard/users} : null, 'إضافة موظفين')}"></div>
+      <th:block th:if="${#lists.isEmpty(employees)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('🎓', 'لا يوجد موظفون بعد', 'أضف موظفاً جديداً لبدء تأهيله.', ${canVerify} ? @{/admin-dashboard/users} : null, 'إضافة موظفين')}"></div>
+      </th:block>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>

@@ -134,7 +134,9 @@
           </tbody>
         </table>
       </div>
-      <div th:if="${#lists.isEmpty(items)}" th:replace="~{fragments/empty-state :: emptyState('📦', 'لا توجد أصناف', 'أضف أول صنف من النموذج أعلاه للبدء.', null, '')}"></div>
+      <th:block th:if="${#lists.isEmpty(items)}">
+        <div th:replace="~{fragments/empty-state :: emptyState('📦', 'لا توجد أصناف', 'أضف أول صنف من النموذج أعلاه للبدء.', null, '')}"></div>
+      </th:block>
     </section>
   </main>
   <div th:replace="~{fragments/drawer :: drawer}"></div>
