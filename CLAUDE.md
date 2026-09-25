@@ -1,20 +1,5 @@
 # ClinicOS — Development Guide
 
-## Stack
-
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Runtime | Java | 25 (LTS) |
-| Framework | Spring Boot | 4.1.0 |
-| UI | Thymeleaf + HTMX + Alpine.js + Tailwind CSS | 3.1+ / 2.0 / 3.x / 4.1 |
-| Modularity | Spring Modulith | 2.1.1 |
-| SQL | jOOQ | 3.21.7 |
-| Migrations | Flyway | 13.5.0 |
-| Database | PostgreSQL | 17 (prod), Testcontainers in tests |
-| Object Storage | MinIO (S3-compatible) | latest |
-| Testing | Testcontainers, MockMvc, Playwright | 1.21.4 / — / latest |
-| API Docs | springdoc OpenAPI | 3.1.0 |
-
 ## Module Layout (Spring Modulith)
 
 ```
@@ -46,12 +31,7 @@ Three rules apply without exception:
 
 ### New screen checklist
 
-1. Read `ClinicOS Design/<NN>_*/screen.png` for the visual target and `code.html` for layout/information-architecture/Arabic copy. Ignore its `tailwind.config`, fonts, hex values, and physical-direction utilities — those are never carried into a template.
-2. Compose the screen from `apps/api/src/main/styles/components.css` classes. Check `/dev/styleguide` first to see what already exists before writing new markup.
-3. Need something not covered by an existing component class or token? Extend `DESIGN.md` first, then `tokens.css`/`components.css`, then add it to the styleguide page — never hardcode a one-off value in a template.
-4. Run `npm run build:css` (from `apps/api`), then `mvn test -Dtest=TemplateHygieneTest,CssHygieneTest` before considering the screen done.
-
-Templates live in `apps/api/src/main/resources/templates/`; controllers in `com.clinicos.ui` map routes to them and prepopulate a `LayoutModel` (drawer nav from the session's primed permissions/role). Interactive server round-trips use HTMX (`hx-*` attributes) with a `th:attr`-built `hx-headers` carrying the CSRF token; light client state uses Alpine.js.
+See the `new-screen` skill for the step-by-step checklist (design assets, component reuse, DESIGN.md/token extension, hygiene tests).
 
 ## Tenant Context — Critical Rule
 
