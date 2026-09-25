@@ -68,7 +68,11 @@ public class AcademyController {
         if (!hasSession(session)) {
             return "redirect:/login";
         }
-        return learner(employeeId(session), session, model);
+        UUID employeeId = employeeId(session);
+        if (employeeId == null) {
+            return "redirect:/academy";
+        }
+        return learner(employeeId, session, model);
     }
 
     @GetMapping("/academy/learners")

@@ -85,6 +85,13 @@ class AcademyControllerTest {
     }
 
     @Test
+    void UC007_ownerWithoutEmployeeRedirectsFromOwnCurriculum() {
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(null);
+
+        assertThat(controller.myLearning(session("owner"), model)).isEqualTo("redirect:/academy");
+    }
+
+    @Test
     void UC007_crossTenantLearnerRedirectsToAcademy() {
         UUID otherClinicEmployee = UUID.randomUUID();
         when(academyService.traineeCurriculum(any(), any(), any(), any()))
