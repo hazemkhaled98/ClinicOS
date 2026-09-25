@@ -72,6 +72,7 @@ class TenantSessionFilterTest {
         filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
 
         assertThat(session.getAttribute(SessionKeys.CLINIC_ID)).isEqualTo(clinicId);
+        assertThat(session.getAttribute(SessionKeys.CLINIC_NAME)).isEqualTo("Clinic");
         assertThat(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).isEqualTo(membershipId);
         assertThat(session.getAttribute(SessionKeys.ROLE_CODE)).isEqualTo("owner");
         assertThat(session.getAttribute(SessionKeys.PERMISSIONS))

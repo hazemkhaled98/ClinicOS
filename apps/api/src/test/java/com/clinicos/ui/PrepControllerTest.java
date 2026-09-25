@@ -128,8 +128,7 @@ class PrepControllerTest {
 
         assertThat(view).isEqualTo("prep-editor");
         assertThat(model.getAttribute("form")).isSameAs(form);
-        assertThat(model.getAttribute("toastType")).isEqualTo("error");
-        assertThat(model.getAttribute("toastMessage")).isEqualTo("أضف قسمًا واحدًا على الأقل");
+        assertThat(model.getAttribute("formError")).isEqualTo("أضف قسمًا واحدًا على الأقل");
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 

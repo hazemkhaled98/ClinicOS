@@ -30,6 +30,9 @@ public class LayoutModel {
     private static final Locale ARABIC = Locale.of("ar");
 
     public record LayoutData(List<NavSection> nav, String username, String clinicName, String role, String date, String activeRoute) {
+        public LayoutData {
+            nav = List.copyOf(nav);
+        }
     }
 
     public LayoutData forRequest(HttpSession httpSession, String activeRoute) {

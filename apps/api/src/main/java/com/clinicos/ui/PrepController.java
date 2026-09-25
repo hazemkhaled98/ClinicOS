@@ -125,7 +125,7 @@ public class PrepController {
             return "redirect:/prep";
         } catch (IllegalArgumentException exception) {
             renderEditor(session, model, id, form);
-            Toasts.error(model, exception.getMessage());
+            model.addAttribute("formError", exception.getMessage());
             return EDITOR;
         }
     }
