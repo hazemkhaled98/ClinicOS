@@ -19,8 +19,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.clinicos.academy.AcademyService;
+import com.clinicos.academy.AcademyService.Actor;
 import com.clinicos.academy.AcademyService.TraineeUnit;
 import com.clinicos.academy.AcademyService.Unit;
 import com.clinicos.identity.api.SessionKeys;
@@ -41,6 +44,8 @@ class AcademyControllerTest {
     private LayoutModel layoutModel;
     private AcademyService academyService;
     private EmployeeService employeeService;
+    private AttachmentService attachmentService;
+    private ActivityLogService activityLogService;
     private AcademyController controller;
     private Model model;
 
@@ -49,8 +54,10 @@ class AcademyControllerTest {
         layoutModel = mock(LayoutModel.class);
         academyService = mock(AcademyService.class);
         employeeService = mock(EmployeeService.class);
+        attachmentService = mock(AttachmentService.class);
+        activityLogService = mock(ActivityLogService.class);
         controller = new AcademyController(layoutModel, academyService, employeeService,
-                mock(AttachmentService.class), mock(ActivityLogService.class));
+                attachmentService, activityLogService);
         model = new ExtendedModelMap();
     }
 
@@ -132,6 +139,51 @@ class AcademyControllerTest {
         assertThat(controller.reject(submissionId, "سبب", session("manager"), model)).isEqualTo("academy-verify");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم رفض الإجابة");
+    }
+
+    @Test
+    void UC007_submitPhotoLogsSuccessAndRedirectsToMyLearning() {
+        UUID unitId = UUID.randomUUID();
+        UUID photoId = UUID.randomUUID();
+        MultipartFile photo = mock(MultipartFile.class);
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
+        when(attachmentService.upload(CLINIC, MEMBERSHIP, photo))
+                .thenReturn(new AttachmentService.Attachment(photoId, "key", "image/jpeg", 1));
+
+        assertThat(controller.submitPhoto(unitId, photo, session(), model)).isEqualTo("redirect:/academy/me");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم رفع الصورة ✔");
+        verify(academyService).submitPhoto(CLINIC, new Actor(MEMBERSHIP, "assistant", EMPLOYEE), unitId, photoId);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "academy.submitPhoto", "academy_step_submission");
+    }
+
+    @Test
+    void UC007_markDoneLogsSuccessAndRedirectsToMyLearning() {
+        UUID unitId = UUID.randomUUID();
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
+
+        assertThat(controller.markDone(unitId, session(), model)).isEqualTo("redirect:/academy/me");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تم إكمال المرحلة ✔");
+        verify(academyService).markDone(CLINIC, new Actor(MEMBERSHIP, "assistant", EMPLOYEE), unitId);
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "academy.markDone", "academy_step_submission");
+    }
+
+    @Test
+    void UC007_saveUnitLogsSuccessFlashesToastAndRedirectsToSavedUnit() {
+        UUID savedId = UUID.randomUUID();
+        AcademyController.UnitForm form = new AcademyController.UnitForm();
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
+        when(academyService.saveUnit(CLINIC, new Actor(MEMBERSHIP, "assistant", EMPLOYEE), form.toRequest()))
+                .thenReturn(new Unit(savedId, AcademyAudience.core, "📘", "وحدة", "هدف", List.of(), null, false, "open", List.of()));
+
+        assertThat(controller.saveUnit(form, session(), model, redirect))
+                .isEqualTo("redirect:/academy/units/" + savedId + "/edit");
+        verify(academyService).saveUnit(CLINIC, new Actor(MEMBERSHIP, "assistant", EMPLOYEE), form.toRequest());
+        verify(activityLogService).log(CLINIC, MEMBERSHIP, "academy.saveUnit", "academy_unit");
+        verify(redirect).addFlashAttribute("toastMessage", "تم حفظ المرحلة ✔");
+        verify(redirect).addFlashAttribute("toastType", "success");
     }
 
     @Test
