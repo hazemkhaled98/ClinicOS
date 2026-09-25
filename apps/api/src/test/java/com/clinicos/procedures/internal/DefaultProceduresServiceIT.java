@@ -90,13 +90,17 @@ class DefaultProceduresServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(analyticsService.profit(clinicA, null, null)).singleElement()
                 .satisfies(row -> {
                     assertThat(row.procedureName()).isEqualTo("حشو");
-                    assertThat(row.cost()).isEqualByComparingTo("45");
+                    assertThat(row.materialCost()).isEqualByComparingTo("20");
+                    assertThat(row.laborCost()).isEqualByComparingTo("20");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("5");
                     assertThat(row.margin()).isEqualByComparingTo("55");
                 });
         assertThat(analyticsService.doctors(clinicA, null, null)).singleElement()
                 .satisfies(row -> {
                     assertThat(row.doctorName()).isEqualTo("د. أحمد");
                     assertThat(row.materialCost()).isEqualByComparingTo("20");
+                    assertThat(row.laborCost()).isEqualByComparingTo("20");
+                    assertThat(row.doctorFee()).isEqualByComparingTo("5");
                     assertThat(row.margin()).isEqualByComparingTo("55");
                 });
     }
