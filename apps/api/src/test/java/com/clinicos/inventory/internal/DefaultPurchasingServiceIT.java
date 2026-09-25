@@ -122,6 +122,13 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(received.status()).isEqualTo("received");
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("7");
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .anySatisfy(entry -> {
+                    assertThat(entry.reason()).isEqualTo("receipt");
+                    assertThat(entry.qtyDelta()).isEqualByComparingTo("7");
+                    assertThat(entry.location()).isEqualTo(LocationKind.store);
+                    assertThat(entry.actorName()).isEqualTo("assistant");
+                });
     }
 
     @Test
@@ -175,6 +182,12 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         var approved = purchasingService.decideReturn(clinicA, manager, pending.id(), true);
         assertThat(approved.status()).isEqualTo("approved");
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("6");
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .anySatisfy(entry -> {
+                    assertThat(entry.reason()).isEqualTo("return");
+                    assertThat(entry.qtyDelta()).isEqualByComparingTo("-4");
+                    assertThat(entry.location()).isEqualTo(LocationKind.store);
+                });
     }
 
     @Test
