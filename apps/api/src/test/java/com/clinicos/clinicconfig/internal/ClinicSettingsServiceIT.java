@@ -127,6 +127,16 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void invoicePhotoPolicyDefaultsToRequiredAndCanBeDisabled() {
+        TenantContext.set(clinicA);
+
+        assertThat(settingsService.get(clinicA).invoicePhotoRequired()).isTrue();
+        settingsService.updateInvoicePhotoRequired(clinicA, false);
+
+        assertThat(settingsService.get(clinicA).invoicePhotoRequired()).isFalse();
+    }
+
+    @Test
     void updateWeightsRejectsSumNotEqualToHundred() {
         TenantContext.set(clinicA);
         List<CategoryWeight> off = adjust(weightList(clinicA), Category.COMPLETION, "10");

@@ -30,6 +30,8 @@ public interface ClinicSettingsService {
 
     void updateVolumeTarget(UUID clinicId, BigDecimal volumeTarget);
 
+    void updateInvoicePhotoRequired(UUID clinicId, boolean required);
+
     /**
      * Replaces every weight row. Weights must be non-negative and sum to 100
      * (BR-G07 evaluation weighs assessed components only, renormalised by
@@ -52,7 +54,8 @@ public interface ClinicSettingsService {
             BigDecimal volumeTarget,
             int academyPassScore,
             List<CategoryWeight> weights,
-            List<Tier> tiers) {
+            List<Tier> tiers,
+            boolean invoicePhotoRequired) {
     }
 
     record CategoryWeight(Category category, BigDecimal weight) {

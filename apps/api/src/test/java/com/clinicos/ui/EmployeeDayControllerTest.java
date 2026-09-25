@@ -396,7 +396,7 @@ class EmployeeDayControllerTest {
 
     private static ClinicSettings settings() {
         return new ClinicSettings(LocalTime.of(9, 0), LocalTime.of(17, 0), 15, 26,
-                new BigDecimal("20000"), 70, List.of(), List.of());
+                new BigDecimal("20000"), 70, List.of(), List.of(), true);
     }
 
     private void allowEmployees() {

@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.PurchasingService;
 import com.clinicos.inventory.PurchasingService.OrderLineRequest;
@@ -44,13 +45,16 @@ public class PurchasingController {
     private final PurchasingService purchasingService;
     private final ActivityLogService activityLogService;
     private final AttachmentService attachmentService;
+    private final ClinicSettingsService clinicSettingsService;
 
     public PurchasingController(LayoutModel layoutModel, PurchasingService purchasingService,
-            ActivityLogService activityLogService, AttachmentService attachmentService) {
+            ActivityLogService activityLogService, AttachmentService attachmentService,
+            ClinicSettingsService clinicSettingsService) {
         this.layoutModel = layoutModel;
         this.purchasingService = purchasingService;
         this.activityLogService = activityLogService;
         this.attachmentService = attachmentService;
+        this.clinicSettingsService = clinicSettingsService;
     }
 
     @GetMapping("/inventory/orders")
@@ -103,6 +107,7 @@ public class PurchasingController {
         }
         model.addAttribute("layout", layoutModel.forRequest(session, AREA));
         model.addAttribute("orders", purchasingService.orders(clinicId(session), java.util.Set.of(placed)));
+        model.addAttribute("invoicePhotoRequired", clinicSettingsService.get(clinicId(session)).invoicePhotoRequired());
         return "inventory-receive";
     }
 
@@ -143,6 +148,7 @@ public class PurchasingController {
             }
             model.addAttribute("layout", layoutModel.forRequest(session, AREA));
             model.addAttribute("orders", purchasingService.orders(clinicId, java.util.Set.of(placed)));
+            model.addAttribute("invoicePhotoRequired", clinicSettingsService.get(clinicId).invoicePhotoRequired());
             Toasts.error(model, exception.getMessage());
             return "inventory-receive";
         }

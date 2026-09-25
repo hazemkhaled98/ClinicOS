@@ -24,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.PurchasingService;
@@ -51,6 +52,7 @@ class PurchasingControllerTest {
     private PurchasingService purchasingService;
     private ActivityLogService activityLogService;
     private AttachmentService attachmentService;
+    private ClinicSettingsService clinicSettingsService;
     private PurchasingController controller;
     private Model model;
 
@@ -60,7 +62,12 @@ class PurchasingControllerTest {
         purchasingService = mock(PurchasingService.class);
         activityLogService = mock(ActivityLogService.class);
         attachmentService = mock(AttachmentService.class);
-        controller = new PurchasingController(layoutModel, purchasingService, activityLogService, attachmentService);
+        clinicSettingsService = mock(ClinicSettingsService.class);
+        var settings = mock(ClinicSettingsService.ClinicSettings.class);
+        when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
+        when(settings.invoicePhotoRequired()).thenReturn(true);
+        controller = new PurchasingController(layoutModel, purchasingService, activityLogService, attachmentService,
+                clinicSettingsService);
         model = new ExtendedModelMap();
     }
 

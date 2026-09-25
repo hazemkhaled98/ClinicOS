@@ -183,7 +183,7 @@ class AdminControllerTest {
         when(employeeService.list(CLINIC)).thenReturn(List.of());
         var settings = new ClinicSettingsService.ClinicSettings(
                 java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
-                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of(), true);
         when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
 
         String view = controller.settings(session, model);
@@ -401,7 +401,7 @@ class AdminControllerTest {
                 new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", UUID.randomUUID(), assistantEmployee.id())));
         var settings = new ClinicSettingsService.ClinicSettings(
                 java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
-                new java.math.BigDecimal("20000"), 70, List.of(), List.of());
+                new java.math.BigDecimal("20000"), 70, List.of(), List.of(), true);
         when(clinicSettingsService.get(CLINIC)).thenReturn(settings);
 
         controller.settings(session, model);

@@ -8,7 +8,7 @@
     <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
       <div class="space-y-1.5 mb-8">
         <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">استلام الطلبيات</h1>
-        <p class="text-sm text-on-surface-variant">سجّل الكميات الواردة مقابل الطلبية — صورة الفاتورة إلزامية.</p>
+        <p class="text-sm text-on-surface-variant" th:text="${invoicePhotoRequired} ? 'سجّل الكميات الواردة مقابل الطلبية — صورة الفاتورة إلزامية.' : 'سجّل الكميات الواردة مقابل الطلبية — صورة الفاتورة اختيارية.'">سجّل الكميات الواردة مقابل الطلبية — صورة الفاتورة إلزامية.</p>
       </div>
 
       <th:block th:if="${#lists.isEmpty(orders)}">
@@ -64,7 +64,7 @@
           <div class="mt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <label class="flex flex-col gap-1.5">
               <span class="clinicos-label">صورة الفاتورة</span>
-              <input type="file" name="photo" accept="image/*" required class="text-sm">
+              <input type="file" name="photo" accept="image/*" th:required="${invoicePhotoRequired}" class="text-sm">
             </label>
             <button class="clinicos-btn" type="submit">تأكيد الاستلام</button>
           </div>

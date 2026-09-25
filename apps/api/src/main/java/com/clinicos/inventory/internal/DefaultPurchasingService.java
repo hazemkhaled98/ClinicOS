@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.PurchasingService;
 import com.clinicos.inventory.PurchasingService.Order;
@@ -53,10 +54,13 @@ public class DefaultPurchasingService implements PurchasingService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final ClinicSettingsService clinicSettingsService;
 
-    public DefaultPurchasingService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultPurchasingService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            ClinicSettingsService clinicSettingsService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.clinicSettingsService = clinicSettingsService;
     }
 
     @Override
@@ -231,7 +235,7 @@ public class DefaultPurchasingService implements PurchasingService {
     public Order receive(UUID clinicId, Actor actor, UUID orderId, List<ReceiptLine> lines, UUID invoicePhotoId) {
         return transactionTemplate.execute(status -> {
             requireActiveActor(clinicId, actor);
-            if (invoicePhotoId == null) {
+            if (invoicePhotoId == null && clinicSettingsService.get(clinicId).invoicePhotoRequired()) {
                 throw missing("صورة الفاتورة مطلوبة");
             }
             var order = requireOrder(clinicId, orderId);

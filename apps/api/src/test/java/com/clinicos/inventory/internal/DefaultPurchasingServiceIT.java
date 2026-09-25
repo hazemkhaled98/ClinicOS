@@ -27,6 +27,7 @@ import com.clinicos.inventory.PurchasingService.OrderLineRequest;
 import com.clinicos.inventory.PurchasingService.ReceiptLine;
 import com.clinicos.inventory.PurchasingService.ReturnLineRequest;
 import com.clinicos.inventory.PurchasingService.SupplierRequest;
+import com.clinicos.clinicconfig.api.ClinicSettingsService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.LocationKind;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
@@ -41,6 +42,9 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private InventoryService inventoryService;
+
+    @Autowired
+    private ClinicSettingsService clinicSettingsService;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -129,6 +133,19 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
                 List.of(new ReceiptLine(orderLineId(order, 0), new BigDecimal("7"), null, null)), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("صورة الفاتورة");
+    }
+
+    @Test
+    void receiveWithoutInvoicePhotoSucceedsWhenClinicPolicyDisablesIt() {
+        TenantContext.set(clinicA);
+        order = placeOrder();
+        clinicSettingsService.updateInvoicePhotoRequired(clinicA, false);
+
+        var received = purchasingService.receive(clinicA, assistant, order,
+                List.of(new ReceiptLine(orderLineId(order, 0), new BigDecimal("7"), null, null)), null);
+
+        assertThat(received.status()).isEqualTo("received");
+        assertThat(received.invoicePhotoId()).isNull();
     }
 
     @Test
