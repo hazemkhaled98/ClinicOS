@@ -159,6 +159,24 @@ class DefaultProceduresServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void approvedCaseEditThatReducesQuantityWritesAdjustmentLedgerRow() {
+        seedTray(new BigDecimal("5"));
+        var record = proceduresService.recordCase(clinicA, assistant,
+                new CaseDraft(procedure, employee, null, null, List.of(new CaseItemRequest(item, new BigDecimal("4")))));
+
+        var request = proceduresService.requestCaseChange(clinicA, assistant, record.id(), ChangeRequestKind.edit,
+                List.of(new CaseItemRequest(item, new BigDecimal("2"))));
+        proceduresService.decideChange(clinicA, manager, request, true);
+
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .anySatisfy(entry -> {
+                    assertThat(entry.reason()).isEqualTo("adjustment");
+                    assertThat(entry.qtyDelta()).isEqualByComparingTo("2");
+                    assertThat(entry.location()).isEqualTo(LocationKind.tray);
+                });
+    }
+
+    @Test
     void recordingACaseWritesNegativeTrayMovementsReferencingTheCase() throws Exception {
         seedTray(new BigDecimal("2"));
 

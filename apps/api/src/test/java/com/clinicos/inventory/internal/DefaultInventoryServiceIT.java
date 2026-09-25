@@ -249,6 +249,9 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("0");
         assertThat(stockOnHand(item, LocationKind.tray)).isEqualByComparingTo("10");
         assertThat(movementCount(item)).isEqualTo(before + 2);
+        assertThat(inventoryService.ledger(clinicA, 10))
+                .extracting(entry -> entry.reason(), entry -> entry.location())
+                .contains(tuple("transfer", LocationKind.store), tuple("transfer", LocationKind.tray));
     }
 
     @Test
