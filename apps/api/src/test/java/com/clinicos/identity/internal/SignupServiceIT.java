@@ -3,7 +3,9 @@ package com.clinicos.identity.internal;
 import static com.clinicos.shared.jooq.tables.AppUser.APP_USER;
 import static com.clinicos.shared.jooq.tables.Clinic.CLINIC;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
+import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
+import static com.clinicos.shared.jooq.tables.RolePermission.ROLE_PERMISSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mockStatic;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.mockStatic;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -93,6 +96,36 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
                                     superuserDsl.select(ROLE.ID).from(ROLE).where(ROLE.CODE.eq("owner"))))))
                     .isEqualTo(1);
         }
+    }
+
+    @Test
+    void BRG01_signupSeedsRoleGrantsScopedToTheBusinessRule() throws Exception {
+        String suffix = uniqueSuffix();
+
+        SignupResult result = signupService.signUp(new SignupRequest(
+                "Scoped Grants " + suffix, "Dr Ahmed", "owner-" + suffix, "owner@scoped.example",
+                "correct-horse-battery-staple"));
+
+        try (Connection connection = superuserConnection()) {
+            DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "receptionist"))
+                    .contains("orders", "receive", "returns", "suppliers")
+                    .doesNotContain("ledger", "tray", "issue");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "assistant"))
+                    .contains("tray", "issue", "myprocs", "manage")
+                    .doesNotContain("procs", "ledger");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "manager"))
+                    .contains("approvals", "analytics", "ledger");
+        }
+    }
+
+    private Set<String> grantedCodes(DSLContext dsl, UUID clinicId, String roleCode) {
+        return Set.copyOf(dsl.select(PERMISSION.CODE).from(ROLE_PERMISSION)
+                .join(ROLE).on(ROLE_PERMISSION.ROLE_ID.eq(ROLE.ID))
+                .join(PERMISSION).on(ROLE_PERMISSION.PERMISSION_ID.eq(PERMISSION.ID))
+                .where(ROLE_PERMISSION.CLINIC_ID.eq(clinicId))
+                .and(ROLE.CODE.eq(roleCode))
+                .fetch(PERMISSION.CODE));
     }
 
     @Test

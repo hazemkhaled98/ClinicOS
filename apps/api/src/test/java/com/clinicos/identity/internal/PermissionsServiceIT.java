@@ -85,7 +85,7 @@ class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(access.roleCode()).isEqualTo("receptionist");
         assertThat(access.permissionCodes())
-                .contains("emp", "orders", "receive", "returns", "suppliers", "ledger", "ceo");
+                .contains("emp", "orders", "receive", "returns", "suppliers", "ceo");
     }
 
     @Test
