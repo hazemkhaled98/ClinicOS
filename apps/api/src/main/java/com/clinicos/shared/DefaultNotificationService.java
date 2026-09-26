@@ -13,6 +13,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jooq.DSLContext;
 import org.jooq.JSONB;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -119,11 +120,10 @@ public class DefaultNotificationService implements NotificationService {
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
             int updated = dsl.update(NOTIFICATION)
-                    .set(NOTIFICATION.READ_AT, OffsetDateTime.now())
+                    .set(NOTIFICATION.READ_AT, DSL.coalesce(NOTIFICATION.READ_AT, OffsetDateTime.now()))
                     .where(NOTIFICATION.ID.eq(notificationId))
                     .and(NOTIFICATION.CLINIC_ID.eq(clinicId))
                     .and(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID.eq(membershipId))
-                    .and(NOTIFICATION.READ_AT.isNull())
                     .execute();
             if (updated == 0) {
                 throw new IllegalArgumentException("الإشعار غير موجود");

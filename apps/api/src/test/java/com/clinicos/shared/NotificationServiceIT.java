@@ -153,14 +153,13 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void markReadRejectsAnAlreadyReadNotification() {
+    void markReadReturnsAnAlreadyReadNotification() {
         notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
                 Map.of("task", "تعقيم"));
         UUID id = notifications.recent(clinicId, ownerMembership, 20).get(0).id();
         notifications.markRead(clinicId, ownerMembership, id);
 
-        assertThatThrownBy(() -> notifications.markRead(clinicId, ownerMembership, id))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(notifications.markRead(clinicId, ownerMembership, id).read()).isTrue();
     }
 
     @Test
