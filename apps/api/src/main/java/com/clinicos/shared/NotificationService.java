@@ -37,6 +37,15 @@ public interface NotificationService {
     int notifyRoles(UUID clinicId, UUID actorMembershipId, Set<String> roleCodes, NotificationKind kind,
             Map<String, String> payload);
 
+    /**
+     * Fans an approval-pending event out to the clinic's approvers: every active
+     * owner, plus every active manager holding {@code managerPermission} (pass
+     * {@code null} to reach all managers). The actor never receives their own
+     * request.
+     */
+    int notifyApprovers(UUID clinicId, UUID actorMembershipId, String managerPermission, NotificationKind kind,
+            Map<String, String> payload);
+
     int unreadCount(UUID clinicId, UUID membershipId);
 
     List<Notification> recent(UUID clinicId, UUID membershipId, int limit);

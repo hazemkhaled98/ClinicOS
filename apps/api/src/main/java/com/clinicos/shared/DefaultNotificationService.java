@@ -2,8 +2,11 @@ package com.clinicos.shared;
 
 import static com.clinicos.shared.jooq.tables.AppUser.APP_USER;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
+import static com.clinicos.shared.jooq.tables.MembershipPermission.MEMBERSHIP_PERMISSION;
 import static com.clinicos.shared.jooq.tables.Notification.NOTIFICATION;
+import static com.clinicos.shared.jooq.tables.Permission.PERMISSION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
+import static com.clinicos.shared.jooq.tables.RolePermission.ROLE_PERMISSION;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -92,10 +95,62 @@ public class DefaultNotificationService implements NotificationService {
                     .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                     .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                     .and(ROLE.CODE.in(roleCodes))
+                    .and(MEMBERSHIP.ID.ne(actorMembershipId))
                     .fetchSet(MEMBERSHIP.ID);
             recipients.forEach(id -> insert(clinicId, id, kind, enriched));
             return recipients.size();
         });
+    }
+
+    @Override
+    public int notifyApprovers(UUID clinicId, UUID actorMembershipId, String managerPermission, NotificationKind kind,
+            Map<String, String> payload) {
+        if (actorMembershipId == null || kind == null) {
+            throw new IllegalArgumentException("مرسل الإشعار أو نوعه مطلوب");
+        }
+        return transactionTemplate.execute(status -> {
+            guardTenant(clinicId);
+            Map<String, String> enriched = enrichPayload(clinicId, actorMembershipId, kind, payload);
+            validatePayloadForWrite(kind, enriched);
+            var candidates = dsl.selectFrom(MEMBERSHIP)
+                    .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                    .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                    .and(MEMBERSHIP.ID.ne(actorMembershipId))
+                    .fetch();
+            int sent = 0;
+            for (var candidate : candidates) {
+                String roleCode = dsl.select(ROLE.CODE)
+                        .from(ROLE)
+                        .where(ROLE.ID.eq(candidate.getRoleId()))
+                        .fetchOne(ROLE.CODE);
+                if ("owner".equals(roleCode)
+                        || ("manager".equals(roleCode)
+                                && (managerPermission == null || holdsPermission(candidate.getId(), managerPermission)))) {
+                    insert(clinicId, candidate.getId(), kind, enriched);
+                    sent++;
+                }
+            }
+            return sent;
+        });
+    }
+
+    private boolean holdsPermission(UUID membershipId, String permissionCode) {
+        return dsl.fetchExists(dsl.selectOne()
+                .from(PERMISSION)
+                .where(PERMISSION.CODE.eq(permissionCode))
+                .and(PERMISSION.ID.in(
+                        dsl.select(ROLE_PERMISSION.PERMISSION_ID)
+                                .from(ROLE_PERMISSION)
+                                .join(MEMBERSHIP).on(MEMBERSHIP.ROLE_ID.eq(ROLE_PERMISSION.ROLE_ID))
+                                .where(MEMBERSHIP.ID.eq(membershipId))
+                                .union(dsl.select(MEMBERSHIP_PERMISSION.PERMISSION_ID)
+                                        .from(MEMBERSHIP_PERMISSION)
+                                        .where(MEMBERSHIP_PERMISSION.MEMBERSHIP_ID.eq(membershipId))
+                                        .and(MEMBERSHIP_PERMISSION.GRANTED.isTrue()))))
+                .and(PERMISSION.ID.notIn(dsl.select(MEMBERSHIP_PERMISSION.PERMISSION_ID)
+                        .from(MEMBERSHIP_PERMISSION)
+                        .where(MEMBERSHIP_PERMISSION.MEMBERSHIP_ID.eq(membershipId))
+                        .and(MEMBERSHIP_PERMISSION.GRANTED.isFalse()))));
     }
 
     @Override

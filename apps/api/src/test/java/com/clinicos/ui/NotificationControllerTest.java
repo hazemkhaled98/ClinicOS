@@ -160,7 +160,23 @@ class NotificationControllerTest {
                 notification(NotificationKind.INVENTORY_CHANGE_REQUESTED,
                         Map.of("actor", "سارة", "action", "تعديل", "item", "قفازات"), false),
                 notification(NotificationKind.SUPPLIER_RETURN_REQUESTED,
-                        Map.of("actor", "سارة", "supplier", "الريادة"), false)));
+                        Map.of("actor", "سارة", "supplier", "الريادة"), false),
+                notification(NotificationKind.DAILY_TASK_REVIEW_REQUESTED,
+                        Map.of("actor", "سارة", "task", "تعقيم"), false),
+                notification(NotificationKind.TASK_ASSIGNMENT_REQUESTED,
+                        Map.of("actor", "سارة", "task", "جرد"), false),
+                notification(NotificationKind.ACADEMY_PHOTO_SUBMITTED,
+                        Map.of("actor", "سارة", "unit", "التعقيم"), false),
+                notification(NotificationKind.PREP_CHECKLIST_REQUESTED,
+                        Map.of("actor", "سارة", "checklist", "قائمة البداية"), false),
+                notification(NotificationKind.PROCEDURE_CHANGE_REQUESTED,
+                        Map.of("actor", "سارة", "procedure", "حقن"), false),
+                notification(NotificationKind.USER_ACCESS_CHANGED,
+                        Map.of("actor", "سارة", "user", "أحمد"), false),
+                notification(NotificationKind.EMPLOYEE_CHANGED,
+                        Map.of("actor", "سارة", "employee", "مها"), false),
+                notification(NotificationKind.CLINIC_SETTINGS_CHANGED,
+                        Map.of("actor", "سارة", "area", "أوزان التقييم"), false)));
 
         assertThat(items).extracting(NotificationPresenter.Item::title).containsExactly(
                 "تم اعتماد المهمة اليومية \"تعقيم\" بواسطة سارة",
@@ -170,7 +186,20 @@ class NotificationControllerTest {
                 "تم اعتماد إنجاز الوحدة التدريبية \"التعقيم\" بواسطة سارة",
                 "تم رفض إنجاز الوحدة التدريبية \"التعقيم\" بواسطة سارة",
                 "تم طلب تعديل الصنف \"قفازات\" من سارة",
-                "تم طلب إرجاع أصناف إلى المورد \"الريادة\" من سارة");
+                "تم طلب إرجاع أصناف إلى المورد \"الريادة\" من سارة",
+                "بانتظار مراجعة المهمة اليومية \"تعقيم\" من سارة",
+                "بانتظار مراجعة المهمة الإضافية \"جرد\" من سارة",
+                "بانتظار التحقق من إنجاز الوحدة التدريبية \"التعقيم\" من سارة",
+                "بانتظار اعتماد قائمة التحضير \"قائمة البداية\" من سارة",
+                "بانتظار اعتماد تعديل الإجراء \"حقن\" من سارة",
+                "تم تعديل صلاحيات المستخدم \"أحمد\" بواسطة سارة",
+                "تم تعديل بيانات الموظف \"مها\" بواسطة سارة",
+                "تم تعديل إعدادات أوزان التقييم بواسطة سارة");
+        assertThat(items).extracting(NotificationPresenter.Item::href).containsExactly(
+                "/employees", "/employees", "/employees", "/employees", "/academy/me", "/academy/me",
+                "/inventory/approvals", "/inventory/approvals",
+                "/evaluation", "/evaluation", "/academy/verify", "/prep", "/inventory/approvals",
+                "/admin-dashboard/users", "/admin-dashboard", "/admin-dashboard/settings");
         assertThat(items.get(1).detail()).isEqualTo("السبب: ناقصة");
         assertThat(items.get(3).detail()).isEqualTo("السبب: غير مطلوب");
         assertThat(items.get(5).detail()).isEqualTo("السبب: أعد الصورة");

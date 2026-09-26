@@ -58,6 +58,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
         try (Connection connection = DriverManager.getConnection(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
             clinicId = TestFixtures.insertClinic(connection);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicId);
             ownerMembership = TestFixtures.insertMembership(connection, clinicId,
                     TestFixtures.insertUser(connection, clinicId), "owner");
             managerMembership = TestFixtures.insertMembership(connection, clinicId,
@@ -204,15 +205,55 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void notifyRolesFansOutToActiveOwnersAndManagersOnly() {
+    void notifyRolesFansOutToActiveOwnersAndManagersButNeverTheActor() {
         int created = notifications.notifyRoles(clinicId, ownerMembership, Set.of("owner", "manager"),
                 NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of("item", "قفازات", "changeKind", "edit"));
+
+        assertThat(created).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, assistantMembership)).isZero();
+        assertThat(notifications.unreadCount(clinicId, suspendedManagerMembership)).isZero();
+    }
+
+    @Test
+    void notifyApproversReachesOwnerAndPermittedManagerButNotTheActorOrStaff() {
+        int created = notifications.notifyApprovers(clinicId, assistantMembership, "acadVerify",
+                NotificationKind.ACADEMY_PHOTO_SUBMITTED, Map.of("unit", "تعقيم الأدوات"));
 
         assertThat(created).isEqualTo(2);
         assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(1);
         assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
         assertThat(notifications.unreadCount(clinicId, assistantMembership)).isZero();
         assertThat(notifications.unreadCount(clinicId, suspendedManagerMembership)).isZero();
+    }
+
+    @Test
+    void notifyApproversSkipsManagersWhoLackThePermission() {
+        int created = notifications.notifyApprovers(clinicId, assistantMembership, "gatedOnly",
+                NotificationKind.PROCEDURE_CHANGE_REQUESTED, Map.of("procedure", "حقن"));
+
+        assertThat(created).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isZero();
+    }
+
+    @Test
+    void notifyApproversWithoutAGateReachesEveryManager() {
+        int created = notifications.notifyApprovers(clinicId, assistantMembership, null,
+                NotificationKind.PREP_CHECKLIST_REQUESTED, Map.of("checklist", "قائمة البداية"));
+
+        assertThat(created).isEqualTo(2);
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(1);
+    }
+
+    @Test
+    void notifyApproversRejectsAnIncompletePayload() {
+        assertThatThrownBy(() -> notifications.notifyApprovers(clinicId, assistantMembership, "acadVerify",
+                NotificationKind.ACADEMY_PHOTO_SUBMITTED, Map.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("بيانات الإشعار غير مكتملة");
     }
 
     @Test
