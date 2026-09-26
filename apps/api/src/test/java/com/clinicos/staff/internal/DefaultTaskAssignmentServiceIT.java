@@ -219,7 +219,8 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(approved.doneAt()).isNull();
         var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.TASK_ASSIGNMENT_APPROVED);
-        assertThat(notification.payload()).containsEntry("task", "طلب أدوات");
+        assertThat(notification.payload()).containsEntry("task", "طلب أدوات")
+                .containsEntry("actor", "Test User");
     }
 
     @Test
@@ -247,6 +248,7 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
         var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.TASK_ASSIGNMENT_REJECTED);
         assertThat(notification.payload()).containsEntry("task", "طلب أدوات")
+                .containsEntry("actor", "Test User")
                 .containsEntry("reason", "غير مناسب");
     }
 

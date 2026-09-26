@@ -342,7 +342,8 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(task.reviewedAt()).isNotNull();
         var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.DAILY_TASK_APPROVED);
-        assertThat(notification.payload()).containsEntry("task", "تنظيف");
+        assertThat(notification.payload()).containsEntry("task", "تنظيف")
+                .containsEntry("actor", "Test User");
     }
 
     @Test
@@ -365,6 +366,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.DAILY_TASK_REJECTED);
         assertThat(notification.payload()).containsEntry("task", "تنظيف")
+                .containsEntry("actor", "Test User")
                 .containsEntry("reason", "صوره غير واضحة");
     }
 

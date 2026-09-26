@@ -29,6 +29,7 @@ public enum NotificationKind {
             case SUPPLIER_RETURN_REQUESTED -> payload.get("supplier");
         };
         return subject != null && !subject.isBlank()
+                && (this != INVENTORY_CHANGE_REQUESTED || nonBlank(payload.get("action")))
                 && (!isRejected() || payload.get("reason") != null && !payload.get("reason").isBlank());
     }
 
@@ -45,5 +46,9 @@ public enum NotificationKind {
         return this == DAILY_TASK_REJECTED
                 || this == TASK_ASSIGNMENT_REJECTED
                 || this == ACADEMY_SUBMISSION_REJECTED;
+    }
+
+    private static boolean nonBlank(String value) {
+        return value != null && !value.isBlank();
     }
 }

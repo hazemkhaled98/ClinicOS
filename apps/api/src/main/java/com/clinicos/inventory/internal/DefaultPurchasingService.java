@@ -336,7 +336,7 @@ public class DefaultPurchasingService implements PurchasingService {
                 throw e;
             }
             String supplier = supplierName(clinicId, order.getSupplierId());
-            notificationService.notifyRoles(clinicId, NotificationService.APPROVER_ROLES,
+            notificationService.notifyRoles(clinicId, actor.membershipId(), NotificationService.APPROVER_ROLES,
                     NotificationKind.SUPPLIER_RETURN_REQUESTED,
                     Map.of("supplier", supplier == null ? "" : supplier));
             return loadReturn(clinicId, returnId);

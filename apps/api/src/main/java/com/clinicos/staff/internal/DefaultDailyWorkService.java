@@ -139,7 +139,7 @@ public class DefaultDailyWorkService implements DailyWorkService {
             if (updated == 0) {
                 throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
             }
-            notificationService.notifyEmployee(clinicId, employeeOfRecord(clinicId, dailyRecordId),
+            notificationService.notifyEmployee(clinicId, reviewedByMembershipId, employeeOfRecord(clinicId, dailyRecordId),
                     NotificationKind.DAILY_TASK_APPROVED, Map.of("task", taskName(taskDefinitionId)));
         });
     }
@@ -164,7 +164,7 @@ public class DefaultDailyWorkService implements DailyWorkService {
             if (updated == 0) {
                 throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
             }
-            notificationService.notifyEmployee(clinicId, employeeOfRecord(clinicId, dailyRecordId),
+            notificationService.notifyEmployee(clinicId, reviewedByMembershipId, employeeOfRecord(clinicId, dailyRecordId),
                     NotificationKind.DAILY_TASK_REJECTED,
                     Map.of("task", taskName(taskDefinitionId), "reason", stripped));
         });

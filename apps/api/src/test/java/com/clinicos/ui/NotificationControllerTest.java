@@ -66,8 +66,10 @@ class NotificationControllerTest {
     @Test
     void listMapsTitlesAndKeepsUnreadCount() {
         when(notificationService.recent(CLINIC, MEMBERSHIP, 20)).thenReturn(List.of(
-                notification(NotificationKind.DAILY_TASK_REJECTED, Map.of("task", "تعقيم", "reason", "ناقصة"), false),
-                notification(NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("unit", "تعقيم الأدوات"), true)));
+                notification(NotificationKind.DAILY_TASK_REJECTED,
+                        Map.of("actor", "المدير", "task", "تعقيم", "reason", "ناقصة"), false),
+                notification(NotificationKind.ACADEMY_SUBMISSION_VERIFIED,
+                        Map.of("actor", "المدير", "unit", "تعقيم الأدوات"), true)));
         when(notificationService.unreadCount(CLINIC, MEMBERSHIP)).thenReturn(1);
 
         String view = controller.list(session(), model);
@@ -78,11 +80,11 @@ class NotificationControllerTest {
         List<NotificationPresenter.Item> items =
                 (List<NotificationPresenter.Item>) model.getAttribute("notifications");
         assertThat(items).hasSize(2);
-        assertThat(items.get(0).title()).isEqualTo("تم رفض مهمتك: تعقيم");
-        assertThat(items.get(0).detail()).isEqualTo("ناقصة");
+        assertThat(items.get(0).title()).isEqualTo("رفض المدير المهمة اليومية \"تعقيم\"");
+        assertThat(items.get(0).detail()).isEqualTo("السبب: ناقصة");
         assertThat(items.get(0).href()).isEqualTo("/employees");
         assertThat(items.get(0).read()).isFalse();
-        assertThat(items.get(1).title()).isEqualTo("تم التحقق من وحدة: تعقيم الأدوات");
+        assertThat(items.get(1).title()).isEqualTo("اعتمد المدير إنجاز الوحدة التدريبية \"تعقيم الأدوات\"");
         assertThat(items.get(1).href()).isEqualTo("/academy/me");
     }
 
@@ -113,7 +115,8 @@ class NotificationControllerTest {
     void readRedirectsToServerDerivedRouteOfTheKind() {
         MockHttpServletResponse response = new MockHttpServletResponse();
         when(notificationService.markRead(CLINIC, MEMBERSHIP, ID)).thenReturn(
-                notification(NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of("item", "قفازات"), false));
+                notification(NotificationKind.INVENTORY_CHANGE_REQUESTED,
+                        Map.of("actor", "المساعد", "action", "تعديل", "item", "قفازات"), false));
 
         controller.read(ID, session(), response);
 
@@ -142,14 +145,35 @@ class NotificationControllerTest {
     }
 
     @Test
-    void unknownSubjectFallsBackToTheEmployeesRoute() {
+    void presenterRendersApprovedCopyForAllKinds() {
         NotificationPresenter presenter = new NotificationPresenter();
+        var items = presenter.present(List.of(
+                notification(NotificationKind.DAILY_TASK_APPROVED, Map.of("actor", "سارة", "task", "تعقيم"), false),
+                notification(NotificationKind.DAILY_TASK_REJECTED,
+                        Map.of("actor", "سارة", "task", "تعقيم", "reason", "ناقصة"), false),
+                notification(NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of("actor", "سارة", "task", "جرد"), false),
+                notification(NotificationKind.TASK_ASSIGNMENT_REJECTED,
+                        Map.of("actor", "سارة", "task", "جرد", "reason", "غير مطلوب"), false),
+                notification(NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("actor", "سارة", "unit", "التعقيم"), false),
+                notification(NotificationKind.ACADEMY_SUBMISSION_REJECTED,
+                        Map.of("actor", "سارة", "unit", "التعقيم", "reason", "أعد الصورة"), false),
+                notification(NotificationKind.INVENTORY_CHANGE_REQUESTED,
+                        Map.of("actor", "سارة", "action", "تعديل", "item", "قفازات"), false),
+                notification(NotificationKind.SUPPLIER_RETURN_REQUESTED,
+                        Map.of("actor", "سارة", "supplier", "الريادة"), false)));
 
-        NotificationPresenter.Item item = presenter.present(
-                notification(NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of(), false));
-
-        assertThat(item.title()).isEqualTo("تم اعتماد المهمة الموكلة: ");
-        assertThat(item.href()).isEqualTo("/employees");
+        assertThat(items).extracting(NotificationPresenter.Item::title).containsExactly(
+                "اعتمد سارة المهمة اليومية \"تعقيم\"",
+                "رفض سارة المهمة اليومية \"تعقيم\"",
+                "اعتمد سارة المهمة الإضافية \"جرد\"",
+                "رفض سارة المهمة الإضافية \"جرد\"",
+                "اعتمد سارة إنجاز الوحدة التدريبية \"التعقيم\"",
+                "رفض سارة إنجاز الوحدة التدريبية \"التعقيم\"",
+                "طلب سارة تعديل الصنف \"قفازات\"",
+                "طلب سارة إرجاع أصناف إلى المورد \"الريادة\"");
+        assertThat(items.get(1).detail()).isEqualTo("السبب: ناقصة");
+        assertThat(items.get(3).detail()).isEqualTo("السبب: غير مطلوب");
+        assertThat(items.get(5).detail()).isEqualTo("السبب: أعد الصورة");
     }
 
     private static Notification notification(NotificationKind kind, Map<String, String> payload, boolean read) {

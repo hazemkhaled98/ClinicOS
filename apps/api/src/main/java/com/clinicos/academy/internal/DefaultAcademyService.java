@@ -232,7 +232,7 @@ public class DefaultAcademyService implements AcademyService {
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_BY, actor.membershipId())
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_AT, OffsetDateTime.now())
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).execute();
-            notificationService.notifyEmployee(clinicId, sub.getEmployeeId(),
+            notificationService.notifyEmployee(clinicId, actor.membershipId(), sub.getEmployeeId(),
                     NotificationKind.ACADEMY_SUBMISSION_VERIFIED,
                     Map.of("unit", unitTitle(sub.getUnitId())));
             return submission(dsl.selectFrom(ACADEMY_STEP_SUBMISSION)
@@ -256,7 +256,7 @@ public class DefaultAcademyService implements AcademyService {
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_BY, actor.membershipId())
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_AT, OffsetDateTime.now())
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).execute();
-            notificationService.notifyEmployee(clinicId, sub.getEmployeeId(),
+            notificationService.notifyEmployee(clinicId, actor.membershipId(), sub.getEmployeeId(),
                     NotificationKind.ACADEMY_SUBMISSION_REJECTED,
                     Map.of("unit", unitTitle(sub.getUnitId()), "reason", reason == null ? "" : reason));
             return submission(dsl.selectFrom(ACADEMY_STEP_SUBMISSION)

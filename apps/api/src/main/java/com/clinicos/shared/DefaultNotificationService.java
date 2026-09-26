@@ -1,10 +1,12 @@
 package com.clinicos.shared;
 
+import static com.clinicos.shared.jooq.tables.AppUser.APP_USER;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static com.clinicos.shared.jooq.tables.Notification.NOTIFICATION;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,48 +38,54 @@ public class DefaultNotificationService implements NotificationService {
     }
 
     @Override
-    public int notifyMembership(UUID clinicId, UUID membershipId, NotificationKind kind, Map<String, String> payload) {
-        if (membershipId == null || kind == null) {
+    public int notifyMembership(UUID clinicId, UUID actorMembershipId, UUID membershipId, NotificationKind kind,
+            Map<String, String> payload) {
+        if (actorMembershipId == null || membershipId == null || kind == null) {
             throw new IllegalArgumentException("مستلم الإشعار أو نوعه مطلوب");
         }
-        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
+            Map<String, String> enriched = enrichPayload(clinicId, actorMembershipId, kind, payload);
+            validatePayloadForWrite(kind, enriched);
             if (!isActiveMember(clinicId, membershipId)) {
                 return 0;
             }
-            insert(clinicId, membershipId, kind, payload);
+            insert(clinicId, membershipId, kind, enriched);
             return 1;
         });
     }
 
     @Override
-    public int notifyEmployee(UUID clinicId, UUID employeeId, NotificationKind kind, Map<String, String> payload) {
-        if (employeeId == null || kind == null) {
+    public int notifyEmployee(UUID clinicId, UUID actorMembershipId, UUID employeeId, NotificationKind kind,
+            Map<String, String> payload) {
+        if (actorMembershipId == null || employeeId == null || kind == null) {
             throw new IllegalArgumentException("موظف الإشعار أو نوعه مطلوب");
         }
-        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
+            Map<String, String> enriched = enrichPayload(clinicId, actorMembershipId, kind, payload);
+            validatePayloadForWrite(kind, enriched);
             var recipients = dsl.select(MEMBERSHIP.ID)
                     .from(MEMBERSHIP)
                     .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                     .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
                     .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                     .fetchSet(MEMBERSHIP.ID);
-            recipients.forEach(id -> insert(clinicId, id, kind, payload));
+            recipients.forEach(id -> insert(clinicId, id, kind, enriched));
             return recipients.size();
         });
     }
 
     @Override
-    public int notifyRoles(UUID clinicId, Set<String> roleCodes, NotificationKind kind, Map<String, String> payload) {
-        if (roleCodes == null || roleCodes.isEmpty() || kind == null) {
+    public int notifyRoles(UUID clinicId, UUID actorMembershipId, Set<String> roleCodes, NotificationKind kind,
+            Map<String, String> payload) {
+        if (actorMembershipId == null || roleCodes == null || roleCodes.isEmpty() || kind == null) {
             throw new IllegalArgumentException("دور واحد على الأقل أو نوع الإشعار مطلوب");
         }
-        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
+            Map<String, String> enriched = enrichPayload(clinicId, actorMembershipId, kind, payload);
+            validatePayloadForWrite(kind, enriched);
             var recipients = dsl.select(MEMBERSHIP.ID)
                     .from(MEMBERSHIP)
                     .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
@@ -85,7 +93,7 @@ public class DefaultNotificationService implements NotificationService {
                     .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                     .and(ROLE.CODE.in(roleCodes))
                     .fetchSet(MEMBERSHIP.ID);
-            recipients.forEach(id -> insert(clinicId, id, kind, payload));
+            recipients.forEach(id -> insert(clinicId, id, kind, enriched));
             return recipients.size();
         });
     }
@@ -163,6 +171,31 @@ public class DefaultNotificationService implements NotificationService {
                 .where(MEMBERSHIP.ID.eq(membershipId))
                 .and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                 .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active)));
+    }
+
+    private Map<String, String> enrichPayload(UUID clinicId, UUID actorMembershipId, NotificationKind kind,
+            Map<String, String> payload) {
+        String actor = dsl.select(APP_USER.FULL_NAME)
+                .from(MEMBERSHIP)
+                .join(APP_USER).on(APP_USER.ID.eq(MEMBERSHIP.USER_ID))
+                .where(MEMBERSHIP.ID.eq(actorMembershipId))
+                .and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                .and(APP_USER.CLINIC_ID.eq(clinicId))
+                .fetchOne(APP_USER.FULL_NAME);
+        if (actor == null || actor.isBlank()) {
+            throw new IllegalArgumentException("مرسل الإشعار غير موجود");
+        }
+        Map<String, String> enriched = new LinkedHashMap<>(payload == null ? Map.of() : payload);
+        enriched.put("actor", actor);
+        if (kind == NotificationKind.INVENTORY_CHANGE_REQUESTED) {
+            String changeKind = enriched.remove("changeKind");
+            enriched.put("action", switch (changeKind == null ? "" : changeKind) {
+                case "edit" -> "تعديل";
+                case "delete" -> "حذف";
+                default -> "";
+            });
+        }
+        return enriched;
     }
 
     private void guardTenant(UUID clinicId) {

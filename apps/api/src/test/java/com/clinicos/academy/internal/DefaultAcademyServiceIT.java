@@ -139,7 +139,8 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(status(unit)).isEqualTo("done");
         var notification = notifications.recent(clinicA, assistant.membershipId(), 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.ACADEMY_SUBMISSION_VERIFIED);
-        assertThat(notification.payload()).containsEntry("unit", "وحدة تصوير");
+        assertThat(notification.payload()).containsEntry("unit", "وحدة تصوير")
+                .containsEntry("actor", "Test User");
     }
 
     @Test
@@ -154,6 +155,7 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
         var notification = notifications.recent(clinicA, assistant.membershipId(), 1).getFirst();
         assertThat(notification.kind()).isEqualTo(NotificationKind.ACADEMY_SUBMISSION_REJECTED);
         assertThat(notification.payload()).containsEntry("unit", "وحدة تصوير")
+                .containsEntry("actor", "Test User")
                 .containsEntry("reason", "الصورة غير واضحة");
     }
 

@@ -185,10 +185,12 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(purchasingService.pendingReturns(clinicA)).anyMatch(r -> r.id().equals(pending.id()));
         var ownerNotification = notifications.recent(clinicA, owner.membershipId(), 1).getFirst();
         assertThat(ownerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
-        assertThat(ownerNotification.payload()).containsEntry("supplier", "الريادة");
+        assertThat(ownerNotification.payload()).containsEntry("supplier", "الريادة")
+                .containsEntry("actor", "Test User");
         var managerNotification = notifications.recent(clinicA, manager.membershipId(), 1).getFirst();
         assertThat(managerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
-        assertThat(managerNotification.payload()).containsEntry("supplier", "الريادة");
+        assertThat(managerNotification.payload()).containsEntry("supplier", "الريادة")
+                .containsEntry("actor", "Test User");
         assertThat(notifications.unreadCount(clinicA, assistant.membershipId())).isZero();
 
         var approved = purchasingService.decideReturn(clinicA, manager, pending.id(), true);

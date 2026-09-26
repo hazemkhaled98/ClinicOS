@@ -28,11 +28,14 @@ public interface NotificationService {
         }
     }
 
-    int notifyMembership(UUID clinicId, UUID membershipId, NotificationKind kind, Map<String, String> payload);
+    int notifyMembership(UUID clinicId, UUID actorMembershipId, UUID membershipId, NotificationKind kind,
+            Map<String, String> payload);
 
-    int notifyEmployee(UUID clinicId, UUID employeeId, NotificationKind kind, Map<String, String> payload);
+    int notifyEmployee(UUID clinicId, UUID actorMembershipId, UUID employeeId, NotificationKind kind,
+            Map<String, String> payload);
 
-    int notifyRoles(UUID clinicId, Set<String> roleCodes, NotificationKind kind, Map<String, String> payload);
+    int notifyRoles(UUID clinicId, UUID actorMembershipId, Set<String> roleCodes, NotificationKind kind,
+            Map<String, String> payload);
 
     int unreadCount(UUID clinicId, UUID membershipId);
 

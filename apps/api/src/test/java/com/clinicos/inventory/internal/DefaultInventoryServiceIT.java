@@ -162,10 +162,14 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(refetched.unitCost()).isEqualByComparingTo("45.50");
         var ownerNotification = notifications.recent(clinicA, owner.membershipId(), 1).getFirst();
         assertThat(ownerNotification.kind()).isEqualTo(NotificationKind.INVENTORY_CHANGE_REQUESTED);
-        assertThat(ownerNotification.payload()).containsEntry("item", "كمبوزيت");
+        assertThat(ownerNotification.payload()).containsEntry("item", "كمبوزيت")
+                .containsEntry("actor", "Test User")
+                .containsEntry("action", "تعديل");
         var managerNotification = notifications.recent(clinicA, manager.membershipId(), 1).getFirst();
         assertThat(managerNotification.kind()).isEqualTo(NotificationKind.INVENTORY_CHANGE_REQUESTED);
-        assertThat(managerNotification.payload()).containsEntry("item", "كمبوزيت");
+        assertThat(managerNotification.payload()).containsEntry("item", "كمبوزيت")
+                .containsEntry("actor", "Test User")
+                .containsEntry("action", "تعديل");
         assertThat(notifications.unreadCount(clinicA, assistant.membershipId())).isZero();
     }
 

@@ -98,7 +98,7 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
             Map<String, String> payload = reason == null
                     ? Map.of("task", assignment.getName())
                     : Map.of("task", assignment.getName(), "reason", reason);
-            notificationService.notifyEmployee(clinicId, assignment.getEmployeeId(), kindFor(target), payload);
+            notificationService.notifyEmployee(clinicId, approvedByMembershipId, assignment.getEmployeeId(), kindFor(target), payload);
             return toAssignment(assignment);
         });
     }
