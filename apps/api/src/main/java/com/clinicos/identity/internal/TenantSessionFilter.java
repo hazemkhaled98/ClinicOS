@@ -94,15 +94,28 @@ public class TenantSessionFilter extends OncePerRequestFilter {
     }
 
     private void primeSession(HttpSession session) {
-        if (session.getAttribute(SessionKeys.PRIMING_ATTEMPTED) != null
-                || session.getAttribute(SessionKeys.CLINIC_ID) != null) {
-            return;
-        }
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof AuthenticatedUser user)) {
+            if (session.getAttribute(SessionKeys.PRIMING_ATTEMPTED) != null
+                    || session.getAttribute(SessionKeys.CLINIC_ID) != null) {
+                return;
+            }
             log.debug("No authenticated principal -- skipping clinic priming");
             return;
         }
+        if (user.getId().equals(session.getAttribute(SessionKeys.PRIMED_USER_ID))
+                && (session.getAttribute(SessionKeys.PRIMING_ATTEMPTED) != null
+                        || session.getAttribute(SessionKeys.CLINIC_ID) != null)) {
+            return;
+        }
+        // A second login inside the same browser session must not inherit the
+        // previous user's membership, role, and permissions: drop whatever the
+        // earlier principal primed before binding the new one.
+        session.removeAttribute(SessionKeys.CLINIC_ID);
+        session.removeAttribute(SessionKeys.CLINIC_NAME);
+        session.removeAttribute(SessionKeys.MEMBERSHIP_ID);
+        session.removeAttribute(SessionKeys.ROLE_CODE);
+        session.removeAttribute(SessionKeys.PERMISSIONS);
         // Marker goes here, after the principal check: an unauthenticated
         // request must not burn the one-shot guarantee, or the first request
         // after login would find the marker set and never prime.
@@ -131,6 +144,7 @@ public class TenantSessionFilter extends OncePerRequestFilter {
             session.setAttribute(SessionKeys.MEMBERSHIP_ID, membership.membershipId());
             session.setAttribute(SessionKeys.ROLE_CODE, access.roleCode());
             session.setAttribute(SessionKeys.PERMISSIONS, List.copyOf(access.permissionCodes()));
+            session.setAttribute(SessionKeys.PRIMED_USER_ID, user.getId());
             activityLogService.log(
                     membership.clinicId(),
                     membership.membershipId(),
