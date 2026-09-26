@@ -80,11 +80,11 @@ class NotificationControllerTest {
         List<NotificationPresenter.Item> items =
                 (List<NotificationPresenter.Item>) model.getAttribute("notifications");
         assertThat(items).hasSize(2);
-        assertThat(items.get(0).title()).isEqualTo("رفض المدير المهمة اليومية \"تعقيم\"");
+        assertThat(items.get(0).title()).isEqualTo("تم رفض المهمة اليومية \"تعقيم\" بواسطة المدير");
         assertThat(items.get(0).detail()).isEqualTo("السبب: ناقصة");
         assertThat(items.get(0).href()).isEqualTo("/employees");
         assertThat(items.get(0).read()).isFalse();
-        assertThat(items.get(1).title()).isEqualTo("اعتمد المدير إنجاز الوحدة التدريبية \"تعقيم الأدوات\"");
+        assertThat(items.get(1).title()).isEqualTo("تم اعتماد إنجاز الوحدة التدريبية \"تعقيم الأدوات\" بواسطة المدير");
         assertThat(items.get(1).href()).isEqualTo("/academy/me");
     }
 
@@ -163,14 +163,14 @@ class NotificationControllerTest {
                         Map.of("actor", "سارة", "supplier", "الريادة"), false)));
 
         assertThat(items).extracting(NotificationPresenter.Item::title).containsExactly(
-                "اعتمد سارة المهمة اليومية \"تعقيم\"",
-                "رفض سارة المهمة اليومية \"تعقيم\"",
-                "اعتمد سارة المهمة الإضافية \"جرد\"",
-                "رفض سارة المهمة الإضافية \"جرد\"",
-                "اعتمد سارة إنجاز الوحدة التدريبية \"التعقيم\"",
-                "رفض سارة إنجاز الوحدة التدريبية \"التعقيم\"",
-                "طلب سارة تعديل الصنف \"قفازات\"",
-                "طلب سارة إرجاع أصناف إلى المورد \"الريادة\"");
+                "تم اعتماد المهمة اليومية \"تعقيم\" بواسطة سارة",
+                "تم رفض المهمة اليومية \"تعقيم\" بواسطة سارة",
+                "تم اعتماد المهمة الإضافية \"جرد\" بواسطة سارة",
+                "تم رفض المهمة الإضافية \"جرد\" بواسطة سارة",
+                "تم اعتماد إنجاز الوحدة التدريبية \"التعقيم\" بواسطة سارة",
+                "تم رفض إنجاز الوحدة التدريبية \"التعقيم\" بواسطة سارة",
+                "تم طلب تعديل الصنف \"قفازات\" من سارة",
+                "تم طلب إرجاع أصناف إلى المورد \"الريادة\" من سارة");
         assertThat(items.get(1).detail()).isEqualTo("السبب: ناقصة");
         assertThat(items.get(3).detail()).isEqualTo("السبب: غير مطلوب");
         assertThat(items.get(5).detail()).isEqualTo("السبب: أعد الصورة");

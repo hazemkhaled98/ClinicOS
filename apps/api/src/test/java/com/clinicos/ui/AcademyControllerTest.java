@@ -222,6 +222,25 @@ class AcademyControllerTest {
     }
 
     @Test
+    void UC007_editorFormKeepsExistingQuestionsSoEditingATitleCannotWipeThem() {
+        UUID firstQuestion = UUID.randomUUID();
+        UUID secondQuestion = UUID.randomUUID();
+        Unit unit = new Unit(UUID.randomUUID(), AcademyAudience.core, "📘", "وحدة", "هدف",
+                List.of(new AcademyService.Section("قسم", List.of("نقطة"))), "التعقيم", true, "open",
+                List.of(
+                        new AcademyService.Question(firstQuestion, "ما التعقيم؟", List.of("تنظيف", "تعقيم"), 1),
+                        new AcademyService.Question(secondQuestion, "ما.queue؟", List.of("انتظار"), 0)));
+
+        var request = AcademyController.UnitForm.from(unit).toRequest();
+
+        assertThat(request.questions()).containsExactly(
+                new AcademyService.QuestionRequest(firstQuestion, "ما التعقيم؟", List.of("تنظيف", "تعقيم"), 1, 0),
+                new AcademyService.QuestionRequest(secondQuestion, "ما.queue؟", List.of("انتظار"), 0, 1));
+        assertThat(request.title()).isEqualTo("وحدة");
+        assertThat(request.content()).containsExactly(new AcademyService.Section("قسم", List.of("نقطة")));
+    }
+
+    @Test
     void UC007_editorTemplateUsesBeanPropertyForUnitId() throws Exception {
         try (var template = getClass().getResourceAsStream("/templates/academy-unit-editor.html")) {
             assertThat(template).isNotNull();
