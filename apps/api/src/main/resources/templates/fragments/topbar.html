@@ -9,5 +9,23 @@
     </button>
     <span class="text-sm font-semibold text-teal-900 clinicos-topbar-t2" th:text="${layout.clinicName} + ' · إدارة الأداء'">عيادتي · إدارة الأداء</span>
   </div>
-  <span class="text-xs text-on-surface-variant clinicos-topbar-date" th:text="${layout.date}">التاريخ</span>
+  <div class="flex items-center gap-3">
+    <div x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false" class="relative">
+      <button type="button" @click="open = !open" hx-get="/notifications"
+              hx-target="#notification-list" hx-swap="innerHTML" x-bind:aria-expanded="open"
+              aria-controls="notification-dropdown" aria-label="الإشعارات"
+              class="relative w-9 h-9 rounded-lg text-on-surface-variant hover:text-teal-900 hover:bg-neutral-100 active:scale-95 motion-reduce:active:scale-100 flex items-center justify-center transition cursor-pointer">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V5a2 2 0 10-4 0v.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+      </button>
+      <span th:replace="~{fragments/notifications :: count(0)}"></span>
+      <div id="notification-dropdown" x-show="open" x-cloak
+           class="absolute z-50 mt-2 end-0 clinicos-card clinicos-card--popover overflow-hidden">
+        <div id="notification-list"></div>
+      </div>
+    </div>
+    <span class="text-xs text-on-surface-variant clinicos-topbar-date" th:text="${layout.date}">التاريخ</span>
+  </div>
 </header>

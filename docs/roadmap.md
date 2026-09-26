@@ -105,6 +105,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 7a–7d — UC-008 Inventory | done | PR #21 merged (see Phase 7). V25 cross-tenant guards on inventory child tables; `InventoryService` + `DefaultInventoryService`; `InventoryController` + all 19 views (foundation screens 7a, purchasing 7b, procedures/costing 7c, approvals + analytics 7d). Role scoping rides the Phase 2 permission model (BR-G25); BR-G26 approval queue, BR-G27 return-ceiling (V10 trigger surfaced as a user error), BR-G28 unit-cost freeze. `/pr-sentinel` + `/coverage-check` clean; manual testing S1–S14 green — three in-PR defects fixed: supplier save binding, zero-qty-line 500 on orders/returns, delete-approval mislabel. |
 | 8 — UC-009 Admin dashboard | done | Manual testing S1–S8 green (S7 A1 validated against a NULL volume target), coverage-check clean. PR #22. |
 | A — Backlog UI polish | done | Branch `feat/backlog-ui-polish`, no DDL. Dynamic clinic branding (`SessionKeys.CLINIC_NAME` + `LayoutModel.clinicName`, `عيادتي` replaced across authenticated templates), save-toast gaps closed, actionable empty states (`fragments/empty-state.html`) applied to inventory/academy screens. `mvn verify` green (302 tests) + `ModularityTests`/`CssHygieneTest`/`TemplateHygieneTest`. Fixed a production regression found via the IT suite: `EmployeeDayController`'s POST fragment responses (check-in/check-out/task-confirm/assignment-propose) were 500ing because `renderGrid` never populated `layout`, only the GET handler did. |
+| B — Backlog notification center | in progress | Branch `feat/backlog-notifications`. Backlog item #1 from `docs/backlog/feature-suggestions.md`. |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -242,6 +243,20 @@ Backlog items #4 (dynamic branding), #5 (save-toast gaps), #6 (actionable empty 
 - [x] Dynamic clinic branding — `SessionKeys.CLINIC_NAME` set in `TenantSessionFilter` from `Membership.clinicName`; `LayoutModel.LayoutData.clinicName` (fallback `عيادتي` when unbound); every authenticated template's hardcoded `عيادتي` replaced with `${layout.clinicName}`.
 - [x] Save-toast gaps — every POST/PUT/DELETE handler across `ui/*Controller` audited for a missing `Toasts.success`/`fromErrors` call; gaps filled using the existing mechanism.
 - [x] Actionable empty states — shared `fragments/empty-state.html :: emptyState(icon, title, hint, actionHref, actionLabel)` fragment; applied to inventory (items/orders/receive) and academy (curriculum/learner/verify) screens, action button rendered only when the actor has the linked permission.
+
+### Phase B — Notification center
+
+Backlog item #1 from `docs/backlog/feature-suggestions.md`. The `notification` table already exists (V8, clinic-RLS in V9, cross-tenant membership FK guard in V10) with a `read_at` column, so no `notification_read` join table is needed. Delivery is **HTMX polling every 30s**, not SSE/WebSocket — a push channel would need a long-lived connection per session that buys nothing at this clinic size.
+
+Recipients: task/assignment review and academy decisions notify the employee; pending inventory change requests and supplier returns notify active `owner`/`manager` memberships. Notification writes join the publisher's existing transaction and propagate failures (unlike `ActivityLogService`, which deliberately swallows them — a lost notification must not desync the audit trail).
+
+- [ ] V31 — `idx_notification_recipient_recent` on `(recipient_membership_id, created_at desc)`
+- [ ] `shared/NotificationKind` enum + `NotificationService` (`notifyMembership` / `notifyEmployee` / `notifyRoles`, `unreadCount`, `recent`, `markRead`, `markAllRead`) + `DefaultNotificationService`
+- [ ] `NotificationServiceIT` — recipient isolation, cross-tenant refusal, role fan-out, ordering, bounded `limit`, mark one/all
+- [ ] Publish from `DefaultDailyWorkService`, `DefaultTaskAssignmentService`, `DefaultInventoryService`, `DefaultPurchasingService`, `DefaultAcademyService`
+- [ ] `NotificationController` + `NotificationPresenter` + `fragments/notifications.html`, mounted in `fragments/topbar.html`
+- [ ] `NotificationControllerTest` + publisher assertions in the five existing ITs
+- [ ] `npm run build:css`, `mvn verify`, `/tenant-guard-check`, `/rtl-token-lint`, `/manual-testing`, `/pr-sentinel`
 
 ### Phase 9 — Hardening and release
 

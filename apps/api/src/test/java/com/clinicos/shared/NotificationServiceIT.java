@@ -1,0 +1,290 @@
+package com.clinicos.shared;
+
+import static com.clinicos.shared.jooq.tables.Notification.NOTIFICATION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.clinicos.AbstractPostgresIntegrationTest;
+import com.clinicos.Application;
+import com.clinicos.TestFixtures;
+import com.clinicos.shared.NotificationService.Notification;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
+
+/**
+ * Raw JDBC here only seeds and inspects rows on the superuser connection, the
+ * same way {@link ActivityLogServiceIT} does — never through the app's tenant
+ * path. Every service call runs with {@link TenantContext} bound.
+ */
+@SpringBootTest(classes = Application.class)
+class NotificationServiceIT extends AbstractPostgresIntegrationTest {
+
+    @Autowired
+    private NotificationService notifications;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    private UUID clinicId;
+    private UUID ownerMembership;
+    private UUID managerMembership;
+    private UUID assistantMembership;
+    private UUID assistantEmployeeId;
+    private UUID unlinkedEmployeeId;
+    private UUID suspendedManagerMembership;
+    private UUID suspendedAssistantMembership;
+    private UUID suspendedAssistantEmployeeId;
+    private UUID otherClinicId;
+    private UUID otherClinicMembership;
+
+    @BeforeEach
+    void seed() throws Exception {
+        try (Connection connection = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
+            clinicId = TestFixtures.insertClinic(connection);
+            ownerMembership = TestFixtures.insertMembership(connection, clinicId,
+                    TestFixtures.insertUser(connection, clinicId), "owner");
+            managerMembership = TestFixtures.insertMembership(connection, clinicId,
+                    TestFixtures.insertUser(connection, clinicId), "manager");
+
+            assistantEmployeeId = TestFixtures.insertEmployee(connection, clinicId, "مساعد");
+            assistantMembership = TestFixtures.insertMembership(connection, clinicId,
+                    TestFixtures.insertUser(connection, clinicId), "assistant");
+            TestFixtures.linkMembershipToEmployee(connection, assistantMembership, assistantEmployeeId);
+
+            unlinkedEmployeeId = TestFixtures.insertEmployee(connection, clinicId, "بلا حساب");
+
+            suspendedManagerMembership = TestFixtures.insertMembership(connection, clinicId,
+                    TestFixtures.insertUser(connection, clinicId), "manager", MembershipStatus.suspended);
+
+            suspendedAssistantEmployeeId = TestFixtures.insertEmployee(connection, clinicId, "موقوف");
+            suspendedAssistantMembership = TestFixtures.insertMembership(connection, clinicId,
+                    TestFixtures.insertUser(connection, clinicId), "assistant", MembershipStatus.suspended);
+            TestFixtures.linkMembershipToEmployee(connection, suspendedAssistantMembership,
+                    suspendedAssistantEmployeeId);
+
+            otherClinicId = TestFixtures.insertClinic(connection);
+            otherClinicMembership = TestFixtures.insertMembership(connection, otherClinicId,
+                    TestFixtures.insertUser(connection, otherClinicId), "owner");
+        }
+        TenantContext.set(clinicId);
+    }
+
+    @AfterEach
+    void clearTenant() {
+        TenantContext.clear();
+    }
+
+    @Test
+    void unreadCountAndRecentAreScopedToTheRecipient() {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, managerMembership,
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.TASK_ASSIGNMENT_REJECTED,
+                Map.of("reason", "غير كافٍ"));
+
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(2);
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, assistantMembership)).isZero();
+
+        List<Notification> ownerRecent = notifications.recent(clinicId, ownerMembership, 20);
+        assertThat(ownerRecent).hasSize(2);
+        assertThat(ownerRecent.get(0).kind()).isEqualTo(NotificationKind.TASK_ASSIGNMENT_REJECTED);
+        assertThat(ownerRecent.get(0).payload()).containsEntry("reason", "غير كافٍ");
+        assertThat(ownerRecent.get(0).read()).isFalse();
+        assertThat(ownerRecent.get(1).kind()).isEqualTo(NotificationKind.DAILY_TASK_APPROVED);
+    }
+
+    @Test
+    void recentClampsTheLimitAtBothEnds() {
+        for (int i = 0; i < 3; i++) {
+            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        }
+
+        assertThat(notifications.recent(clinicId, ownerMembership, 0)).hasSize(1);
+        assertThat(notifications.recent(clinicId, ownerMembership, -5)).hasSize(1);
+        assertThat(notifications.recent(clinicId, ownerMembership, 99_999)).hasSize(3);
+    }
+
+    @Test
+    void markReadTouchesOnlyTheCallingRecipientsNotification() {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        UUID ownerId = notifications.recent(clinicId, ownerMembership, 20).get(0).id();
+
+        Notification read = notifications.markRead(clinicId, ownerMembership, ownerId);
+
+        assertThat(read.read()).isTrue();
+        assertThat(read.readAt()).isNotNull();
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+    }
+
+    @Test
+    void markReadRejectsAnotherRecipientsNotification() {
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        UUID managerId = notifications.recent(clinicId, managerMembership, 20).get(0).id();
+
+        assertThatThrownBy(() -> notifications.markRead(clinicId, ownerMembership, managerId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("الإشعار غير موجود");
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+    }
+
+    @Test
+    void markReadRejectsAnAlreadyReadNotification() {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        UUID id = notifications.recent(clinicId, ownerMembership, 20).get(0).id();
+        notifications.markRead(clinicId, ownerMembership, id);
+
+        assertThatThrownBy(() -> notifications.markRead(clinicId, ownerMembership, id))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void markAllReadClearsOnlyTheCallingRecipient() {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+
+        assertThat(notifications.markAllRead(clinicId, ownerMembership)).isEqualTo(2);
+
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.recent(clinicId, ownerMembership, 20)).allMatch(Notification::read);
+    }
+
+    @Test
+    void notifyEmployeeReachesTheLinkedActiveMembershipAndNobodyElse() {
+        int created = notifications.notifyEmployee(clinicId, assistantEmployeeId,
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("unit", "تعقيم الأدوات"));
+
+        assertThat(created).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, assistantMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(notifications.recent(clinicId, assistantMembership, 20).get(0).payload())
+                .containsEntry("unit", "تعقيم الأدوات");
+    }
+
+    @Test
+    void notifyEmployeeIsANoopWhenNoMembershipIsLinked() {
+        assertThat(notifications.notifyEmployee(clinicId, unlinkedEmployeeId,
+                NotificationKind.ACADEMY_SUBMISSION_REJECTED, Map.of())).isZero();
+    }
+
+    @Test
+    void notifyEmployeeSkipsASuspendedMembership() {
+        assertThat(notifications.notifyEmployee(clinicId, suspendedAssistantEmployeeId,
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of())).isZero();
+    }
+
+    @Test
+    void notifyRolesFansOutToActiveOwnersAndManagersOnly() {
+        int created = notifications.notifyRoles(clinicId, Set.of("owner", "manager"),
+                NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of("item", "قفازات"));
+
+        assertThat(created).isEqualTo(2);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, assistantMembership)).isZero();
+        assertThat(notifications.unreadCount(clinicId, suspendedManagerMembership)).isZero();
+    }
+
+    @Test
+    void notifyRolesRejectsAnEmptyRoleSet() {
+        assertThatThrownBy(() -> notifications.notifyRoles(clinicId, Set.of(),
+                NotificationKind.SUPPLIER_RETURN_REQUESTED, Map.of()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void notifyMembershipSkipsAnInactiveOrForeignRecipient() {
+        assertThat(notifications.notifyMembership(clinicId, suspendedAssistantMembership,
+                NotificationKind.DAILY_TASK_APPROVED, Map.of())).isZero();
+        assertThat(notifications.notifyMembership(clinicId, otherClinicMembership,
+                NotificationKind.DAILY_TASK_APPROVED, Map.of())).isZero();
+    }
+
+    @Test
+    void readsNeverLeakAnotherTenantsRows() {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+
+        assertThat(notifications.unreadCount(clinicId, otherClinicMembership)).isZero();
+        assertThat(notifications.recent(clinicId, otherClinicMembership, 20)).isEmpty();
+    }
+
+    @Test
+    void clinicArgumentMustMatchTheBoundTenant() {
+        assertThatThrownBy(() -> notifications.unreadCount(otherClinicId, otherClinicMembership))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No tenant bound matching clinic");
+    }
+
+    @Test
+    void everyCallFailsLoudlyWithoutATenantBound() {
+        TenantContext.clear();
+
+        assertThatThrownBy(() -> notifications.unreadCount(clinicId, ownerMembership))
+                .isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> notifications.notifyMembership(clinicId, ownerMembership,
+                NotificationKind.DAILY_TASK_APPROVED, Map.of()))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void aFailingCallerTransactionRollsTheNotificationBack() {
+        assertThatThrownBy(() -> transactionTemplate.execute(status -> {
+            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+            throw new IllegalStateException("boom");
+        })).isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+    }
+
+    @Test
+    void rowsCarryTheEnumLiteralAJsonPayloadAndNoReadStamp() throws Exception {
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.ACADEMY_SUBMISSION_REJECTED,
+                Map.of("reason", "صورة غير واضحة"));
+        TenantContext.clear();
+
+        try (Connection connection = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
+            DSLContext dsl = DSL.using(connection, SQLDialect.POSTGRES);
+            var row = dsl.select(NOTIFICATION.KIND, NOTIFICATION.PAYLOAD, NOTIFICATION.READ_AT)
+                    .from(NOTIFICATION)
+                    .where(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID.eq(ownerMembership))
+                    .fetchOne();
+            assertThat(row.get(NOTIFICATION.KIND)).isEqualTo("ACADEMY_SUBMISSION_REJECTED");
+            assertThat(row.get(NOTIFICATION.PAYLOAD).data()).contains("\"reason\"");
+            assertThat(row.get(NOTIFICATION.READ_AT)).isNull();
+        }
+    }
+
+    @Test
+    void createdAtIsServerDefaulted() {
+        OffsetDateTime before = OffsetDateTime.now().minusSeconds(1);
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+
+        Notification n = notifications.recent(clinicId, ownerMembership, 1).get(0);
+
+        assertThat(n.createdAt()).isAfterOrEqualTo(before);
+    }
+}

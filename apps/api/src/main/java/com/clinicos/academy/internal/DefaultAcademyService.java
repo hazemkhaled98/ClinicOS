@@ -37,6 +37,8 @@ import com.clinicos.academy.AcademyService.Submission;
 import com.clinicos.academy.AcademyService.TraineeUnit;
 import com.clinicos.academy.AcademyService.Unit;
 import com.clinicos.academy.AcademyService.UnitRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.AcademyAudience;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.SubmissionStatus;
@@ -53,10 +55,13 @@ public class DefaultAcademyService implements AcademyService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultAcademyService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultAcademyService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -227,6 +232,9 @@ public class DefaultAcademyService implements AcademyService {
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_BY, actor.membershipId())
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_AT, OffsetDateTime.now())
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).execute();
+            notificationService.notifyEmployee(clinicId, sub.getEmployeeId(),
+                    NotificationKind.ACADEMY_SUBMISSION_VERIFIED,
+                    Map.of("unit", unitTitle(sub.getUnitId())));
             return submission(dsl.selectFrom(ACADEMY_STEP_SUBMISSION)
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).fetchOne());
         });
@@ -248,9 +256,18 @@ public class DefaultAcademyService implements AcademyService {
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_BY, actor.membershipId())
                     .set(ACADEMY_STEP_SUBMISSION.VERIFIED_AT, OffsetDateTime.now())
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).execute();
+            notificationService.notifyEmployee(clinicId, sub.getEmployeeId(),
+                    NotificationKind.ACADEMY_SUBMISSION_REJECTED,
+                    Map.of("unit", unitTitle(sub.getUnitId()), "reason", reason == null ? "" : reason));
             return submission(dsl.selectFrom(ACADEMY_STEP_SUBMISSION)
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(submissionId)).fetchOne());
         });
+    }
+
+    private String unitTitle(UUID unitId) {
+        String title = dsl.select(ACADEMY_UNIT.TITLE).from(ACADEMY_UNIT)
+                .where(ACADEMY_UNIT.ID.eq(unitId)).fetchOne(ACADEMY_UNIT.TITLE);
+        return title == null ? "" : title;
     }
 
     @Override
