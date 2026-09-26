@@ -306,6 +306,20 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void recentRejectsANullPayload() {
+        transactionTemplate.executeWithoutResult(status -> dsl.insertInto(NOTIFICATION)
+                .set(NOTIFICATION.CLINIC_ID, clinicId)
+                .set(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID, ownerMembership)
+                .set(NOTIFICATION.KIND, NotificationKind.DAILY_TASK_APPROVED.literal())
+                .set(NOTIFICATION.PAYLOAD, JSONB.valueOf("null"))
+                .execute());
+
+        assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("تعذر عرض بيانات الإشعار");
+    }
+
+    @Test
     void createdAtIsServerDefaulted() {
         OffsetDateTime before = OffsetDateTime.now().minusSeconds(1);
         notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());

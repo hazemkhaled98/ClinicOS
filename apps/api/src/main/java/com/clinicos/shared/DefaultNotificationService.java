@@ -190,7 +190,11 @@ public class DefaultNotificationService implements NotificationService {
             return Map.of();
         }
         try {
-            return JSON.readValue(payload.data(), PAYLOAD_TYPE);
+            Map<String, String> parsed = JSON.readValue(payload.data(), PAYLOAD_TYPE);
+            if (parsed == null) {
+                throw new IllegalStateException("تعذر عرض بيانات الإشعار");
+            }
+            return parsed;
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("تعذر عرض بيانات الإشعار", e);
         }
