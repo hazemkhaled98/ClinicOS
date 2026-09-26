@@ -20,7 +20,7 @@
                 d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V5a2 2 0 10-4 0v.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
       </button>
-      <span th:replace="~{fragments/notifications :: count(0)}"></span>
+      <span th:replace="~{fragments/notifications :: countPoller(0)}"></span>
       <div id="notification-dropdown" x-show="open" x-cloak
            class="absolute z-50 mt-2 end-0 clinicos-card clinicos-card--popover overflow-hidden">
         <div id="notification-list"></div>

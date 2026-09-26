@@ -5,11 +5,16 @@
   تعذر عرض الإشعارات
 </div>
 
-<span th:fragment="count(unread)" id="notification-count"
-      hx-get="/notifications/badge" hx-target="this"
+<span th:fragment="countPoller(unread)" id="notification-count-poller"
+      hx-get="/notifications/badge" hx-target="#notification-count"
       hx-trigger="load, every 30s, notificationsChanged from:body"
-      hx-swap="outerHTML" class="absolute -top-0.5 -start-0.5 min-w-4 h-4 px-1 rounded-full bg-danger-600 text-white text-micro font-bold leading-4 text-center tabular-nums"
-      th:classappend="${unread > 0} ? '' : 'hidden'"
+      hx-swap="outerHTML">
+  <span th:replace="~{fragments/notifications :: count(${unread})}"></span>
+</span>
+
+<span th:fragment="count(unread)" id="notification-count"
+      class="absolute -top-0.5 -start-0.5 min-w-4 h-4 px-1 rounded-full bg-danger-600 text-white text-micro font-bold leading-4 text-center tabular-nums"
+      th:classappend="${unread > 0} ? 'notification-count--pulse' : 'hidden'"
       th:text="${unread > 99 ? '99+' : unread}">0</span>
 
 <div th:fragment="list(notifications, unread)" class="w-80 max-w-[calc(100vw-2rem)]">
