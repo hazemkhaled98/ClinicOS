@@ -28,6 +28,8 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.CategoryWeight;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettings;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidationException;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -35,6 +37,9 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DefaultClinicSettingsService settingsService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -120,6 +125,27 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(settings.workingDaysPerMonth()).isEqualTo(22);
         assertThat(settings.academyPassScore()).isEqualTo(65);
         assertThat(settings.volumeTarget()).isEqualByComparingTo("20000");
+    }
+
+    @Test
+    void updateDutyNotifiesOtherOwnersOnly() throws Exception {
+        TenantContext.set(clinicA);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (Connection connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
+
+        settingsService.updateDuty(clinicA, LocalTime.of(8, 30), LocalTime.of(16, 30),
+                20, 22, 65, actorA);
+
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.CLINIC_SETTINGS_CHANGED);
+        assertThat(notification.payload()).containsEntry("area", "الدوام")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actorA, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
     }
 
     @Test

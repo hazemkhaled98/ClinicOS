@@ -272,6 +272,15 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void inventoryChangeRequiresAnActionWhenWriting() {
+        assertThatThrownBy(() -> notifications.notifyMembership(clinicId, ownerMembership, ownerMembership,
+                NotificationKind.INVENTORY_CHANGE_REQUESTED,
+                Map.of("item", "قفازات", "changeKind", "unknown")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("بيانات الإشعار غير مكتملة");
+    }
+
+    @Test
     void notifyMembershipSkipsAnInactiveOrForeignRecipient() {
         assertThat(notifications.notifyMembership(clinicId, ownerMembership, suspendedAssistantMembership,
                 NotificationKind.DAILY_TASK_APPROVED, Map.of("task", "تعقيم"))).isZero();
@@ -347,7 +356,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 .execute());
 
         assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(MalformedNotificationDataException.class)
                 .hasMessage("نوع إشعار غير مدعوم");
     }
 
@@ -361,7 +370,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 .execute());
 
         assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(MalformedNotificationDataException.class)
                 .hasMessage("تعذر عرض بيانات الإشعار");
     }
 
@@ -375,7 +384,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 .execute());
 
         assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(MalformedNotificationDataException.class)
                 .hasMessage("تعذر عرض بيانات الإشعار");
     }
 
@@ -390,7 +399,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                     .execute());
 
             assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(MalformedNotificationDataException.class)
                     .hasMessage("بيانات الإشعار غير مكتملة");
 
             transactionTemplate.executeWithoutResult(status -> dsl.deleteFrom(NOTIFICATION).execute());
@@ -409,26 +418,42 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     private static Map<NotificationKind, Map<String, String>> invalidPayloads() {
-        return Map.of(
-                NotificationKind.DAILY_TASK_APPROVED, Map.of(),
-                NotificationKind.DAILY_TASK_REJECTED, Map.of("task", "تعقيم"),
-                NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of(),
-                NotificationKind.TASK_ASSIGNMENT_REJECTED, Map.of("task", "تعقيم"),
-                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of(),
-                NotificationKind.ACADEMY_SUBMISSION_REJECTED, Map.of("unit", "تعقيم"),
-                NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of(),
-                NotificationKind.SUPPLIER_RETURN_REQUESTED, Map.of());
+        return Map.ofEntries(
+                Map.entry(NotificationKind.DAILY_TASK_APPROVED, Map.of()),
+                Map.entry(NotificationKind.DAILY_TASK_REJECTED, Map.of("task", "تعقيم")),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of()),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_REJECTED, Map.of("task", "تعقيم")),
+                Map.entry(NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of()),
+                Map.entry(NotificationKind.ACADEMY_SUBMISSION_REJECTED, Map.of("unit", "تعقيم")),
+                Map.entry(NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.SUPPLIER_RETURN_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.DAILY_TASK_REVIEW_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.ACADEMY_PHOTO_SUBMITTED, Map.of()),
+                Map.entry(NotificationKind.PREP_CHECKLIST_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.PROCEDURE_CHANGE_REQUESTED, Map.of()),
+                Map.entry(NotificationKind.USER_ACCESS_CHANGED, Map.of()),
+                Map.entry(NotificationKind.EMPLOYEE_CHANGED, Map.of()),
+                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of()));
     }
 
     private static Map<NotificationKind, String> invalidPayloadJsons() {
-        return Map.of(
-                NotificationKind.DAILY_TASK_APPROVED, "{\"actor\":\"مدير\"}",
-                NotificationKind.DAILY_TASK_REJECTED, "{\"actor\":\"مدير\",\"task\":\"تعقيم\"}",
-                NotificationKind.TASK_ASSIGNMENT_APPROVED, "{\"actor\":\"مدير\"}",
-                NotificationKind.TASK_ASSIGNMENT_REJECTED, "{\"actor\":\"مدير\",\"task\":\"تعقيم\"}",
-                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, "{\"actor\":\"مدير\"}",
-                NotificationKind.ACADEMY_SUBMISSION_REJECTED, "{\"actor\":\"مدير\",\"unit\":\"تعقيم\"}",
-                NotificationKind.INVENTORY_CHANGE_REQUESTED, "{\"actor\":\"مدير\",\"item\":\"قفازات\"}",
-                NotificationKind.SUPPLIER_RETURN_REQUESTED, "{\"actor\":\"مدير\"}");
+        return Map.ofEntries(
+                Map.entry(NotificationKind.DAILY_TASK_APPROVED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.DAILY_TASK_REJECTED, "{\"actor\":\"مدير\",\"task\":\"تعقيم\"}"),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_APPROVED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_REJECTED, "{\"actor\":\"مدير\",\"task\":\"تعقيم\"}"),
+                Map.entry(NotificationKind.ACADEMY_SUBMISSION_VERIFIED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.ACADEMY_SUBMISSION_REJECTED, "{\"actor\":\"مدير\",\"unit\":\"تعقيم\"}"),
+                Map.entry(NotificationKind.INVENTORY_CHANGE_REQUESTED, "{\"actor\":\"مدير\",\"item\":\"قفازات\"}"),
+                Map.entry(NotificationKind.SUPPLIER_RETURN_REQUESTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.DAILY_TASK_REVIEW_REQUESTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.TASK_ASSIGNMENT_REQUESTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.ACADEMY_PHOTO_SUBMITTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.PREP_CHECKLIST_REQUESTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.PROCEDURE_CHANGE_REQUESTED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.USER_ACCESS_CHANGED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.EMPLOYEE_CHANGED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "{\"actor\":\"مدير\"}"));
     }
 }

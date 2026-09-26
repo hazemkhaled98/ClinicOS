@@ -106,6 +106,10 @@ public final class TestFixtures {
         return insertMembership(connection, clinicId, userId, "owner");
     }
 
+    public static UUID insertMembership(Connection connection, UUID clinicId, String roleCode) throws Exception {
+        return insertMembership(connection, clinicId, insertUser(connection, clinicId), roleCode);
+    }
+
     private static final Map<UUID, UUID> ACTOR_MEMBERSHIPS = new ConcurrentHashMap<>();
 
     /**

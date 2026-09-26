@@ -19,6 +19,8 @@ import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.GamificationService.BadgeThreshold;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
 import com.clinicos.clinicconfig.api.GamificationService.WeeklyGoal;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -26,6 +28,9 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DefaultGamificationService gamificationService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -67,6 +72,27 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(settings.showLevelRing()).isFalse();
         assertThat(settings.showLeaderboard()).isTrue();
+    }
+
+    @Test
+    void updateSettingsNotifiesOtherOwnersOnly() throws Exception {
+        TenantContext.set(clinicA);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (var connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
+
+        gamificationService.updateSettings(clinicA,
+                new GamificationSettings(false, false, false, false, true, false), actorA);
+
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.CLINIC_SETTINGS_CHANGED);
+        assertThat(notification.payload()).containsEntry("area", "إعدادات التحفيز")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actorA, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
     }
 
     @Test

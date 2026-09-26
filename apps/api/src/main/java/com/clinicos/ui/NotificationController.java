@@ -3,10 +3,13 @@ package com.clinicos.ui;
 import java.util.List;
 import java.util.UUID;
 
+import com.clinicos.shared.MalformedNotificationDataException;
 import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.NotificationService.Notification;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class NotificationController {
 
     private static final int RECENT_LIMIT = 20;
+    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
 
     private final NotificationService notificationService;
     private final NotificationPresenter presenter;
@@ -48,7 +52,8 @@ public class NotificationController {
             model.addAttribute("unread", notificationService.unreadCount(AdminAccess.clinicId(session),
                     AdminAccess.membershipId(session)));
             return "fragments/notifications :: list";
-        } catch (IllegalStateException e) {
+        } catch (MalformedNotificationDataException e) {
+            log.warn("list notifications failed", e);
             Toasts.error(model, "تعذر عرض الإشعارات");
             return "fragments/notifications :: error";
         }

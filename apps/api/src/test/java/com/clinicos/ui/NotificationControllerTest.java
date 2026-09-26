@@ -1,6 +1,7 @@
 package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,6 +19,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.shared.MalformedNotificationDataException;
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.NotificationService.Notification;
@@ -91,13 +93,21 @@ class NotificationControllerTest {
     @Test
     void listRendersAnArabicErrorFragmentForInvalidNotificationData() {
         when(notificationService.recent(CLINIC, MEMBERSHIP, 20))
-                .thenThrow(new IllegalStateException("بيانات الإشعار غير مكتملة"));
+                .thenThrow(new MalformedNotificationDataException("بيانات الإشعار غير مكتملة"));
 
         String view = controller.list(session(), model);
 
         assertThat(view).isEqualTo("fragments/notifications :: error");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تعذر عرض الإشعارات");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
+    }
+
+    @Test
+    void listPropagatesTenantInvariantFailures() {
+        IllegalStateException failure = new IllegalStateException("No tenant bound matching clinic");
+        when(notificationService.recent(CLINIC, MEMBERSHIP, 20)).thenThrow(failure);
+
+        assertThatThrownBy(() -> controller.list(session(), model)).isSameAs(failure);
     }
 
     @Test

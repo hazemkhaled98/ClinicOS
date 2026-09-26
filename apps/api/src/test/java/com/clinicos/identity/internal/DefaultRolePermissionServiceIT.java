@@ -20,6 +20,8 @@ import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.identity.api.RolePermissionService;
 import com.clinicos.identity.api.RolePermissionService.RolePermissionRow;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -27,6 +29,9 @@ class DefaultRolePermissionServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DefaultRolePermissionService rolePermissionService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -47,13 +52,22 @@ class DefaultRolePermissionServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void setThenListPermissions() throws Exception {
         TenantContext.set(clinicA);
-        rolePermissionService.setPermissions(clinicA, ownerMembership(clinicA), "manager", Set.of("emp", "quick"));
+        UUID actor = ownerMembership(clinicA);
+        UUID ownerRecipient = ownerMembership(clinicA);
+        UUID managerObserver = managerMembership(clinicA);
+        rolePermissionService.setPermissions(clinicA, actor, "manager", Set.of("emp", "quick"));
 
         List<RolePermissionRow> rows = rolePermissionService.listForClinic(clinicA);
 
         assertThat(rows).hasSize(2);
         assertThat(rows).extracting(RolePermissionRow::roleCode).containsOnly("manager");
         assertThat(rows).extracting(RolePermissionRow::permissionCode).containsExactlyInAnyOrder("emp", "quick");
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.USER_ACCESS_CHANGED);
+        assertThat(notification.payload()).containsEntry("user", "الدور manager")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actor, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
     }
 
     @Test

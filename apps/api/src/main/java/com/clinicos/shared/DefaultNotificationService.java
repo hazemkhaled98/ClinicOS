@@ -263,7 +263,7 @@ public class DefaultNotificationService implements NotificationService {
         NotificationKind kind = NotificationKind.fromLiteral(r.get(NOTIFICATION.KIND));
         Map<String, String> payload = parsePayload(r.get(NOTIFICATION.PAYLOAD));
         if (!kind.hasValidPayload(payload)) {
-            throw new IllegalStateException("بيانات الإشعار غير مكتملة");
+            throw new MalformedNotificationDataException("بيانات الإشعار غير مكتملة");
         }
         return new Notification(
                 r.get(NOTIFICATION.ID),
@@ -294,11 +294,11 @@ public class DefaultNotificationService implements NotificationService {
         try {
             Map<String, String> parsed = JSON.readValue(payload.data(), PAYLOAD_TYPE);
             if (parsed == null) {
-                throw new IllegalStateException("تعذر عرض بيانات الإشعار");
+                throw new MalformedNotificationDataException("تعذر عرض بيانات الإشعار");
             }
             return parsed;
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("تعذر عرض بيانات الإشعار", e);
+            throw new MalformedNotificationDataException("تعذر عرض بيانات الإشعار", e);
         }
     }
 }

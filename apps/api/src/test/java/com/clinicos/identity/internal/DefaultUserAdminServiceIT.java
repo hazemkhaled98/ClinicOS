@@ -20,6 +20,8 @@ import com.clinicos.TestFixtures;
 import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.identity.api.UserAdminService.UserValidationException;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -27,6 +29,9 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DefaultUserAdminService userAdminService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -262,15 +267,35 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void ownerCanAssignManagerRole() throws Exception {
         TenantContext.set(clinicA);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (var connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
         UserSummary actor = createUser(clinicA, "owner-actor");
         setRoleDirect(clinicA, actor.membershipId(), "owner");
         UserSummary target = createUser(clinicA, "promote-target");
+        notifications.markAllRead(clinicA, actor.membershipId());
 
         userAdminService.assignRole(clinicA, target.membershipId(), "manager", actor.membershipId());
 
         assertThat(userAdminService.list(clinicA))
                 .filteredOn(u -> u.id().equals(target.id())).singleElement()
                 .extracting(UserSummary::roleCode).isEqualTo("manager");
+        var ownerNotifications = notifications.recent(clinicA, ownerRecipient, 20).stream()
+                .filter(n -> n.kind() == NotificationKind.USER_ACCESS_CHANGED
+                        && target.username().equals(n.payload().get("user")))
+                .toList();
+        assertThat(ownerNotifications).hasSize(2);
+        assertThat(ownerNotifications).filteredOn(n -> "مستخدم".equals(n.payload().get("actor")))
+                .singleElement()
+                .satisfies(n -> assertThat(n.payload()).containsEntry("user", target.username()));
+        assertThat(notifications.recent(clinicA, actor.membershipId(), 20))
+                .noneMatch(n -> n.kind() == NotificationKind.USER_ACCESS_CHANGED
+                        && target.username().equals(n.payload().get("user"))
+                        && "مستخدم".equals(n.payload().get("actor")));
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
     }
 
     @Test

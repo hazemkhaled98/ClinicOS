@@ -27,6 +27,8 @@ import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.WorkCalendarService.Holiday;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -34,6 +36,9 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DefaultWorkCalendarService workCalendarService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -90,9 +95,15 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void addAndRemoveClinicWideHoliday() {
+    void addAndRemoveClinicWideHoliday() throws Exception {
         TenantContext.set(clinicA);
         LocalDate day = next(DayOfWeek.SATURDAY);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (Connection connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
 
         Holiday holiday = workCalendarService.addHoliday(clinicA,
                 new HolidayRequest(day, "عيد الفطر", null), actorA);
@@ -102,6 +113,12 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(workCalendarService.listHolidays(clinicA))
                 .extracting(Holiday::name).containsExactly("عيد الفطر");
         assertThat(workCalendarService.isWorkday(clinicA, day, null)).isFalse();
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.CLINIC_SETTINGS_CHANGED);
+        assertThat(notification.payload()).containsEntry("area", "الإجازات")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actorA, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
         assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA,
                 new HolidayRequest(day, "عيد الفطر مكرر", null), actorA))
                 .isInstanceOf(IllegalArgumentException.class)

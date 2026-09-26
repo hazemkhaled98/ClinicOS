@@ -54,7 +54,7 @@ public enum NotificationKind {
                 return kind;
             }
         }
-        throw new IllegalStateException("نوع إشعار غير مدعوم");
+        throw new MalformedNotificationDataException("نوع إشعار غير مدعوم");
     }
 
     private boolean isRejected() {
