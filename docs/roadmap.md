@@ -105,7 +105,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 7a–7d — UC-008 Inventory | done | PR #21 merged (see Phase 7). V25 cross-tenant guards on inventory child tables; `InventoryService` + `DefaultInventoryService`; `InventoryController` + all 19 views (foundation screens 7a, purchasing 7b, procedures/costing 7c, approvals + analytics 7d). Role scoping rides the Phase 2 permission model (BR-G25); BR-G26 approval queue, BR-G27 return-ceiling (V10 trigger surfaced as a user error), BR-G28 unit-cost freeze. `/pr-sentinel` + `/coverage-check` clean; manual testing S1–S14 green — three in-PR defects fixed: supplier save binding, zero-qty-line 500 on orders/returns, delete-approval mislabel. |
 | 8 — UC-009 Admin dashboard | done | Manual testing S1–S8 green (S7 A1 validated against a NULL volume target), coverage-check clean. PR #22. |
 | A — Backlog UI polish | done | Branch `feat/backlog-ui-polish`, no DDL. Dynamic clinic branding (`SessionKeys.CLINIC_NAME` + `LayoutModel.clinicName`, `عيادتي` replaced across authenticated templates), save-toast gaps closed, actionable empty states (`fragments/empty-state.html`) applied to inventory/academy screens. `mvn verify` green (302 tests) + `ModularityTests`/`CssHygieneTest`/`TemplateHygieneTest`. Fixed a production regression found via the IT suite: `EmployeeDayController`'s POST fragment responses (check-in/check-out/task-confirm/assignment-propose) were 500ing because `renderGrid` never populated `layout`, only the GET handler did. |
-| B — Backlog notification center | in progress | Branch `feat/backlog-notifications`. Backlog item #1 from `docs/backlog/feature-suggestions.md`. |
+| B — Backlog notification center | code merged, manual testing pending | PR #28 landed as `1773a0c`. Backlog item #1 from `docs/backlog/feature-suggestions.md`. `/manual-testing` is the remaining gate. |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -250,13 +250,13 @@ Backlog item #1 from `docs/backlog/feature-suggestions.md`. The `notification` t
 
 Recipients: task/assignment review and academy decisions notify the employee; pending inventory change requests and supplier returns notify active `owner`/`manager` memberships. Notification writes join the publisher's existing transaction and propagate failures (unlike `ActivityLogService`, which deliberately swallows them — a lost notification must not desync the audit trail).
 
-- [ ] V31 — `idx_notification_recipient_recent` on `(recipient_membership_id, created_at desc)`
-- [ ] `shared/NotificationKind` enum + `NotificationService` (`notifyMembership` / `notifyEmployee` / `notifyRoles`, `unreadCount`, `recent`, `markRead`, `markAllRead`) + `DefaultNotificationService`
-- [ ] `NotificationServiceIT` — recipient isolation, cross-tenant refusal, role fan-out, ordering, bounded `limit`, mark one/all
-- [ ] Publish from `DefaultDailyWorkService`, `DefaultTaskAssignmentService`, `DefaultInventoryService`, `DefaultPurchasingService`, `DefaultAcademyService`
-- [ ] `NotificationController` + `NotificationPresenter` + `fragments/notifications.html`, mounted in `fragments/topbar.html`
-- [ ] `NotificationControllerTest` + publisher assertions in the five existing ITs
-- [ ] `npm run build:css`, `mvn verify`, `/tenant-guard-check`, `/rtl-token-lint`, `/manual-testing`, `/pr-sentinel`
+- [x] V31 — `idx_notification_recipient_recent` on `(recipient_membership_id, created_at desc)`
+- [x] `shared/NotificationKind` enum + `NotificationService` (`notifyMembership` / `notifyEmployee` / `notifyRoles` / `notifyApprovers`, `unreadCount`, `recent`, `markRead`, `markAllRead`) + `DefaultNotificationService`
+- [x] `NotificationServiceIT` — recipient isolation, cross-tenant refusal, role fan-out, ordering, bounded `limit`, mark one/all
+- [x] Publish from `DefaultDailyWorkService`, `DefaultTaskAssignmentService`, `DefaultAcademyService` (→ employee) and `DefaultInventoryService`, `DefaultPurchasingService` (→ permission-aware approvers), plus owner routing from `DefaultEmployeeService`, `DefaultRolePermissionService`, `DefaultUserAdminService`, `DefaultClinicSettingsService`, `DefaultWorkCalendarService`, `DefaultGamificationService`
+- [x] `NotificationController` + `NotificationPresenter` + `fragments/notifications.html`, mounted in `fragments/topbar.html`
+- [x] `NotificationControllerTest`, `NotificationTemplateTest` + publisher assertions in the existing ITs
+- [ ] `npm run build:css`, `mvn verify`, `/tenant-guard-check`, `/rtl-token-lint`, `/manual-testing`, `/pr-sentinel` — `build:css`, `mvn test` (339), `/pr-sentinel` done; `/manual-testing` still outstanding, so the phase stays open.
 
 ### Phase 9 — Hardening and release
 
