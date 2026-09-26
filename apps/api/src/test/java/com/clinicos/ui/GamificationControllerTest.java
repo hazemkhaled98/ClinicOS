@@ -83,7 +83,7 @@ class GamificationControllerTest {
 
         controller.updateSettings(true, false, true, false, false, true, session, model);
 
-        verify(gamificationService).updateSettings(eq(CLINIC), any(GamificationSettings.class));
+        verify(gamificationService).updateSettings(eq(CLINIC), any(GamificationSettings.class), eq(MEMBERSHIP));
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.settings", "gamification_settings");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ إعدادات التحفيز");
     }
@@ -106,9 +106,9 @@ class GamificationControllerTest {
 
         controller.updateGoals(form, session, model);
 
-        verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
-        verify(gamificationService).updateGoal(CLINIC, 2, "مهارة2", 20);
-        verify(gamificationService).updateGoal(CLINIC, 3, "مهارة3", 30);
+        verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10, MEMBERSHIP);
+        verify(gamificationService).updateGoal(CLINIC, 2, "مهارة2", 20, MEMBERSHIP);
+        verify(gamificationService).updateGoal(CLINIC, 3, "مهارة3", 30, MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.goals", "weekly_goal");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الأهداف الأسبوعية");
     }
@@ -127,9 +127,9 @@ class GamificationControllerTest {
 
         controller.updateGoals(form, session, model);
 
-        verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10);
-        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(2), any(), anyInt());
-        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(3), any(), anyInt());
+        verify(gamificationService).updateGoal(CLINIC, 1, "مهارة1", 10, MEMBERSHIP);
+        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(2), any(), anyInt(), any());
+        verify(gamificationService, never()).updateGoal(eq(CLINIC), eq(3), any(), anyInt(), any());
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ الأهداف الأسبوعية");
     }
 
@@ -147,8 +147,8 @@ class GamificationControllerTest {
 
         controller.updateThresholds(form, session, model);
 
-        verify(gamificationService).updateThreshold(CLINIC, "شارة1", 5);
-        verify(gamificationService).updateThreshold(CLINIC, "شارة2", 15);
+        verify(gamificationService).updateThreshold(CLINIC, "شارة1", 5, MEMBERSHIP);
+        verify(gamificationService).updateThreshold(CLINIC, "شارة2", 15, MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "gamification.thresholds", "badge_threshold");
         assertThat(model.getAttribute("toastMessage")).isEqualTo("تم حفظ شروط الشارات");
     }
@@ -166,7 +166,7 @@ class GamificationControllerTest {
 
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("قيمة الهدف يجب أن تكون رقماً");
-        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt());
+        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt(), any());
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
@@ -183,7 +183,7 @@ class GamificationControllerTest {
 
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("لا يمكن حفظ أكثر من 3 أهداف");
-        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt());
+        verify(gamificationService, never()).updateGoal(any(), anyInt(), any(), anyInt(), any());
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
@@ -199,7 +199,7 @@ class GamificationControllerTest {
 
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("عدد المهام يجب أن يكون رقماً");
-        verify(gamificationService, never()).updateThreshold(any(), any(), anyInt());
+        verify(gamificationService, never()).updateThreshold(any(), any(), anyInt(), any());
         verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 

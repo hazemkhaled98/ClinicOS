@@ -88,7 +88,7 @@ class UserAdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "owner", UUID.randomUUID(), null);
-        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class), any(UUID.class))).thenReturn(created);
         when(employeeService.create(eq(CLINIC), any())).thenReturn(new Employee(UUID.randomUUID(), "أحمد",
                 null, null, null, null, false, null, null));
         when(userAdminService.list(CLINIC)).thenReturn(List.of(created));
@@ -114,7 +114,7 @@ class UserAdminControllerTest {
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("اسم المستخدم مطلوب");
-        verify(userAdminService, never()).create(any(), any());
+        verify(userAdminService, never()).create(any(), any(), any());
     }
 
     @Test
@@ -129,7 +129,7 @@ class UserAdminControllerTest {
         assertThat(view).isEqualTo("admin/users :: usersCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("صيغة البريد الإلكتروني غير صحيحة");
-        verify(userAdminService, never()).create(any(), any());
+        verify(userAdminService, never()).create(any(), any(), any());
     }
 
     @Test
@@ -246,7 +246,7 @@ class UserAdminControllerTest {
         UUID membershipId = UUID.randomUUID();
         UUID employeeId = UUID.randomUUID();
         UserSummary created = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", "a@b.com", "active", "receptionist", membershipId, null);
-        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class))).thenReturn(created);
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class), any(UUID.class))).thenReturn(created);
         Employee employee = new Employee(employeeId, "أحمد",
                 null, null, null, null, false, null, null);
         when(employeeService.create(eq(CLINIC), any())).thenReturn(employee);
@@ -256,7 +256,7 @@ class UserAdminControllerTest {
 
         assertThat(view).isEqualTo("admin/users :: usersCard");
         verify(employeeService).create(eq(CLINIC), any());
-        verify(userAdminService).linkEmployee(CLINIC, membershipId, employeeId);
+        verify(userAdminService).linkEmployee(CLINIC, membershipId, employeeId, MEMBERSHIP);
         verify(userAdminService).assignRole(CLINIC, membershipId, "receptionist", MEMBERSHIP);
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
@@ -265,7 +265,7 @@ class UserAdminControllerTest {
     void createUserValidationErrorsRenderAsToast() {
         HttpSession session = session();
         allowDashboard();
-        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class)))
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class), any(UUID.class)))
                 .thenThrow(new UserValidationException(
                         Map.of("email", "البريد الإلكتروني مستخدم بالفعل في هذه العيادة")));
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
@@ -283,7 +283,7 @@ class UserAdminControllerTest {
     void createUserDuplicateUsernameReportsError() {
         HttpSession session = session();
         allowDashboard();
-        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class)))
+        when(userAdminService.create(eq(CLINIC), any(UserCreateRequest.class), any(UUID.class)))
                 .thenThrow(new IllegalArgumentException("اسم المستخدم موجود مسبقاً"));
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());

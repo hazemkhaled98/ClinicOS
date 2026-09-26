@@ -7,6 +7,7 @@ import static org.jooq.impl.DSL.val;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,16 +16,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.identity.api.RolePermissionService;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 
 @Service
 public class DefaultRolePermissionService implements RolePermissionService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultRolePermissionService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultRolePermissionService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -72,6 +78,8 @@ public class DefaultRolePermissionService implements RolePermissionService {
                             .from(PERMISSION)
                             .where(PERMISSION.CODE.in(permissionCodes)))
                     .execute();
+            notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                    NotificationKind.USER_ACCESS_CHANGED, Map.of("user", "الدور " + roleCode));
         });
     }
 

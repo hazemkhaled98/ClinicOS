@@ -65,6 +65,8 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         try (var connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection, "Clinic Purch A", "purch-a-" + UUID.randomUUID());
             clinicB = TestFixtures.insertClinic(connection, "Clinic Purch B", "purch-b-" + UUID.randomUUID());
+            TestFixtures.seedRolePermissionDefaults(connection, clinicA);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicB);
             owner = actor(connection, clinicA, "owner");
             manager = actor(connection, clinicA, "manager");
             assistant = actor(connection, clinicA, "assistant");
@@ -151,7 +153,7 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
     void receiveWithoutInvoicePhotoSucceedsWhenClinicPolicyDisablesIt() {
         TenantContext.set(clinicA);
         order = placeOrder();
-        clinicSettingsService.updateInvoicePhotoRequired(clinicA, false);
+        clinicSettingsService.updateInvoicePhotoRequired(clinicA, false, owner.membershipId());
 
         var received = purchasingService.receive(clinicA, assistant, order,
                 List.of(new ReceiptLine(orderLineId(order, 0), new BigDecimal("7"), null, null)), null);
@@ -305,7 +307,7 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(updated.id()).isEqualTo(supplier);
         assertThat(purchasingService.suppliers(clinicA, false))
                 .anyMatch(s -> s.id().equals(supplier) && s.name().equals("الريادة المحدّثة"));
-        assertThatThrownBy(() -> purchasingService.saveSupplier(clinicA, manager, UUID.randomUUID(),
+        assertThatThrownBy(() -> purchasingService.saveSupplier(clinicA, manager, manager.membershipId(),
                 new SupplierRequest("مفقود", null, null, 1, new BigDecimal("1"), false)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("المورد غير موجود");

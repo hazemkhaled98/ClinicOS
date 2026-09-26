@@ -322,7 +322,8 @@ public class AdminController {
         EmployeeRequest request = toRequest(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
-                employeeService.update(AdminAccess.clinicId(session), employeeId, request);
+                employeeService.update(AdminAccess.clinicId(session), employeeId, request,
+                        AdminAccess.membershipId(session));
                 activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.update", "employee");
             } catch (EmployeeValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
@@ -361,7 +362,7 @@ public class AdminController {
             return "admin/employees :: employeesCard";
         }
         try {
-            employeeService.archive(AdminAccess.clinicId(session), employeeId);
+            employeeService.archive(AdminAccess.clinicId(session), employeeId, AdminAccess.membershipId(session));
             activityLogService.log(AdminAccess.clinicId(session), AdminAccess.membershipId(session), "employee.archive", "employee");
             boolean suspended = linked.map(user -> suspendLinkedUser(user, session)).orElse(true);
             if (!suspended) {

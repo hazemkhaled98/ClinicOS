@@ -164,7 +164,7 @@ public class DefaultInventoryService implements InventoryService {
                     .set(INVENTORY_CHANGE_REQUEST.REQUESTED_BY, actor.membershipId())
                     .set(INVENTORY_CHANGE_REQUEST.STATUS, ChangeRequestStatus.pending)
                     .execute();
-            notificationService.notifyRoles(clinicId, actor.membershipId(), NotificationService.APPROVER_ROLES,
+            notificationService.notifyApprovers(clinicId, actor.membershipId(), "approvals",
                     NotificationKind.INVENTORY_CHANGE_REQUESTED,
                     Map.of("item", requireItem(clinicId, itemId).getName(), "changeKind", kind.getLiteral()));
             return requireChangeRequest(clinicId, id);

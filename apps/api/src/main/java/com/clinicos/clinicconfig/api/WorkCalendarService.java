@@ -26,15 +26,15 @@ public interface WorkCalendarService {
 
     List<Holiday> listHolidays(UUID clinicId);
 
-    Holiday addHoliday(UUID clinicId, HolidayRequest request);
+    Holiday addHoliday(UUID clinicId, HolidayRequest request, UUID actorMembershipId);
 
-    void removeHoliday(UUID clinicId, UUID holidayId);
+    void removeHoliday(UUID clinicId, UUID holidayId, UUID actorMembershipId);
 
     /** Current working weekday mask as ISO day-of-week ints. */
     List<Integer> workingWeekdays(UUID clinicId);
 
     /** Replaces the weekday mask (validated 1..7, non-empty, no duplicates). */
-    void setWorkingWeekdays(UUID clinicId, List<Integer> weekdays);
+    void setWorkingWeekdays(UUID clinicId, List<Integer> weekdays, UUID actorMembershipId);
 
     record Holiday(UUID id, LocalDate date, String name, UUID employeeId, String employeeName) {
     }

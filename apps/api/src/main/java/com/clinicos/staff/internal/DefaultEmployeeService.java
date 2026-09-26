@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -16,6 +17,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.tables.records.EmployeeRecord;
 import com.clinicos.staff.api.EmployeeService;
 
@@ -24,10 +27,13 @@ public class DefaultEmployeeService implements EmployeeService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultEmployeeService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultEmployeeService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -96,7 +102,7 @@ public class DefaultEmployeeService implements EmployeeService {
     }
 
     @Override
-    public Employee update(UUID clinicId, UUID employeeId, EmployeeRequest request) {
+    public Employee update(UUID clinicId, UUID employeeId, EmployeeRequest request, UUID actorMembershipId) {
         validate(request);
         return transactionTemplate.execute(status -> {
             int updated = dsl.update(EMPLOYEE)
@@ -113,12 +119,14 @@ public class DefaultEmployeeService implements EmployeeService {
             if (updated == 0) {
                 throw new IllegalArgumentException("الموظف غير موجود");
             }
-            return findOrThrow(clinicId, employeeId);
+            Employee employee = findOrThrow(clinicId, employeeId);
+            notifyOwners(clinicId, actorMembershipId, employee.name());
+            return employee;
         });
     }
 
     @Override
-    public Employee archive(UUID clinicId, UUID employeeId) {
+    public Employee archive(UUID clinicId, UUID employeeId, UUID actorMembershipId) {
         return transactionTemplate.execute(status -> {
             int archived = dsl.update(EMPLOYEE)
                     .set(EMPLOYEE.ARCHIVED_AT, OffsetDateTime.now())
@@ -133,8 +141,15 @@ public class DefaultEmployeeService implements EmployeeService {
                     .set(MEMBERSHIP.EMPLOYEE_ID, (UUID) null)
                     .where(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
                     .execute();
-            return findOrThrow(clinicId, employeeId);
+            Employee employee = findOrThrow(clinicId, employeeId);
+            notifyOwners(clinicId, actorMembershipId, employee.name());
+            return employee;
         });
+    }
+
+    private void notifyOwners(UUID clinicId, UUID actorMembershipId, String name) {
+        notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                NotificationKind.EMPLOYEE_CHANGED, Map.of("employee", name));
     }
 
     private Employee findOrThrow(UUID clinicId, UUID employeeId) {

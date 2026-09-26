@@ -8,7 +8,7 @@ public interface UserAdminService {
 
     List<UserSummary> list(UUID clinicId);
 
-    UserSummary create(UUID clinicId, UserCreateRequest request);
+    UserSummary create(UUID clinicId, UserCreateRequest request, UUID actorMembershipId);
 
     void changePassword(UUID clinicId, UUID userId, String newPasswordHash, UUID actorMembershipId);
 
@@ -18,7 +18,7 @@ public interface UserAdminService {
 
     void assignRole(UUID clinicId, UUID membershipId, String roleCode, UUID actorMembershipId);
 
-    void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId);
+    void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId, UUID actorMembershipId);
 
     record UserSummary(
             UUID id,

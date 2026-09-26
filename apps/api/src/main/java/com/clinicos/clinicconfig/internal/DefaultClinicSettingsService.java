@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -21,6 +22,8 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.CategoryWeight;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettings;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidationException;
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 
 @Service
 public class DefaultClinicSettingsService implements ClinicSettingsService {
@@ -29,10 +32,13 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultClinicSettingsService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultClinicSettingsService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
 
     @Override
     public void updateDuty(UUID clinicId, LocalTime defaultShiftStart, LocalTime defaultShiftEnd,
-            int lateGraceMinutes, int workingDaysPerMonth, int academyPassScore) {
+            int lateGraceMinutes, int workingDaysPerMonth, int academyPassScore, UUID actorMembershipId) {
         Map<String, String> fieldErrors = new HashMap<>();
         if (defaultShiftStart == null || defaultShiftEnd == null) {
             fieldErrors.put("shift", "وقت بداية الدوام ووقت نهايته مطلوبان");
@@ -83,7 +89,7 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
             fieldErrors.put("academyPassScore", "درجة النجاح في الأكاديمية يجب أن تكون بين 0 و 100");
         }
         throwIfAny(fieldErrors);
-        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+        int updated = transactionTemplate.execute(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.DEFAULT_SHIFT_START, defaultShiftStart)
                 .set(CLINIC_SETTINGS.DEFAULT_SHIFT_END, defaultShiftEnd)
                 .set(CLINIC_SETTINGS.LATE_GRACE_MINUTES, lateGraceMinutes)
@@ -91,31 +97,40 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
                 .set(CLINIC_SETTINGS.ACADEMY_PASS_SCORE, academyPassScore)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
+        if (updated > 0) {
+            notifyOwners(clinicId, actorMembershipId, "الدوام");
+        }
     }
 
     @Override
-    public void updateVolumeTarget(UUID clinicId, BigDecimal volumeTarget) {
+    public void updateVolumeTarget(UUID clinicId, BigDecimal volumeTarget, UUID actorMembershipId) {
         Map<String, String> fieldErrors = new HashMap<>();
         if (volumeTarget == null || volumeTarget.signum() < 0) {
             fieldErrors.put("volumeTarget", "هدف الفواتير الشهري لا يمكن أن يكون سالباً");
         }
         throwIfAny(fieldErrors);
-        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+        int updated = transactionTemplate.execute(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.VOLUME_TARGET, volumeTarget)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
+        if (updated > 0) {
+            notifyOwners(clinicId, actorMembershipId, "هدف الفواتير");
+        }
     }
 
     @Override
-    public void updateInvoicePhotoRequired(UUID clinicId, boolean required) {
-        transactionTemplate.executeWithoutResult(status -> dsl.update(CLINIC_SETTINGS)
+    public void updateInvoicePhotoRequired(UUID clinicId, boolean required, UUID actorMembershipId) {
+        int updated = transactionTemplate.execute(status -> dsl.update(CLINIC_SETTINGS)
                 .set(CLINIC_SETTINGS.INVOICE_PHOTO_REQUIRED, required)
                 .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                 .execute());
+        if (updated > 0) {
+            notifyOwners(clinicId, actorMembershipId, "سياسة صور الفواتير");
+        }
     }
 
     @Override
-    public void updateWeights(UUID clinicId, List<CategoryWeight> weights) {
+    public void updateWeights(UUID clinicId, List<CategoryWeight> weights, UUID actorMembershipId) {
         Map<String, String> fieldErrors = new HashMap<>();
         BigDecimal sum = BigDecimal.ZERO;
         Map<Category, Boolean> seen = new HashMap<>();
@@ -154,10 +169,11 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
                         .execute();
             }
         });
+        notifyOwners(clinicId, actorMembershipId, "أوزان التقييم");
     }
 
     @Override
-    public void updateTiers(UUID clinicId, List<Tier> tiers) {
+    public void updateTiers(UUID clinicId, List<Tier> tiers, UUID actorMembershipId) {
         Map<String, String> fieldErrors = new HashMap<>();
         if (tiers == null || tiers.isEmpty()) {
             fieldErrors.put("tiers", "يجب وجود شريحة واحدة على الأقل");
@@ -199,6 +215,12 @@ public class DefaultClinicSettingsService implements ClinicSettingsService {
                         .execute();
             }
         });
+        notifyOwners(clinicId, actorMembershipId, "شرائح الحافز");
+    }
+
+    private void notifyOwners(UUID clinicId, UUID actorMembershipId, String area) {
+        notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of("area", area));
     }
 
     private static void throwIfAny(Map<String, String> fieldErrors) {

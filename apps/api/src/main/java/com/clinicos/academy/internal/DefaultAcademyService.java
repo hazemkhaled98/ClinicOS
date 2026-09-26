@@ -186,6 +186,8 @@ public class DefaultAcademyService implements AcademyService {
                     .set(ACADEMY_STEP_SUBMISSION.PHOTO_ID, photoId)
                     .set(ACADEMY_STEP_SUBMISSION.STATUS, SubmissionStatus.pending)
                     .execute();
+            notificationService.notifyApprovers(clinicId, actor.membershipId(), "acadVerify",
+                    NotificationKind.ACADEMY_PHOTO_SUBMITTED, Map.of("unit", unit.getTitle()));
             return submission(dsl.selectFrom(ACADEMY_STEP_SUBMISSION)
                     .where(ACADEMY_STEP_SUBMISSION.ID.eq(id)).fetchOne());
         });

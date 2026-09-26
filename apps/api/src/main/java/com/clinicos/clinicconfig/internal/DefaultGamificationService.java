@@ -5,6 +5,8 @@ import static com.clinicos.shared.jooq.tables.GamificationSettings.GAMIFICATION_
 import static com.clinicos.shared.jooq.tables.WeeklyGoal.WEEKLY_GOAL;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -15,16 +17,21 @@ import com.clinicos.clinicconfig.api.GamificationService;
 import com.clinicos.clinicconfig.api.GamificationService.BadgeThreshold;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
 import com.clinicos.clinicconfig.api.GamificationService.WeeklyGoal;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 
 @Service
 public class DefaultGamificationService implements GamificationService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultGamificationService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultGamificationService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -56,7 +63,7 @@ public class DefaultGamificationService implements GamificationService {
     }
 
     @Override
-    public void updateSettings(UUID clinicId, GamificationSettings settings) {
+    public void updateSettings(UUID clinicId, GamificationSettings settings, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status ->
                 dsl.insertInto(GAMIFICATION_SETTINGS)
                         .set(GAMIFICATION_SETTINGS.CLINIC_ID, clinicId)
@@ -70,6 +77,7 @@ public class DefaultGamificationService implements GamificationService {
                         .doUpdate()
                         .setNonKeyToExcluded()
                         .execute());
+        notifyOwners(clinicId, actorMembershipId, "إعدادات التحفيز");
     }
 
     @Override
@@ -82,7 +90,7 @@ public class DefaultGamificationService implements GamificationService {
     }
 
     @Override
-    public void updateGoal(UUID clinicId, int slot, String title, int target) {
+    public void updateGoal(UUID clinicId, int slot, String title, int target, UUID actorMembershipId) {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("اسم الهدف مطلوب");
         }
@@ -99,6 +107,7 @@ public class DefaultGamificationService implements GamificationService {
                         .doUpdate()
                         .setNonKeyToExcluded()
                         .execute());
+        notifyOwners(clinicId, actorMembershipId, "الأهداف الأسبوعية");
     }
 
     @Override
@@ -111,7 +120,7 @@ public class DefaultGamificationService implements GamificationService {
     }
 
     @Override
-    public void updateThreshold(UUID clinicId, String name, int threshold) {
+    public void updateThreshold(UUID clinicId, String name, int threshold, UUID actorMembershipId) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("اسم الشارة مطلوب");
         }
@@ -127,5 +136,11 @@ public class DefaultGamificationService implements GamificationService {
                         .doUpdate()
                         .setNonKeyToExcluded()
                         .execute());
+        notifyOwners(clinicId, actorMembershipId, "عتبات الشارات");
+    }
+
+    private void notifyOwners(UUID clinicId, UUID actorMembershipId, String area) {
+        notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of("area", area));
     }
 }

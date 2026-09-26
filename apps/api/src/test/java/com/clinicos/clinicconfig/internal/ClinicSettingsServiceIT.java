@@ -38,12 +38,16 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
 
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (Connection connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection);
             clinicB = TestFixtures.insertClinic(connection);
+            actorA = TestFixtures.actorMembership(connection, clinicA);
+            actorB = TestFixtures.actorMembership(connection, clinicB);
         }
     }
 
@@ -107,7 +111,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
     void updateDutyPersistsNewValues() {
         TenantContext.set(clinicA);
         settingsService.updateDuty(clinicA, LocalTime.of(8, 30), LocalTime.of(16, 30),
-                20, 22, 65);
+                20, 22, 65, actorA);
 
         ClinicSettings settings = settingsService.get(clinicA);
         assertThat(settings.defaultShiftStart()).isEqualTo(LocalTime.of(8, 30));
@@ -121,7 +125,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void updateVolumeTargetPersists() {
         TenantContext.set(clinicA);
-        settingsService.updateVolumeTarget(clinicA, new BigDecimal("30000"));
+        settingsService.updateVolumeTarget(clinicA, new BigDecimal("30000"), actorA);
 
         assertThat(settingsService.get(clinicA).volumeTarget()).isEqualByComparingTo("30000");
     }
@@ -131,7 +135,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
 
         assertThat(settingsService.get(clinicA).invoicePhotoRequired()).isTrue();
-        settingsService.updateInvoicePhotoRequired(clinicA, false);
+        settingsService.updateInvoicePhotoRequired(clinicA, false, actorA);
 
         assertThat(settingsService.get(clinicA).invoicePhotoRequired()).isFalse();
     }
@@ -142,7 +146,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         List<CategoryWeight> off = adjust(weightList(clinicA), Category.COMPLETION, "10");
 
         ClinicSettingsValidationException exception = assertThrows(ClinicSettingsValidationException.class,
-                () -> settingsService.updateWeights(clinicA, off));
+                () -> settingsService.updateWeights(clinicA, off, actorA));
 
         assertThat(exception.fieldErrors()).containsKey("weights");
         assertThat(weightSum(settingsService.get(clinicA))).isEqualByComparingTo("100");
@@ -154,7 +158,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         List<CategoryWeight> missingOne = weightList(clinicA).subList(0, 5);
 
         ClinicSettingsValidationException exception = assertThrows(ClinicSettingsValidationException.class,
-                () -> settingsService.updateWeights(clinicA, missingOne));
+                () -> settingsService.updateWeights(clinicA, missingOne, actorA));
 
         assertThat(exception.fieldErrors()).containsKey("weights");
     }
@@ -165,7 +169,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         List<CategoryWeight> changed = adjust(weightList(clinicA), Category.COMPLETION, "20");
         changed.set(1, new CategoryWeight(Category.FANNI, new BigDecimal("16")));
 
-        settingsService.updateWeights(clinicA, changed);
+        settingsService.updateWeights(clinicA, changed, actorA);
 
         assertThat(weightMap(settingsService.get(clinicA)))
                 .containsEntry(Category.COMPLETION, w("20"))
@@ -177,7 +181,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         settingsService.updateTiers(clinicA, List.of(
                 new Tier("ممتاز", new BigDecimal("95"), new BigDecimal("100")),
-                new Tier("جيد", new BigDecimal("70"), new BigDecimal("30"))));
+                new Tier("جيد", new BigDecimal("70"), new BigDecimal("30"))), actorA);
 
         assertThat(settingsService.get(clinicA).tiers())
                 .extracting(Tier::name, tier -> tier.minScore().stripTrailingZeros())
@@ -191,21 +195,21 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         assertThrows(ClinicSettingsValidationException.class,
                 () -> settingsService.updateTiers(clinicA, List.of(
-                        new Tier("", new BigDecimal("80"), new BigDecimal("60")))));
+                        new Tier("", new BigDecimal("80"), new BigDecimal("60"))), actorA));
         assertThrows(ClinicSettingsValidationException.class,
                 () -> settingsService.updateTiers(clinicA, List.of(
                         new Tier("جيد", new BigDecimal("80"), new BigDecimal("60")),
-                        new Tier("جيد", new BigDecimal("60"), new BigDecimal("30")))));
+                        new Tier("جيد", new BigDecimal("60"), new BigDecimal("30"))), actorA));
         assertThrows(ClinicSettingsValidationException.class,
                 () -> settingsService.updateTiers(clinicA, List.of(
-                        new Tier("جيد", new BigDecimal("80"), new BigDecimal("120")))));
+                        new Tier("جيد", new BigDecimal("80"), new BigDecimal("120"))), actorA));
     }
 
     @Test
     void updateDutyRejectsInvertedShift() {
         TenantContext.set(clinicA);
         assertThatThrownBy(() -> settingsService.updateDuty(clinicA,
-                LocalTime.of(17, 0), LocalTime.of(9, 0), 15, 26, 70))
+                LocalTime.of(17, 0), LocalTime.of(9, 0), 15, 26, 70, actorA))
                 .isInstanceOf(ClinicSettingsValidationException.class)
                 .extracting(e -> ((ClinicSettingsValidationException) e).fieldErrors())
                 .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.MAP)
@@ -218,7 +222,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
 
         List<CategoryWeight> changed = adjust(weightList(clinicA), Category.VOLUME, "20");
         changed = adjust(changed, Category.ATTENDANCE, "10");
-        settingsService.updateWeights(clinicA, changed);
+        settingsService.updateWeights(clinicA, changed, actorA);
 
         assertThat(weightMap(settingsService.get(clinicA)))
                 .containsEntry(Category.VOLUME, w("20"))
@@ -240,7 +244,7 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
 
         // updateDuty for the hidden clinic changes nothing, and the whole
         // configuration of clinic B stays invisible.
-        settingsService.updateDuty(clinicB, LocalTime.of(7, 0), LocalTime.of(15, 0), 5, 20, 80);
+        settingsService.updateDuty(clinicB, LocalTime.of(7, 0), LocalTime.of(15, 0), 5, 20, 80, actorB);
 
         assertThatThrownBy(() -> settingsService.get(clinicB))
                 .isInstanceOf(IllegalArgumentException.class)

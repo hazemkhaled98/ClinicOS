@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.tables.records.ClinicHolidayRecord;
 
 @Service
@@ -24,10 +27,13 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultWorkCalendarService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultWorkCalendarService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -62,7 +68,7 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
     }
 
     @Override
-    public Holiday addHoliday(UUID clinicId, HolidayRequest request) {
+    public Holiday addHoliday(UUID clinicId, HolidayRequest request, UUID actorMembershipId) {
         if (request.date() == null) {
             throw new IllegalArgumentException("تاريخ الإجازة مطلوب");
         }
@@ -85,12 +91,13 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
                     .set(CLINIC_HOLIDAY.NAME, request.name().trim())
                     .set(CLINIC_HOLIDAY.EMPLOYEE_ID, request.employeeId())
                     .execute();
+            notifyOwners(clinicId, actorMembershipId, "الإجازات");
             return new Holiday(id, request.date(), request.name().trim(), request.employeeId(), null);
         });
     }
 
     @Override
-    public void removeHoliday(UUID clinicId, UUID holidayId) {
+    public void removeHoliday(UUID clinicId, UUID holidayId, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status -> {
             int removed = dsl.deleteFrom(CLINIC_HOLIDAY)
                     .where(CLINIC_HOLIDAY.CLINIC_ID.eq(clinicId))
@@ -100,6 +107,7 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
                 throw new IllegalArgumentException("لا يوجد يوم إجازة بهذا المعرف");
             }
         });
+        notifyOwners(clinicId, actorMembershipId, "الإجازات");
     }
 
     @Override
@@ -108,13 +116,21 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
     }
 
     @Override
-    public void setWorkingWeekdays(UUID clinicId, List<Integer> weekdays) {
+    public void setWorkingWeekdays(UUID clinicId, List<Integer> weekdays, UUID actorMembershipId) {
         validateWeekdays(weekdays);
-        transactionTemplate.executeWithoutResult(status ->
+        int updated = transactionTemplate.execute(status ->
                 dsl.update(CLINIC_SETTINGS)
                         .set(CLINIC_SETTINGS.WORKING_WEEKDAYS, toShorts(weekdays))
                         .where(CLINIC_SETTINGS.CLINIC_ID.eq(clinicId))
                         .execute());
+        if (updated > 0) {
+            notifyOwners(clinicId, actorMembershipId, "أيام العمل");
+        }
+    }
+
+    private void notifyOwners(UUID clinicId, UUID actorMembershipId, String area) {
+        notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of("area", area));
     }
 
     private boolean isWorkdayTx(UUID clinicId, LocalDate date, UUID employeeId, Short[] weekdays) {

@@ -38,12 +38,16 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
 
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (Connection connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection);
             clinicB = TestFixtures.insertClinic(connection);
+            actorA = TestFixtures.actorMembership(connection, clinicA);
+            actorB = TestFixtures.actorMembership(connection, clinicB);
         }
     }
 
@@ -78,7 +82,7 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
                 request("محمود", "4000", null, null, null, false));
 
         employeeService.update(clinicA, created.id(),
-                request("محمود سمير", "5200", "2000", null, null, false));
+                request("محمود سمير", "5200", "2000", null, null, false), actorA);
 
         Employee updated = employeeService.list(clinicA).get(0);
         assertThat(updated.name()).isEqualTo("محمود سمير");
@@ -93,7 +97,7 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
                 request("محمود", "5000", null, LocalTime.of(9, 0), LocalTime.of(17, 0), true));
 
         employeeService.update(clinicA, created.id(),
-                request("محمود", "5000", null, null, null, false));
+                request("محمود", "5000", null, null, null, false), actorA);
 
         Employee updated = employeeService.list(clinicA).get(0);
         assertThat(updated.customShift()).isFalse();
@@ -107,10 +111,10 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
         Employee created = employeeService.create(clinicA,
                 request("محمود", "5000", null, null, null, false));
 
-        employeeService.archive(clinicA, created.id());
+        employeeService.archive(clinicA, created.id(), actorA);
 
         assertThat(employeeService.list(clinicA)).isEmpty();
-        assertThatThrownBy(() -> employeeService.archive(clinicA, created.id()))
+        assertThatThrownBy(() -> employeeService.archive(clinicA, created.id(), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("الموظف غير موجود");
     }
@@ -131,7 +135,7 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
                     .execute();
         }
 
-        employeeService.archive(clinicA, created.id());
+        employeeService.archive(clinicA, created.id(), actorA);
 
         try (Connection connection = superuser()) {
             UUID linkedEmployeeId = DSL.using(connection, SQLDialect.POSTGRES)
@@ -196,7 +200,7 @@ class DefaultEmployeeServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThat(employeeService.list(clinicA)).isEmpty();
         assertThatThrownBy(() -> employeeService.update(clinicA, otherClinicEmployee,
-                request("محمود", null, null, null, null, false)))
+                request("محمود", null, null, null, null, false), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("الموظف غير موجود");
     }

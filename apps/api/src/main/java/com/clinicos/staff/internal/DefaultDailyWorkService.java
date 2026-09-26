@@ -23,6 +23,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.enums.TaskReviewStatus;
@@ -231,7 +232,21 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .set(DAILY_TASK_COMPLETION.REVIEWED_BY, (UUID) null)
                     .set(DAILY_TASK_COMPLETION.REVIEWED_AT, (OffsetDateTime) null)
                     .execute();
+            UUID actorMembership = membershipOfEmployee(clinicId, employeeId);
+            if (actorMembership != null) {
+                notificationService.notifyApprovers(clinicId, actorMembership, "quick",
+                        NotificationKind.DAILY_TASK_REVIEW_REQUESTED, Map.of("task", task.getName()));
+            }
         });
+    }
+
+    private UUID membershipOfEmployee(UUID clinicId, UUID employeeId) {
+        return dsl.select(MEMBERSHIP.ID)
+                .from(MEMBERSHIP)
+                .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                .fetchOne(MEMBERSHIP.ID);
     }
 
     @Override

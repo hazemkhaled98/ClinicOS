@@ -16,7 +16,9 @@ import static org.jooq.impl.DSL.val;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -102,6 +104,24 @@ public final class TestFixtures {
 
     public static UUID insertMembership(Connection connection, UUID clinicId, UUID userId) throws Exception {
         return insertMembership(connection, clinicId, userId, "owner");
+    }
+
+    private static final Map<UUID, UUID> ACTOR_MEMBERSHIPS = new ConcurrentHashMap<>();
+
+    /**
+     * An active owner membership for {@code clinicId}, created once per clinic and
+     * cached for the rest of the JVM. Notification producers resolve the actor's
+     * display name, so a test that exercises one must pass a real membership id
+     * rather than a random one.
+     */
+    public static UUID actorMembership(Connection connection, UUID clinicId) {
+        return ACTOR_MEMBERSHIPS.computeIfAbsent(clinicId, id -> {
+            try {
+                return insertMembership(connection, id, insertUser(connection, id));
+            } catch (Exception e) {
+                throw new IllegalStateException("could not seed actor membership for " + id, e);
+            }
+        });
     }
 
     public static UUID lookupUserId(Connection connection, UUID clinicId, String username) {

@@ -1,5 +1,6 @@
 package com.clinicos.staff.internal;
 
+import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static com.clinicos.shared.jooq.tables.TaskAssignment.TASK_ASSIGNMENT;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.AssignmentProposer;
 import com.clinicos.shared.jooq.enums.AssignmentStatus;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.tables.records.TaskAssignmentRecord;
 import com.clinicos.staff.api.TaskAssignmentService;
 import com.clinicos.staff.api.TaskAssignmentService.Assignment;
@@ -150,7 +152,7 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
                 throw new IllegalArgumentException("الموظف مطلوب");
             }
             LocalDate dueDate = form.dueDate() != null ? form.dueDate() : LocalDate.now();
-            return dsl.insertInto(TASK_ASSIGNMENT,
+            TaskAssignmentRecord inserted = dsl.insertInto(TASK_ASSIGNMENT,
                     TASK_ASSIGNMENT.CLINIC_ID,
                     TASK_ASSIGNMENT.EMPLOYEE_ID,
                     TASK_ASSIGNMENT.NAME,
@@ -159,8 +161,26 @@ public class DefaultTaskAssignmentService implements TaskAssignmentService {
                     .values(clinicId, form.employeeId(), name.strip(),
                             toDbProposer(proposer), dueDate)
                     .returning(TASK_ASSIGNMENT.fields())
-                    .fetchOne(this::toAssignment);
+                    .fetchOne();
+            if (proposer == Proposer.SELF) {
+                UUID actorMembership = membershipOfEmployee(clinicId, proposerEmployeeId);
+                if (actorMembership != null) {
+                    notificationService.notifyApprovers(clinicId, actorMembership, "quick",
+                            NotificationKind.TASK_ASSIGNMENT_REQUESTED,
+                            Map.of("task", inserted.getName()));
+                }
+            }
+            return toAssignment(inserted);
         });
+    }
+
+    private UUID membershipOfEmployee(UUID clinicId, UUID employeeId) {
+        return dsl.select(MEMBERSHIP.ID)
+                .from(MEMBERSHIP)
+                .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                .fetchOne(MEMBERSHIP.ID);
     }
 
     private Assignment toAssignment(TaskAssignmentRecord r) {
