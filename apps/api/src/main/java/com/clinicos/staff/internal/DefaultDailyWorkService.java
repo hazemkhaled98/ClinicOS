@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -20,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
+import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.TaskDimension;
 import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.enums.TaskReviewStatus;
@@ -35,12 +39,14 @@ public class DefaultDailyWorkService implements DailyWorkService {
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
     private final SelfCheckService selfCheckService;
+    private final NotificationService notificationService;
 
     public DefaultDailyWorkService(DSLContext dsl, TransactionTemplate transactionTemplate,
-            SelfCheckService selfCheckService) {
+            SelfCheckService selfCheckService, NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
         this.selfCheckService = selfCheckService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -134,6 +140,8 @@ public class DefaultDailyWorkService implements DailyWorkService {
             if (updated == 0) {
                 throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
             }
+            notificationService.notifyEmployee(clinicId, reviewedByMembershipId, employeeOfRecord(clinicId, dailyRecordId),
+                    NotificationKind.DAILY_TASK_APPROVED, Map.of("task", taskName(taskDefinitionId)));
         });
     }
 
@@ -143,10 +151,11 @@ public class DefaultDailyWorkService implements DailyWorkService {
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("سبب الرفض مطلوب");
         }
+        String stripped = reason.strip();
         transactionTemplate.executeWithoutResult(status -> {
             int updated = dsl.update(DAILY_TASK_COMPLETION)
                     .set(DAILY_TASK_COMPLETION.REVIEW_STATUS, TaskReviewStatus.rejected)
-                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, reason.strip())
+                    .set(DAILY_TASK_COMPLETION.REVIEW_REASON, stripped)
                     .set(DAILY_TASK_COMPLETION.REVIEWED_BY, reviewedByMembershipId)
                     .set(DAILY_TASK_COMPLETION.REVIEWED_AT, OffsetDateTime.now())
                     .where(DAILY_TASK_COMPLETION.DAILY_RECORD_ID.eq(dailyRecordId))
@@ -156,7 +165,29 @@ public class DefaultDailyWorkService implements DailyWorkService {
             if (updated == 0) {
                 throw new IllegalArgumentException("المهمة غير مكتملة أو غير موجودة");
             }
+            notificationService.notifyEmployee(clinicId, reviewedByMembershipId, employeeOfRecord(clinicId, dailyRecordId),
+                    NotificationKind.DAILY_TASK_REJECTED,
+                    Map.of("task", taskName(taskDefinitionId), "reason", stripped));
         });
+    }
+
+    private UUID employeeOfRecord(UUID clinicId, UUID dailyRecordId) {
+        UUID employeeId = dsl.select(DAILY_RECORD.EMPLOYEE_ID)
+                .from(DAILY_RECORD)
+                .where(DAILY_RECORD.ID.eq(dailyRecordId))
+                .and(DAILY_RECORD.CLINIC_ID.eq(clinicId))
+                .fetchOne(DAILY_RECORD.EMPLOYEE_ID);
+        if (employeeId == null) {
+            throw new IllegalArgumentException("سجل العمل اليومي غير موجود");
+        }
+        return employeeId;
+    }
+
+    private String taskName(UUID taskDefinitionId) {
+        return dsl.select(TASK_DEFINITION.NAME)
+                .from(TASK_DEFINITION)
+                .where(TASK_DEFINITION.ID.eq(taskDefinitionId))
+                .fetchOne(TASK_DEFINITION.NAME);
     }
 
     @Override
@@ -201,7 +232,21 @@ public class DefaultDailyWorkService implements DailyWorkService {
                     .set(DAILY_TASK_COMPLETION.REVIEWED_BY, (UUID) null)
                     .set(DAILY_TASK_COMPLETION.REVIEWED_AT, (OffsetDateTime) null)
                     .execute();
+            UUID actorMembership = membershipOfEmployee(clinicId, employeeId);
+            if (actorMembership != null) {
+                notificationService.notifyApprovers(clinicId, actorMembership, "quick",
+                        NotificationKind.DAILY_TASK_REVIEW_REQUESTED, Map.of("task", task.getName()));
+            }
         });
+    }
+
+    private UUID membershipOfEmployee(UUID clinicId, UUID employeeId) {
+        return dsl.select(MEMBERSHIP.ID)
+                .from(MEMBERSHIP)
+                .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                .fetchOne(MEMBERSHIP.ID);
     }
 
     @Override

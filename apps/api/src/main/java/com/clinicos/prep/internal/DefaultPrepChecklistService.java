@@ -14,6 +14,7 @@ import static com.clinicos.shared.jooq.tables.Role.ROLE;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.jooq.DSLContext;
@@ -29,6 +30,8 @@ import com.clinicos.prep.PrepChecklistService.Run;
 import com.clinicos.prep.PrepChecklistService.Section;
 import com.clinicos.prep.PrepChecklistService.SectionRequest;
 import com.clinicos.prep.PrepChecklistService.Template;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.ChecklistStatus;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.tables.records.PrepChecklistRecord;
@@ -38,10 +41,13 @@ import com.clinicos.shared.jooq.tables.records.PrepRunRecord;
 public class DefaultPrepChecklistService implements PrepChecklistService {
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultPrepChecklistService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultPrepChecklistService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -86,14 +92,28 @@ public class DefaultPrepChecklistService implements PrepChecklistService {
                             .where(PREP_TEMPLATE_ITEM.SECTION_ID.eq(section.getId()))
                             .orderBy(PREP_TEMPLATE_ITEM.DISPLAY_ORDER.asc())
                             .fetch(item -> new ItemRequest(item.getName())))));
-            return saveInside(clinicId, null, request);
+            var imported = saveInside(clinicId, null, request);
+            notifyApprovalPending(clinicId, actor, imported.name());
+            return imported;
         });
     }
 
     @Override
     public Checklist save(UUID clinicId, Actor actor, UUID checklistId, ChecklistRequest request) {
         PrepChecklistService.validate(request);
-        return transactionTemplate.execute(status -> { requireEmployee(clinicId, actor); return saveInside(clinicId, checklistId, request); });
+        return transactionTemplate.execute(status -> {
+            requireEmployee(clinicId, actor);
+            Checklist saved = saveInside(clinicId, checklistId, request);
+            if (checklistId == null) {
+                notifyApprovalPending(clinicId, actor, saved.name());
+            }
+            return saved;
+        });
+    }
+
+    private void notifyApprovalPending(UUID clinicId, Actor actor, String name) {
+        notificationService.notifyApprovers(clinicId, actor.membershipId(), null,
+                NotificationKind.PREP_CHECKLIST_REQUESTED, Map.of("checklist", name));
     }
 
     @Override

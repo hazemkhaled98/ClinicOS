@@ -63,7 +63,8 @@ public class GamificationController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         gamificationService.updateSettings(clinicId, new GamificationSettings(
-                showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward));
+                showLevelRing, showStreaks, showBadges, showWeeklyGoals, showLeaderboard, showReward),
+                AdminAccess.membershipId(session));
         activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.settings", "gamification_settings");
         Toasts.success(model, "تم حفظ إعدادات التحفيز");
         renderPage(model, clinicId);
@@ -90,7 +91,8 @@ public class GamificationController {
                     if (row.title == null || row.title.isBlank()) {
                         continue;
                     }
-                    gamificationService.updateGoal(clinicId, i + 1, row.title.trim(), parsedTargets[i]);
+                    gamificationService.updateGoal(clinicId, i + 1, row.title.trim(), parsedTargets[i],
+                            AdminAccess.membershipId(session));
                 }
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.goals", "weekly_goal");
             } catch (IllegalArgumentException e) {
@@ -115,7 +117,8 @@ public class GamificationController {
         if (errors.isEmpty()) {
             try {
                 for (int i = 0; i < rows.size(); i++) {
-                    gamificationService.updateThreshold(clinicId, rows.get(i).name, parsedThresholds[i]);
+                    gamificationService.updateThreshold(clinicId, rows.get(i).name, parsedThresholds[i],
+                            AdminAccess.membershipId(session));
                 }
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "gamification.thresholds", "badge_threshold");
             } catch (IllegalArgumentException e) {

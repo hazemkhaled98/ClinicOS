@@ -19,6 +19,8 @@ import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.GamificationService.BadgeThreshold;
 import com.clinicos.clinicconfig.api.GamificationService.GamificationSettings;
 import com.clinicos.clinicconfig.api.GamificationService.WeeklyGoal;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -27,14 +29,21 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     @Autowired
     private DefaultGamificationService gamificationService;
 
+    @Autowired
+    private NotificationService notifications;
+
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (var connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection, "Clinic A", "clinic-a-" + UUID.randomUUID());
             clinicB = TestFixtures.insertClinic(connection, "Clinic B", "clinic-b-" + UUID.randomUUID());
+            actorA = TestFixtures.actorMembership(connection, clinicA);
+            actorB = TestFixtures.actorMembership(connection, clinicB);
         }
     }
 
@@ -57,7 +66,7 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     void updateThenGetReturnsSaved() {
         TenantContext.set(clinicA);
         gamificationService.updateSettings(clinicA,
-                new GamificationSettings(false, false, false, false, true, false));
+                new GamificationSettings(false, false, false, false, true, false), actorA);
 
         GamificationSettings settings = gamificationService.get(clinicA);
 
@@ -66,13 +75,34 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void updateSettingsNotifiesOtherOwnersOnly() throws Exception {
+        TenantContext.set(clinicA);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (var connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
+
+        gamificationService.updateSettings(clinicA,
+                new GamificationSettings(false, false, false, false, true, false), actorA);
+
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.CLINIC_SETTINGS_CHANGED);
+        assertThat(notification.payload()).containsEntry("area", "إعدادات التحفيز")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actorA, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
+    }
+
+    @Test
     void settingsArePerClinic() {
         TenantContext.set(clinicA);
         gamificationService.updateSettings(clinicA,
-                new GamificationSettings(true, false, false, false, false, false));
+                new GamificationSettings(true, false, false, false, false, false), actorA);
         TenantContext.set(clinicB);
         gamificationService.updateSettings(clinicB,
-                new GamificationSettings(false, true, false, false, false, false));
+                new GamificationSettings(false, true, false, false, false, false), actorB);
 
         TenantContext.set(clinicA);
         GamificationSettings a = gamificationService.get(clinicA);
@@ -88,8 +118,8 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void updateGoalThenList() {
         TenantContext.set(clinicA);
-        gamificationService.updateGoal(clinicA, 1, "مهارة التبسم", 10);
-        gamificationService.updateGoal(clinicA, 2, "ال干净", 20);
+        gamificationService.updateGoal(clinicA, 1, "مهارة التبسم", 10, actorA);
+        gamificationService.updateGoal(clinicA, 2, "ال干净", 20, actorA);
 
         List<WeeklyGoal> goals = gamificationService.getGoals(clinicA);
 
@@ -102,8 +132,8 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void updateGoalUpserts() {
         TenantContext.set(clinicA);
-        gamificationService.updateGoal(clinicA, 1, "أول", 5);
-        gamificationService.updateGoal(clinicA, 1, "جديد", 15);
+        gamificationService.updateGoal(clinicA, 1, "أول", 5, actorA);
+        gamificationService.updateGoal(clinicA, 1, "جديد", 15, actorA);
 
         List<WeeklyGoal> goals = gamificationService.getGoals(clinicA);
 
@@ -115,8 +145,8 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void updateThresholdThenList() {
         TenantContext.set(clinicA);
-        gamificationService.updateThreshold(clinicA, "المهام اليومية", 10);
-        gamificationService.updateThreshold(clinicA, "الإنجازات", 20);
+        gamificationService.updateThreshold(clinicA, "المهام اليومية", 10, actorA);
+        gamificationService.updateThreshold(clinicA, "الإنجازات", 20, actorA);
 
         List<BadgeThreshold> thresholds = gamificationService.getThresholds(clinicA);
 
@@ -128,8 +158,8 @@ class DefaultGamificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void updateThresholdUpserts() {
         TenantContext.set(clinicA);
-        gamificationService.updateThreshold(clinicA, "شارة", 5);
-        gamificationService.updateThreshold(clinicA, "شارة", 25);
+        gamificationService.updateThreshold(clinicA, "شارة", 5, actorA);
+        gamificationService.updateThreshold(clinicA, "شارة", 25, actorA);
 
         List<BadgeThreshold> thresholds = gamificationService.getThresholds(clinicA);
 

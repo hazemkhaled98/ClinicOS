@@ -7,15 +7,15 @@ public interface GamificationService {
 
     GamificationSettings get(UUID clinicId);
 
-    void updateSettings(UUID clinicId, GamificationSettings settings);
+    void updateSettings(UUID clinicId, GamificationSettings settings, UUID actorMembershipId);
 
     List<WeeklyGoal> getGoals(UUID clinicId);
 
-    void updateGoal(UUID clinicId, int slot, String title, int target);
+    void updateGoal(UUID clinicId, int slot, String title, int target, UUID actorMembershipId);
 
     List<BadgeThreshold> getThresholds(UUID clinicId);
 
-    void updateThreshold(UUID clinicId, String name, int threshold);
+    void updateThreshold(UUID clinicId, String name, int threshold, UUID actorMembershipId);
 
     record GamificationSettings(
             boolean showLevelRing,

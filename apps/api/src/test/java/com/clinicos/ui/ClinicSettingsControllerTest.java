@@ -44,6 +44,7 @@ import jakarta.servlet.http.HttpSession;
 class ClinicSettingsControllerTest {
 
     private static final UUID CLINIC = UUID.randomUUID();
+    private static final UUID ACTOR = UUID.randomUUID();
     private static final List<CategoryWeight> WEIGHTS = List.of(
             new CategoryWeight(Category.COMPLETION, new BigDecimal("18")),
             new CategoryWeight(Category.FANNI, new BigDecimal("18")),
@@ -88,7 +89,7 @@ class ClinicSettingsControllerTest {
                 ClinicSettingsController.WeightsForm.from(WEIGHTS), session, model);
 
         assertThat(view).isEqualTo("admin/clinic-settings :: weightsCard");
-        verify(settingsService).updateWeights(eq(CLINIC), any());
+        verify(settingsService).updateWeights(eq(CLINIC), any(), eq(ACTOR));
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
     }
 
@@ -98,7 +99,7 @@ class ClinicSettingsControllerTest {
         allowDashboard();
         doThrow(new ClinicSettingsValidationException(
                 java.util.Map.of("weights", "مجموع أوزان مكونات التقييم يجب أن يساوي 100")))
-                .when(settingsService).updateWeights(eq(CLINIC), any());
+                .when(settingsService).updateWeights(eq(CLINIC), any(), eq(ACTOR));
 
         String view = controller.updateWeights(
                 ClinicSettingsController.WeightsForm.from(WEIGHTS), session, model);
@@ -121,7 +122,7 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: weightsCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("أوزان مكونات التقييم غير صحيحة");
-        verify(settingsService, never()).updateWeights(any(), any());
+        verify(settingsService, never()).updateWeights(any(), any(), any());
     }
 
     @Test
@@ -140,7 +141,7 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: dutyCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateDuty(CLINIC, LocalTime.of(8, 30), LocalTime.of(16, 30),
-                20, 22, 65);
+                20, 22, 65, ACTOR);
     }
 
     @Test
@@ -159,7 +160,7 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: dutyCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("مهلة التأخير غير صحيحة");
-        verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt());
+        verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt(), any());
     }
 
     @Test
@@ -173,7 +174,7 @@ class ClinicSettingsControllerTest {
 
         assertThat(view).isEqualTo("admin/clinic-settings :: volumeCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
-        verify(settingsService).updateVolumeTarget(CLINIC, new BigDecimal("30000"));
+        verify(settingsService).updateVolumeTarget(CLINIC, new BigDecimal("30000"), ACTOR);
     }
 
     @Test
@@ -184,7 +185,7 @@ class ClinicSettingsControllerTest {
                 .session(httpSession()))
                 .andExpect(status().isOk());
 
-        verify(settingsService).updateInvoicePhotoRequired(CLINIC, false);
+        verify(settingsService).updateInvoicePhotoRequired(CLINIC, false, ACTOR);
     }
 
     @Test
@@ -196,7 +197,7 @@ class ClinicSettingsControllerTest {
                 .param("invoicePhotoRequired", "true"))
                 .andExpect(status().isOk());
 
-        verify(settingsService).updateInvoicePhotoRequired(CLINIC, true);
+        verify(settingsService).updateInvoicePhotoRequired(CLINIC, true, ACTOR);
     }
 
     @Test
@@ -210,7 +211,7 @@ class ClinicSettingsControllerTest {
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(settingsService).updateTiers(eq(CLINIC), eq(List.of(
                 new Tier("ممتاز", new BigDecimal("90"), new BigDecimal("100")),
-                new Tier("جيد", new BigDecimal("60"), new BigDecimal("50")))));
+                new Tier("جيد", new BigDecimal("60"), new BigDecimal("50")))), eq(ACTOR));
     }
 
     @Test
@@ -222,7 +223,7 @@ class ClinicSettingsControllerTest {
             form.getTiers().add(new ClinicSettingsController.TiersForm.TierRow());
         }
         doThrow(new ClinicSettingsValidationException(java.util.Map.of("tiers", "عدد شرائح الحافز يجب ألا يتجاوز 20")))
-                .when(settingsService).updateTiers(eq(CLINIC), any());
+                .when(settingsService).updateTiers(eq(CLINIC), any(), eq(ACTOR));
 
         String view = controller.updateTiers(form, session, model);
 
@@ -241,7 +242,7 @@ class ClinicSettingsControllerTest {
 
         assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
-        verify(workCalendarService).setWorkingWeekdays(CLINIC, List.of(1, 2, 3, 4, 5, 6, 7));
+        verify(workCalendarService).setWorkingWeekdays(CLINIC, List.of(1, 2, 3, 4, 5, 6, 7), ACTOR);
         verify(workCalendarService).listHolidays(CLINIC);
         verify(employeeService).list(CLINIC);
     }
@@ -251,7 +252,7 @@ class ClinicSettingsControllerTest {
         HttpSession session = session();
         allowDashboard();
         doThrow(new IllegalArgumentException("أيام العمل يجب أن تتضمن يوماً واحداً على الأقل"))
-                .when(workCalendarService).setWorkingWeekdays(eq(CLINIC), any());
+                .when(workCalendarService).setWorkingWeekdays(eq(CLINIC), any(), eq(ACTOR));
         var form = new ClinicSettingsController.WeekdaysForm();
 
         String view = controller.updateWeekdays(form, session, model);
@@ -275,7 +276,7 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
         verify(workCalendarService).addHoliday(eq(CLINIC),
-                any(HolidayRequest.class));
+                any(HolidayRequest.class), eq(ACTOR));
     }
 
     @Test
@@ -290,7 +291,7 @@ class ClinicSettingsControllerTest {
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage")))
                 .contains("تاريخ الإجازة غير صحيح", "اسم الإجازة مطلوب");
-        verify(workCalendarService, never()).addHoliday(any(), any());
+        verify(workCalendarService, never()).addHoliday(any(), any(), any());
     }
 
     @Test
@@ -298,7 +299,7 @@ class ClinicSettingsControllerTest {
         HttpSession session = session();
         allowDashboard();
         doThrow(new IllegalArgumentException("هذه الإجازة مسجلة مسبقاً"))
-                .when(workCalendarService).addHoliday(eq(CLINIC), any());
+                .when(workCalendarService).addHoliday(eq(CLINIC), any(), eq(ACTOR));
         var form = new ClinicSettingsController.HolidayForm();
         form.setDate("2026-03-20");
         form.setName("عيد الفطر");
@@ -322,7 +323,7 @@ class ClinicSettingsControllerTest {
 
         assertThat(view).isEqualTo("admin/clinic-settings :: calendarCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
-        verify(workCalendarService).removeHoliday(CLINIC, holidayId);
+        verify(workCalendarService).removeHoliday(CLINIC, holidayId, ACTOR);
     }
 
     @Test
@@ -337,13 +338,13 @@ class ClinicSettingsControllerTest {
         assertThat(controller.updateWeekdays(new ClinicSettingsController.WeekdaysForm(), session, model)).isEqualTo("redirect:/");
         assertThat(controller.addHoliday(new ClinicSettingsController.HolidayForm(), session, model)).isEqualTo("redirect:/");
         assertThat(controller.deleteHoliday(UUID.randomUUID(), session, model)).isEqualTo("redirect:/");
-        verify(settingsService, never()).updateWeights(any(), any());
-        verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt());
-        verify(settingsService, never()).updateVolumeTarget(any(), any());
-        verify(settingsService, never()).updateTiers(any(), any());
-        verify(workCalendarService, never()).setWorkingWeekdays(any(), any());
-        verify(workCalendarService, never()).addHoliday(any(), any());
-        verify(workCalendarService, never()).removeHoliday(any(), any());
+        verify(settingsService, never()).updateWeights(any(), any(), any());
+        verify(settingsService, never()).updateDuty(any(), any(), any(), anyInt(), anyInt(), anyInt(), any());
+        verify(settingsService, never()).updateVolumeTarget(any(), any(), any());
+        verify(settingsService, never()).updateTiers(any(), any(), any());
+        verify(workCalendarService, never()).setWorkingWeekdays(any(), any(), any());
+        verify(workCalendarService, never()).addHoliday(any(), any(), any());
+        verify(workCalendarService, never()).removeHoliday(any(), any(), any());
     }
 
     @Test
@@ -379,12 +380,14 @@ class ClinicSettingsControllerTest {
     private static HttpSession session() {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
+        when(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(ACTOR);
         return session;
     }
 
     private static MockHttpSession httpSession() {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(SessionKeys.CLINIC_ID, CLINIC);
+        session.setAttribute(SessionKeys.MEMBERSHIP_ID, ACTOR);
         return session;
     }
 }

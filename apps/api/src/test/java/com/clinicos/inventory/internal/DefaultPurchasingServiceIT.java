@@ -28,6 +28,8 @@ import com.clinicos.inventory.PurchasingService.ReceiptLine;
 import com.clinicos.inventory.PurchasingService.ReturnLineRequest;
 import com.clinicos.inventory.PurchasingService.SupplierRequest;
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.LocationKind;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
@@ -46,6 +48,9 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
     @Autowired
     private ClinicSettingsService clinicSettingsService;
 
+    @Autowired
+    private NotificationService notifications;
+
     private UUID clinicA;
     private UUID clinicB;
     private Actor owner;
@@ -60,6 +65,8 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         try (var connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection, "Clinic Purch A", "purch-a-" + UUID.randomUUID());
             clinicB = TestFixtures.insertClinic(connection, "Clinic Purch B", "purch-b-" + UUID.randomUUID());
+            TestFixtures.seedRolePermissionDefaults(connection, clinicA);
+            TestFixtures.seedRolePermissionDefaults(connection, clinicB);
             owner = actor(connection, clinicA, "owner");
             manager = actor(connection, clinicA, "manager");
             assistant = actor(connection, clinicA, "assistant");
@@ -146,7 +153,7 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
     void receiveWithoutInvoicePhotoSucceedsWhenClinicPolicyDisablesIt() {
         TenantContext.set(clinicA);
         order = placeOrder();
-        clinicSettingsService.updateInvoicePhotoRequired(clinicA, false);
+        clinicSettingsService.updateInvoicePhotoRequired(clinicA, false, owner.membershipId());
 
         var received = purchasingService.receive(clinicA, assistant, order,
                 List.of(new ReceiptLine(orderLineId(order, 0), new BigDecimal("7"), null, null)), null);
@@ -178,6 +185,15 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(pending.status()).isEqualTo("pending");
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("10");
         assertThat(purchasingService.pendingReturns(clinicA)).anyMatch(r -> r.id().equals(pending.id()));
+        var ownerNotification = notifications.recent(clinicA, owner.membershipId(), 1).getFirst();
+        assertThat(ownerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
+        assertThat(ownerNotification.payload()).containsEntry("supplier", "الريادة")
+                .containsEntry("actor", "Test User");
+        var managerNotification = notifications.recent(clinicA, manager.membershipId(), 1).getFirst();
+        assertThat(managerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
+        assertThat(managerNotification.payload()).containsEntry("supplier", "الريادة")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.unreadCount(clinicA, assistant.membershipId())).isZero();
 
         var approved = purchasingService.decideReturn(clinicA, manager, pending.id(), true);
         assertThat(approved.status()).isEqualTo("approved");
@@ -291,7 +307,7 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(updated.id()).isEqualTo(supplier);
         assertThat(purchasingService.suppliers(clinicA, false))
                 .anyMatch(s -> s.id().equals(supplier) && s.name().equals("الريادة المحدّثة"));
-        assertThatThrownBy(() -> purchasingService.saveSupplier(clinicA, manager, UUID.randomUUID(),
+        assertThatThrownBy(() -> purchasingService.saveSupplier(clinicA, manager, manager.membershipId(),
                 new SupplierRequest("مفقود", null, null, 1, new BigDecimal("1"), false)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("المورد غير موجود");

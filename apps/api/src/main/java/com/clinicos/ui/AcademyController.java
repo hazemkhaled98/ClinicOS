@@ -441,6 +441,14 @@ public class AcademyController {
             f.goal = unit.goal();
             try {
                 f.sectionsJson = JSON.writeValueAsString(unit.content());
+                List<AcademyService.QuestionRequest> questions = new java.util.ArrayList<>();
+                List<AcademyService.Question> existing = unit.questions();
+                for (int i = 0; i < existing.size(); i++) {
+                    AcademyService.Question q = existing.get(i);
+                    questions.add(new AcademyService.QuestionRequest(
+                            q.id(), q.prompt(), q.options(), q.correctIndex(), i));
+                }
+                f.questionsJson = JSON.writeValueAsString(questions);
             } catch (Exception ignored) {
             }
             f.photoTask = unit.photoTask();

@@ -88,18 +88,22 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
 
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (Connection conn = superuser()) {
             clinicA = TestFixtures.insertClinic(conn);
             clinicB = TestFixtures.insertClinic(conn);
+            actorA = TestFixtures.actorMembership(conn, clinicA);
+            actorB = TestFixtures.actorMembership(conn, clinicB);
         }
     }
 
     private void seedWeekdays(UUID clinicId) {
         TenantContext.set(clinicId);
-        workCalendarService.setWorkingWeekdays(clinicId, List.of(1, 2, 3, 4, 5, 6, 7));
+        workCalendarService.setWorkingWeekdays(clinicId, List.of(1, 2, 3, 4, 5, 6, 7), actorA);
     }
 
     @AfterEach
@@ -242,8 +246,8 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         seedWorkday(clinicA, employeeId, taskId, asOf);
         seedWorkday(clinicA, employeeId, taskId, asOf.minusDays(1));
         seedWorkday(clinicA, employeeId, taskId, asOf.minusDays(2));
-        gamificationService.updateGoal(clinicA, 1, "إنجاز أسبوعي", 2);
-        gamificationService.updateThreshold(clinicA, "بطل الأسبوع", 3);
+        gamificationService.updateGoal(clinicA, 1, "إنجاز أسبوعي", 2, actorA);
+        gamificationService.updateThreshold(clinicA, "بطل الأسبوع", 3, actorA);
 
         Gamification result = evaluationService.gamification(clinicA, employeeId, june);
 

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,6 +41,8 @@ import com.clinicos.inventory.PurchasingService.ReturnRequest;
 import com.clinicos.inventory.PurchasingService.Shortage;
 import com.clinicos.inventory.PurchasingService.Supplier;
 import com.clinicos.inventory.PurchasingService.SupplierRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.LocationKind;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
 import com.clinicos.shared.jooq.enums.MovementReason;
@@ -55,12 +58,14 @@ public class DefaultPurchasingService implements PurchasingService {
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
     private final ClinicSettingsService clinicSettingsService;
+    private final NotificationService notificationService;
 
     public DefaultPurchasingService(DSLContext dsl, TransactionTemplate transactionTemplate,
-            ClinicSettingsService clinicSettingsService) {
+            ClinicSettingsService clinicSettingsService, NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
         this.clinicSettingsService = clinicSettingsService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -330,8 +335,19 @@ public class DefaultPurchasingService implements PurchasingService {
                 }
                 throw e;
             }
+            String supplier = supplierName(clinicId, order.getSupplierId());
+            notificationService.notifyApprovers(clinicId, actor.membershipId(), "approvals",
+                    NotificationKind.SUPPLIER_RETURN_REQUESTED,
+                    Map.of("supplier", supplier == null ? "" : supplier));
             return loadReturn(clinicId, returnId);
         });
+    }
+
+    private String supplierName(UUID clinicId, UUID supplierId) {
+        return dsl.select(SUPPLIER.NAME).from(SUPPLIER)
+                .where(SUPPLIER.ID.eq(supplierId))
+                .and(SUPPLIER.CLINIC_ID.eq(clinicId))
+                .fetchOne(SUPPLIER.NAME);
     }
 
     @Override

@@ -70,13 +70,15 @@ public class UserAdminController {
             try {
                 String email = blankToNull(form.getEmail());
                 transactionTemplate.executeWithoutResult(status -> {
+                    UUID actorMembershipId = AdminAccess.membershipId(session);
                     UserSummary created = userAdminService.create(clinicId, new UserCreateRequest(
-                            form.getUsername().trim(), form.getFullName().trim(), email, passwordEncoder.encode(form.getPassword())));
+                            form.getUsername().trim(), form.getFullName().trim(), email, passwordEncoder.encode(form.getPassword())),
+                            actorMembershipId);
                     Employee employee = employeeService.create(clinicId, new EmployeeRequest(
                             form.getFullName().trim(), null, null, null, null, false, null));
-                    userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id());
+                    userAdminService.linkEmployee(clinicId, created.membershipId(), employee.id(), actorMembershipId);
                     userAdminService.assignRole(clinicId, created.membershipId(), form.getRoleCode(),
-                            AdminAccess.membershipId(session));
+                            actorMembershipId);
                 });
                 activityLogService.log(clinicId, AdminAccess.membershipId(session), "user.create", "user");
             } catch (UserValidationException e) {

@@ -147,6 +147,67 @@ class TenantSessionFilterTest {
     }
 
     @Test
+    void secondLoginInSameSessionRebindsToTheNewUserInsteadOfInheritingTheOldOne() throws Exception {
+        UUID clinicId = UUID.randomUUID();
+        UUID firstUserId = UUID.randomUUID();
+        UUID secondUserId = UUID.randomUUID();
+        UUID firstMembershipId = UUID.randomUUID();
+        UUID secondMembershipId = UUID.randomUUID();
+
+        authenticate(firstUserId, clinicId);
+        when(membershipLookupService.findByUserId(firstUserId))
+                .thenReturn(List.of(new Membership(firstMembershipId, clinicId, "Clinic", "owner")));
+        when(permissionsService.accessFor(firstMembershipId))
+                .thenReturn(new MembershipAccess(firstMembershipId, "owner", Set.of("emp", "acadVerify")));
+
+        MockHttpSession session = new MockHttpSession();
+        MockHttpServletRequest firstRequest = new MockHttpServletRequest();
+        firstRequest.setSession(session);
+        filter.doFilter(firstRequest, new MockHttpServletResponse(), new MockFilterChain());
+        assertThat(session.getAttribute(SessionKeys.ROLE_CODE)).isEqualTo("owner");
+
+        SecurityContextHolder.clearContext();
+        authenticate(secondUserId, clinicId);
+        when(membershipLookupService.findByUserId(secondUserId))
+                .thenReturn(List.of(new Membership(secondMembershipId, clinicId, "Clinic", "assistant")));
+        when(permissionsService.accessFor(secondMembershipId))
+                .thenReturn(new MembershipAccess(secondMembershipId, "assistant", Set.of("emp")));
+
+        MockHttpServletRequest secondRequest = new MockHttpServletRequest();
+        secondRequest.setSession(session);
+        filter.doFilter(secondRequest, new MockHttpServletResponse(), new MockFilterChain());
+
+        assertThat(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).isEqualTo(secondMembershipId);
+        assertThat(session.getAttribute(SessionKeys.ROLE_CODE)).isEqualTo("assistant");
+        assertThat(session.getAttribute(SessionKeys.PERMISSIONS)).isEqualTo(List.copyOf(Set.of("emp")));
+        assertThat(session.getAttribute(SessionKeys.PRIMED_USER_ID)).isEqualTo(secondUserId);
+    }
+
+    @Test
+    void sameUserRepeatRequestDoesNotRePrime() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID clinicId = UUID.randomUUID();
+        UUID membershipId = UUID.randomUUID();
+        authenticate(userId, clinicId);
+        when(membershipLookupService.findByUserId(userId))
+                .thenReturn(List.of(new Membership(membershipId, clinicId, "Clinic", "owner")));
+        when(permissionsService.accessFor(membershipId))
+                .thenReturn(new MembershipAccess(membershipId, "owner", Set.of("emp")));
+
+        MockHttpSession session = new MockHttpSession();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setSession(session);
+        filter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+        MockHttpServletRequest repeatRequest = new MockHttpServletRequest();
+        repeatRequest.setSession(session);
+        filter.doFilter(repeatRequest, new MockHttpServletResponse(), new MockFilterChain());
+
+        verify(membershipLookupService).findByUserId(userId);
+        assertThat(session.getAttribute(SessionKeys.CLINIC_ID)).isEqualTo(clinicId);
+    }
+
+    @Test
     void primingFailureDoesNotBurnOneShotGuarantee() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID clinicId = UUID.randomUUID();

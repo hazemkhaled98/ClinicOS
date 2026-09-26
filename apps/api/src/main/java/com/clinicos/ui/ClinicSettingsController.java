@@ -61,7 +61,7 @@ public class ClinicSettingsController {
         List<CategoryWeight> weights = toWeights(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateWeights(AdminAccess.clinicId(session), weights);
+                clinicSettingsService.updateWeights(AdminAccess.clinicId(session), weights, AdminAccess.membershipId(session));
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -85,7 +85,7 @@ public class ClinicSettingsController {
                 fieldErrors, "هدف الفواتير الشهري غير صحيح");
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateVolumeTarget(AdminAccess.clinicId(session), volumeTarget);
+                clinicSettingsService.updateVolumeTarget(AdminAccess.clinicId(session), volumeTarget, AdminAccess.membershipId(session));
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -101,7 +101,8 @@ public class ClinicSettingsController {
         if (!AdminAccess.canDashboard(layoutModel, session)) {
             return "redirect:/";
         }
-        clinicSettingsService.updateInvoicePhotoRequired(AdminAccess.clinicId(session), invoicePhotoRequired);
+        clinicSettingsService.updateInvoicePhotoRequired(AdminAccess.clinicId(session), invoicePhotoRequired,
+                AdminAccess.membershipId(session));
         Toasts.success(model, "تم حفظ سياسة صورة الفاتورة");
         model.addAttribute("invoicePhotoRequired", invoicePhotoRequired);
         return "admin/clinic-settings :: invoicePhotoPolicyCard";
@@ -123,7 +124,7 @@ public class ClinicSettingsController {
         if (fieldErrors.isEmpty()) {
             try {
                 clinicSettingsService.updateDuty(AdminAccess.clinicId(session), shiftStart, shiftEnd,
-                        grace, workingDays, academyScore);
+                        grace, workingDays, academyScore, AdminAccess.membershipId(session));
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -142,7 +143,7 @@ public class ClinicSettingsController {
         List<Tier> tiers = toTiers(form, fieldErrors);
         if (fieldErrors.isEmpty()) {
             try {
-                clinicSettingsService.updateTiers(AdminAccess.clinicId(session), tiers);
+                clinicSettingsService.updateTiers(AdminAccess.clinicId(session), tiers, AdminAccess.membershipId(session));
             } catch (ClinicSettingsValidationException e) {
                 fieldErrors.putAll(e.fieldErrors());
             }
@@ -163,7 +164,8 @@ public class ClinicSettingsController {
         Map<String, String> fieldErrors = new HashMap<>();
         List<Integer> weekdays = form.getWeekdays() == null ? List.of() : form.getWeekdays();
         try {
-            workCalendarService.setWorkingWeekdays(AdminAccess.clinicId(session), weekdays);
+            workCalendarService.setWorkingWeekdays(AdminAccess.clinicId(session), weekdays,
+                    AdminAccess.membershipId(session));
         } catch (IllegalArgumentException e) {
             fieldErrors.put("weekdays", e.getMessage());
         }
@@ -189,7 +191,8 @@ public class ClinicSettingsController {
         if (fieldErrors.isEmpty()) {
             try {
                 workCalendarService.addHoliday(AdminAccess.clinicId(session),
-                        new HolidayRequest(date, form.getName().trim(), employeeId));
+                        new HolidayRequest(date, form.getName().trim(), employeeId),
+                        AdminAccess.membershipId(session));
             } catch (IllegalArgumentException e) {
                 fieldErrors.put("holiday", e.getMessage());
             }
@@ -208,7 +211,7 @@ public class ClinicSettingsController {
         }
         Map<String, String> fieldErrors = new HashMap<>();
         try {
-            workCalendarService.removeHoliday(AdminAccess.clinicId(session), holidayId);
+            workCalendarService.removeHoliday(AdminAccess.clinicId(session), holidayId, AdminAccess.membershipId(session));
         } catch (IllegalArgumentException e) {
             fieldErrors.put("holiday", e.getMessage());
         }

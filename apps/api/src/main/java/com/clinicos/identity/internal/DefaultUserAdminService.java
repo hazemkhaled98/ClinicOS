@@ -10,6 +10,7 @@ import static com.clinicos.shared.jooq.Routines.setUserStatus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
@@ -18,16 +19,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.identity.api.UserAdminService;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 
 @Service
 public class DefaultUserAdminService implements UserAdminService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultUserAdminService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultUserAdminService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -45,7 +51,7 @@ public class DefaultUserAdminService implements UserAdminService {
     }
 
     @Override
-    public UserSummary create(UUID clinicId, UserCreateRequest request) {
+    public UserSummary create(UUID clinicId, UserCreateRequest request, UUID actorMembershipId) {
         return transactionTemplate.execute(status -> {
             Map<String, String> fieldErrors = new HashMap<>();
             if (usernameExists(clinicId, request.username())) {
@@ -76,6 +82,7 @@ public class DefaultUserAdminService implements UserAdminService {
             if (summary == null) {
                 throw new IllegalArgumentException("فشل إنشاء المستخدم");
             }
+            notifyOwners(clinicId, actorMembershipId, summary.username());
             return summary;
         });
     }
@@ -91,6 +98,7 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("لا يمكنك تغيير كلمة مرور حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserPassword(dsl.configuration(), clinicId, userId, newPasswordHash);
+            notifyOwners(clinicId, actorMembershipId, target.username());
         });
     }
 
@@ -109,6 +117,7 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("لا يمكنك تعليق حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserStatus(dsl.configuration(), clinicId, userId, "suspended");
+            notifyOwners(clinicId, actorMembershipId, target.username());
         });
     }
 
@@ -121,6 +130,7 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("لا يمكنك تفعيل حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserStatus(dsl.configuration(), clinicId, userId, "active");
+            notifyOwners(clinicId, actorMembershipId, target.username());
         });
     }
 
@@ -155,11 +165,12 @@ public class DefaultUserAdminService implements UserAdminService {
             if (updated == 0) {
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }
+            notifyOwners(clinicId, actorMembershipId, usernameOf(clinicId, membershipId));
         });
     }
 
     @Override
-    public void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId) {
+    public void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status -> {
             int updated = dsl.update(MEMBERSHIP)
                     .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
@@ -169,11 +180,27 @@ public class DefaultUserAdminService implements UserAdminService {
             if (updated == 0) {
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }
+            notifyOwners(clinicId, actorMembershipId, usernameOf(clinicId, membershipId));
         });
     }
 
+    private void notifyOwners(UUID clinicId, UUID actorMembershipId, String username) {
+        notificationService.notifyRoles(clinicId, actorMembershipId, Set.of("owner"),
+                NotificationKind.USER_ACCESS_CHANGED, Map.of("user", username));
+    }
+
+    private String usernameOf(UUID clinicId, UUID membershipId) {
+        String username = dsl.select(APP_USER.USERNAME)
+                .from(APP_USER)
+                .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
+                        .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
+                .where(MEMBERSHIP.ID.eq(membershipId))
+                .fetchOne(APP_USER.USERNAME);
+        return username == null || username.isBlank() ? "مستخدم" : username;
+    }
+
     private Target resolveTarget(UUID clinicId, UUID userId) {
-        org.jooq.Record row = dsl.select(MEMBERSHIP.ID, ROLE.CODE)
+        org.jooq.Record row = dsl.select(MEMBERSHIP.ID, ROLE.CODE, APP_USER.USERNAME)
                 .from(APP_USER)
                 .join(MEMBERSHIP).on(MEMBERSHIP.USER_ID.eq(APP_USER.ID)
                         .and(MEMBERSHIP.CLINIC_ID.eq(clinicId)))
@@ -184,10 +211,10 @@ public class DefaultUserAdminService implements UserAdminService {
         if (row == null) {
             throw new IllegalArgumentException("المستخدم غير موجود");
         }
-        return new Target(userId, row.get(MEMBERSHIP.ID), row.get(ROLE.CODE));
+        return new Target(userId, row.get(MEMBERSHIP.ID), row.get(ROLE.CODE), row.get(APP_USER.USERNAME));
     }
 
-    private record Target(UUID userId, UUID membershipId, String roleCode) {
+    private record Target(UUID userId, UUID membershipId, String roleCode, String username) {
     }
 
     private static UserValidationException conflictByConstraint(DuplicateKeyException e) {

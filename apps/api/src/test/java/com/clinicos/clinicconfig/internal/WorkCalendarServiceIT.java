@@ -27,6 +27,8 @@ import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.WorkCalendarService.Holiday;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -35,14 +37,21 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     @Autowired
     private DefaultWorkCalendarService workCalendarService;
 
+    @Autowired
+    private NotificationService notifications;
+
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (Connection connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection);
             clinicB = TestFixtures.insertClinic(connection);
+            actorA = TestFixtures.actorMembership(connection, clinicA);
+            actorB = TestFixtures.actorMembership(connection, clinicB);
         }
     }
 
@@ -64,7 +73,7 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     void updateWeekdayMaskReplacesMask() {
         TenantContext.set(clinicA);
 
-        workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 2, 3));
+        workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 2, 3), actorA);
 
         assertThat(workCalendarService.workingWeekdays(clinicA)).containsExactly(1, 2, 3);
         assertThat(workCalendarService.isWorkday(clinicA, next(DayOfWeek.SATURDAY), null)).isFalse();
@@ -76,34 +85,46 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
 
         assertThrows(IllegalArgumentException.class,
-                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of()));
+                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(), actorA));
         assertThrows(IllegalArgumentException.class,
-                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 8)));
+                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 8), actorA));
         assertThrows(IllegalArgumentException.class,
-                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 1)));
+                () -> workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 1), actorA));
 
         assertThat(workCalendarService.workingWeekdays(clinicA)).containsExactly(6, 7, 1, 2, 3, 4);
     }
 
     @Test
-    void addAndRemoveClinicWideHoliday() {
+    void addAndRemoveClinicWideHoliday() throws Exception {
         TenantContext.set(clinicA);
         LocalDate day = next(DayOfWeek.SATURDAY);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (Connection connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
 
         Holiday holiday = workCalendarService.addHoliday(clinicA,
-                new HolidayRequest(day, "عيد الفطر", null));
+                new HolidayRequest(day, "عيد الفطر", null), actorA);
 
         assertThat(holiday.id()).isNotNull();
         assertThat(holiday.employeeId()).isNull();
         assertThat(workCalendarService.listHolidays(clinicA))
                 .extracting(Holiday::name).containsExactly("عيد الفطر");
         assertThat(workCalendarService.isWorkday(clinicA, day, null)).isFalse();
+        var notification = notifications.recent(clinicA, ownerRecipient, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.CLINIC_SETTINGS_CHANGED);
+        assertThat(notification.payload()).containsEntry("area", "الإجازات")
+                .containsEntry("actor", "Test User");
+        assertThat(notifications.recent(clinicA, actorA, 20)).isEmpty();
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
         assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA,
-                new HolidayRequest(day, "عيد الفطر مكرر", null)))
+                new HolidayRequest(day, "عيد الفطر مكرر", null), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("مسجلة مسبقاً");
 
-        workCalendarService.removeHoliday(clinicA, holiday.id());
+        workCalendarService.removeHoliday(clinicA, holiday.id(), actorA);
 
         assertThat(workCalendarService.listHolidays(clinicA)).isEmpty();
         assertThat(workCalendarService.isWorkday(clinicA, day, null)).isTrue();
@@ -116,7 +137,7 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
         UUID employeeB = insertEmployee(clinicA, "سارة");
         LocalDate day = next(DayOfWeek.SATURDAY);
 
-        workCalendarService.addHoliday(clinicA, new HolidayRequest(day, "إجازة شخصية", employeeA));
+        workCalendarService.addHoliday(clinicA, new HolidayRequest(day, "إجازة شخصية", employeeA), actorA);
 
         assertThat(workCalendarService.isWorkday(clinicA, day, employeeA)).isFalse();
         assertThat(workCalendarService.isWorkday(clinicA, day, employeeB)).isTrue();
@@ -131,7 +152,7 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
         UUID employeeB = insertEmployee(clinicB, "موظف عيادة أخرى");
 
         assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA,
-                new HolidayRequest(next(DayOfWeek.SATURDAY), "إجازة", employeeB)))
+                new HolidayRequest(next(DayOfWeek.SATURDAY), "إجازة", employeeB), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("الموظف غير موجود");
     }
@@ -140,15 +161,15 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     void holidayAndMaskAreIsolatedBetweenTenants() throws Exception {
         TenantContext.set(clinicA);
         LocalDate day = next(DayOfWeek.SATURDAY);
-        Holiday holiday = workCalendarService.addHoliday(clinicA, new HolidayRequest(day, "إجازة عيادة أ", null));
-        workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 2, 3));
+        Holiday holiday = workCalendarService.addHoliday(clinicA, new HolidayRequest(day, "إجازة عيادة أ", null), actorA);
+        workCalendarService.setWorkingWeekdays(clinicA, List.of(1, 2, 3), actorA);
 
         TenantContext.set(clinicB);
 
         assertThat(workCalendarService.listHolidays(clinicB)).isEmpty();
         assertThat(workCalendarService.workingWeekdays(clinicB)).containsExactly(6, 7, 1, 2, 3, 4);
         assertThat(workCalendarService.isWorkday(clinicB, day, null)).isTrue();
-        assertThatThrownBy(() -> workCalendarService.removeHoliday(clinicB, holiday.id()))
+        assertThatThrownBy(() -> workCalendarService.removeHoliday(clinicB, holiday.id(), actorB))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("لا يوجد يوم إجازة");
 
@@ -160,11 +181,11 @@ class WorkCalendarServiceIT extends AbstractPostgresIntegrationTest {
     void holidayValidationsRejectBlankFields() {
         TenantContext.set(clinicA);
 
-        assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA, new HolidayRequest(null, "اسم", null)))
+        assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA, new HolidayRequest(null, "اسم", null), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("تاريخ الإجازة مطلوب");
         assertThatThrownBy(() -> workCalendarService.addHoliday(clinicA,
-                new HolidayRequest(next(DayOfWeek.SUNDAY), "  ", null)))
+                new HolidayRequest(next(DayOfWeek.SUNDAY), "  ", null), actorA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("اسم الإجازة مطلوب");
     }

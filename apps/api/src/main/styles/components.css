@@ -480,7 +480,26 @@
     transition: opacity 150ms ease;
   }
 
+  #notification-count.htmx-swapping {
+    opacity: 1;
+    transition: none;
+  }
+
+  .notification-count--pulse {
+    animation: notification-count-pulse 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+  }
+
+  @keyframes notification-count-pulse {
+    0%, 45% { opacity: 1; }
+    50%, 95% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .notification-count--pulse {
+      animation: none;
+    }
+
     .htmx-swapping {
       transition-duration: 1ms;
     }

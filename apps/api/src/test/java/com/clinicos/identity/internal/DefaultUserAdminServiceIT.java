@@ -20,6 +20,8 @@ import com.clinicos.TestFixtures;
 import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.identity.api.UserAdminService.UserValidationException;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 
 @SpringBootTest(classes = Application.class)
@@ -28,14 +30,21 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     @Autowired
     private DefaultUserAdminService userAdminService;
 
+    @Autowired
+    private NotificationService notifications;
+
     private UUID clinicA;
     private UUID clinicB;
+    private UUID actorA;
+    private UUID actorB;
 
     @BeforeEach
     void seedClinics() throws Exception {
         try (var connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection, "Clinic A", "clinic-a-" + UUID.randomUUID());
             clinicB = TestFixtures.insertClinic(connection, "Clinic B", "clinic-b-" + UUID.randomUUID());
+            actorA = TestFixtures.actorMembership(connection, clinicA);
+            actorB = TestFixtures.actorMembership(connection, clinicB);
         }
     }
 
@@ -48,14 +57,16 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     void createThenListReturnsUser() {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "ahmed-" + UUID.randomUUID(), "أحمد", null, "hash123"));
+                "ahmed-" + UUID.randomUUID(), "أحمد", null, "hash123"), actorA);
 
         List<UserSummary> users = userAdminService.list(clinicA);
 
-        assertThat(users).hasSize(1);
-        assertThat(users.get(0).username()).startsWith("ahmed-");
-        assertThat(users.get(0).fullName()).isEqualTo("أحمد");
-        assertThat(users.get(0).employeeId()).isNull();
+        assertThat(users).hasSize(2);
+        assertThat(users).filteredOn(u -> u.username().startsWith("ahmed-")).singleElement()
+                .satisfies(u -> {
+                    assertThat(u.fullName()).isEqualTo("أحمد");
+                    assertThat(u.employeeId()).isNull();
+                });
     }
 
     @Test
@@ -63,19 +74,20 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         String uname = "clinicA-" + UUID.randomUUID();
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                uname, "مستخدم أ", null, "hash"));
+                uname, "مستخدم أ", null, "hash"), actorA);
         TenantContext.set(clinicB);
         userAdminService.create(clinicB, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "clinicB-" + UUID.randomUUID(), "مستخدم ب", null, "hash"));
+                "clinicB-" + UUID.randomUUID(), "مستخدم ب", null, "hash"), actorB);
 
         TenantContext.set(clinicA);
         List<UserSummary> aUsers = userAdminService.list(clinicA);
         TenantContext.set(clinicB);
         List<UserSummary> bUsers = userAdminService.list(clinicB);
 
-        assertThat(aUsers).hasSize(1);
-        assertThat(aUsers.get(0).username()).isEqualTo(uname);
-        assertThat(bUsers).hasSize(1);
+        assertThat(aUsers).hasSize(2);
+        assertThat(aUsers).filteredOn(u -> u.username().equals(uname)).singleElement()
+                .satisfies(u -> assertThat(u.fullName()).isEqualTo("مستخدم أ"));
+        assertThat(bUsers).hasSize(2);
     }
 
     @Test
@@ -83,10 +95,10 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         String uname = "dup-" + UUID.randomUUID();
         userAdminService.create(clinicA, new UserCreateRequest(
-                uname, "أول", null, "hash"));
+                uname, "أول", null, "hash"), actorA);
 
         assertThatThrownBy(() -> userAdminService.create(clinicA,
-                new UserCreateRequest(uname, "ثاني", null, "hash")))
+                new UserCreateRequest(uname, "ثاني", null, "hash"), actorA))
                 .isInstanceOf(UserValidationException.class)
                 .satisfies(e -> assertThat(((UserValidationException) e).fieldErrors()).containsKey("username"));
     }
@@ -96,27 +108,27 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         TenantContext.set(clinicA);
         String empSuffix = "emp-" + UUID.randomUUID();
         userAdminService.create(clinicA, new UserCreateRequest(
-                empSuffix, "أول", "", "hash"));
+                empSuffix, "أول", "", "hash"), actorA);
 
         assertThatThrownBy(() -> userAdminService.create(clinicA,
-                new UserCreateRequest("dup-email-" + UUID.randomUUID(), "ثاني", "", "hash")))
+                new UserCreateRequest("dup-email-" + UUID.randomUUID(), "ثاني", "", "hash"), actorA))
                 .isInstanceOf(UserValidationException.class)
                 .satisfies(e -> assertThat(((UserValidationException) e).fieldErrors()).containsKey("email"));
 
         userAdminService.create(clinicA, new UserCreateRequest(
-                "after-" + UUID.randomUUID(), "بعد الخطأ", null, "hash"));
-        assertThat(userAdminService.list(clinicA)).hasSize(2);
+                "after-" + UUID.randomUUID(), "بعد الخطأ", null, "hash"), actorA);
+        assertThat(userAdminService.list(clinicA)).hasSize(3);
     }
 
     @Test
     void createDuplicateNullEmailSucceedsBothUsers() {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new UserCreateRequest(
-                "null-email-1-" + UUID.randomUUID(), "أول", null, "hash"));
+                "null-email-1-" + UUID.randomUUID(), "أول", null, "hash"), actorA);
         userAdminService.create(clinicA, new UserCreateRequest(
-                "null-email-2-" + UUID.randomUUID(), "ثاني", null, "hash"));
+                "null-email-2-" + UUID.randomUUID(), "ثاني", null, "hash"), actorA);
 
-        assertThat(userAdminService.list(clinicA)).hasSize(2);
+        assertThat(userAdminService.list(clinicA)).hasSize(3);
     }
 
     @Test
@@ -138,7 +150,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     void suspendSelfThrows() {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "self-" + UUID.randomUUID(), "ذاتي", null, "hash"));
+                "self-" + UUID.randomUUID(), "ذاتي", null, "hash"), actorA);
         UUID userId = userAdminService.list(clinicA).get(0).id();
         UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
 
@@ -164,7 +176,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     void suspendCrossClinicThrowsAndLeavesClinicAUnaffected() {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "cross-" + UUID.randomUUID(), "عبر العيادات", null, "hash"));
+                "cross-" + UUID.randomUUID(), "عبر العيادات", null, "hash"), actorA);
         UUID userId = userAdminService.list(clinicA).get(0).id();
 
         TenantContext.set(clinicB);
@@ -180,7 +192,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     void listShowsLinkedEmployeeId() throws Exception {
         TenantContext.set(clinicA);
         userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "emp-" + UUID.randomUUID(), "مربوط", null, "hash"));
+                "emp-" + UUID.randomUUID(), "مربوط", null, "hash"), actorA);
         UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
         UUID employeeId;
         try (Connection connection = superuser()) {
@@ -194,7 +206,7 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
                 }
             }
         }
-        userAdminService.linkEmployee(clinicA, membershipId, employeeId);
+        userAdminService.linkEmployee(clinicA, membershipId, employeeId, actorA);
 
         assertThat(userAdminService.list(clinicA).get(0).employeeId()).isEqualTo(employeeId);
     }
@@ -255,15 +267,35 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void ownerCanAssignManagerRole() throws Exception {
         TenantContext.set(clinicA);
+        UUID ownerRecipient;
+        UUID managerObserver;
+        try (var connection = superuser()) {
+            ownerRecipient = TestFixtures.insertMembership(connection, clinicA, "owner");
+            managerObserver = TestFixtures.insertMembership(connection, clinicA, "manager");
+        }
         UserSummary actor = createUser(clinicA, "owner-actor");
         setRoleDirect(clinicA, actor.membershipId(), "owner");
         UserSummary target = createUser(clinicA, "promote-target");
+        notifications.markAllRead(clinicA, actor.membershipId());
 
         userAdminService.assignRole(clinicA, target.membershipId(), "manager", actor.membershipId());
 
         assertThat(userAdminService.list(clinicA))
                 .filteredOn(u -> u.id().equals(target.id())).singleElement()
                 .extracting(UserSummary::roleCode).isEqualTo("manager");
+        var ownerNotifications = notifications.recent(clinicA, ownerRecipient, 20).stream()
+                .filter(n -> n.kind() == NotificationKind.USER_ACCESS_CHANGED
+                        && target.username().equals(n.payload().get("user")))
+                .toList();
+        assertThat(ownerNotifications).hasSize(2);
+        assertThat(ownerNotifications).filteredOn(n -> "مستخدم".equals(n.payload().get("actor")))
+                .singleElement()
+                .satisfies(n -> assertThat(n.payload()).containsEntry("user", target.username()));
+        assertThat(notifications.recent(clinicA, actor.membershipId(), 20))
+                .noneMatch(n -> n.kind() == NotificationKind.USER_ACCESS_CHANGED
+                        && target.username().equals(n.payload().get("user"))
+                        && "مستخدم".equals(n.payload().get("actor")));
+        assertThat(notifications.recent(clinicA, managerObserver, 20)).isEmpty();
     }
 
     @Test
@@ -337,7 +369,11 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
 
     private UserSummary createUser(UUID clinicId, String suffix) {
         return userAdminService.create(clinicId, new UserCreateRequest(
-                suffix + "-" + UUID.randomUUID(), "مستخدم", null, "hash"));
+                suffix + "-" + UUID.randomUUID(), "مستخدم", null, "hash"), actorOf(clinicId));
+    }
+
+    private UUID actorOf(UUID clinicId) {
+        return clinicId.equals(clinicB) ? actorB : actorA;
     }
 
     private static void setRoleDirect(UUID clinicId, UUID membershipId, String roleCode) throws Exception {

@@ -33,6 +33,8 @@ import com.clinicos.inventory.InventoryService.ItemRequest;
 import com.clinicos.inventory.InventoryService.IssueResult;
 import com.clinicos.inventory.InventoryService.MovementEntry;
 import com.clinicos.inventory.InventoryService.StockLine;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.ChangeRequestStatus;
 import com.clinicos.shared.jooq.enums.LocationKind;
@@ -50,10 +52,13 @@ public class DefaultInventoryService implements InventoryService {
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
+    private final NotificationService notificationService;
 
-    public DefaultInventoryService(DSLContext dsl, TransactionTemplate transactionTemplate) {
+    public DefaultInventoryService(DSLContext dsl, TransactionTemplate transactionTemplate,
+            NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -159,6 +164,9 @@ public class DefaultInventoryService implements InventoryService {
                     .set(INVENTORY_CHANGE_REQUEST.REQUESTED_BY, actor.membershipId())
                     .set(INVENTORY_CHANGE_REQUEST.STATUS, ChangeRequestStatus.pending)
                     .execute();
+            notificationService.notifyApprovers(clinicId, actor.membershipId(), "approvals",
+                    NotificationKind.INVENTORY_CHANGE_REQUESTED,
+                    Map.of("item", requireItem(clinicId, itemId).getName(), "changeKind", kind.getLiteral()));
             return requireChangeRequest(clinicId, id);
         });
     }

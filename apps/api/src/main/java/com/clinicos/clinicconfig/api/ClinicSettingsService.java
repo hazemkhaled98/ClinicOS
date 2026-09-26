@@ -26,25 +26,25 @@ public interface ClinicSettingsService {
      * via {@link #updateVolumeTarget}.
      */
     void updateDuty(UUID clinicId, LocalTime defaultShiftStart, LocalTime defaultShiftEnd,
-            int lateGraceMinutes, int workingDaysPerMonth, int academyPassScore);
+            int lateGraceMinutes, int workingDaysPerMonth, int academyPassScore, UUID actorMembershipId);
 
-    void updateVolumeTarget(UUID clinicId, BigDecimal volumeTarget);
+    void updateVolumeTarget(UUID clinicId, BigDecimal volumeTarget, UUID actorMembershipId);
 
-    void updateInvoicePhotoRequired(UUID clinicId, boolean required);
+    void updateInvoicePhotoRequired(UUID clinicId, boolean required, UUID actorMembershipId);
 
     /**
      * Replaces every weight row. Weights must be non-negative and sum to 100
      * (BR-G07 evaluation weighs assessed components only, renormalised by
      * assessed weight -- the sum must stay 100).
      */
-    void updateWeights(UUID clinicId, List<CategoryWeight> weights);
+    void updateWeights(UUID clinicId, List<CategoryWeight> weights, UUID actorMembershipId);
 
     /**
      * Replaces every tier row (BR-G07: a month's incentive is
      * {@code maxIncentive x pct}, where the tier comes from the employee's
      * final score band).
      */
-    void updateTiers(UUID clinicId, List<Tier> tiers);
+    void updateTiers(UUID clinicId, List<Tier> tiers, UUID actorMembershipId);
 
     record ClinicSettings(
             LocalTime defaultShiftStart,

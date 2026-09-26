@@ -14,6 +14,7 @@ public final class SessionKeys {
     public static final String ROLE_CODE = "roleCode";
     public static final String PERMISSIONS = "permissions";
     public static final String PRIMING_ATTEMPTED = "primingAttempted";
+    public static final String PRIMED_USER_ID = "primedUserId";
 
     private SessionKeys() {
     }

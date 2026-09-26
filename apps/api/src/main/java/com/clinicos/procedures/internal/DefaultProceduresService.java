@@ -38,6 +38,8 @@ import com.clinicos.procedures.ProceduresService.CaseRecord;
 import com.clinicos.procedures.ProceduresService.PendingChange;
 import com.clinicos.procedures.ProceduresService.Procedure;
 import com.clinicos.procedures.ProceduresService.ProcedureRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.jooq.enums.ChangeRequestEntity;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.ChangeRequestStatus;
@@ -55,12 +57,14 @@ public class DefaultProceduresService implements ProceduresService {
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
     private final InventoryService inventoryService;
+    private final NotificationService notificationService;
 
     public DefaultProceduresService(DSLContext dsl, TransactionTemplate transactionTemplate,
-            InventoryService inventoryService) {
+            InventoryService inventoryService, NotificationService notificationService) {
         this.dsl = dsl;
         this.transactionTemplate = transactionTemplate;
         this.inventoryService = inventoryService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -348,7 +352,27 @@ public class DefaultProceduresService implements ProceduresService {
                 .set(INVENTORY_CHANGE_REQUEST.ENTITY, entity).set(INVENTORY_CHANGE_REQUEST.PROCEDURE_ID, procedureId)
                 .set(INVENTORY_CHANGE_REQUEST.PROCEDURE_CASE_ID, caseId).set(INVENTORY_CHANGE_REQUEST.PAYLOAD, payload)
                 .set(INVENTORY_CHANGE_REQUEST.REQUESTED_BY, actor.membershipId()).set(INVENTORY_CHANGE_REQUEST.STATUS, ChangeRequestStatus.pending).execute();
+        notificationService.notifyApprovers(clinicId, actor.membershipId(), "approvals",
+                NotificationKind.PROCEDURE_CHANGE_REQUESTED,
+                Map.of("procedure", subjectName(clinicId, procedureId, caseId)));
         return id;
+    }
+
+    private String subjectName(UUID clinicId, UUID procedureId, UUID caseId) {
+        UUID target = procedureId;
+        if (target == null && caseId != null) {
+            target = dsl.select(PROCEDURE_CASE.PROCEDURE_ID)
+                    .from(PROCEDURE_CASE)
+                    .where(PROCEDURE_CASE.ID.eq(caseId))
+                    .and(PROCEDURE_CASE.CLINIC_ID.eq(clinicId))
+                    .fetchOne(PROCEDURE_CASE.PROCEDURE_ID);
+        }
+        String name = target == null ? null : dsl.select(PROCEDURE.NAME)
+                .from(PROCEDURE)
+                .where(PROCEDURE.ID.eq(target))
+                .and(PROCEDURE.CLINIC_ID.eq(clinicId))
+                .fetchOne(PROCEDURE.NAME);
+        return name == null || name.isBlank() ? "إجراء" : name;
     }
 
     private List<BomLineRequest> parseBom(JSONB payload) {

@@ -214,7 +214,7 @@ class AdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         Employee updated = employee("محمود");
-        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         String view = controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
@@ -229,7 +229,7 @@ class AdminControllerTest {
     void updateEmployeeSurvivesConcurrentArchive() {
         HttpSession session = session();
         allowDashboard();
-        when(employeeService.update(eq(CLINIC), any(UUID.class), any(EmployeeRequest.class)))
+        when(employeeService.update(eq(CLINIC), any(UUID.class), any(EmployeeRequest.class), eq(MEMBERSHIP)))
                 .thenThrow(new IllegalArgumentException("الموظف غير موجود"));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
@@ -253,7 +253,7 @@ class AdminControllerTest {
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).contains("اسم الموظف مطلوب");
-        verify(employeeService, never()).update(any(), any(), any());
+        verify(employeeService, never()).update(any(), any(), any(), any());
     }
 
     @Test
@@ -261,7 +261,7 @@ class AdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         Employee archived = employee("محمود");
-        when(employeeService.archive(CLINIC, archived.id())).thenReturn(archived);
+        when(employeeService.archive(eq(CLINIC), eq(archived.id()), eq(MEMBERSHIP))).thenReturn(archived);
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
         String view = controller.archiveEmployee(archived.id(), session, model);
@@ -275,7 +275,7 @@ class AdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         UUID employeeId = UUID.randomUUID();
-        when(employeeService.archive(CLINIC, employeeId))
+        when(employeeService.archive(eq(CLINIC), eq(employeeId), eq(MEMBERSHIP)))
                 .thenThrow(new IllegalArgumentException("الموظف غير موجود"));
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
@@ -350,7 +350,7 @@ class AdminControllerTest {
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
-        verify(employeeService, never()).update(any(), any(), any());
+        verify(employeeService, never()).update(any(), any(), any(), any());
     }
 
     @Test
@@ -361,7 +361,7 @@ class AdminControllerTest {
         UserSummary assistant = new UserSummary(UUID.randomUUID(), "mahmoud", "محمود", null, "active", "assistant",
                 UUID.randomUUID(), updated.id());
         when(userAdminService.list(CLINIC)).thenReturn(List.of(assistant));
-        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         String view = controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
@@ -384,7 +384,7 @@ class AdminControllerTest {
 
         assertThat(view).isEqualTo("admin/employees :: employeesCard");
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
-        verify(employeeService, never()).archive(any(), any());
+        verify(employeeService, never()).archive(any(), any(), any());
     }
 
     @Test
@@ -420,7 +420,7 @@ class AdminControllerTest {
         UserSummary linked = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant",
                 UUID.randomUUID(), employeeId);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(linked));
-        when(employeeService.archive(CLINIC, employeeId)).thenReturn(archived);
+        when(employeeService.archive(eq(CLINIC), eq(employeeId), eq(MEMBERSHIP))).thenReturn(archived);
         when(employeeService.list(CLINIC)).thenReturn(List.of());
         doThrow(new IllegalArgumentException("تعذر تعليق الحساب"))
                 .when(userAdminService).suspend(eq(CLINIC), eq(linked.id()), eq(MEMBERSHIP));
@@ -441,7 +441,7 @@ class AdminControllerTest {
         UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
         Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
-        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         String view = controller.updateEmployee(employeeId, form("محمود", "manager"), Validated.of(form("محمود", "manager")), session, model);
@@ -460,7 +460,7 @@ class AdminControllerTest {
         UserSummary summary = new UserSummary(UUID.randomUUID(), "owner", "المالك", null, "active", "owner", membershipId, employeeId);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
         Employee updated = new Employee(employeeId, "المالك", null, null, null, null, false, null, null);
-        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         controller.updateEmployee(employeeId, form("المالك", "manager"), Validated.of(form("المالك", "manager")), session, model);
@@ -474,7 +474,7 @@ class AdminControllerTest {
         allowDashboard();
         Employee updated = employee("محمود");
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
-        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(updated.id()), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         controller.updateEmployee(updated.id(), form("محمود", null), Validated.of(form("محمود", null)), session, model);
@@ -491,7 +491,7 @@ class AdminControllerTest {
         UserSummary summary = new UserSummary(UUID.randomUUID(), "ahmed", "أحمد", null, "active", "assistant", membershipId, employeeId);
         when(userAdminService.list(CLINIC)).thenReturn(List.of(summary));
         Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
-        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         controller.updateEmployee(employeeId, form("محمود", "assistant"), Validated.of(form("محمود", "assistant")), session, model);
@@ -511,7 +511,7 @@ class AdminControllerTest {
         doThrow(new IllegalArgumentException("الدور غير موجود: manager"))
                 .when(userAdminService).assignRole(eq(CLINIC), eq(membershipId), eq("manager"), eq(MEMBERSHIP));
         Employee updated = new Employee(employeeId, "محمود", null, null, null, null, false, null, null);
-        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class))).thenReturn(updated);
+        when(employeeService.update(eq(CLINIC), eq(employeeId), any(EmployeeRequest.class), eq(MEMBERSHIP))).thenReturn(updated);
         when(employeeService.list(CLINIC)).thenReturn(List.of(updated));
 
         controller.updateEmployee(employeeId, form("محمود", "manager"), Validated.of(form("محمود", "manager")), session, model);

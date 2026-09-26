@@ -28,9 +28,9 @@ public interface EmployeeService {
 
     Employee create(UUID clinicId, EmployeeRequest request);
 
-    Employee update(UUID clinicId, UUID employeeId, EmployeeRequest request);
+    Employee update(UUID clinicId, UUID employeeId, EmployeeRequest request, UUID actorMembershipId);
 
-    Employee archive(UUID clinicId, UUID employeeId);
+    Employee archive(UUID clinicId, UUID employeeId, UUID actorMembershipId);
 
     record Employee(
             UUID id,
