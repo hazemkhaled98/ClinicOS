@@ -32,6 +32,21 @@ class NotificationTemplateTest {
     }
 
     @Test
+    void anonymousBadgeKeepsSwapTargetId() throws Exception {
+        String source;
+        try (var in = getClass().getResourceAsStream("/templates/fragments/notifications.html")) {
+            source = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+
+        String emptyBadge = source.lines()
+                .filter(line -> line.contains("th:fragment=\"emptyBadge\""))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(emptyBadge).contains("id=\"notification-count\"");
+    }
+
+    @Test
     void topbarMountsPersistentBadgePoller() {
         Context context = new Context(Locale.ROOT);
         context.setVariable("layout", new LayoutModel.LayoutData(
