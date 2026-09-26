@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jooq.DSLContext;
 import org.jooq.JSONB;
 import org.springframework.stereotype.Service;
@@ -190,8 +191,8 @@ public class DefaultNotificationService implements NotificationService {
         }
         try {
             return JSON.readValue(payload.data(), PAYLOAD_TYPE);
-        } catch (Exception e) {
-            return Map.of();
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("تعذر عرض بيانات الإشعار", e);
         }
     }
 }

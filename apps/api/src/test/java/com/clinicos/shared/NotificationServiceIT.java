@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
@@ -28,11 +29,6 @@ import com.clinicos.TestFixtures;
 import com.clinicos.shared.NotificationService.Notification;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
 
-/**
- * Raw JDBC here only seeds and inspects rows on the superuser connection, the
- * same way {@link ActivityLogServiceIT} does — never through the app's tenant
- * path. Every service call runs with {@link TenantContext} bound.
- */
 @SpringBootTest(classes = Application.class)
 class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
@@ -41,6 +37,9 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private DSLContext dsl;
 
     private UUID clinicId;
     private UUID ownerMembership;
@@ -276,6 +275,34 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
             assertThat(row.get(NOTIFICATION.PAYLOAD).data()).contains("\"reason\"");
             assertThat(row.get(NOTIFICATION.READ_AT)).isNull();
         }
+    }
+
+    @Test
+    void recentRejectsAnUnknownPersistedKind() {
+        transactionTemplate.executeWithoutResult(status -> dsl.insertInto(NOTIFICATION)
+                .set(NOTIFICATION.CLINIC_ID, clinicId)
+                .set(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID, ownerMembership)
+                .set(NOTIFICATION.KIND, "UNKNOWN")
+                .set(NOTIFICATION.PAYLOAD, JSONB.valueOf("{}"))
+                .execute());
+
+        assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("نوع إشعار غير مدعوم");
+    }
+
+    @Test
+    void recentRejectsAPayloadThatIsNotAnObject() {
+        transactionTemplate.executeWithoutResult(status -> dsl.insertInto(NOTIFICATION)
+                .set(NOTIFICATION.CLINIC_ID, clinicId)
+                .set(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID, ownerMembership)
+                .set(NOTIFICATION.KIND, NotificationKind.DAILY_TASK_APPROVED.literal())
+                .set(NOTIFICATION.PAYLOAD, JSONB.valueOf("[]"))
+                .execute());
+
+        assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("تعذر عرض بيانات الإشعار");
     }
 
     @Test

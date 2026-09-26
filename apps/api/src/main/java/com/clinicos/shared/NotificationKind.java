@@ -16,14 +16,11 @@ public enum NotificationKind {
     }
 
     public static NotificationKind fromLiteral(String literal) {
-        if (literal == null) {
-            return null;
-        }
         for (NotificationKind kind : values()) {
             if (kind.literal().equals(literal)) {
                 return kind;
             }
         }
-        return null;
+        throw new IllegalStateException("نوع إشعار غير مدعوم");
     }
 }
