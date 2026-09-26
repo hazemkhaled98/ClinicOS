@@ -28,6 +28,8 @@ import com.clinicos.inventory.PurchasingService.ReceiptLine;
 import com.clinicos.inventory.PurchasingService.ReturnLineRequest;
 import com.clinicos.inventory.PurchasingService.SupplierRequest;
 import com.clinicos.clinicconfig.api.ClinicSettingsService;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.LocationKind;
 import com.clinicos.shared.jooq.enums.MembershipStatus;
@@ -45,6 +47,9 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private ClinicSettingsService clinicSettingsService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -178,6 +183,13 @@ class DefaultPurchasingServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(pending.status()).isEqualTo("pending");
         assertThat(stockOnHand(item, LocationKind.store)).isEqualByComparingTo("10");
         assertThat(purchasingService.pendingReturns(clinicA)).anyMatch(r -> r.id().equals(pending.id()));
+        var ownerNotification = notifications.recent(clinicA, owner.membershipId(), 1).getFirst();
+        assertThat(ownerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
+        assertThat(ownerNotification.payload()).containsEntry("supplier", "الريادة");
+        var managerNotification = notifications.recent(clinicA, manager.membershipId(), 1).getFirst();
+        assertThat(managerNotification.kind()).isEqualTo(NotificationKind.SUPPLIER_RETURN_REQUESTED);
+        assertThat(managerNotification.payload()).containsEntry("supplier", "الريادة");
+        assertThat(notifications.unreadCount(clinicA, assistant.membershipId())).isZero();
 
         var approved = purchasingService.decideReturn(clinicA, manager, pending.id(), true);
         assertThat(approved.status()).isEqualTo("approved");

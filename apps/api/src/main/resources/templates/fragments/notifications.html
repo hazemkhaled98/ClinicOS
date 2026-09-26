@@ -1,5 +1,10 @@
 <span th:fragment="emptyBadge" id="notification-count"></span>
 
+<div th:fragment="error" class="w-80 max-w-[calc(100vw-2rem)] px-4 py-8 text-center text-sm text-on-surface-variant"
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+  تعذر عرض الإشعارات
+</div>
+
 <span th:fragment="count(unread)" id="notification-count"
       hx-get="/notifications/badge" hx-target="this"
       hx-trigger="load, every 30s, notificationsChanged from:body"

@@ -26,6 +26,8 @@ import com.clinicos.TestFixtures;
 import com.clinicos.inventory.InventoryService;
 import com.clinicos.inventory.InventoryService.Actor;
 import com.clinicos.inventory.InventoryService.ItemRequest;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.ChangeRequestKind;
 import com.clinicos.shared.jooq.enums.LocationKind;
@@ -43,6 +45,9 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -155,6 +160,13 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
                 .filter(i -> i.id().equals(item)).findFirst().orElseThrow();
         assertThat(refetched.name()).isEqualTo("كمبوزيت");
         assertThat(refetched.unitCost()).isEqualByComparingTo("45.50");
+        var ownerNotification = notifications.recent(clinicA, owner.membershipId(), 1).getFirst();
+        assertThat(ownerNotification.kind()).isEqualTo(NotificationKind.INVENTORY_CHANGE_REQUESTED);
+        assertThat(ownerNotification.payload()).containsEntry("item", "كمبوزيت");
+        var managerNotification = notifications.recent(clinicA, manager.membershipId(), 1).getFirst();
+        assertThat(managerNotification.kind()).isEqualTo(NotificationKind.INVENTORY_CHANGE_REQUESTED);
+        assertThat(managerNotification.payload()).containsEntry("item", "كمبوزيت");
+        assertThat(notifications.unreadCount(clinicA, assistant.membershipId())).isZero();
     }
 
     @Test

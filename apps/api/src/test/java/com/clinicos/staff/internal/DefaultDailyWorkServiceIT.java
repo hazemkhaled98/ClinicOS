@@ -27,6 +27,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.TestFixtures;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.TaskDimension;
@@ -48,6 +50,9 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -321,7 +326,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
     void forDate_returnsReviewState() throws Exception {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
-        linkEmployeeToRole(employeeId, "assistant");
+        UUID employeeMembershipId = linkEmployeeToRole(employeeId, "assistant");
         UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
         selfCheckService.checkIn(clinicA, employeeId);
         dailyWorkService.complete(clinicA, employeeId, taskId, null);
@@ -335,13 +340,16 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(task.reviewStatus()).isEqualTo("approved");
         assertThat(task.reviewReason()).isNull();
         assertThat(task.reviewedAt()).isNotNull();
+        var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.DAILY_TASK_APPROVED);
+        assertThat(notification.payload()).containsEntry("task", "تنظيف");
     }
 
     @Test
     void rejectReview_setsReason() throws Exception {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee("أحمد");
-        linkEmployeeToRole(employeeId, "assistant");
+        UUID employeeMembershipId = linkEmployeeToRole(employeeId, "assistant");
         UUID taskId = seedTask(clinicA, "assistant", null, "تنظيف", TaskDimension.fanni, TaskFrequency.daily, false);
         selfCheckService.checkIn(clinicA, employeeId);
         dailyWorkService.complete(clinicA, employeeId, taskId, null);
@@ -354,6 +362,10 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(task.reviewStatus()).isEqualTo("rejected");
         assertThat(task.reviewReason()).isEqualTo("صوره غير واضحة");
         assertThat(task.reviewedAt()).isNotNull();
+        var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.DAILY_TASK_REJECTED);
+        assertThat(notification.payload()).containsEntry("task", "تنظيف")
+                .containsEntry("reason", "صوره غير واضحة");
     }
 
     @Test
@@ -440,7 +452,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
                         LocalTime.of(9, 0), LocalTime.of(17, 0), false, null)).id();
     }
 
-    private void linkEmployeeToRole(UUID employeeId, String roleCode) throws Exception {
+    private UUID linkEmployeeToRole(UUID employeeId, String roleCode) throws Exception {
         try (Connection conn = superuser()) {
             UUID userId = TestFixtures.insertUser(conn, clinicA, "user-" + UUID.randomUUID(), "hash", "active", "Test");
             UUID membershipId = TestFixtures.insertMembership(conn, clinicA, userId, roleCode);
@@ -449,6 +461,7 @@ class DefaultDailyWorkServiceIT extends AbstractPostgresIntegrationTest {
                     .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
                     .where(MEMBERSHIP.ID.eq(membershipId))
                     .execute();
+            return membershipId;
         }
     }
 

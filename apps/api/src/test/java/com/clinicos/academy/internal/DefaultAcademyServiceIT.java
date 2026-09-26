@@ -34,6 +34,8 @@ import com.clinicos.academy.AcademyService.Actor;
 import com.clinicos.academy.AcademyService.Submission;
 import com.clinicos.academy.AcademyService.TraineeUnit;
 import com.clinicos.academy.AcademyService.Unit;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.AcademyAudience;
 import com.clinicos.shared.jooq.enums.SubmissionStatus;
@@ -52,6 +54,9 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -132,6 +137,9 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
         var sub = latest(assistant.employeeId(), unit);
         service.verify(clinicA, manager, sub.getId());
         assertThat(status(unit)).isEqualTo("done");
+        var notification = notifications.recent(clinicA, assistant.membershipId(), 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.ACADEMY_SUBMISSION_VERIFIED);
+        assertThat(notification.payload()).containsEntry("unit", "وحدة تصوير");
     }
 
     @Test
@@ -143,6 +151,10 @@ class DefaultAcademyServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(rejected.status()).isEqualTo("rejected");
         assertThat(rejected.rejectReason()).isEqualTo("الصورة غير واضحة");
         assertThat(status(unit)).isEqualTo("open");
+        var notification = notifications.recent(clinicA, assistant.membershipId(), 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.ACADEMY_SUBMISSION_REJECTED);
+        assertThat(notification.payload()).containsEntry("unit", "وحدة تصوير")
+                .containsEntry("reason", "الصورة غير واضحة");
     }
 
     @Test

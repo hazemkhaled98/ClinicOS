@@ -1,6 +1,7 @@
 package com.clinicos.staff.internal;
 
 import static com.clinicos.shared.jooq.tables.TaskAssignment.TASK_ASSIGNMENT;
+import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -23,6 +24,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
+import com.clinicos.shared.NotificationKind;
+import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.TenantContext;
 import com.clinicos.shared.jooq.enums.AssignmentProposer;
 import com.clinicos.shared.jooq.enums.AssignmentStatus;
@@ -39,6 +42,9 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private NotificationService notifications;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -203,6 +209,7 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
     void approve_pendingAssignment_setsApproved() throws Exception {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID employeeMembershipId = linkEmployeeToMembership(employeeId);
         UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.pending);
 
         Assignment approved = taskAssignmentService.approve(clinicA, assignmentId, insertApproverMembership());
@@ -210,6 +217,9 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(approved.status()).isEqualTo("approved");
         assertThat(approved.approvedAt()).isNotNull();
         assertThat(approved.doneAt()).isNull();
+        var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.TASK_ASSIGNMENT_APPROVED);
+        assertThat(notification.payload()).containsEntry("task", "طلب أدوات");
     }
 
     @Test
@@ -227,12 +237,17 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
     void reject_pendingAssignment_setsRejected() throws Exception {
         TenantContext.set(clinicA);
         UUID employeeId = createEmployee(clinicA, "أحمد");
+        UUID employeeMembershipId = linkEmployeeToMembership(employeeId);
         UUID assignmentId = seedAssignment(clinicA, employeeId, "طلب أدوات", LocalDate.now().plusDays(1), AssignmentStatus.pending);
 
         Assignment rejected = taskAssignmentService.reject(clinicA, assignmentId, insertApproverMembership(), "غير مناسب");
 
         assertThat(rejected.status()).isEqualTo("rejected");
         assertThat(rejected.approvedAt()).isNotNull();
+        var notification = notifications.recent(clinicA, employeeMembershipId, 1).getFirst();
+        assertThat(notification.kind()).isEqualTo(NotificationKind.TASK_ASSIGNMENT_REJECTED);
+        assertThat(notification.payload()).containsEntry("task", "طلب أدوات")
+                .containsEntry("reason", "غير مناسب");
     }
 
     @Test
@@ -267,6 +282,18 @@ class DefaultTaskAssignmentServiceIT extends AbstractPostgresIntegrationTest {
         try (Connection conn = superuser()) {
             UUID userId = TestFixtures.insertUser(conn, clinicA);
             return TestFixtures.insertMembership(conn, clinicA, userId, "manager");
+        }
+    }
+
+    private UUID linkEmployeeToMembership(UUID employeeId) throws Exception {
+        try (Connection conn = superuser()) {
+            UUID membershipId = TestFixtures.insertMembership(conn, clinicA, TestFixtures.insertUser(conn, clinicA), "assistant");
+            DSL.using(conn, SQLDialect.POSTGRES)
+                    .update(MEMBERSHIP)
+                    .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
+                    .where(MEMBERSHIP.ID.eq(membershipId))
+                    .execute();
+            return membershipId;
         }
     }
 

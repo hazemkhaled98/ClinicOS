@@ -39,6 +39,7 @@ public class DefaultNotificationService implements NotificationService {
         if (membershipId == null || kind == null) {
             throw new IllegalArgumentException("مستلم الإشعار أو نوعه مطلوب");
         }
+        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
             if (!isActiveMember(clinicId, membershipId)) {
@@ -54,6 +55,7 @@ public class DefaultNotificationService implements NotificationService {
         if (employeeId == null || kind == null) {
             throw new IllegalArgumentException("موظف الإشعار أو نوعه مطلوب");
         }
+        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
             var recipients = dsl.select(MEMBERSHIP.ID)
@@ -72,6 +74,7 @@ public class DefaultNotificationService implements NotificationService {
         if (roleCodes == null || roleCodes.isEmpty() || kind == null) {
             throw new IllegalArgumentException("دور واحد على الأقل أو نوع الإشعار مطلوب");
         }
+        validatePayloadForWrite(kind, payload);
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
             var recipients = dsl.select(MEMBERSHIP.ID)
@@ -169,12 +172,23 @@ public class DefaultNotificationService implements NotificationService {
     }
 
     private Notification toNotification(org.jooq.Record r) {
+        NotificationKind kind = NotificationKind.fromLiteral(r.get(NOTIFICATION.KIND));
+        Map<String, String> payload = parsePayload(r.get(NOTIFICATION.PAYLOAD));
+        if (!kind.hasValidPayload(payload)) {
+            throw new IllegalStateException("بيانات الإشعار غير مكتملة");
+        }
         return new Notification(
                 r.get(NOTIFICATION.ID),
-                NotificationKind.fromLiteral(r.get(NOTIFICATION.KIND)),
-                parsePayload(r.get(NOTIFICATION.PAYLOAD)),
+                kind,
+                payload,
                 r.get(NOTIFICATION.CREATED_AT),
                 r.get(NOTIFICATION.READ_AT));
+    }
+
+    private static void validatePayloadForWrite(NotificationKind kind, Map<String, String> payload) {
+        if (!kind.hasValidPayload(payload)) {
+            throw new IllegalArgumentException("بيانات الإشعار غير مكتملة");
+        }
     }
 
     private String serialize(Map<String, String> payload) {

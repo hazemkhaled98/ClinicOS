@@ -93,11 +93,12 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void unreadCountAndRecentAreScopedToTheRecipient() {
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
         notifications.notifyMembership(clinicId, managerMembership,
-                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of());
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("unit", "تعقيم"));
         notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.TASK_ASSIGNMENT_REJECTED,
-                Map.of("reason", "غير كافٍ"));
+                Map.of("task", "تعقيم", "reason", "غير كافٍ"));
 
         assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(2);
         assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
@@ -114,7 +115,8 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void recentClampsTheLimitAtBothEnds() {
         for (int i = 0; i < 3; i++) {
-            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                    Map.of("task", "تعقيم"));
         }
 
         assertThat(notifications.recent(clinicId, ownerMembership, 0)).hasSize(1);
@@ -124,8 +126,10 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void markReadTouchesOnlyTheCallingRecipientsNotification() {
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
-        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
         UUID ownerId = notifications.recent(clinicId, ownerMembership, 20).get(0).id();
 
         Notification read = notifications.markRead(clinicId, ownerMembership, ownerId);
@@ -138,7 +142,8 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void markReadRejectsAnotherRecipientsNotification() {
-        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
         UUID managerId = notifications.recent(clinicId, managerMembership, 20).get(0).id();
 
         assertThatThrownBy(() -> notifications.markRead(clinicId, ownerMembership, managerId))
@@ -149,7 +154,8 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void markReadRejectsAnAlreadyReadNotification() {
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
         UUID id = notifications.recent(clinicId, ownerMembership, 20).get(0).id();
         notifications.markRead(clinicId, ownerMembership, id);
 
@@ -159,9 +165,12 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Test
     void markAllReadClearsOnlyTheCallingRecipient() {
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of());
-        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.TASK_ASSIGNMENT_APPROVED,
+                Map.of("task", "تعقيم"));
+        notifications.notifyMembership(clinicId, managerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
 
         assertThat(notifications.markAllRead(clinicId, ownerMembership)).isEqualTo(2);
 
@@ -185,13 +194,14 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void notifyEmployeeIsANoopWhenNoMembershipIsLinked() {
         assertThat(notifications.notifyEmployee(clinicId, unlinkedEmployeeId,
-                NotificationKind.ACADEMY_SUBMISSION_REJECTED, Map.of())).isZero();
+                NotificationKind.ACADEMY_SUBMISSION_REJECTED,
+                Map.of("unit", "تعقيم", "reason", "ناقصة"))).isZero();
     }
 
     @Test
     void notifyEmployeeSkipsASuspendedMembership() {
         assertThat(notifications.notifyEmployee(clinicId, suspendedAssistantEmployeeId,
-                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of())).isZero();
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("unit", "تعقيم"))).isZero();
     }
 
     @Test
@@ -214,16 +224,25 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void writesRejectPayloadsMissingKindRequiredKeys() {
+        invalidPayloads().forEach((kind, payload) -> assertThatThrownBy(
+                () -> notifications.notifyMembership(clinicId, ownerMembership, kind, payload))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("بيانات الإشعار غير مكتملة"));
+    }
+
+    @Test
     void notifyMembershipSkipsAnInactiveOrForeignRecipient() {
         assertThat(notifications.notifyMembership(clinicId, suspendedAssistantMembership,
-                NotificationKind.DAILY_TASK_APPROVED, Map.of())).isZero();
+                NotificationKind.DAILY_TASK_APPROVED, Map.of("task", "تعقيم"))).isZero();
         assertThat(notifications.notifyMembership(clinicId, otherClinicMembership,
-                NotificationKind.DAILY_TASK_APPROVED, Map.of())).isZero();
+                NotificationKind.DAILY_TASK_APPROVED, Map.of("task", "تعقيم"))).isZero();
     }
 
     @Test
     void readsNeverLeakAnotherTenantsRows() {
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
 
         assertThat(notifications.unreadCount(clinicId, otherClinicMembership)).isZero();
         assertThat(notifications.recent(clinicId, otherClinicMembership, 20)).isEmpty();
@@ -243,14 +262,15 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
         assertThatThrownBy(() -> notifications.unreadCount(clinicId, ownerMembership))
                 .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> notifications.notifyMembership(clinicId, ownerMembership,
-                NotificationKind.DAILY_TASK_APPROVED, Map.of()))
+                NotificationKind.DAILY_TASK_APPROVED, Map.of("task", "تعقيم")))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void aFailingCallerTransactionRollsTheNotificationBack() {
         assertThatThrownBy(() -> transactionTemplate.execute(status -> {
-            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+            notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                    Map.of("task", "تعقيم"));
             throw new IllegalStateException("boom");
         })).isInstanceOf(IllegalStateException.class)
                 .hasMessage("boom");
@@ -261,7 +281,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void rowsCarryTheEnumLiteralAJsonPayloadAndNoReadStamp() throws Exception {
         notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.ACADEMY_SUBMISSION_REJECTED,
-                Map.of("reason", "صورة غير واضحة"));
+                Map.of("unit", "تعقيم", "reason", "صورة غير واضحة"));
         TenantContext.clear();
 
         try (Connection connection = DriverManager.getConnection(
@@ -320,12 +340,55 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void recentRejectsPayloadsMissingKindRequiredKeys() {
+        invalidPayloadJsons().forEach((kind, payload) -> {
+            transactionTemplate.executeWithoutResult(status -> dsl.insertInto(NOTIFICATION)
+                    .set(NOTIFICATION.CLINIC_ID, clinicId)
+                    .set(NOTIFICATION.RECIPIENT_MEMBERSHIP_ID, ownerMembership)
+                    .set(NOTIFICATION.KIND, kind.literal())
+                    .set(NOTIFICATION.PAYLOAD, JSONB.valueOf(payload))
+                    .execute());
+
+            assertThatThrownBy(() -> notifications.recent(clinicId, ownerMembership, 1))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("بيانات الإشعار غير مكتملة");
+
+            transactionTemplate.executeWithoutResult(status -> dsl.deleteFrom(NOTIFICATION).execute());
+        });
+    }
+
+    @Test
     void createdAtIsServerDefaulted() {
         OffsetDateTime before = OffsetDateTime.now().minusSeconds(1);
-        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED, Map.of());
+        notifications.notifyMembership(clinicId, ownerMembership, NotificationKind.DAILY_TASK_APPROVED,
+                Map.of("task", "تعقيم"));
 
         Notification n = notifications.recent(clinicId, ownerMembership, 1).get(0);
 
         assertThat(n.createdAt()).isAfterOrEqualTo(before);
+    }
+
+    private static Map<NotificationKind, Map<String, String>> invalidPayloads() {
+        return Map.of(
+                NotificationKind.DAILY_TASK_APPROVED, Map.of(),
+                NotificationKind.DAILY_TASK_REJECTED, Map.of("task", "تعقيم"),
+                NotificationKind.TASK_ASSIGNMENT_APPROVED, Map.of(),
+                NotificationKind.TASK_ASSIGNMENT_REJECTED, Map.of("task", "تعقيم"),
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of(),
+                NotificationKind.ACADEMY_SUBMISSION_REJECTED, Map.of("unit", "تعقيم"),
+                NotificationKind.INVENTORY_CHANGE_REQUESTED, Map.of(),
+                NotificationKind.SUPPLIER_RETURN_REQUESTED, Map.of());
+    }
+
+    private static Map<NotificationKind, String> invalidPayloadJsons() {
+        return Map.of(
+                NotificationKind.DAILY_TASK_APPROVED, "{}",
+                NotificationKind.DAILY_TASK_REJECTED, "{\"task\":\"تعقيم\"}",
+                NotificationKind.TASK_ASSIGNMENT_APPROVED, "{}",
+                NotificationKind.TASK_ASSIGNMENT_REJECTED, "{\"task\":\"تعقيم\"}",
+                NotificationKind.ACADEMY_SUBMISSION_VERIFIED, "{}",
+                NotificationKind.ACADEMY_SUBMISSION_REJECTED, "{\"unit\":\"تعقيم\"}",
+                NotificationKind.INVENTORY_CHANGE_REQUESTED, "{}",
+                NotificationKind.SUPPLIER_RETURN_REQUESTED, "{}");
     }
 }

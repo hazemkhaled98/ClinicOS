@@ -87,6 +87,18 @@ class NotificationControllerTest {
     }
 
     @Test
+    void listRendersAnArabicErrorFragmentForInvalidNotificationData() {
+        when(notificationService.recent(CLINIC, MEMBERSHIP, 20))
+                .thenThrow(new IllegalStateException("بيانات الإشعار غير مكتملة"));
+
+        String view = controller.list(session(), model);
+
+        assertThat(view).isEqualTo("fragments/notifications :: error");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تعذر عرض الإشعارات");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+    }
+
+    @Test
     void readAllMarksEverythingAndAsksBadgeToRefresh() {
         MockHttpServletResponse response = new MockHttpServletResponse();
 

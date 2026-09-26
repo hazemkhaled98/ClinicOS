@@ -41,12 +41,17 @@ public class NotificationController {
         if (!loggedIn(session)) {
             return "redirect:/login";
         }
-        List<Notification> recent = notificationService.recent(AdminAccess.clinicId(session),
-                AdminAccess.membershipId(session), RECENT_LIMIT);
-        model.addAttribute("notifications", presenter.present(recent));
-        model.addAttribute("unread", notificationService.unreadCount(AdminAccess.clinicId(session),
-                AdminAccess.membershipId(session)));
-        return "fragments/notifications :: list";
+        try {
+            List<Notification> recent = notificationService.recent(AdminAccess.clinicId(session),
+                    AdminAccess.membershipId(session), RECENT_LIMIT);
+            model.addAttribute("notifications", presenter.present(recent));
+            model.addAttribute("unread", notificationService.unreadCount(AdminAccess.clinicId(session),
+                    AdminAccess.membershipId(session)));
+            return "fragments/notifications :: list";
+        } catch (IllegalStateException e) {
+            Toasts.error(model, "تعذر عرض الإشعارات");
+            return "fragments/notifications :: error";
+        }
     }
 
     @PostMapping("/notifications/read-all")
