@@ -55,7 +55,10 @@ public class DefaultSignupService implements SignupService {
         String slug = deriveSlug(request.clinicName());
         if (slug.isEmpty()) {
             slug = "clinic-" + randomSuffix();
+        } else if (slug.length() < 3) {
+            slug = "clinic-" + slug;
         }
+        slug = slug.substring(0, Math.min(slug.length(), 40)).replaceAll("-$", "");
         String passwordHash = passwordEncoder.encode(request.rawPassword());
 
         TenantContext.enterAuthMode();
@@ -64,7 +67,8 @@ public class DefaultSignupService implements SignupService {
                 return attempt(slug, request, passwordHash);
             } catch (DuplicateKeyException e) {
                 if (isSlugConflict(e)) {
-                    return attempt(slug + "-" + randomSuffix(), request, passwordHash);
+                    return attempt(slug.substring(0, Math.min(slug.length(), 31)).replaceAll("-$", "")
+                            + "-" + randomSuffix(), request, passwordHash);
                 }
                 throw mapConflict(e);
             }

@@ -106,7 +106,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | 8 — UC-009 Admin dashboard | done | Manual testing S1–S8 green (S7 A1 validated against a NULL volume target), coverage-check clean. PR #22. |
 | A — Backlog UI polish | done | Branch `feat/backlog-ui-polish`, no DDL. Dynamic clinic branding (`SessionKeys.CLINIC_NAME` + `LayoutModel.clinicName`, `عيادتي` replaced across authenticated templates), save-toast gaps closed, actionable empty states (`fragments/empty-state.html`) applied to inventory/academy screens. `mvn verify` green (302 tests) + `ModularityTests`/`CssHygieneTest`/`TemplateHygieneTest`. Fixed a production regression found via the IT suite: `EmployeeDayController`'s POST fragment responses (check-in/check-out/task-confirm/assignment-propose) were 500ing because `renderGrid` never populated `layout`, only the GET handler did. |
 | B — Backlog notification center | done | PR #28 landed as `1773a0c`. Backlog item #1 from `docs/backlog/feature-suggestions.md`. `/manual-testing` passed 2026-09-27, so the phase is closed. |
-| C — Editable clinic identity | in progress | Branch `feat/backlog-clinic-identity`, V32. Name + login slug editing, audit, member notifications, owner-only settings form, and integration coverage implemented; full `mvn clean verify` green. `/manual-testing` remains before closure. |
+| C — Editable clinic identity | in progress | Branch `feat/backlog-clinic-identity`, V32. Name + login slug editing, audit, member notifications, owner-only settings form, and integration coverage implemented; review fixes cover concurrent updates, required audit, signup slugs, notification destination, and form errors. Full `mvn clean verify` green. `/manual-testing` remains before closure. |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -266,6 +266,7 @@ Backlog item #3 from `docs/backlog/feature-suggestions.md`. The owner can change
 - [x] V32 `update_clinic_identity` with tenant and active-owner guards.
 - [x] Owner-only settings card; audit row and active-member notification on change; acting owner's clinic name updates in session.
 - [x] `ClinicProfileServiceIT`, controller coverage, notification coverage, full `mvn clean verify`, CSS build, tenant and RTL checks.
+- [x] PR review fixes: lock-and-return previous identity atomically, require audit write, align new signup slugs, route member notifications to accessible home, and show persistent form errors; full `mvn clean verify` green.
 - [ ] `/manual-testing`: rename clinic, confirm new slug login succeeds and old slug fails, verify notifications and acting-owner session refresh.
 
 ### Phase 9 — Hardening and release

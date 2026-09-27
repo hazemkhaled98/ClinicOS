@@ -56,20 +56,24 @@ public class DefaultClinicProfileService implements ClinicProfileService {
         String trimmedName = name == null ? "" : name.trim();
         String trimmedSlug = slug == null ? "" : slug.trim().toLowerCase(Locale.ROOT);
 
-        Map<String, String> fieldErrors = validate(trimmedName, trimmedSlug);
-        if (!fieldErrors.isEmpty()) {
-            return fieldErrors;
-        }
-
         try {
             return transactionTemplate.execute(status -> {
                 requireOwner(clinicId, actorMembershipId);
-                ClinicIdentity before = read(clinicId);
+                ClinicIdentity current = read(clinicId);
+                Map<String, String> fieldErrors = validate(trimmedName, trimmedSlug);
+                if (current.slug().equals(trimmedSlug)) {
+                    fieldErrors.remove("slug");
+                }
+                if (!fieldErrors.isEmpty()) {
+                    return fieldErrors;
+                }
+                String[] previous = updateClinicIdentity(dsl.configuration(), clinicId, actorMembershipId,
+                        trimmedName, trimmedSlug);
+                ClinicIdentity before = new ClinicIdentity(previous[0], previous[1]);
                 if (before.name().equals(trimmedName) && before.slug().equals(trimmedSlug)) {
                     return Map.<String, String>of();
                 }
-                updateClinicIdentity(dsl.configuration(), clinicId, actorMembershipId, trimmedName, trimmedSlug);
-                activityLogService.log(clinicId, actorMembershipId, "clinic.identity_changed", "clinic", clinicId,
+                activityLogService.logRequired(clinicId, actorMembershipId, "clinic.identity_changed", "clinic", clinicId,
                         Map.of(
                                 "oldName", before.name(),
                                 "newName", trimmedName,

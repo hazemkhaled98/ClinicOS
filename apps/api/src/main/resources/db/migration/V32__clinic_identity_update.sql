@@ -4,12 +4,15 @@ create function update_clinic_identity(
     p_name text,
     p_slug text
 )
-returns void
+returns text[]
 language plpgsql
 security definer
 volatile
 set search_path = pg_catalog, public, pg_temp
 as $$
+declare
+    previous_name text;
+    previous_slug text;
 begin
     if p_clinic_id is distinct from nullif(current_setting('app.clinic_id', true), '')::uuid then
         raise exception 'tenant mismatch for clinic %', p_clinic_id;
@@ -27,9 +30,18 @@ begin
         raise exception 'only the clinic owner may change clinic identity';
     end if;
 
-    update public.clinic
-    set name = p_name, slug = p_slug
-    where id = p_clinic_id;
+    select c.name, c.slug into strict previous_name, previous_slug
+    from public.clinic c
+    where c.id = p_clinic_id
+    for update;
+
+    if previous_name is distinct from p_name or previous_slug is distinct from p_slug then
+        update public.clinic
+        set name = p_name, slug = p_slug
+        where id = p_clinic_id;
+    end if;
+
+    return array[previous_name, previous_slug];
 end;
 $$;
 

@@ -77,6 +77,7 @@ public class ClinicSettingsController {
             fieldErrors.putAll(serviceErrors);
         }
         Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات العيادة");
+        model.addAttribute("fieldErrors", fieldErrors);
         if (fieldErrors.isEmpty()) {
             form.setName(form.getName().trim());
             form.setSlug(form.getSlug().trim().toLowerCase(Locale.ROOT));

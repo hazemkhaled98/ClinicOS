@@ -48,23 +48,28 @@ public class ActivityLogService {
     public void log(UUID clinicId, UUID membershipId, String action, String entityType, UUID entityId,
             Map<String, ?> detail) {
         try {
-            transactionTemplate.execute(status -> {
-                dsl.insertInto(ACTIVITY_LOG)
-                        .set(ACTIVITY_LOG.CLINIC_ID, clinicId)
-                        .set(ACTIVITY_LOG.ACTOR_MEMBERSHIP_ID, membershipId)
-                        .set(ACTIVITY_LOG.ACTION, action)
-                        .set(ACTIVITY_LOG.ENTITY_TYPE, entityType)
-                        .set(ACTIVITY_LOG.ENTITY_ID, entityId)
-                        .set(ACTIVITY_LOG.DETAIL, detail == null || detail.isEmpty()
-                                ? null
-                                : JSONB.valueOf(serialize(detail)))
-                        .execute();
-                return null;
-            });
+            logRequired(clinicId, membershipId, action, entityType, entityId, detail);
         } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException e) {
             log.error("Failed to write activity log entry: clinic={} membership={} action={} entityType={}",
                     clinicId, membershipId, action, entityType, e);
         }
+    }
+
+    public void logRequired(UUID clinicId, UUID membershipId, String action, String entityType, UUID entityId,
+            Map<String, ?> detail) {
+        transactionTemplate.execute(status -> {
+            dsl.insertInto(ACTIVITY_LOG)
+                    .set(ACTIVITY_LOG.CLINIC_ID, clinicId)
+                    .set(ACTIVITY_LOG.ACTOR_MEMBERSHIP_ID, membershipId)
+                    .set(ACTIVITY_LOG.ACTION, action)
+                    .set(ACTIVITY_LOG.ENTITY_TYPE, entityType)
+                    .set(ACTIVITY_LOG.ENTITY_ID, entityId)
+                    .set(ACTIVITY_LOG.DETAIL, detail == null || detail.isEmpty()
+                            ? null
+                            : JSONB.valueOf(serialize(detail)))
+                    .execute();
+            return null;
+        });
     }
 
     private String serialize(Map<String, ?> detail) {

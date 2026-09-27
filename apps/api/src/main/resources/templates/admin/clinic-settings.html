@@ -10,7 +10,7 @@
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🏥 بيانات العيادة</h2>
-    <p class="text-sm text-on-surface-variant">الاسم الذي يظهر في صفحة الدخول والتقارير، والكود الذي يدخل به فريق العمل.</p>
+    <p class="text-sm text-on-surface-variant">الاسم الذي يظهر لفريق العمل داخل النظام، والكود الذي يدخل به الفريق.</p>
   </div>
 
   <form class="flex flex-col gap-4"
@@ -21,18 +21,25 @@
         اسم العيادة
         <input type="text" name="name" required
                class="clinicos-input w-full"
+               th:classappend="${fieldErrors != null and fieldErrors.containsKey('name')} ? 'clinicos-input--error'"
+               th:attr="aria-invalid=${fieldErrors != null and fieldErrors.containsKey('name')} ? 'true' : null,aria-describedby=${fieldErrors != null and fieldErrors.containsKey('name')} ? 'clinic-name-error' : null"
                th:value="${identityForm.getName()}" placeholder="عيادة النور">
+        <span id="clinic-name-error" class="text-danger-600" th:if="${fieldErrors != null and fieldErrors.containsKey('name')}" th:text="${fieldErrors.get('name')}"></span>
       </label>
       <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
         كود العيادة (للدخول)
         <input type="text" name="slug" required dir="ltr" inputmode="url" autocomplete="off"
                class="clinicos-input w-full font-mono"
+               th:classappend="${fieldErrors != null and fieldErrors.containsKey('slug')} ? 'clinicos-input--error'"
+               th:attr="aria-invalid=${fieldErrors != null and fieldErrors.containsKey('slug')} ? 'true' : null,aria-describedby=${fieldErrors != null and fieldErrors.containsKey('slug')} ? 'clinic-slug-help clinic-slug-error' : 'clinic-slug-help'"
                th:value="${identityForm.getSlug()}" placeholder="bright-smile">
+        <span id="clinic-slug-help">الكود الجديد: 3–40 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة، ولا يبدأ أو ينتهي بشرطة.</span>
+        <span id="clinic-slug-error" class="text-danger-600" th:if="${fieldErrors != null and fieldErrors.containsKey('slug')}" th:text="${fieldErrors.get('slug')}"></span>
       </label>
     </div>
 
-    <p class="text-xs leading-relaxed bg-warning-50 text-warning-600 rounded-xl p-3">
-      تغيير الكود يعني أن فريق العمل سيدخل بالكود الجديد — سلّمهم الكود مباشرة، ولا يمكن العودة للكود القديم.
+    <p class="text-xs leading-relaxed bg-warning-50 text-on-surface rounded-xl p-3">
+      تغيير الكود يوقف الدخول بالكود القديم فورًا — سلّم الفريق الكود الجديد قبل تسجيل دخولهم التالي.
     </p>
 
     <button type="submit" class="clinicos-btn me-auto">حفظ بيانات العيادة</button>

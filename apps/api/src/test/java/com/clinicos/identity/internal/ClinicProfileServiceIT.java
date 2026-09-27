@@ -7,7 +7,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +19,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.AbstractPostgresIntegrationTest;
@@ -40,6 +49,12 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private UUID clinicId;
     private String slug;
@@ -100,11 +115,48 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void aClinicCreatedWithALegacyShortCodeCanChangeItsName() throws Exception {
+        UUID legacyClinic;
+        UUID legacyOwner;
+        try (Connection connection = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
+            legacyClinic = TestFixtures.insertClinic(connection, "عيادة قصيرة", "x");
+            legacyOwner = TestFixtures.insertMembership(connection, legacyClinic, "owner");
+        }
+        TenantContext.set(legacyClinic);
+
+        assertThat(clinicProfileService.update(legacyClinic, legacyOwner, "عيادة جديدة", "x")).isEmpty();
+        assertThat(clinicProfileService.current(legacyClinic))
+                .isEqualTo(new ClinicIdentity("عيادة جديدة", "x"));
+    }
+
+    @Test
     void theNewSlugLogsMembersInAndTheOldOneNoLongerResolves() {
+        String password = "correct-horse-battery-staple";
+        try (Connection connection = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
+            UUID userId = TestFixtures.insertUser(connection, clinicId, "renamed-" + slug,
+                    passwordEncoder.encode(password), "active");
+            TestFixtures.insertMembership(connection, clinicId, userId);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
         clinicProfileService.update(clinicId, ownerMembership, "عيادة النور", newSlug());
 
         assertThat(fetchCredentialCount(newSlug())).isEqualTo(1L);
         assertThat(fetchCredentialCount(slug)).isZero();
+        assertThat(authenticationManager.authenticate(login(newSlug(), "renamed-" + slug, password))
+                .isAuthenticated()).isTrue();
+        assertThatThrownBy(() -> authenticationManager.authenticate(login(slug, "renamed-" + slug, password)))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    private static UsernamePasswordAuthenticationToken login(String clinicCode, String username, String password) {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addParameter("clinic", clinicCode);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+        token.setDetails(new ClinicWebAuthenticationDetails(request));
+        return token;
     }
 
     private String newSlug() {
@@ -143,7 +195,9 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(clinicProfileService.update(clinicId, ownerMembership, "عيادة النور", newSlug()))
                 .containsEntry("slug", "كود العيادة مستخدم بالفعل، اختر كودًا آخر");
 
-        assertThat(clinicProfileService.current(clinicId).slug()).isEqualTo(slug);
+        assertThat(clinicProfileService.current(clinicId)).isEqualTo(new ClinicIdentity("عيادة قديمة", slug));
+        assertThat(identityAuditCount()).isZero();
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
     }
 
     @Test
@@ -167,6 +221,7 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
                 .isInstanceOf(IllegalArgumentException.class);
 
         assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(identityAuditCount()).isZero();
     }
 
     @Test
@@ -174,6 +229,7 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(clinicProfileService.update(clinicId, ownerMembership, "عيادة قديمة", slug)).isEmpty();
 
         assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+        assertThat(identityAuditCount()).isZero();
     }
 
     @Test
@@ -199,6 +255,89 @@ class ClinicProfileServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(notifications.recent(clinicId, managerMembership, 20).get(0).payload())
                 .containsEntry("name", "عيادة النور")
                 .containsEntry("slug", newSlug());
+    }
+
+    @Test
+    void concurrentEditAuditsTheIdentityThatWasActuallyReplaced() throws Exception {
+        try (Connection blocker = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                Connection observer = DriverManager.getConnection(
+                        POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                var executor = Executors.newSingleThreadExecutor()) {
+            blocker.setAutoCommit(false);
+            try (PreparedStatement update = blocker.prepareStatement("update clinic set name = ? where id = ?")) {
+                update.setString(1, "عيادة وسطية");
+                update.setObject(2, clinicId);
+                update.executeUpdate();
+            }
+            var change = executor.submit(() -> {
+                TenantContext.set(clinicId);
+                try {
+                    return clinicProfileService.update(clinicId, ownerMembership, "عيادة النور", newSlug());
+                } finally {
+                    TenantContext.clear();
+                }
+            });
+            try {
+                boolean waiting = false;
+                for (int i = 0; i < 250 && !waiting; i++) {
+                    if (change.isDone()) {
+                        change.get(1, TimeUnit.SECONDS);
+                        throw new AssertionError("Identity edit finished before blocked on clinic row");
+                    }
+                    try (PreparedStatement query = observer.prepareStatement(
+                            "select exists(select 1 from pg_stat_activity where wait_event_type = 'Lock' "
+                                    + "and query like '%clinic%' and pid <> pg_backend_pid())")) {
+                        try (ResultSet result = query.executeQuery()) {
+                            result.next();
+                            waiting = result.getBoolean(1);
+                        }
+                    }
+                    if (!waiting) {
+                        Thread.sleep(20);
+                    }
+                }
+                assertThat(waiting).isTrue();
+            } finally {
+                blocker.commit();
+            }
+            assertThat(change.get(10, TimeUnit.SECONDS)).isEmpty();
+            String detail = transactionTemplate.execute(status -> dsl.select(ACTIVITY_LOG.DETAIL)
+                    .from(ACTIVITY_LOG).where(ACTIVITY_LOG.CLINIC_ID.eq(clinicId))
+                    .and(ACTIVITY_LOG.ACTION.eq("clinic.identity_changed"))
+                    .fetchOne(ACTIVITY_LOG.DETAIL).data());
+            assertThat(detail).contains("\"oldName\": \"عيادة وسطية\"");
+        }
+    }
+
+    @Test
+    void failedAuditAbortsTheIdentityChange() throws Exception {
+        try (Connection admin = DriverManager.getConnection(
+                POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+                var statement = admin.createStatement()) {
+            statement.execute("create function reject_identity_audit() returns trigger language plpgsql as $$ "
+                    + "begin raise exception 'audit unavailable'; end $$");
+            statement.execute("create trigger reject_identity_audit before insert on activity_log "
+                    + "for each row when (new.action = 'clinic.identity_changed') "
+                    + "execute function reject_identity_audit()");
+            try {
+                assertThatThrownBy(() -> clinicProfileService.update(clinicId, ownerMembership,
+                        "عيادة النور", newSlug()))
+                        .hasMessageContaining("audit unavailable");
+                assertThat(clinicProfileService.current(clinicId))
+                        .isEqualTo(new ClinicIdentity("عيادة قديمة", slug));
+                assertThat(notifications.unreadCount(clinicId, ownerMembership)).isZero();
+            } finally {
+                statement.execute("drop trigger reject_identity_audit on activity_log");
+                statement.execute("drop function reject_identity_audit()");
+            }
+        }
+    }
+
+    private int identityAuditCount() {
+        return transactionTemplate.execute(status -> dsl.fetchCount(ACTIVITY_LOG,
+                ACTIVITY_LOG.CLINIC_ID.eq(clinicId)
+                        .and(ACTIVITY_LOG.ACTION.eq("clinic.identity_changed"))));
     }
 
 }

@@ -207,6 +207,21 @@ class AdminControllerTest {
     }
 
     @Test
+    void managerSettingsDoNotExposeClinicIdentityEditing() {
+        HttpSession manager = session("manager");
+        allowDashboard();
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+        when(clinicSettingsService.get(CLINIC)).thenReturn(new ClinicSettingsService.ClinicSettings(
+                java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
+                new BigDecimal("20000"), 70, List.of(), List.of(), true));
+
+        assertThat(controller.settings(manager, model)).isEqualTo("admin/settings");
+        assertThat(model.getAttribute("identityForm")).isNull();
+        assertThat(model.getAttribute("canEditIdentity")).isNull();
+        verify(clinicProfileService, never()).current(any());
+    }
+
+    @Test
     void settingsRedirectsHomeWithoutCeoPermission() {
         HttpSession session = session();
         denyDashboard();

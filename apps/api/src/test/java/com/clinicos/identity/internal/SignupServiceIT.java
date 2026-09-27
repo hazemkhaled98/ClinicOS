@@ -99,6 +99,23 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void signupCreatesEditableCodesForShortAndLongNames() {
+        String suffix = uniqueSuffix();
+        SignupResult shortName = signupService.signUp(new SignupRequest(
+                "X", "Owner", "short-" + suffix, null, "password-12345"));
+        SignupResult longName = signupService.signUp(new SignupRequest(
+                "dental".repeat(9) + suffix, "Owner", "long-" + suffix, null, "password-12345"));
+        SignupResult collision = signupService.signUp(new SignupRequest(
+                "dental".repeat(9) + suffix + " again", "Owner", "another-" + suffix, null, "password-12345"));
+
+        assertThat(shortName.clinicSlug()).isEqualTo("clinic-x");
+        assertThat(longName.clinicSlug()).matches("[a-z0-9][a-z0-9-]{1,38}[a-z0-9]");
+        assertThat(longName.clinicSlug()).hasSizeLessThanOrEqualTo(40);
+        assertThat(collision.clinicSlug()).matches("[a-z0-9][a-z0-9-]{1,38}[a-z0-9]");
+        assertThat(collision.clinicSlug()).hasSizeLessThanOrEqualTo(40).isNotEqualTo(longName.clinicSlug());
+    }
+
+    @Test
     void BRG01_signupSeedsRoleGrantsScopedToTheBusinessRule() throws Exception {
         String suffix = uniqueSuffix();
 

@@ -429,6 +429,8 @@ class ClinicSettingsControllerTest {
         assertThat(view).isEqualTo("admin/clinic-settings :: clinicInfoCard");
         assertThat(form.getSlug()).isEqualTo("مأجور");
         assertThat(model.getAttribute("identityForm")).isSameAs(form);
+        assertThat(((Map<?, ?>) model.getAttribute("fieldErrors")).get("slug"))
+                .isEqualTo("كود العيادة يقبل أحرفًا إنجليزية صغيرة");
         assertThat(session.getAttribute(SessionKeys.CLINIC_NAME)).isNull();
     }
 
