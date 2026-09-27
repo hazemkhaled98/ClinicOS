@@ -267,7 +267,8 @@ Backlog item #3 from `docs/backlog/feature-suggestions.md`. The owner can change
 - [x] Owner-only settings card; audit row and active-member notification on change; acting owner's clinic name updates in session.
 - [x] `ClinicProfileServiceIT`, controller coverage, notification coverage, full `mvn clean verify`, CSS build, tenant and RTL checks.
 - [x] PR review fixes: lock-and-return previous identity atomically, require audit write, align new signup slugs, route member notifications to accessible home, and show persistent form errors; full `mvn clean verify` green.
-- [ ] `/manual-testing`: rename clinic, confirm new slug login succeeds and old slug fails, verify notifications and acting-owner session refresh.
+- [x] `/pr-sentinel` review fixes: keep the topbar product suffix outside the swappable name node, scope the rename sync to the identity card, sync the settings kicker, and keep `ActivityLogService.log()` best-effort without swallowing the tenant guard; full `mvn clean verify` green.
+- [x] `/manual-testing`: rename clinic, confirm new slug login succeeds and old slug fails, verify notifications and acting-owner session refresh (2026-09-27).
 
 ### Phase 9 — Hardening and release
 
