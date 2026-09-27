@@ -72,9 +72,12 @@ public class ClinicSettingsController {
             fieldErrors.put("slug", "كود العيادة مطلوب");
         }
         if (fieldErrors.isEmpty()) {
-            Map<String, String> serviceErrors = clinicProfileService.update(AdminAccess.clinicId(session),
-                    AdminAccess.membershipId(session), form.getName(), form.getSlug());
-            fieldErrors.putAll(serviceErrors);
+            try {
+                fieldErrors.putAll(clinicProfileService.update(AdminAccess.clinicId(session),
+                        AdminAccess.membershipId(session), form.getName(), form.getSlug()));
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("name", e.getMessage());
+            }
         }
         Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات العيادة");
         model.addAttribute("fieldErrors", fieldErrors);

@@ -22,10 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Writes activity-log entries. A write failure here is never allowed to
- * block the caller's own flow (e.g. login/clinic selection) -- the activity
- * log is a record of what happened, not a gate on whether it's allowed to
- * happen, so failures are logged and swallowed rather than propagated.
+ * Writes activity-log entries.
+ *
+ * <p>{@link #log} is best-effort. It serves flows where a missing audit row must
+ * not block the caller (e.g. login/clinic selection) -- the activity log is a
+ * record of what happened, not a gate on whether it's allowed to happen -- so
+ * write failures are logged and swallowed. A missing tenant is still propagated:
+ * that is a programming error, not an audit failure.
+ *
+ * <p>{@link #logRequired} is for audit-critical writes that must abort the
+ * caller's transaction when the insert fails.
  */
 @Service
 public class ActivityLogService {

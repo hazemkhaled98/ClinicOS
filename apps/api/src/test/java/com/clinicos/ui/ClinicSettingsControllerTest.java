@@ -435,6 +435,25 @@ class ClinicSettingsControllerTest {
     }
 
     @Test
+    void aServiceRejectionIsShownAsAFieldErrorInsteadOfBlowingUp() {
+        HttpSession session = ownerSession();
+        allowDashboard();
+        when(clinicProfileService.update(CLINIC, ACTOR, "عيادة النور", "bright-smile"))
+                .thenThrow(new IllegalArgumentException("مرسل الإشعار غير موجود"));
+        ClinicSettingsController.IdentityForm form = new ClinicSettingsController.IdentityForm();
+        form.setName("عيادة النور");
+        form.setSlug("bright-smile");
+
+        String view = controller.updateIdentity(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: clinicInfoCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(((Map<?, ?>) model.getAttribute("fieldErrors")).get("name"))
+                .isEqualTo("مرسل الإشعار غير موجود");
+        assertThat(session.getAttribute(SessionKeys.CLINIC_NAME)).isNull();
+    }
+
+    @Test
     void aBlankNameIsRejectedBeforeTheServiceIsCalled() {
         HttpSession session = ownerSession();
         allowDashboard();
