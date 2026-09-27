@@ -61,6 +61,7 @@ class DefaultInventoryServiceIT extends AbstractPostgresIntegrationTest {
         try (var connection = superuser()) {
             clinicA = TestFixtures.insertClinic(connection, "Clinic A", "clinic-a-" + UUID.randomUUID());
             clinicB = TestFixtures.insertClinic(connection, "Clinic B", "clinic-b-" + UUID.randomUUID());
+            TestFixtures.seedRolePermissionDefaults(connection, clinicA);
             owner = actor(connection, clinicA, "owner");
             manager = actor(connection, clinicA, "manager");
             assistant = actor(connection, clinicA, "assistant");

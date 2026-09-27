@@ -9,24 +9,35 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Writes activity-log entries. A write failure here is never allowed to
- * block the caller's own flow (e.g. login/clinic selection) -- the activity
- * log is a record of what happened, not a gate on whether it's allowed to
- * happen, so failures are logged and swallowed rather than propagated.
+ * Writes activity-log entries.
+ *
+ * <p>{@link #log} is best-effort. It serves flows where a missing audit row must
+ * not block the caller (e.g. login/clinic selection) -- the activity log is a
+ * record of what happened, not a gate on whether it's allowed to happen -- so
+ * write failures are logged and swallowed. A missing tenant is still propagated:
+ * that is a programming error, not an audit failure.
+ *
+ * <p>{@link #logRequired} is for audit-critical writes that must abort the
+ * caller's transaction when the insert fails.
  */
 @Service
 public class ActivityLogService {
 
     private static final Logger log = LoggerFactory.getLogger(ActivityLogService.class);
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
@@ -37,19 +48,48 @@ public class ActivityLogService {
     }
 
     public void log(UUID clinicId, UUID membershipId, String action, String entityType) {
+        log(clinicId, membershipId, action, entityType, null, null);
+    }
+
+    public void log(UUID clinicId, UUID membershipId, String action, String entityType, UUID entityId,
+            Map<String, ?> detail) {
         try {
-            transactionTemplate.execute(status -> {
-                dsl.insertInto(ACTIVITY_LOG)
-                        .set(ACTIVITY_LOG.CLINIC_ID, clinicId)
-                        .set(ACTIVITY_LOG.ACTOR_MEMBERSHIP_ID, membershipId)
-                        .set(ACTIVITY_LOG.ACTION, action)
-                        .set(ACTIVITY_LOG.ENTITY_TYPE, entityType)
-                        .execute();
-                return null;
-            });
-        } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException e) {
+            logRequired(clinicId, membershipId, action, entityType, entityId, detail);
+        } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException
+                | LogDetailException e) {
             log.error("Failed to write activity log entry: clinic={} membership={} action={} entityType={}",
                     clinicId, membershipId, action, entityType, e);
+        }
+    }
+
+    public void logRequired(UUID clinicId, UUID membershipId, String action, String entityType, UUID entityId,
+            Map<String, ?> detail) {
+        transactionTemplate.execute(status -> {
+            dsl.insertInto(ACTIVITY_LOG)
+                    .set(ACTIVITY_LOG.CLINIC_ID, clinicId)
+                    .set(ACTIVITY_LOG.ACTOR_MEMBERSHIP_ID, membershipId)
+                    .set(ACTIVITY_LOG.ACTION, action)
+                    .set(ACTIVITY_LOG.ENTITY_TYPE, entityType)
+                    .set(ACTIVITY_LOG.ENTITY_ID, entityId)
+                    .set(ACTIVITY_LOG.DETAIL, detail == null || detail.isEmpty()
+                            ? null
+                            : JSONB.valueOf(serialize(detail)))
+                    .execute();
+            return null;
+        });
+    }
+
+    private String serialize(Map<String, ?> detail) {
+        try {
+            return JSON.writeValueAsString(detail);
+        } catch (JsonProcessingException e) {
+            throw new LogDetailException("تعذر تجهيز تفاصيل السجل", e);
+        }
+    }
+
+    private static final class LogDetailException extends RuntimeException {
+        LogDetailException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 

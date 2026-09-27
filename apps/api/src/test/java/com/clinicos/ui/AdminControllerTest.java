@@ -29,6 +29,7 @@ import com.clinicos.evaluation.api.EvaluationService;
 import com.clinicos.evaluation.api.EvaluationService.MonthlyEvaluation;
 import com.clinicos.evaluation.api.EvaluationService.VolumePace;
 import com.clinicos.identity.api.SessionKeys;
+import com.clinicos.identity.api.ClinicProfileService;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
@@ -53,6 +54,7 @@ class AdminControllerTest {
     private UserAdminService userAdminService;
     private EvaluationService evaluationService;
     private AcademyService academyService;
+    private ClinicProfileService clinicProfileService;
     private AdminController controller;
     private Model model;
 
@@ -66,8 +68,10 @@ class AdminControllerTest {
         userAdminService = mock(UserAdminService.class);
         evaluationService = mock(EvaluationService.class);
         academyService = mock(AcademyService.class);
+        clinicProfileService = mock(ClinicProfileService.class);
         controller = new AdminController(layoutModel, employeeService, activityLogService,
-                clinicSettingsService, workCalendarService, userAdminService, evaluationService, academyService);
+                clinicSettingsService, workCalendarService, userAdminService, evaluationService, academyService,
+                clinicProfileService);
         model = new ExtendedModelMap();
         when(workCalendarService.workingWeekdays(CLINIC)).thenReturn(List.of(6, 7, 1, 2, 3, 4));
         when(workCalendarService.listHolidays(CLINIC)).thenReturn(List.of());
@@ -181,6 +185,8 @@ class AdminControllerTest {
         HttpSession session = session();
         allowDashboard();
         when(employeeService.list(CLINIC)).thenReturn(List.of());
+        when(clinicProfileService.current(CLINIC))
+                .thenReturn(new ClinicProfileService.ClinicIdentity("عيادتي", "my-clinic"));
         var settings = new ClinicSettingsService.ClinicSettings(
                 java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
                 new java.math.BigDecimal("20000"), 70, List.of(), List.of(), true);
@@ -196,6 +202,23 @@ class AdminControllerTest {
         assertThat(model.getAttribute("tiers")).isEqualTo(List.of());
         assertThat(model.getAttribute("weightsForm")).isNotNull();
         assertThat(model.getAttribute("employeeRoles")).isNotNull();
+        assertThat(model.getAttribute("canEditIdentity")).isEqualTo(true);
+        assertThat(model.getAttribute("identityForm")).isNotNull();
+    }
+
+    @Test
+    void managerSettingsDoNotExposeClinicIdentityEditing() {
+        HttpSession manager = session("manager");
+        allowDashboard();
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+        when(clinicSettingsService.get(CLINIC)).thenReturn(new ClinicSettingsService.ClinicSettings(
+                java.time.LocalTime.of(9, 0), java.time.LocalTime.of(17, 0), 15, 26,
+                new BigDecimal("20000"), 70, List.of(), List.of(), true));
+
+        assertThat(controller.settings(manager, model)).isEqualTo("admin/settings");
+        assertThat(model.getAttribute("identityForm")).isNull();
+        assertThat(model.getAttribute("canEditIdentity")).isNull();
+        verify(clinicProfileService, never()).current(any());
     }
 
     @Test

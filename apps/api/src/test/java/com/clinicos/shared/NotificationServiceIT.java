@@ -180,6 +180,31 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void notifyAllMembersReachesEveryActiveMemberIncludingTheActorButNotSuspendedOnes() {
+        int created = notifications.notifyAllMembers(clinicId, ownerMembership,
+                NotificationKind.CLINIC_IDENTITY_CHANGED,
+                Map.of("name", "عيادة النور", "slug", "bright-smile"));
+
+        assertThat(created).isEqualTo(3);
+        assertThat(notifications.unreadCount(clinicId, ownerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, managerMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, assistantMembership)).isEqualTo(1);
+        assertThat(notifications.unreadCount(clinicId, suspendedManagerMembership)).isZero();
+        assertThat(notifications.recent(clinicId, managerMembership, 20).get(0).payload())
+                .containsEntry("name", "عيادة النور")
+                .containsEntry("slug", "bright-smile");
+    }
+
+    @Test
+    void clinicIdentityNotificationsRequireBothNameAndSlug() {
+        assertThatThrownBy(() -> notifications.notifyAllMembers(clinicId, ownerMembership,
+                NotificationKind.CLINIC_IDENTITY_CHANGED, Map.of("name", "عيادة النور")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("بيانات الإشعار غير مكتملة");
+    }
+
+
+    @Test
     void notifyEmployeeReachesTheLinkedActiveMembershipAndNobodyElse() {
         int created = notifications.notifyEmployee(clinicId, ownerMembership, assistantEmployeeId,
                 NotificationKind.ACADEMY_SUBMISSION_VERIFIED, Map.of("unit", "تعقيم الأدوات"));
@@ -434,7 +459,8 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 Map.entry(NotificationKind.PROCEDURE_CHANGE_REQUESTED, Map.of()),
                 Map.entry(NotificationKind.USER_ACCESS_CHANGED, Map.of()),
                 Map.entry(NotificationKind.EMPLOYEE_CHANGED, Map.of()),
-                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of()));
+                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of()),
+                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, Map.of()));
     }
 
     private static Map<NotificationKind, String> invalidPayloadJsons() {
@@ -454,6 +480,7 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 Map.entry(NotificationKind.PROCEDURE_CHANGE_REQUESTED, "{\"actor\":\"مدير\"}"),
                 Map.entry(NotificationKind.USER_ACCESS_CHANGED, "{\"actor\":\"مدير\"}"),
                 Map.entry(NotificationKind.EMPLOYEE_CHANGED, "{\"actor\":\"مدير\"}"),
-                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "{\"actor\":\"مدير\"}"));
+                Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "{\"actor\":\"مدير\"}"));
     }
 }

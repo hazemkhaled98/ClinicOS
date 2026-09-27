@@ -35,11 +35,17 @@
         setTimeout(function () { el.classList.add('hidden'); }, 300);
       }, type === 'error' ? 3000 : 2500);
     };
-    document.addEventListener('htmx:afterSwap', function () {
+    document.addEventListener('htmx:afterSwap', function (e) {
       var el = document.querySelector('[data-toast]');
       if (el) {
         window.toastShow(el.getAttribute('data-toast'), el.getAttribute('data-toast-type') || 'success');
         el.removeAttribute('data-toast');
+      }
+      var renamed = e.detail.elt;
+      if (renamed && renamed.matches && renamed.matches('[data-clinic-name]')) {
+        var name = renamed.getAttribute('data-clinic-name');
+        document.querySelectorAll('.clinicos-clinic-name').forEach(function (node) { node.textContent = name; });
+        renamed.removeAttribute('data-clinic-name');
       }
     });
     document.addEventListener('htmx:confirm', function (e) {

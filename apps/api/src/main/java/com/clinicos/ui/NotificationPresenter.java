@@ -33,7 +33,8 @@ public class NotificationPresenter {
             Map.entry(NotificationKind.PROCEDURE_CHANGE_REQUESTED, "/inventory/approvals"),
             Map.entry(NotificationKind.USER_ACCESS_CHANGED, "/admin-dashboard/users"),
             Map.entry(NotificationKind.EMPLOYEE_CHANGED, "/admin-dashboard"),
-            Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "/admin-dashboard/settings"));
+            Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "/admin-dashboard/settings"),
+            Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "/"));
 
     public List<Item> present(List<Notification> notifications) {
         return notifications.stream().map(n -> present(n)).toList();
@@ -60,6 +61,10 @@ public class NotificationPresenter {
             case USER_ACCESS_CHANGED -> item(notification, "تم تعديل صلاحيات المستخدم \"" + payload.get("user") + "\" بواسطة " + actor);
             case EMPLOYEE_CHANGED -> item(notification, "تم تعديل بيانات الموظف \"" + payload.get("employee") + "\" بواسطة " + actor);
             case CLINIC_SETTINGS_CHANGED -> item(notification, "تم تعديل إعدادات " + payload.get("area") + " بواسطة " + actor);
+            case CLINIC_IDENTITY_CHANGED -> new Item(notification.id(),
+                    "تم تغيير بيانات العيادة إلى \"" + payload.get("name") + "\" بواسطة " + actor,
+                    "الكود الجديد للدخول هو " + payload.get("slug"), linkFor(kind), notification.read(),
+                    notification.createdAt());
         };
     }
 
@@ -77,4 +82,5 @@ public class NotificationPresenter {
         return new Item(notification.id(), title, detail, linkFor(notification.kind()), notification.read(),
                 notification.createdAt());
     }
+
 }

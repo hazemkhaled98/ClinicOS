@@ -46,6 +46,8 @@ public interface NotificationService {
     int notifyApprovers(UUID clinicId, UUID actorMembershipId, String managerPermission, NotificationKind kind,
             Map<String, String> payload);
 
+    int notifyAllMembers(UUID clinicId, UUID actorMembershipId, NotificationKind kind, Map<String, String> payload);
+
     int unreadCount(UUID clinicId, UUID membershipId);
 
     List<Notification> recent(UUID clinicId, UUID membershipId, int limit);

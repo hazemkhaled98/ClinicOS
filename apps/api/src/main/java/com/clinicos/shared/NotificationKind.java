@@ -19,7 +19,8 @@ public enum NotificationKind {
     PROCEDURE_CHANGE_REQUESTED,
     USER_ACCESS_CHANGED,
     EMPLOYEE_CHANGED,
-    CLINIC_SETTINGS_CHANGED;
+    CLINIC_SETTINGS_CHANGED,
+    CLINIC_IDENTITY_CHANGED;
 
     public String literal() {
         return name();
@@ -42,8 +43,10 @@ public enum NotificationKind {
             case USER_ACCESS_CHANGED -> payload.get("user");
             case EMPLOYEE_CHANGED -> payload.get("employee");
             case CLINIC_SETTINGS_CHANGED -> payload.get("area");
+            case CLINIC_IDENTITY_CHANGED -> payload.get("name");
         };
         return subject != null && !subject.isBlank()
+                && (this != CLINIC_IDENTITY_CHANGED || nonBlank(payload.get("slug")))
                 && (this != INVENTORY_CHANGE_REQUESTED || nonBlank(payload.get("action")))
                 && (!isRejected() || payload.get("reason") != null && !payload.get("reason").isBlank());
     }

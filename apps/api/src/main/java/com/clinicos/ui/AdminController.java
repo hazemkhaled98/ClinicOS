@@ -30,6 +30,7 @@ import com.clinicos.evaluation.api.EvaluationService;
 import com.clinicos.evaluation.api.EvaluationService.TeamScore;
 import com.clinicos.shared.ActivityLogService.Entry;
 import com.clinicos.shared.jooq.enums.AcademyAudience;
+import com.clinicos.identity.api.ClinicProfileService;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
 import com.clinicos.shared.ActivityLogService;
@@ -63,11 +64,13 @@ public class AdminController {
     private final UserAdminService userAdminService;
     private final EvaluationService evaluationService;
     private final AcademyService academyService;
+    private final ClinicProfileService clinicProfileService;
 
     public AdminController(LayoutModel layoutModel, EmployeeService employeeService,
             ActivityLogService activityLogService, ClinicSettingsService clinicSettingsService,
             WorkCalendarService workCalendarService, UserAdminService userAdminService,
-            EvaluationService evaluationService, AcademyService academyService) {
+            EvaluationService evaluationService, AcademyService academyService,
+            ClinicProfileService clinicProfileService) {
         this.layoutModel = layoutModel;
         this.employeeService = employeeService;
         this.activityLogService = activityLogService;
@@ -76,6 +79,7 @@ public class AdminController {
         this.userAdminService = userAdminService;
         this.evaluationService = evaluationService;
         this.academyService = academyService;
+        this.clinicProfileService = clinicProfileService;
     }
 
     @GetMapping("/admin-dashboard")
@@ -303,6 +307,11 @@ public class AdminController {
         model.addAttribute("holidaysForm", new ClinicSettingsController.HolidayForm());
         model.addAttribute("holidays", workCalendarService.listHolidays(clinicId));
         model.addAttribute("employees", employeeService.list(clinicId));
+        if ("owner".equals(AdminAccess.roleCode(session))) {
+            model.addAttribute("identityForm",
+                    ClinicSettingsController.IdentityForm.from(clinicProfileService.current(clinicId)));
+            model.addAttribute("canEditIdentity", true);
+        }
         renderCard(model, session, userAdminService.list(clinicId));
         return "admin/settings";
     }

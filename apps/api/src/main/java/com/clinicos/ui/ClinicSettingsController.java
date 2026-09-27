@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,6 +27,9 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidat
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
+import com.clinicos.identity.api.ClinicProfileService;
+import com.clinicos.identity.api.ClinicProfileService.ClinicIdentity;
+import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.staff.api.EmployeeService;
 
 import jakarta.servlet.http.HttpSession;
@@ -43,13 +47,51 @@ public class ClinicSettingsController {
     private final ClinicSettingsService clinicSettingsService;
     private final WorkCalendarService workCalendarService;
     private final EmployeeService employeeService;
+    private final ClinicProfileService clinicProfileService;
 
     public ClinicSettingsController(LayoutModel layoutModel, ClinicSettingsService clinicSettingsService,
-            WorkCalendarService workCalendarService, EmployeeService employeeService) {
+            WorkCalendarService workCalendarService, EmployeeService employeeService,
+            ClinicProfileService clinicProfileService) {
         this.layoutModel = layoutModel;
         this.clinicSettingsService = clinicSettingsService;
         this.workCalendarService = workCalendarService;
         this.employeeService = employeeService;
+        this.clinicProfileService = clinicProfileService;
+    }
+
+    @PostMapping("/admin-dashboard/settings/identity")
+    public String updateIdentity(IdentityForm form, HttpSession session, Model model) {
+        if (!AdminAccess.canDashboard(layoutModel, session) || !isOwner(session)) {
+            return "redirect:/";
+        }
+        Map<String, String> fieldErrors = new HashMap<>();
+        if (form.getName() == null || form.getName().isBlank()) {
+            fieldErrors.put("name", "اسم العيادة مطلوب");
+        }
+        if (form.getSlug() == null || form.getSlug().isBlank()) {
+            fieldErrors.put("slug", "كود العيادة مطلوب");
+        }
+        if (fieldErrors.isEmpty()) {
+            try {
+                fieldErrors.putAll(clinicProfileService.update(AdminAccess.clinicId(session),
+                        AdminAccess.membershipId(session), form.getName(), form.getSlug()));
+            } catch (IllegalArgumentException e) {
+                fieldErrors.put("name", e.getMessage());
+            }
+        }
+        Toasts.fromErrors(model, fieldErrors, "تم حفظ بيانات العيادة");
+        model.addAttribute("fieldErrors", fieldErrors);
+        if (fieldErrors.isEmpty()) {
+            form.setName(form.getName().trim());
+            form.setSlug(form.getSlug().trim().toLowerCase(Locale.ROOT));
+            session.setAttribute(SessionKeys.CLINIC_NAME, form.getName());
+        }
+        model.addAttribute("identityForm", form);
+        return "admin/clinic-settings :: clinicInfoCard";
+    }
+
+    private static boolean isOwner(HttpSession session) {
+        return "owner".equals(AdminAccess.roleCode(session));
     }
 
     @PostMapping("/admin-dashboard/settings/weights")
@@ -293,6 +335,34 @@ public class ClinicSettingsController {
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .stripTrailingZeros().toPlainString();
+    }
+
+    public static class IdentityForm {
+        private String name;
+        private String slug;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getSlug() {
+            return slug;
+        }
+
+        public void setSlug(String slug) {
+            this.slug = slug;
+        }
+
+        static IdentityForm from(ClinicIdentity saved) {
+            IdentityForm form = new IdentityForm();
+            form.name = saved.name();
+            form.slug = saved.slug();
+            return form;
+        }
     }
 
     public static class WeightsForm {

@@ -215,6 +215,16 @@ class NotificationControllerTest {
         assertThat(items.get(5).detail()).isEqualTo("السبب: أعد الصورة");
     }
 
+    @Test
+    void clinicIdentityNotificationShowsNewCodeAndLinksToAccessibleHome() {
+        var item = new NotificationPresenter().present(notification(NotificationKind.CLINIC_IDENTITY_CHANGED,
+                Map.of("actor", "سارة", "name", "عيادة النور", "slug", "bright-smile"), false));
+
+        assertThat(item.title()).contains("عيادة النور");
+        assertThat(item.detail()).contains("bright-smile");
+        assertThat(item.href()).isEqualTo("/");
+    }
+
     private static Notification notification(NotificationKind kind, Map<String, String> payload, boolean read) {
         return new Notification(UUID.randomUUID(), kind, payload, OffsetDateTime.now(),
                 read ? OffsetDateTime.now() : null);
