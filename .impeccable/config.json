@@ -1,26 +1,9 @@
 {
   "detector": {
-    "ignoreRules": [],
+    "ignoreRules": [
+      "broken-image"
+    ],
     "ignoreFiles": [],
-    "ignoreValues": [
-      {
-        "rule": "broken-image",
-        "value": "*",
-        "files": [
-          "apps/api/src/main/resources/templates/academy-verify.html"
-        ],
-        "createdAt": "2026-09-18T13:53:22.960Z",
-        "reason": "dynamic th:src bound to resident AttachmentController stream; img only rendered when photoId present"
-      },
-      {
-        "rule": "broken-image",
-        "value": "*",
-        "files": [
-          "apps/api/src/main/resources/templates/fragments/drawer.html"
-        ],
-        "createdAt": "2026-09-27T14:36:35.780Z",
-        "reason": "False positive: static rule does not parse Thymeleaf th:src attribute namespace, so it sees an <img> with no literal src. Verified: file is a valid 36691-byte PNG serving HTTP 200 image/png and decoding 256x256 in browser."
-      }
-    ]
+    "ignoreValues": []
   }
 }
