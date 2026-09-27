@@ -49,7 +49,8 @@ public class ActivityLogService {
             Map<String, ?> detail) {
         try {
             logRequired(clinicId, membershipId, action, entityType, entityId, detail);
-        } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException e) {
+        } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException
+                | LogDetailException e) {
             log.error("Failed to write activity log entry: clinic={} membership={} action={} entityType={}",
                     clinicId, membershipId, action, entityType, e);
         }
@@ -76,7 +77,13 @@ public class ActivityLogService {
         try {
             return JSON.writeValueAsString(detail);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("تعذر تجهيز تفاصيل السجل", e);
+            throw new LogDetailException("تعذر تجهيز تفاصيل السجل", e);
+        }
+    }
+
+    private static final class LogDetailException extends RuntimeException {
+        LogDetailException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
