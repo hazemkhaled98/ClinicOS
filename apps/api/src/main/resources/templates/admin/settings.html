@@ -12,6 +12,9 @@
 <div id="employees-card"
          th:replace="~{admin/employees :: employeesCard(${employees}, ${employeeRoles})}">
       </div>
+      <th:block th:if="${canEditIdentity}">
+        <div th:replace="~{admin/clinic-settings :: clinicInfoCard(${identityForm})}"></div>
+      </th:block>
       <div th:replace="~{admin/clinic-settings :: weightsCard(${weightsForm}, ${weightsSum})}"></div>
        <div th:replace="~{admin/clinic-settings :: volumeCard(${volumeForm})}"></div>
        <div th:replace="~{admin/clinic-settings :: invoicePhotoPolicyCard(${settings.invoicePhotoRequired()})}"></div>

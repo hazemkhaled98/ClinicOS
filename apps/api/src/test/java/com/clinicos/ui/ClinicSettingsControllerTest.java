@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,7 @@ import com.clinicos.clinicconfig.api.ClinicSettingsService.ClinicSettingsValidat
 import com.clinicos.clinicconfig.api.ClinicSettingsService.Tier;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.clinicconfig.api.WorkCalendarService.HolidayRequest;
+import com.clinicos.identity.api.ClinicProfileService;
 import com.clinicos.identity.api.SessionKeys;
 import com.clinicos.staff.api.EmployeeService;
 import com.clinicos.staff.api.EmployeeService.Employee;
@@ -60,6 +63,7 @@ class ClinicSettingsControllerTest {
     private ClinicSettingsService settingsService;
     private WorkCalendarService workCalendarService;
     private EmployeeService employeeService;
+    private ClinicProfileService clinicProfileService;
     private ClinicSettingsController controller;
     private MockMvc mockMvc;
     private Model model;
@@ -70,8 +74,9 @@ class ClinicSettingsControllerTest {
         settingsService = mock(ClinicSettingsService.class);
         workCalendarService = mock(WorkCalendarService.class);
         employeeService = mock(EmployeeService.class);
+        clinicProfileService = mock(ClinicProfileService.class);
         controller = new ClinicSettingsController(layoutModel, settingsService,
-                workCalendarService, employeeService);
+                workCalendarService, employeeService, clinicProfileService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         model = new ExtendedModelMap();
         when(settingsService.get(CLINIC)).thenReturn(settings(WEIGHTS, TIERS));
@@ -388,6 +393,92 @@ class ClinicSettingsControllerTest {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(SessionKeys.CLINIC_ID, CLINIC);
         session.setAttribute(SessionKeys.MEMBERSHIP_ID, ACTOR);
+        return session;
+    }
+
+    @Test
+    void theOwnerRenamesTheClinicAndItsSessionSeesTheNewName() {
+        MockHttpSession session = writableOwnerSession();
+        allowDashboard();
+        when(clinicProfileService.update(CLINIC, ACTOR, "عيادة النور", "bright-smile")).thenReturn(Map.of());
+        ClinicSettingsController.IdentityForm form = new ClinicSettingsController.IdentityForm();
+        form.setName("عيادة النور");
+        form.setSlug("Bright-Smile");
+
+        String view = controller.updateIdentity(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: clinicInfoCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("identityForm")).isSameAs(form);
+        assertThat(form.getSlug()).isEqualTo("bright-smile");
+        assertThat(session.getAttribute(SessionKeys.CLINIC_NAME)).isEqualTo("عيادة النور");
+    }
+
+    @Test
+    void aFieldErrorReRendersTheSubmittedValuesAndDoesNotTouchTheSession() {
+        HttpSession session = ownerSession();
+        allowDashboard();
+        when(clinicProfileService.update(CLINIC, ACTOR, "عيادة النور", "مأجور"))
+                .thenReturn(Map.of("slug", "كود العيادة يقبل أحرفًا إنجليزية صغيرة"));
+        ClinicSettingsController.IdentityForm form = new ClinicSettingsController.IdentityForm();
+        form.setName("عيادة النور");
+        form.setSlug("مأجور");
+
+        String view = controller.updateIdentity(form, session, model);
+
+        assertThat(view).isEqualTo("admin/clinic-settings :: clinicInfoCard");
+        assertThat(form.getSlug()).isEqualTo("مأجور");
+        assertThat(model.getAttribute("identityForm")).isSameAs(form);
+        assertThat(session.getAttribute(SessionKeys.CLINIC_NAME)).isNull();
+    }
+
+    @Test
+    void aBlankNameIsRejectedBeforeTheServiceIsCalled() {
+        HttpSession session = ownerSession();
+        allowDashboard();
+        ClinicSettingsController.IdentityForm form = new ClinicSettingsController.IdentityForm();
+        form.setName("  ");
+        form.setSlug("bright-smile");
+
+        controller.updateIdentity(form, session, model);
+
+        verifyNoInteractions(clinicProfileService);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+    }
+
+    @Test
+    void aManagerCannotRenameTheClinic() {
+        HttpSession session = session();
+        allowDashboard();
+
+        assertThat(controller.updateIdentity(new ClinicSettingsController.IdentityForm(), session, model))
+                .isEqualTo("redirect:/");
+
+        verifyNoInteractions(clinicProfileService);
+    }
+
+    @Test
+    void aUserWithoutDashboardAccessCannotRenameTheClinic() {
+        HttpSession session = ownerSession();
+        denyDashboard();
+
+        assertThat(controller.updateIdentity(new ClinicSettingsController.IdentityForm(), session, model))
+                .isEqualTo("redirect:/");
+
+        verifyNoInteractions(clinicProfileService);
+    }
+
+    private static HttpSession ownerSession() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("owner");
+        return session;
+    }
+
+    private static MockHttpSession writableOwnerSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(SessionKeys.CLINIC_ID, CLINIC);
+        session.setAttribute(SessionKeys.MEMBERSHIP_ID, ACTOR);
+        session.setAttribute(SessionKeys.ROLE_CODE, "owner");
         return session;
     }
 }

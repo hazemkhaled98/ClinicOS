@@ -88,9 +88,10 @@ class UC008InventoryFoundationIT extends AbstractBrowserIT {
         page().navigate(getUrl() + "inventory/items");
         page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("تعديل")).first().click();
         page().locator("input[name='name']").last().fill("كمبوزيت معدّل");
-        page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("إرسال طلب التعديل")).click();
-        page().waitForURL(url -> url.contains("/inventory/items"));
-        org.junit.jupiter.api.Assertions.assertEquals("بانتظار موافقة المدير", page().locator("body").getAttribute("data-toast"));
+        page().waitForNavigation(
+                () -> page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("إرسال طلب التعديل")).click());
+        PlaywrightAssertions.assertThat(page().locator("#toast-root"))
+                .containsText("بانتظار موافقة المدير");
         PlaywrightAssertions.assertThat(page().getByText("كمبوزيت", new Page.GetByTextOptions().setExact(true)).first()).isVisible();
 
         page().context().clearCookies();

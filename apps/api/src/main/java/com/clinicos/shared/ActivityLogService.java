@@ -9,9 +9,13 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.DSLContext;
+import org.jooq.JSONB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class ActivityLogService {
 
     private static final Logger log = LoggerFactory.getLogger(ActivityLogService.class);
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private final DSLContext dsl;
     private final TransactionTemplate transactionTemplate;
@@ -37,6 +42,11 @@ public class ActivityLogService {
     }
 
     public void log(UUID clinicId, UUID membershipId, String action, String entityType) {
+        log(clinicId, membershipId, action, entityType, null, null);
+    }
+
+    public void log(UUID clinicId, UUID membershipId, String action, String entityType, UUID entityId,
+            Map<String, ?> detail) {
         try {
             transactionTemplate.execute(status -> {
                 dsl.insertInto(ACTIVITY_LOG)
@@ -44,12 +54,24 @@ public class ActivityLogService {
                         .set(ACTIVITY_LOG.ACTOR_MEMBERSHIP_ID, membershipId)
                         .set(ACTIVITY_LOG.ACTION, action)
                         .set(ACTIVITY_LOG.ENTITY_TYPE, entityType)
+                        .set(ACTIVITY_LOG.ENTITY_ID, entityId)
+                        .set(ACTIVITY_LOG.DETAIL, detail == null || detail.isEmpty()
+                                ? null
+                                : JSONB.valueOf(serialize(detail)))
                         .execute();
                 return null;
             });
         } catch (org.springframework.dao.DataAccessException | org.jooq.exception.DataAccessException e) {
             log.error("Failed to write activity log entry: clinic={} membership={} action={} entityType={}",
                     clinicId, membershipId, action, entityType, e);
+        }
+    }
+
+    private String serialize(Map<String, ?> detail) {
+        try {
+            return JSON.writeValueAsString(detail);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("تعذر تجهيز تفاصيل السجل", e);
         }
     }
 

@@ -154,6 +154,26 @@ public class DefaultNotificationService implements NotificationService {
     }
 
     @Override
+    public int notifyAllMembers(UUID clinicId, UUID actorMembershipId, NotificationKind kind,
+            Map<String, String> payload) {
+        if (actorMembershipId == null || kind == null) {
+            throw new IllegalArgumentException("مرسل الإشعار أو نوعه مطلوب");
+        }
+        return transactionTemplate.execute(status -> {
+            guardTenant(clinicId);
+            Map<String, String> enriched = enrichPayload(clinicId, actorMembershipId, kind, payload);
+            validatePayloadForWrite(kind, enriched);
+            var recipients = dsl.select(MEMBERSHIP.ID)
+                    .from(MEMBERSHIP)
+                    .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                    .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
+                    .fetchSet(MEMBERSHIP.ID);
+            recipients.forEach(id -> insert(clinicId, id, kind, enriched));
+            return recipients.size();
+        });
+    }
+
+    @Override
     public int unreadCount(UUID clinicId, UUID membershipId) {
         return transactionTemplate.execute(status -> {
             guardTenant(clinicId);
