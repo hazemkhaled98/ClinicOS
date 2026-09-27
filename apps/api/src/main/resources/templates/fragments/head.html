@@ -41,6 +41,11 @@
         window.toastShow(el.getAttribute('data-toast'), el.getAttribute('data-toast-type') || 'success');
         el.removeAttribute('data-toast');
       }
+      var renamed = document.querySelector('[data-clinic-name]');
+      if (renamed) {
+        var name = renamed.getAttribute('data-clinic-name');
+        document.querySelectorAll('.clinicos-clinic-name').forEach(function (node) { node.textContent = name; });
+      }
     });
     document.addEventListener('htmx:confirm', function (e) {
       if (!e.detail.question) return;

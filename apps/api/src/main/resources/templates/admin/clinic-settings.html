@@ -7,7 +7,7 @@
 
 <div th:fragment="clinicInfoCard(identityForm)"
      id="clinic-info-card" class="mt-6 p-6 sm:p-8 clinicos-card"
-     th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
+     th:attr="data-toast=${toastMessage},data-toast-type=${toastType},data-clinic-name=${fieldErrors == null or fieldErrors.isEmpty() ? identityForm.getName() : null}">
   <div class="flex flex-col gap-2 mb-6">
     <h2 class="flex items-center gap-2 text-xl font-extrabold text-teal-900">🏥 بيانات العيادة</h2>
     <p class="text-sm text-on-surface-variant">الاسم الذي يظهر لفريق العمل داخل النظام، والكود الذي يدخل به الفريق.</p>
