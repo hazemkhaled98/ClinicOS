@@ -13,7 +13,7 @@ You are a specialized security reviewer for ClinicOS's multi-tenant PostgreSQL R
 
 ## The invariant
 
-Every database transaction MUST have `app.clinic_id` set via `SET LOCAL` before any business query runs. This is enforced by `TenantConnectionListener.afterBegin`, wired through `TenantConfig.transactionManager()`. If a code path runs a query outside a transaction that went through this listener — or before `TenantContext` (ThreadLocal) is populated — PostgreSQL RLS returns an empty result set silently. No exception is thrown. This is the single most dangerous failure mode in the codebase per CLAUDE.md: a bug here looks like "no data" instead of "error," and can leak or hide data across clinics.
+Every database transaction MUST have `app.clinic_id` set via `SET LOCAL` before any business query runs. This is enforced by `TenantConnectionListener.afterBegin`, wired through `TenantConfig.transactionManager()`. If a code path runs a query outside a transaction that went through this listener — or before `TenantContext` (ThreadLocal) is populated — PostgreSQL RLS returns an empty result set silently. No exception is thrown. This is the single most dangerous failure mode in the codebase per AGENTS.md: a bug here looks like "no data" instead of "error," and can leak or hide data across clinics.
 
 ## What to check on every diff
 

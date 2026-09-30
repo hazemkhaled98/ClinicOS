@@ -5,7 +5,7 @@ description: Scan changed Thymeleaf templates, components.css, or Tailwind class
 
 # RTL / Token Lint
 
-DESIGN.md and CLAUDE.md require, without exception:
+DESIGN.md and AGENTS.md require, without exception:
 - Logical CSS properties only: `padding-inline-start/end`, `margin-inline`, `border-inline-start`, `inset-inline` — never `left`/`right`/`padding-left`/etc.
 - Logical Tailwind utilities only: `ps-`/`pe-` (padding), `ms-`/`me-` (margin), `border-s`/`border-e`, `start-`/`end-` — never `pl-`, `pr-`, `ml-`, `mr-`, `left-`, `right-`, `-translate-x`.
 - No raw hex (`bg-[#...]` or CSS hex literals) — every color must come from the Tailwind `@theme` palette in `apps/api/src/main/styles/tokens.css`, sourced from DESIGN.md.

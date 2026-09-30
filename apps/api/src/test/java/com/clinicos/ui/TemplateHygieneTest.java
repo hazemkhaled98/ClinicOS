@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
- * Enforces the ClinicOS UI hard rule (CLAUDE.md): a Thymeleaf template ships
+ * Enforces the ClinicOS UI hard rule (AGENTS.md): a Thymeleaf template ships
  * zero inline {@code <style>} blocks, zero inline {@code style=} attributes,
  * zero inline {@code <script>} bodies, and zero {@code on*=} attributes.
  * {@code fragments/head.html} is the only

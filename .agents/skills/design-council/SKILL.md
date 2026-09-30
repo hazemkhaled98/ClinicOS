@@ -57,7 +57,7 @@ Read the real surface before touching anything:
   tokens.css` and `components.css`, `/dev/styleguide`).
 - Existing transitions/animations already in the codebase.
 - The matching design reference when one exists (e.g. ClinicOS: `ClinicOS
-  Design/<NN>_*/screen.png` + `code.html` -- see that project's CLAUDE.md
+  Design/<NN>_*/screen.png` + `code.html` -- see that project's AGENTS.md
   "Visual work stays out of main context" rule before reading any `screen.png`
   directly).
 - `impeccable audit` for the technical floor (a11y, perf, responsive).

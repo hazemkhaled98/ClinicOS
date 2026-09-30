@@ -23,20 +23,11 @@
 hs_err_pid*
 replay_pid*
 
-# Claude Code local-only state (machine paths, local session cache)
-.claude/settings.local.json
-.claude/pr-sentinel-state.json
-.claude/.headroom_wrap_*.json
-.claude/.headroom_wrap_*.lock
-
-# Vendored skill binaries (platform-specific, downloaded on first run)
-.claude/skills/impeccable/scripts/bin/
-
 docs/plans/
 
 # Local agent/tooling state
-# .agents skills are tracked so they exist in every git worktree (like
-# .claude); keep only the platform binary and machine-local state out.
+# .agents skills are tracked so they exist in every git worktree; keep only
+# the platform binary and machine-local state out.
 .agents/pr-sentinel-state.json
 .agents/skills/impeccable/scripts/bin/
 .mcp.json

@@ -1,6 +1,6 @@
 # ClinicOS — Dev Setup Reference
 
-Reference material moved out of `CLAUDE.md` to keep the per-request context small. See `CLAUDE.md` for
+Reference material moved out of `AGENTS.md` to keep the per-request context small. See `AGENTS.md` for
 behavioural rules (tenant context, UI rules, session workflow).
 
 ## Stack

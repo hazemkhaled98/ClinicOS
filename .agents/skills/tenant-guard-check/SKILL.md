@@ -12,7 +12,7 @@ ClinicOS is multi-tenant via PostgreSQL RLS. `TenantConnectionListener` runs `SE
 1. Identify every new/changed method that issues a DB query (DSLContext, generated jOOQ metamodel calls, or any `Connection`/`Statement` usage).
 2. For each one, trace the call path back to confirm it runs inside a `@Transactional` boundary managed by `TenantConfig.transactionManager()` — not a bare `DataSource.getConnection()`, not a background thread/executor without `TenantContext` propagation, not a test that bypasses `AbstractPostgresIntegrationTest`.
 3. Confirm `TenantContext` is populated before the transaction begins on that call path (e.g. via the request filter/session, not assumed).
-4. Flag any raw JDBC outside `TenantConnectionListener.java` — that file is the sole intentional exception per CLAUDE.md.
+4. Flag any raw JDBC outside `TenantConnectionListener.java` — that file is the sole intentional exception per AGENTS.md.
 5. Flag any `@Async`, `CompletableFuture`, scheduled task, or new thread that touches the DB — `TenantContext` is a ThreadLocal and does not cross threads automatically.
 
 ## Output

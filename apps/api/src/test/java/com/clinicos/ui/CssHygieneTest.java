@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 /**
- * Enforces the ClinicOS RTL and design-token rules (CLAUDE.md, DESIGN.md) on
+ * Enforces the ClinicOS RTL and design-token rules (AGENTS.md, DESIGN.md) on
  * the source Tailwind stylesheets in {@code apps/api/src/main/styles/}.
  */
 class CssHygieneTest {
