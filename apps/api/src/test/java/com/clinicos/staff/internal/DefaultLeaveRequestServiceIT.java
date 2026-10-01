@@ -1,17 +1,24 @@
 package com.clinicos.staff.internal;
 
 import static com.clinicos.shared.jooq.tables.EvaluationSnapshot.EVALUATION_SNAPSHOT;
+import static com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -21,11 +28,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.clinicos.AbstractPostgresIntegrationTest;
 import com.clinicos.Application;
 import com.clinicos.TestFixtures;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
+import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
 import com.clinicos.shared.ActivityLogService;
@@ -51,6 +62,9 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
     private EmployeeService employeeService;
 
     @Autowired
+    private UserAdminService userAdminService;
+
+    @Autowired
     private WorkCalendarService calendar;
 
     @Autowired
@@ -61,6 +75,9 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DSLContext dsl;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private UUID clinicA;
     private UUID clinicB;
@@ -111,6 +128,40 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void rowLevelSecurityFiltersDirectReadsAndRejectsCrossClinicWrites() throws Exception {
+        TenantContext.set(clinicA);
+        LocalDate start = LocalDate.of(2027, 1, 4);
+        LeaveRequest clinicARequest = leaveRequests.submit(clinicA, staffEmployeeId, start, start, "A", staffMembership);
+        UUID clinicBEmployee;
+        UUID clinicBRequest;
+        try (Connection conn = superuser()) {
+            clinicBEmployee = TestFixtures.insertEmployee(conn, clinicB, "موظف عيادة ثانية");
+            clinicBRequest = DSL.using(conn, SQLDialect.POSTGRES)
+                    .insertInto(LEAVE_REQUEST, LEAVE_REQUEST.CLINIC_ID, LEAVE_REQUEST.EMPLOYEE_ID,
+                            LEAVE_REQUEST.START_DATE, LEAVE_REQUEST.END_DATE, LEAVE_REQUEST.REASON)
+                    .values(clinicB, clinicBEmployee, start, start, "B")
+                    .returning(LEAVE_REQUEST.ID)
+                    .fetchOne(LEAVE_REQUEST.ID);
+        }
+
+        List<UUID> clinicAVisible = transactionTemplate.execute(status -> dsl.select(LEAVE_REQUEST.ID)
+                .from(LEAVE_REQUEST).fetch(LEAVE_REQUEST.ID));
+        assertThat(clinicAVisible).containsExactly(clinicARequest.id());
+
+        TenantContext.set(clinicB);
+        List<UUID> clinicBVisible = transactionTemplate.execute(status -> dsl.select(LEAVE_REQUEST.ID)
+                .from(LEAVE_REQUEST).fetch(LEAVE_REQUEST.ID));
+        assertThat(clinicBVisible).containsExactly(clinicBRequest);
+
+        TenantContext.set(clinicA);
+        assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> dsl.insertInto(LEAVE_REQUEST,
+                LEAVE_REQUEST.CLINIC_ID, LEAVE_REQUEST.EMPLOYEE_ID, LEAVE_REQUEST.START_DATE,
+                LEAVE_REQUEST.END_DATE, LEAVE_REQUEST.REASON)
+                .values(clinicB, clinicBEmployee, start.plusDays(1), start.plusDays(1), "cross clinic write")
+                .execute())).isInstanceOf(org.jooq.exception.DataAccessException.class);
+    }
+
+    @Test
     void hasOtherActiveOwnerExcludesTheActor() throws Exception {
         TenantContext.set(clinicA);
 
@@ -158,6 +209,19 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
+    void onlyPostgresExclusionViolationsBecomeOverlapErrors() {
+        DataIntegrityViolationException overlap = new DataIntegrityViolationException("overlap",
+                new java.sql.SQLException("overlap", "23P01"));
+        DataIntegrityViolationException foreignKey = new DataIntegrityViolationException("foreign key",
+                new java.sql.SQLException("foreign key", "23503"));
+
+        assertThat(DefaultLeaveRequestService.overlapViolation(overlap))
+                .hasMessage("توجد إجازة مسجلة بنفس الفترة")
+                .hasCause(overlap);
+        assertThatThrownBy(() -> DefaultLeaveRequestService.overlapViolation(foreignKey)).isSameAs(foreignKey);
+    }
+
+    @Test
     void submit_rejectsActingForAnotherEmployee() throws Exception {
         TenantContext.set(clinicA);
         LocalDate start = LocalDate.now().plusDays(7);
@@ -189,6 +253,43 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
         assertThatThrownBy(() -> leaveRequests.submit(clinicA, staffEmployeeId, start.plusDays(1), start.plusDays(3),
                 "ثانية", staffMembership))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void databaseRejectsOverlappingPendingRangesWhenServicePrecheckIsBypassed() throws Exception {
+        TenantContext.set(clinicA);
+        LocalDate start = LocalDate.now().plusDays(7);
+        leaveRequests.submit(clinicA, staffEmployeeId, start, start.plusDays(2), "أولى", staffMembership);
+
+        assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> dsl.insertInto(LEAVE_REQUEST,
+                LEAVE_REQUEST.CLINIC_ID, LEAVE_REQUEST.EMPLOYEE_ID, LEAVE_REQUEST.START_DATE,
+                LEAVE_REQUEST.END_DATE, LEAVE_REQUEST.REASON)
+                .values(clinicA, staffEmployeeId, start.plusDays(1), start.plusDays(3), "ثانية")
+                .execute()))
+                .isInstanceOf(DataAccessException.class)
+                .hasStackTraceContaining("leave_request_no_active_overlap");
+    }
+
+    @Test
+    void concurrentOverlappingRangeInsertsHaveOneWinner() throws Exception {
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        LocalDate start = LocalDate.now().plusDays(14);
+        try {
+            Future<Boolean> first = executor.submit(() -> insertConcurrentRange(start, ready, startGate));
+            Future<Boolean> second = executor.submit(() -> insertConcurrentRange(start, ready, startGate));
+
+            assertThat(ready.await(10, TimeUnit.SECONDS)).isTrue();
+            startGate.countDown();
+            assertThat(List.of(first.get(10, TimeUnit.SECONDS), second.get(10, TimeUnit.SECONDS)))
+                    .containsExactlyInAnyOrder(true, false);
+            TenantContext.set(clinicA);
+            assertThat(leaveRequests.listPendingForApprover(clinicA, managerMembership)).hasSize(1);
+        } finally {
+            startGate.countDown();
+            executor.shutdownNow();
+        }
     }
 
     @Test
@@ -294,7 +395,17 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void secondApproverLosesTheRace() throws Exception {
+    void activeMembershipCannotLinkToAnotherMembershipsEmployee() {
+        TenantContext.set(clinicA);
+
+        assertThatThrownBy(() -> userAdminService.linkEmployee(clinicA, otherMembership, staffEmployeeId,
+                ownerMembership))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("ملف الموظف مرتبط بحساب آخر");
+    }
+
+    @Test
+    void secondApproverCannotDecideResolvedRequest() throws Exception {
         TenantContext.set(clinicA);
         LocalDate start = LocalDate.now().plusDays(7);
         LeaveRequest created = leaveRequests.submit(clinicA, staffEmployeeId, start, start.plusDays(1), "إجازة",
@@ -408,7 +519,7 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
 
         leaveRequests.cancel(clinicA, created.id(), staffEmployeeId, staffMembership);
 
-        assertThat(leaveRequests.listPendingForApprover(clinicA, managerMembership, "manager")).isEmpty();
+        assertThat(leaveRequests.listPendingForApprover(clinicA, managerMembership)).isEmpty();
         assertThat(leaveRequests
                 .submit(clinicA, staffEmployeeId, start, start.plusDays(2), "إجازة ثانية", staffMembership).status())
                 .isEqualTo(LeaveStatus.pending);
@@ -424,7 +535,7 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
 
         assertThatThrownBy(() -> leaveRequests.cancel(clinicA, created.id(), staffEmployeeId, otherMembership))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThat(leaveRequests.listPendingForApprover(clinicA, managerMembership, "manager")).hasSize(1);
+        assertThat(leaveRequests.listPendingForApprover(clinicA, managerMembership)).hasSize(1);
     }
 
     @Test
@@ -436,8 +547,9 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
         UUID secondManagerEmployeeId = employeeIdOf(secondManager);
         leaveRequests.submit(clinicA, secondManagerEmployeeId, start, start, "مدير", secondManager);
 
-        List<LeaveRequest> managerQueue = leaveRequests.listPendingForApprover(clinicA, managerMembership, "manager");
-        List<LeaveRequest> ownerQueue = leaveRequests.listPendingForApprover(clinicA, ownerMembership, "owner");
+        List<LeaveRequest> managerQueue = leaveRequests.listPendingForApprover(clinicA, managerMembership);
+        List<LeaveRequest> ownerQueue = leaveRequests.listPendingForApprover(clinicA, ownerMembership);
+        assertThat(leaveRequests.listPendingForApprover(clinicA, otherMembership)).isEmpty();
 
         assertThat(managerQueue).extracting(LeaveRequest::employeeId).containsExactly(staffEmployeeId);
         assertThat(ownerQueue).extracting(LeaveRequest::employeeId)
@@ -475,7 +587,7 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
 
         TenantContext.set(clinicB);
         assertThat(leaveRequests.listForEmployee(clinicB, staffEmployeeId)).isEmpty();
-        assertThat(leaveRequests.listPendingForApprover(clinicB, ownerMembership, "owner")).isEmpty();
+        assertThat(leaveRequests.listPendingForApprover(clinicB, ownerMembership)).isEmpty();
         assertThatThrownBy(() -> leaveRequests.approve(clinicB, created.id(), ownerMembership))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -486,6 +598,7 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(LeaveRequestService.mayDecide("manager", "assistant", false)).isTrue();
         assertThat(LeaveRequestService.mayDecide("manager", "manager", false)).isFalse();
         assertThat(LeaveRequestService.mayDecide("manager", "owner", false)).isFalse();
+        assertThat(LeaveRequestService.mayDecide("manager", null, false)).isFalse();
         assertThat(LeaveRequestService.mayDecide("assistant", "assistant", false)).isFalse();
         assertThat(LeaveRequestService.mayDecide("owner", "owner", true)).isFalse();
     }
@@ -560,6 +673,32 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
                     .from(com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST)
                     .where(com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST.ID.eq(leaveRequestId))
                     .fetchOne(com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST.EMPLOYEE_ID);
+        }
+    }
+
+    private boolean insertConcurrentRange(LocalDate start, CountDownLatch ready, CountDownLatch startGate)
+            throws Exception {
+        TenantContext.set(clinicA);
+        try {
+            ready.countDown();
+            if (!startGate.await(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("Concurrent leave submitters did not start together");
+            }
+            transactionTemplate.executeWithoutResult(status -> dsl.insertInto(LEAVE_REQUEST,
+                    LEAVE_REQUEST.CLINIC_ID, LEAVE_REQUEST.EMPLOYEE_ID, LEAVE_REQUEST.START_DATE,
+                    LEAVE_REQUEST.END_DATE, LEAVE_REQUEST.REASON)
+                    .values(clinicA, staffEmployeeId, start, start.plusDays(1), "concurrent")
+                    .execute());
+            return true;
+        } catch (RuntimeException failure) {
+            for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+                if (cause instanceof SQLException sql && "23P01".equals(sql.getSQLState())) {
+                    return false;
+                }
+            }
+            throw failure;
+        } finally {
+            TenantContext.clear();
         }
     }
 

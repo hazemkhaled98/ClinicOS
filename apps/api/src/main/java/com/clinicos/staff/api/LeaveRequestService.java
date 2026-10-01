@@ -15,7 +15,7 @@ public interface LeaveRequestService {
 
     void cancel(UUID clinicId, UUID leaveRequestId, UUID employeeId, UUID actorMembershipId);
 
-    List<LeaveRequest> listPendingForApprover(UUID clinicId, UUID actorMembershipId, String actorRoleCode);
+    List<LeaveRequest> listPendingForApprover(UUID clinicId, UUID actorMembershipId);
 
     List<LeaveRequest> listForEmployee(UUID clinicId, UUID employeeId);
 
@@ -29,6 +29,7 @@ public interface LeaveRequestService {
             return true;
         }
         return "manager".equals(actorRoleCode)
+                && requesterRoleCode != null
                 && !"owner".equals(requesterRoleCode)
                 && !"manager".equals(requesterRoleCode);
     }

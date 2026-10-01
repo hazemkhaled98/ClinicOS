@@ -276,12 +276,13 @@ Backlog item #3 from `docs/backlog/feature-suggestions.md`. The owner can change
 Backlog item #2 from `docs/backlog/feature-suggestions.md`. An employee submits a dated leave request with a reason; a manager decides staff requests, an owner decides any other member's, and nobody decides their own — a sole active owner records their own days off through the existing holiday settings instead. Approval turns those dates into days off for that employee only, so attendance scoring stops counting them as absences. `clinic_holiday` (V20) stays the clinic-wide/per-employee calendar; approved leave is the *requested and decided* layer above it.
 
 - [x] V33 `leave_request` — tenant-scoped, RLS, same-clinic guard, non-overlapping pending/approved ranges per employee.
+- [x] V34 enforces one active membership per employee, keeping requester identity and role unambiguous.
 - [x] `LeaveRequestService` — submit, approve, reject, list-for-approver, list-for-employee; role-hierarchy and no-self-decision guards; closed-month rejection so an approval cannot change a frozen evaluation.
 - [x] `WorkCalendarService.isWorkday` / `workdaysBetween` treat an approved leave range as days off for that employee.
 - [x] `LEAVE_REQUESTED` / `LEAVE_APPROVED` / `LEAVE_REJECTED` notification kinds, approver fan-out on submit, requester notice on decision, presenter lines and links.
 - [x] `LeaveController` + templates: employee request/history screen and owner/manager decision queue; nav entries.
 - [x] Tests: `DefaultLeaveRequestServiceIT`, `LeaveControllerTest`, `LeaveTemplateTest`, calendar + scoring effect, audit, notification coverage.
-- [x] Gates: `npm run build:css`, `mvn clean verify`, `/tenant-guard-check`, `/rtl-token-lint`, Phase D roadmap/backlog coverage audit (no UC spec exists), approved Playwright scenarios passed after fixing overlap feedback and sole-owner guidance.
+- [x] Gates: `npm run build:css`, `mvn clean verify`, `/tenant-guard-check`, `/rtl-token-lint`, Phase D roadmap/backlog coverage audit (no UC spec exists), approved Playwright scenarios.
 - [ ] `/pr-sentinel`.
 
 ### Phase 9 — Hardening and release

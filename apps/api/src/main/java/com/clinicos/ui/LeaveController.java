@@ -56,8 +56,7 @@ public class LeaveController {
             return "redirect:/leaves/me";
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "leaves/me"));
-        model.addAttribute("pending", leaveRequests.listPendingForApprover(clinicId(session), membershipId(session),
-                roleCode(session)));
+        model.addAttribute("pending", leaveRequests.listPendingForApprover(clinicId(session), membershipId(session)));
         return QUEUE;
     }
 
@@ -153,8 +152,7 @@ public class LeaveController {
         model.addAttribute("reason", reason);
         model.addAttribute("canApprove", canApprove(session));
         model.addAttribute("pendingCount",
-                canApprove(session) ? leaveRequests.listPendingForApprover(clinicId(session), membershipId(session),
-                        roleCode(session)).size() : 0);
+                canApprove(session) ? leaveRequests.listPendingForApprover(clinicId(session), membershipId(session)).size() : 0);
         UUID employeeId = ownEmployeeId(session);
         boolean soleOwner = "owner".equals(roleCode(session))
                 && !leaveRequests.hasOtherActiveOwner(clinicId(session), membershipId(session));

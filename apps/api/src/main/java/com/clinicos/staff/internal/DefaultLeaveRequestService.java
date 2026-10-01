@@ -6,6 +6,7 @@ import static com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST;
 import static com.clinicos.shared.jooq.tables.Membership.MEMBERSHIP;
 import static com.clinicos.shared.jooq.tables.Role.ROLE;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
@@ -62,11 +63,7 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("سبب الإجازة مطلوب");
         }
-        try {
-            return doSubmit(clinicId, employeeId, start, end, reason, actorMembershipId);
-        } catch (DataIntegrityViolationException violation) {
-            throw new IllegalArgumentException("توجد إجازة مسجلة بنفس الفترة", violation);
-        }
+        return doSubmit(clinicId, employeeId, start, end, reason, actorMembershipId);
     }
 
     private LeaveRequest doSubmit(UUID clinicId, UUID employeeId, LocalDate start, LocalDate end, String reason,
@@ -87,15 +84,20 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
                 throw new IllegalArgumentException("المالك الوحيد يسجل إجازته من تقويم العمل");
             }
             rejectIfOverlaps(clinicId, employeeId, start, end);
-            LeaveRequestRecord inserted = dsl.insertInto(LEAVE_REQUEST,
-                    LEAVE_REQUEST.CLINIC_ID,
-                    LEAVE_REQUEST.EMPLOYEE_ID,
-                    LEAVE_REQUEST.START_DATE,
-                    LEAVE_REQUEST.END_DATE,
-                    LEAVE_REQUEST.REASON)
-                    .values(clinicId, employeeId, start, end, reason.strip())
-                    .returning(LEAVE_REQUEST.fields())
-                    .fetchOne();
+            LeaveRequestRecord inserted;
+            try {
+                inserted = dsl.insertInto(LEAVE_REQUEST,
+                        LEAVE_REQUEST.CLINIC_ID,
+                        LEAVE_REQUEST.EMPLOYEE_ID,
+                        LEAVE_REQUEST.START_DATE,
+                        LEAVE_REQUEST.END_DATE,
+                        LEAVE_REQUEST.REASON)
+                        .values(clinicId, employeeId, start, end, reason.strip())
+                        .returning(LEAVE_REQUEST.fields())
+                        .fetchOne();
+            } catch (DataIntegrityViolationException violation) {
+                throw overlapViolation(violation);
+            }
             Set<String> approverRoles = "owner".equals(requesterRole) || "manager".equals(requesterRole)
                     ? Set.of("owner")
                     : Set.of("owner", "manager");
@@ -192,8 +194,9 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
     }
 
     @Override
-    public List<LeaveRequest> listPendingForApprover(UUID clinicId, UUID actorMembershipId, String actorRoleCode) {
+    public List<LeaveRequest> listPendingForApprover(UUID clinicId, UUID actorMembershipId) {
         return transactionTemplate.execute(status -> {
+            String actorRoleCode = roleOfMembership(clinicId, actorMembershipId);
             if (!"owner".equals(actorRoleCode) && !"manager".equals(actorRoleCode)) {
                 return List.of();
             }
@@ -256,6 +259,15 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
         }
     }
 
+    static IllegalArgumentException overlapViolation(DataIntegrityViolationException violation) {
+        for (Throwable cause = violation; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sql && "23P01".equals(sql.getSQLState())) {
+                return new IllegalArgumentException("توجد إجازة مسجلة بنفس الفترة", violation);
+            }
+        }
+        throw violation;
+    }
+
     private LeaveRequestRecord pendingRow(UUID clinicId, UUID leaveRequestId) {
         LeaveRequestRecord row = dsl.selectFrom(LEAVE_REQUEST)
                 .where(LEAVE_REQUEST.CLINIC_ID.eq(clinicId))
@@ -285,6 +297,7 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
                 .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
                 .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                 .and(MEMBERSHIP.EMPLOYEE_ID.eq(LEAVE_REQUEST.EMPLOYEE_ID))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                 .and(ROLE.CODE.eq(roleCode)));
     }
 
@@ -303,6 +316,7 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
                 .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
                 .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                 .and(MEMBERSHIP.ID.eq(membershipId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                 .fetchOne(ROLE.CODE);
     }
 
@@ -312,6 +326,7 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
                 .join(ROLE).on(ROLE.ID.eq(MEMBERSHIP.ROLE_ID))
                 .where(MEMBERSHIP.CLINIC_ID.eq(clinicId))
                 .and(MEMBERSHIP.EMPLOYEE_ID.eq(employeeId))
+                .and(MEMBERSHIP.STATUS.eq(MembershipStatus.active))
                 .fetchOne(ROLE.CODE);
     }
 

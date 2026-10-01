@@ -60,7 +60,7 @@ class LeaveControllerTest {
     void soleOwnerIsDirectedToTheHolidayCalendar() {
         when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("owner");
         when(leaveRequests.hasOtherActiveOwner(CLINIC, MEMBERSHIP)).thenReturn(false);
-        when(leaveRequests.listPendingForApprover(CLINIC, MEMBERSHIP, "owner")).thenReturn(java.util.List.of());
+        when(leaveRequests.listPendingForApprover(CLINIC, MEMBERSHIP)).thenReturn(java.util.List.of());
         when(leaveRequests.listForEmployee(CLINIC, EMPLOYEE_ID)).thenReturn(java.util.List.of());
         Model model = new ExtendedModelMap();
 
@@ -73,7 +73,7 @@ class LeaveControllerTest {
     void ownerCanRequestWhenAnotherActiveOwnerCanDecide() {
         when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("owner");
         when(leaveRequests.hasOtherActiveOwner(CLINIC, MEMBERSHIP)).thenReturn(true);
-        when(leaveRequests.listPendingForApprover(CLINIC, MEMBERSHIP, "owner")).thenReturn(java.util.List.of());
+        when(leaveRequests.listPendingForApprover(CLINIC, MEMBERSHIP)).thenReturn(java.util.List.of());
         when(leaveRequests.listForEmployee(CLINIC, EMPLOYEE_ID)).thenReturn(java.util.List.of());
         Model model = new ExtendedModelMap();
 
