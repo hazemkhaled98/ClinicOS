@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طلبات الإجازة</title>
+  <link rel="stylesheet" href="../../apps/api/target/classes/static/css/app.css">
+</head>
+<body class="min-h-screen bg-surface text-on-surface antialiased">
+  <main class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+    <header class="space-y-1.5 mb-8">
+      <h1 class="text-3xl font-extrabold text-teal-900">طلبات الإجازة</h1>
+      <p class="text-sm text-on-surface-variant">اعتمد أو ارفض طلبات فريقك</p>
+    </header>
+    <a class="clinicos-btn clinicos-btn--secondary mb-8 inline-flex" href="/leaves/me">إجازاتي</a>
+    <section class="space-y-4">
+      <h2 class="text-base font-bold">بانتظار الاعتماد</h2>
+      <article class="clinicos-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div class="space-y-2"><span class="clinicos-chip clinicos-chip--warning">بانتظار قرارك</span><h3 class="text-lg font-bold text-teal-900">سارة</h3><p class="text-sm text-on-surface-variant">12 أكتوبر 2026 — 14 أكتوبر 2026</p><p class="text-sm text-on-surface-variant">ظرف عائلي</p></div>
+        <div class="flex flex-wrap items-center gap-2"><button class="clinicos-btn">اعتماد</button><input class="clinicos-input" placeholder="سبب الرفض"><button class="clinicos-btn clinicos-btn--danger">رفض</button></div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

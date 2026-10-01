@@ -460,7 +460,10 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 Map.entry(NotificationKind.USER_ACCESS_CHANGED, Map.of()),
                 Map.entry(NotificationKind.EMPLOYEE_CHANGED, Map.of()),
                 Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, Map.of()),
-                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, Map.of()));
+                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, Map.of()),
+                Map.entry(NotificationKind.LEAVE_REQUESTED, Map.of("employee", "سارة")),
+                Map.entry(NotificationKind.LEAVE_APPROVED, Map.of("employee", "سارة")),
+                Map.entry(NotificationKind.LEAVE_REJECTED, Map.of("employee", "سارة", "range", "12 أكتوبر")));
     }
 
     private static Map<NotificationKind, String> invalidPayloadJsons() {
@@ -481,6 +484,9 @@ class NotificationServiceIT extends AbstractPostgresIntegrationTest {
                 Map.entry(NotificationKind.USER_ACCESS_CHANGED, "{\"actor\":\"مدير\"}"),
                 Map.entry(NotificationKind.EMPLOYEE_CHANGED, "{\"actor\":\"مدير\"}"),
                 Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "{\"actor\":\"مدير\"}"),
-                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "{\"actor\":\"مدير\"}"));
+                Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "{\"actor\":\"مدير\"}"),
+                Map.entry(NotificationKind.LEAVE_REQUESTED, "{\"employee\":\"سارة\"}"),
+                Map.entry(NotificationKind.LEAVE_APPROVED, "{\"employee\":\"سارة\"}"),
+                Map.entry(NotificationKind.LEAVE_REJECTED, "{\"employee\":\"سارة\",\"range\":\"12 أكتوبر\"}"));
     }
 }

@@ -3,6 +3,7 @@ package com.clinicos.clinicconfig.internal;
 import static com.clinicos.shared.jooq.tables.ClinicHoliday.CLINIC_HOLIDAY;
 import static com.clinicos.shared.jooq.tables.ClinicSettings.CLINIC_SETTINGS;
 import static com.clinicos.shared.jooq.tables.Employee.EMPLOYEE;
+import static com.clinicos.shared.jooq.tables.LeaveRequest.LEAVE_REQUEST;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.clinicos.clinicconfig.api.WorkCalendarService;
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
+import com.clinicos.shared.jooq.enums.LeaveRequestStatus;
 import com.clinicos.shared.jooq.tables.records.ClinicHolidayRecord;
 
 @Service
@@ -145,6 +147,9 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
         if (!onMask) {
             return false;
         }
+        if (employeeId != null && onApprovedLeave(clinicId, employeeId, date)) {
+            return false;
+        }
         Condition holidayMatch = CLINIC_HOLIDAY.EMPLOYEE_ID.isNull();
         if (employeeId != null) {
             holidayMatch = holidayMatch.or(CLINIC_HOLIDAY.EMPLOYEE_ID.eq(employeeId));
@@ -152,6 +157,14 @@ public class DefaultWorkCalendarService implements WorkCalendarService {
         return !dsl.fetchExists(CLINIC_HOLIDAY, CLINIC_HOLIDAY.CLINIC_ID.eq(clinicId)
                 .and(CLINIC_HOLIDAY.HOLIDAY_DATE.eq(date))
                 .and(holidayMatch));
+    }
+
+    private boolean onApprovedLeave(UUID clinicId, UUID employeeId, LocalDate date) {
+        return dsl.fetchExists(LEAVE_REQUEST, LEAVE_REQUEST.CLINIC_ID.eq(clinicId)
+                .and(LEAVE_REQUEST.EMPLOYEE_ID.eq(employeeId))
+                .and(LEAVE_REQUEST.STATUS.eq(LeaveRequestStatus.approved))
+                .and(LEAVE_REQUEST.START_DATE.lessOrEqual(date))
+                .and(LEAVE_REQUEST.END_DATE.greaterOrEqual(date)));
     }
 
     private boolean duplicateHoliday(UUID clinicId, LocalDate date, UUID employeeId) {

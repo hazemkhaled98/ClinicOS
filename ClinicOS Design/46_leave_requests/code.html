@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إجازاتي</title>
+  <link rel="stylesheet" href="../../apps/api/target/classes/static/css/app.css">
+</head>
+<body class="min-h-screen bg-surface text-on-surface antialiased">
+  <main class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+    <header class="space-y-1.5 mb-8">
+      <h1 class="text-3xl font-extrabold text-teal-900">إجازاتي</h1>
+      <p class="text-sm text-on-surface-variant">اطلب إجازة وتابع حالة طلبك</p>
+    </header>
+    <section class="clinicos-card p-6 mb-8">
+      <h2 class="text-xl font-bold text-teal-900 mb-6">طلب إجازة جديد</h2>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <label class="clinicos-label">من تاريخ<input class="clinicos-input" type="date"></label>
+        <label class="clinicos-label">إلى تاريخ<input class="clinicos-input" type="date"></label>
+        <label class="clinicos-label sm:col-span-2">السبب<textarea class="clinicos-input" rows="3"></textarea></label>
+      </div>
+      <div class="flex justify-end mt-5"><button class="clinicos-btn">إرسال الطلب</button></div>
+    </section>
+    <section class="space-y-4">
+      <h2 class="text-base font-bold">سجل طلباتي</h2>
+      <article class="clinicos-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div><h3 class="font-bold text-teal-900">12 أكتوبر 2026 — 14 أكتوبر 2026</h3><p class="text-sm text-on-surface-variant">ظرف عائلي</p></div>
+        <span class="clinicos-chip clinicos-chip--warning">بانتظار</span>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

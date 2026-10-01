@@ -14,7 +14,7 @@ class NavSectionResolverTest {
         var visible = NavSectionResolver.resolve(
                 Set.of("emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit", "tray"), "manager");
 
-        assertThat(keys(visible)).containsExactly("emp", "myeval", "quick", "prep", "acad", "inv", "ceo");
+        assertThat(keys(visible)).containsExactly("emp", "myeval", "quick", "prep", "leaves", "acad", "inv", "ceo");
     }
 
     @Test
@@ -31,7 +31,7 @@ class NavSectionResolverTest {
         var visible = NavSectionResolver.resolve(fullCatalog(), "owner");
 
         assertThat(keys(visible))
-                .containsExactly("quick", "prep", "acad", "inv", "ceo")
+                .containsExactly("quick", "prep", "leaves", "acad", "inv", "ceo")
                 .doesNotContain("myeval", "tasks");
     }
 
@@ -46,14 +46,14 @@ class NavSectionResolverTest {
     void receptionistWithInventoryPortfolioSeesInventoryButNotDashboard() {
         var visible = NavSectionResolver.resolve(Set.of("emp", "orders", "ledger"), "receptionist");
 
-        assertThat(keys(visible)).containsExactly("emp", "myeval", "prep", "inv");
+        assertThat(keys(visible)).containsExactly("emp", "myeval", "prep", "leaves", "inv");
     }
 
     @Test
-    void noPermissionsStillShowsPrepSection() {
+    void noPermissionsStillShowsPrepAndLeavesSections() {
         var visible = NavSectionResolver.resolve(Set.of(), "assistant");
 
-        assertThat(keys(visible)).containsExactly("prep");
+        assertThat(keys(visible)).containsExactly("prep", "leaves");
     }
 
     @Test
@@ -80,7 +80,7 @@ class NavSectionResolverTest {
     @Test
     void authoredNavigationsAreOrderedAndUnique() {
         List<NavSection> all = NavSectionResolver.all();
-        assertThat(all).hasSize(8);
+        assertThat(all).hasSize(9);
         assertThat(all.stream().map(NavSection::route).distinct()).hasSize(all.size());
         assertThat(all.stream().map(NavSection::label)).allSatisfy(label -> assertThat(label).isNotBlank());
     }

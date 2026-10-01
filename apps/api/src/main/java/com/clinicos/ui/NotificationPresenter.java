@@ -34,7 +34,10 @@ public class NotificationPresenter {
             Map.entry(NotificationKind.USER_ACCESS_CHANGED, "/admin-dashboard/users"),
             Map.entry(NotificationKind.EMPLOYEE_CHANGED, "/admin-dashboard"),
             Map.entry(NotificationKind.CLINIC_SETTINGS_CHANGED, "/admin-dashboard/settings"),
-            Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "/"));
+            Map.entry(NotificationKind.CLINIC_IDENTITY_CHANGED, "/"),
+            Map.entry(NotificationKind.LEAVE_REQUESTED, "/leaves"),
+            Map.entry(NotificationKind.LEAVE_APPROVED, "/leaves/me"),
+            Map.entry(NotificationKind.LEAVE_REJECTED, "/leaves/me"));
 
     public List<Item> present(List<Notification> notifications) {
         return notifications.stream().map(n -> present(n)).toList();
@@ -65,6 +68,12 @@ public class NotificationPresenter {
                     "تم تغيير بيانات العيادة إلى \"" + payload.get("name") + "\" بواسطة " + actor,
                     "الكود الجديد للدخول هو " + payload.get("slug"), linkFor(kind), notification.read(),
                     notification.createdAt());
+            case LEAVE_REQUESTED -> item(notification, "طلب إجازة من " + payload.get("employee"),
+                    "الفترة: " + payload.get("range"));
+            case LEAVE_APPROVED -> item(notification, "تم اعتماد إجازتك " + payload.get("range") + " بواسطة " + actor,
+                    "");
+            case LEAVE_REJECTED -> item(notification,
+                    "تم رفض إجازتك " + payload.get("range") + " بواسطة " + actor, payload.get("reason"));
         };
     }
 
