@@ -43,7 +43,8 @@ class LeaveTemplateTest {
         String html = templateEngine().process("leaves-me", context);
 
         assertThat(html).contains("name=\"start\"", "name=\"end\"", "name=\"reason\"",
-                "سجل طلباتي", "غير مناسب هذا الأسبوع", "مرفوضة");
+                "سجل طلباتي", "غير مناسب هذا الأسبوع", "مرفوضة", "12/10/2026", "14/10/2026")
+                .doesNotContain("معتمدة", "بانتظار", "Oct");
     }
 
     @Test
@@ -52,7 +53,18 @@ class LeaveTemplateTest {
 
         String html = templateEngine().process("leaves-queue", context);
 
-        assertThat(html).contains("طلبات الإجازة", "سارة", "/leaves/", "اعتماد", "رفض", "name=\"note\"");
+        assertThat(html).contains("طلبات الإجازة", "سارة", "/leaves/", "اعتماد", "رفض", "name=\"note\"",
+                "w-full sm:w-auto", "12/10/2026", "14/10/2026", "<h2>بانتظار الاعتماد</h2>")
+                .doesNotContain("<h3>بانتظار الاعتماد</h3>", "Oct");
+    }
+
+    @Test
+    void approvedAndPendingStatusesRenderOnlyTheirOwnChip() {
+        String approved = ownRequestsHtml(request(LeaveStatus.approved, null));
+        String pending = ownRequestsHtml(request(LeaveStatus.pending, null));
+
+        assertThat(approved).contains("معتمدة").doesNotContain("مرفوضة", "بانتظار");
+        assertThat(pending).contains("بانتظار").doesNotContain("معتمدة", "مرفوضة");
     }
 
     @Test
@@ -155,6 +167,20 @@ class LeaveTemplateTest {
                 JakartaServletWebApplication.buildApplication(new MockServletContext())
                         .buildExchange(new MockHttpServletRequest(), new MockHttpServletResponse()),
                 Locale.forLanguageTag("ar"), model);
+    }
+
+    private static String ownRequestsHtml(LeaveRequest request) {
+        WebContext context = context("assistant", "leaves/me", Map.of(
+                "errors", Map.of(),
+                "start", "",
+                "end", "",
+                "reason", "",
+                "canApprove", false,
+                "pendingCount", 0,
+                "hasEmployee", true,
+                "canRequest", true,
+                "requests", List.of(request)));
+        return templateEngine().process("leaves-me", context);
     }
 
     private static LeaveRequest request(LeaveStatus status, String note) {

@@ -13,19 +13,19 @@
            th:classappend="${toastType == 'error'} ? ' border-danger-600 bg-danger-50 text-danger-600' : ' border-success-600 bg-success-50 text-success-600'"
            th:attr="role=${toastType == 'error'} ? 'alert' : 'status'" th:text="${toastMessage}"></div>
 
-      <a th:href="@{/leaves/me}" class="clinicos-btn clinicos-btn--secondary mb-8 inline-flex">إجازاتي</a>
+      <a th:href="@{/leaves/me}" class="clinicos-btn clinicos-btn--secondary mb-8 inline-flex w-full sm:w-auto">إجازاتي</a>
 
       <div th:if="${!#lists.isEmpty(pending)}" class="space-y-4">
         <div class="flex items-center gap-2 text-on-surface font-bold text-sm sm:text-base">
           <span class="text-base" role="img" aria-label="ساعة رملية">⏳</span>
-          <h3>بانتظار الاعتماد</h3>
+          <h2>بانتظار الاعتماد</h2>
         </div>
         <article th:each="request : ${pending}" class="clinicos-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div class="space-y-2.5 flex-1">
             <span class="clinicos-chip clinicos-chip--warning">بانتظار قرارك</span>
             <h4 class="text-lg font-bold text-teal-900" th:text="${request.employeeName()}">سارة أحمد</h4>
             <p class="text-xs sm:text-sm text-on-surface-variant">
-              <span th:text="|${#temporals.format(request.start(), 'dd MMM yyyy')} — ${#temporals.format(request.end(), 'dd MMM yyyy')}|"></span>
+              <span dir="ltr" th:text="|${#temporals.format(request.start(), 'dd/MM/yyyy')} — ${#temporals.format(request.end(), 'dd/MM/yyyy')}|"></span>
             </p>
             <p class="text-xs sm:text-sm text-on-surface-variant" th:text="${request.reason()}">السبب</p>
           </div>

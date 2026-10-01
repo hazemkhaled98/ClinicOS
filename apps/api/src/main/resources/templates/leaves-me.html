@@ -70,7 +70,7 @@
         </div>
         <article th:each="request : ${requests}" class="clinicos-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="space-y-1.5">
-            <h4 class="font-extrabold text-teal-900 text-lg" th:text="|${#temporals.format(request.start(), 'dd MMM yyyy')} — ${#temporals.format(request.end(), 'dd MMM yyyy')}|">01 يناير 2026 — 05 يناير 2026</h4>
+            <h4 class="font-extrabold text-teal-900 text-lg"><bdi dir="ltr" th:text="|${#temporals.format(request.start(), 'dd/MM/yyyy')} — ${#temporals.format(request.end(), 'dd/MM/yyyy')}|">01/01/2026 — 05/01/2026</bdi></h4>
             <p class="text-xs sm:text-sm text-on-surface-variant" th:text="${request.reason()}">السبب</p>
             <p th:if="${request.decisionNote() != null and !request.decisionNote().isBlank()}" class="text-xs text-on-surface-variant">
               <span class="font-semibold">ملاحظة القرار:</span>
@@ -79,8 +79,8 @@
           </div>
           <div class="flex items-center gap-2.5 shrink-0">
             <span th:if="${request.status().name() == 'approved'}" class="clinicos-chip clinicos-chip--success">معتمدة</span>
-            <span th:elseif="${request.status().name() == 'rejected'}" class="clinicos-chip clinicos-chip--danger">مرفوضة</span>
-            <span th:else class="clinicos-chip clinicos-chip--warning">بانتظار</span>
+            <span th:if="${request.status().name() == 'rejected'}" class="clinicos-chip clinicos-chip--danger">مرفوضة</span>
+            <span th:if="${request.status().name() == 'pending'}" class="clinicos-chip clinicos-chip--warning">بانتظار</span>
             <form th:if="${request.status().name() == 'pending'}" method="post" th:action="@{/leaves/{id}/cancel(id=${request.id()})}" hx-boost="true" hx-confirm="هل أنت متأكد من إلغاء الطلب؟">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
               <button class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs" type="submit">إلغاء</button>
