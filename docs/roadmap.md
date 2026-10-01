@@ -283,7 +283,7 @@ Backlog item #2 from `docs/backlog/feature-suggestions.md`. An employee submits 
 - [x] `LeaveController` + templates: employee request/history screen and owner/manager decision queue; nav entries.
 - [x] Tests: `DefaultLeaveRequestServiceIT`, `LeaveControllerTest`, `LeaveTemplateTest`, calendar + scoring effect, audit, notification coverage.
 - [x] Gates: `npm run build:css`, `mvn clean verify`, `/tenant-guard-check`, `/rtl-token-lint`, Phase D roadmap/backlog coverage audit (no UC spec exists), approved Playwright scenarios.
-- [ ] `/pr-sentinel`.
+- [x] `/pr-sentinel`.
 
 ### Phase 9 — Hardening and release
 
