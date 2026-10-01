@@ -58,6 +58,7 @@ import com.clinicos.shared.jooq.enums.TaskFrequency;
 import com.clinicos.shared.jooq.enums.TaskReviewStatus;
 import com.clinicos.staff.api.DailyWorkService;
 import com.clinicos.staff.api.EmployeeService;
+import com.clinicos.staff.api.LeaveRequestService;
 
 @SpringBootTest(classes = Application.class)
 class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
@@ -70,6 +71,9 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private DailyWorkService dailyWorkService;
+
+    @Autowired
+    private LeaveRequestService leaveRequestService;
 
     @Autowired
     private ClinicSettingsService clinicSettingsService;
@@ -215,6 +219,29 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         MonthlyEvaluation after = evaluationService.evaluate(clinicA, employeeId, now);
 
         assertThat(component(after, "fanni").rawScore()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
+    void currentMonth_approvedLeaveRemovesAbsenceFromScoringSchedule() throws Exception {
+        TenantContext.set(clinicA);
+        seedWeekdays(clinicA);
+        YearMonth now = YearMonth.now();
+        UUID employeeId = createEmployee("أحمد");
+        linkEmployeeToRole(employeeId, "assistant");
+        UUID employeeMembershipId = membershipId(employeeId);
+        seedTaskAt(clinicA, "assistant", "تنظيف", now.atDay(1).minusDays(1), "fanni", TaskFrequency.daily);
+        LocalDate workDate = now.atDay(1);
+        LocalDate leaveDate = now.atDay(2);
+        seedAttendanceOnly(clinicA, employeeId, workDate);
+
+        MonthlyEvaluation before = evaluationService.evaluate(clinicA, employeeId, now);
+
+        var request = leaveRequestService.submit(clinicA, employeeId, leaveDate, leaveDate, "إجازة", employeeMembershipId);
+        leaveRequestService.approve(clinicA, request.id(), actorA);
+
+        MonthlyEvaluation after = evaluationService.evaluate(clinicA, employeeId, now);
+        assertThat(component(after, "attendance").rawScore())
+                .isGreaterThan(component(before, "attendance").rawScore());
     }
 
     @Test

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('الإجازات')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">إجازاتي</h1>
+        <p class="text-sm text-on-surface-variant">اطلب إجازة وتابع حالة طلبك — الاعتماد يوقف أيام العمل في تقويمك</p>
+      </div>
+      <div th:if="${toastMessage != null and !toastMessage.isBlank()}" class="clinicos-card p-4 mb-6"
+           th:classappend="${toastType == 'error'} ? ' border-danger-600 bg-danger-50 text-danger-600' : ' border-success-600 bg-success-50 text-success-600'"
+           th:attr="role=${toastType == 'error'} ? 'alert' : 'status'" th:text="${toastMessage}"></div>
+
+      <a th:if="${canApprove}" th:href="@{/leaves}" class="clinicos-card p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-lg transition-shadow">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-warning-600 inline-block"></span>
+            <h2 class="text-xl font-bold text-teal-900">طلبات بانتظار الموافقة</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-on-surface-variant ps-4">لديك <span th:text="${pendingCount}">0</span> طلب تحتاج مراجعته.</p>
+        </div>
+        <span class="clinicos-btn clinicos-btn--secondary sm:shrink-0">فتح القائمة</span>
+      </a>
+
+      <div th:if="${canRequest}" class="clinicos-card p-6 mb-8">
+        <div class="space-y-1.5 mb-6">
+          <h2 class="text-xl font-bold text-teal-900">طلب إجازة جديد</h2>
+          <p class="text-xs sm:text-sm text-on-surface-variant">اكتب الفترة والسبب، ومديرك هيشوف الطلب ويقرره.</p>
+        </div>
+        <form method="post" th:action="@{/leaves}" class="grid gap-5 sm:grid-cols-2">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <p th:if="${formError != null}" class="sm:col-span-2 text-sm text-danger-600" role="alert" th:text="${formError}"></p>
+          <div>
+            <label class="clinicos-label" for="leave-start">من تاريخ</label>
+            <input id="leave-start" name="start" type="date" class="clinicos-input" th:value="${start}" th:classappend="${errors.containsKey('start')} ? ' clinicos-input--error'">
+            <p th:if="${errors.containsKey('start')}" class="text-xs text-danger-600 mt-1" th:text="${errors.get('start')}"></p>
+          </div>
+          <div>
+            <label class="clinicos-label" for="leave-end">إلى تاريخ</label>
+            <input id="leave-end" name="end" type="date" class="clinicos-input" th:value="${end}" th:classappend="${errors.containsKey('end')} ? ' clinicos-input--error'">
+            <p th:if="${errors.containsKey('end')}" class="text-xs text-danger-600 mt-1" th:text="${errors.get('end')}"></p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="clinicos-label" for="leave-reason">السبب</label>
+            <textarea id="leave-reason" name="reason" rows="3" class="clinicos-input" th:text="${reason}" th:classappend="${errors.containsKey('reason')} ? ' clinicos-input--error'"></textarea>
+            <p th:if="${errors.containsKey('reason')}" class="text-xs text-danger-600 mt-1" th:text="${errors.get('reason')}"></p>
+          </div>
+          <div class="sm:col-span-2 flex justify-end">
+            <button class="clinicos-btn" type="submit">إرسال الطلب</button>
+          </div>
+        </form>
+      </div>
+
+      <div th:if="${soleOwner}" class="clinicos-card p-6 mb-8 border-info-600 bg-info-50">
+        <p class="font-bold text-teal-900">بصفتك المالك الوحيد، سجّل أيام إجازتك من تقويم العمل.</p>
+        <a href="/admin-dashboard/settings" class="clinicos-btn clinicos-btn--secondary mt-4 inline-flex">إعدادات تقويم العمل</a>
+      </div>
+
+      <div th:if="${!hasEmployee and !soleOwner}" class="clinicos-card p-6 mb-8 border-warning-200 bg-warning-50/30">
+        <p class="font-bold text-teal-900">لا يوجد ملف موظف مرتبط بحسابك بعد</p>
+        <p class="mt-2 text-sm text-on-surface-variant">اربط حسابك بملف الموظف من صفحة «تسجيل الموظف» عشان تقدر تطلب إجازة.</p>
+      </div>
+
+      <div th:if="${!#lists.isEmpty(requests)}" class="space-y-4">
+        <div class="flex items-center gap-2 text-on-surface font-bold text-sm sm:text-base">
+          <span class="text-base" role="img" aria-label="سجل">🗓️</span>
+          <h3>سجل طلباتي</h3>
+        </div>
+        <article th:each="request : ${requests}" class="clinicos-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <h4 class="font-extrabold text-teal-900 text-lg"><bdi dir="ltr" th:text="|${#temporals.format(request.start(), 'dd/MM/yyyy')} — ${#temporals.format(request.end(), 'dd/MM/yyyy')}|">01/01/2026 — 05/01/2026</bdi></h4>
+            <p class="text-xs sm:text-sm text-on-surface-variant" th:text="${request.reason()}">السبب</p>
+            <p th:if="${request.decisionNote() != null and !request.decisionNote().isBlank()}" class="text-xs text-on-surface-variant">
+              <span class="font-semibold">ملاحظة القرار:</span>
+              <span th:text="${request.decisionNote()}"></span>
+            </p>
+          </div>
+          <div class="flex items-center gap-2.5 shrink-0">
+            <span th:if="${request.status().name() == 'approved'}" class="clinicos-chip clinicos-chip--success">معتمدة</span>
+            <span th:if="${request.status().name() == 'rejected'}" class="clinicos-chip clinicos-chip--danger">مرفوضة</span>
+            <span th:if="${request.status().name() == 'pending'}" class="clinicos-chip clinicos-chip--warning">بانتظار</span>
+            <form th:if="${request.status().name() == 'pending'}" method="post" th:action="@{/leaves/{id}/cancel(id=${request.id()})}" hx-boost="true" hx-confirm="هل أنت متأكد من إلغاء الطلب؟">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn clinicos-btn--secondary px-3 py-2 text-xs" type="submit">إلغاء</button>
+            </form>
+          </div>
+        </article>
+      </div>
+
+      <div th:if="${#lists.isEmpty(requests)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">🗓️</div>
+        <p class="font-bold text-teal-900 text-xl">ما في طلبات إجازة لحد دلوقتي</p>
+        <p th:if="${canRequest}" class="mt-2 text-sm text-on-surface-variant">ابدأ بأول طلب من النموذج فوق.</p>
+        <p th:if="${soleOwner}" class="mt-2 text-sm text-on-surface-variant">يمكنك تسجيل أيام إجازتك من تقويم العمل.</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

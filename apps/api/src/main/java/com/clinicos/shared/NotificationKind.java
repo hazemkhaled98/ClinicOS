@@ -20,7 +20,10 @@ public enum NotificationKind {
     USER_ACCESS_CHANGED,
     EMPLOYEE_CHANGED,
     CLINIC_SETTINGS_CHANGED,
-    CLINIC_IDENTITY_CHANGED;
+    CLINIC_IDENTITY_CHANGED,
+    LEAVE_REQUESTED,
+    LEAVE_APPROVED,
+    LEAVE_REJECTED;
 
     public String literal() {
         return name();
@@ -44,10 +47,12 @@ public enum NotificationKind {
             case EMPLOYEE_CHANGED -> payload.get("employee");
             case CLINIC_SETTINGS_CHANGED -> payload.get("area");
             case CLINIC_IDENTITY_CHANGED -> payload.get("name");
+            case LEAVE_REQUESTED, LEAVE_APPROVED, LEAVE_REJECTED -> payload.get("employee");
         };
         return subject != null && !subject.isBlank()
                 && (this != CLINIC_IDENTITY_CHANGED || nonBlank(payload.get("slug")))
                 && (this != INVENTORY_CHANGE_REQUESTED || nonBlank(payload.get("action")))
+                && (!isLeave() || nonBlank(payload.get("range")))
                 && (!isRejected() || payload.get("reason") != null && !payload.get("reason").isBlank());
     }
 
@@ -63,7 +68,12 @@ public enum NotificationKind {
     private boolean isRejected() {
         return this == DAILY_TASK_REJECTED
                 || this == TASK_ASSIGNMENT_REJECTED
-                || this == ACADEMY_SUBMISSION_REJECTED;
+                || this == ACADEMY_SUBMISSION_REJECTED
+                || this == LEAVE_REJECTED;
+    }
+
+    private boolean isLeave() {
+        return this == LEAVE_REQUESTED || this == LEAVE_APPROVED || this == LEAVE_REJECTED;
     }
 
     private static boolean nonBlank(String value) {

@@ -2,7 +2,8 @@ package com.clinicos.ui.nav;
 
 public enum NavIcon {
     USER("user"), EDIT("edit"), BOLT("bolt"), TASKS("tasks"),
-    CLIPBOARD_CHECK("clipboard-check"), STAR("star"), ARCHIVE("archive"), CHART("chart");
+    CLIPBOARD_CHECK("clipboard-check"), STAR("star"), ARCHIVE("archive"), CHART("chart"),
+    CALENDAR("calendar");
 
     private final String key;
 

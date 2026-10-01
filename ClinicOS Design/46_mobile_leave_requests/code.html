@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إجازاتي</title>
+  <link rel="stylesheet" href="../../apps/api/target/classes/static/css/app.css">
+</head>
+<body class="min-h-screen bg-surface text-on-surface antialiased">
+  <main class="px-4 py-5 max-w-md mx-auto space-y-5">
+    <header class="space-y-1.5">
+      <h1 class="text-2xl font-extrabold text-teal-900">إجازاتي</h1>
+      <p class="text-xs text-on-surface-variant">اطلب إجازة وتابع حالة طلبك</p>
+    </header>
+    <section class="clinicos-card p-4 space-y-4">
+      <h2 class="text-base font-bold text-teal-900">طلب إجازة جديد</h2>
+      <label class="clinicos-label">من تاريخ<input class="clinicos-input" type="date"></label>
+      <label class="clinicos-label">إلى تاريخ<input class="clinicos-input" type="date"></label>
+      <label class="clinicos-label">السبب<textarea class="clinicos-input" rows="3"></textarea></label>
+      <button class="clinicos-btn w-full">إرسال الطلب</button>
+    </section>
+    <section class="space-y-3">
+      <h2 class="text-sm font-bold">سجل طلباتي</h2>
+      <article class="clinicos-card p-4 space-y-3">
+        <h3 class="font-bold text-teal-900">12 أكتوبر 2026 — 14 أكتوبر 2026</h3>
+        <p class="text-sm text-on-surface-variant">ظرف عائلي</p>
+        <span class="clinicos-chip clinicos-chip--warning">بانتظار</span>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

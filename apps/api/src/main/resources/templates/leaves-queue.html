@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('طلبات الإجازة')}"></head>
+<body class="min-h-screen bg-surface text-on-surface antialiased relative flex" x-data="{ drawerOpen: false }" @keydown.escape.window="drawerOpen = false">
+  <main class="w-full min-h-screen flex flex-col bg-surface">
+    <header th:replace="~{fragments/topbar :: topbar}"></header>
+    <section class="flex-1 p-8 sm:p-10 max-w-7xl w-full mx-auto clinicos-section">
+      <div class="space-y-1.5 mb-8">
+        <h1 class="text-3xl font-extrabold text-teal-900 tracking-tight">طلبات الإجازة</h1>
+        <p class="text-sm text-on-surface-variant">اعتمد أو ارفض طلبات فريقك — الاعتماد بيوقف أيام العمل في تقويم الموظف</p>
+      </div>
+      <div th:if="${toastMessage != null and !toastMessage.isBlank()}" class="clinicos-card p-4 mb-6"
+           th:classappend="${toastType == 'error'} ? ' border-danger-600 bg-danger-50 text-danger-600' : ' border-success-600 bg-success-50 text-success-600'"
+           th:attr="role=${toastType == 'error'} ? 'alert' : 'status'" th:text="${toastMessage}"></div>
+
+      <a th:href="@{/leaves/me}" class="clinicos-btn clinicos-btn--secondary mb-8 inline-flex w-full sm:w-auto">إجازاتي</a>
+
+      <div th:if="${!#lists.isEmpty(pending)}" class="space-y-4">
+        <div class="flex items-center gap-2 text-on-surface font-bold text-sm sm:text-base">
+          <span class="text-base" role="img" aria-label="ساعة رملية">⏳</span>
+          <h2>بانتظار الاعتماد</h2>
+        </div>
+        <article th:each="request : ${pending}" class="clinicos-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div class="space-y-2.5 flex-1">
+            <span class="clinicos-chip clinicos-chip--warning">بانتظار قرارك</span>
+            <h4 class="text-lg font-bold text-teal-900" th:text="${request.employeeName()}">سارة أحمد</h4>
+            <p class="text-xs sm:text-sm text-on-surface-variant">
+              <span dir="ltr" th:text="|${#temporals.format(request.start(), 'dd/MM/yyyy')} — ${#temporals.format(request.end(), 'dd/MM/yyyy')}|"></span>
+            </p>
+            <p class="text-xs sm:text-sm text-on-surface-variant" th:text="${request.reason()}">السبب</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <form method="post" th:action="@{/leaves/{id}/approve(id=${request.id()})}" class="inline">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <button class="clinicos-btn px-3 py-2 text-xs" type="submit">اعتماد</button>
+            </form>
+            <form method="post" th:action="@{/leaves/{id}/reject(id=${request.id()})}" class="inline flex items-center gap-2">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+              <label class="sr-only" th:for="|note-${request.id()}|" th:text="|سبب الرفض لطلب ${request.employeeName()}|">سبب الرفض</label>
+              <input th:id="|note-${request.id()}|" name="note" type="text" placeholder="سبب الرفض" class="clinicos-input text-xs py-2 w-40">
+              <button class="clinicos-btn clinicos-btn--danger px-3 py-2 text-xs" type="submit">رفض</button>
+            </form>
+          </div>
+        </article>
+      </div>
+
+      <div th:if="${#lists.isEmpty(pending)}" class="clinicos-empty-state p-16">
+        <div class="text-5xl mb-4">✅</div>
+        <p class="font-bold text-teal-900 text-xl">مفيش طلبات بانتظار الموافقة</p>
+        <p class="mt-2 text-sm text-on-surface-variant">كل الطلبات اتعالجت. هتشوف الطلبات الجديدة هنا.</p>
+      </div>
+    </section>
+  </main>
+  <div th:replace="~{fragments/drawer :: drawer}"></div>
+  <div th:replace="~{fragments/toast :: toast}"></div>
+  <div th:replace="~{fragments/confirm-dialog :: confirm-dialog}"></div>
+</body>
+</html>

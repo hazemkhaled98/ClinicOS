@@ -107,6 +107,7 @@ This plan is copied to `docs/roadmap.md` at the start of Phase 0 and committed �
 | A — Backlog UI polish | done | Branch `feat/backlog-ui-polish`, no DDL. Dynamic clinic branding (`SessionKeys.CLINIC_NAME` + `LayoutModel.clinicName`, `عيادتي` replaced across authenticated templates), save-toast gaps closed, actionable empty states (`fragments/empty-state.html`) applied to inventory/academy screens. `mvn verify` green (302 tests) + `ModularityTests`/`CssHygieneTest`/`TemplateHygieneTest`. Fixed a production regression found via the IT suite: `EmployeeDayController`'s POST fragment responses (check-in/check-out/task-confirm/assignment-propose) were 500ing because `renderGrid` never populated `layout`, only the GET handler did. |
 | B — Backlog notification center | done | PR #28 landed as `1773a0c`. Backlog item #1 from `docs/backlog/feature-suggestions.md`. `/manual-testing` passed 2026-09-27, so the phase is closed. |
 | C — Editable clinic identity | done | PR #29 merged as `a730eb8`. V32 `update_clinic_identity` (tenant + active-owner guarded, `for update`, returns the previous name/slug). Name + login slug editing, audit via `logRequired` (a failed audit row rolls the rename back), member notifications, owner-only settings form. `/manual-testing` S1–S5 green 2026-09-27; `/pr-sentinel` clean after fixing the topbar name-suffix clobber, the best-effort audit swallowing, and an unactionable 500 on service rejection. `mvn clean verify` green at 353 unit / 359 integration. **Known limitation (not fixed):** `DefaultClinicProfileService.update` reads the current slug un-locked to decide the "unchanged, skip validation" bypass, so two concurrent owner sessions can make a stale submit revert the other's new login code; the audit row records the reverted slug. Fixing it means taking the row lock before the validation read. |
+| D — Holiday/leave requests | in progress | Backlog item #2 from `docs/backlog/feature-suggestions.md`. Branch `feat/backlog-leave-requests`. An employee submits a dated leave request with a reason; a manager decides staff requests, an owner decides any other member's, and nobody decides their own (a sole owner uses the existing holiday settings instead). Approval turns the dates into days off for that employee only. |
 | 9 — Hardening/release | not started | |
 
 ## Phases
@@ -269,6 +270,20 @@ Backlog item #3 from `docs/backlog/feature-suggestions.md`. The owner can change
 - [x] PR review fixes: lock-and-return previous identity atomically, require audit write, align new signup slugs, route member notifications to accessible home, and show persistent form errors; full `mvn clean verify` green.
 - [x] `/pr-sentinel` review fixes: keep the topbar product suffix outside the swappable name node, scope the rename sync to the identity card, sync the settings kicker, and keep `ActivityLogService.log()` best-effort without swallowing the tenant guard; full `mvn clean verify` green.
 - [x] `/manual-testing`: rename clinic, confirm new slug login succeeds and old slug fails, verify notifications and acting-owner session refresh (2026-09-27).
+
+### Phase D — Holiday and leave requests
+
+Backlog item #2 from `docs/backlog/feature-suggestions.md`. An employee submits a dated leave request with a reason; a manager decides staff requests, an owner decides any other member's, and nobody decides their own — a sole active owner records their own days off through the existing holiday settings instead. Approval turns those dates into days off for that employee only, so attendance scoring stops counting them as absences. `clinic_holiday` (V20) stays the clinic-wide/per-employee calendar; approved leave is the *requested and decided* layer above it.
+
+- [x] V33 `leave_request` — tenant-scoped, RLS, same-clinic guard, non-overlapping pending/approved ranges per employee.
+- [x] V34 enforces one active membership per employee, keeping requester identity and role unambiguous.
+- [x] `LeaveRequestService` — submit, approve, reject, list-for-approver, list-for-employee; role-hierarchy and no-self-decision guards; closed-month rejection so an approval cannot change a frozen evaluation.
+- [x] `WorkCalendarService.isWorkday` / `workdaysBetween` treat an approved leave range as days off for that employee.
+- [x] `LEAVE_REQUESTED` / `LEAVE_APPROVED` / `LEAVE_REJECTED` notification kinds, approver fan-out on submit, requester notice on decision, presenter lines and links.
+- [x] `LeaveController` + templates: employee request/history screen and owner/manager decision queue; nav entries.
+- [x] Tests: `DefaultLeaveRequestServiceIT`, `LeaveControllerTest`, `LeaveTemplateTest`, calendar + scoring effect, audit, notification coverage.
+- [x] Gates: `npm run build:css`, `mvn clean verify`, `/tenant-guard-check`, `/rtl-token-lint`, Phase D roadmap/backlog coverage audit (no UC spec exists), approved Playwright scenarios.
+- [x] `/pr-sentinel`.
 
 ### Phase 9 — Hardening and release
 

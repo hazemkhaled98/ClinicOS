@@ -172,11 +172,16 @@ public class DefaultUserAdminService implements UserAdminService {
     @Override
     public void linkEmployee(UUID clinicId, UUID membershipId, UUID employeeId, UUID actorMembershipId) {
         transactionTemplate.executeWithoutResult(status -> {
-            int updated = dsl.update(MEMBERSHIP)
-                    .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
-                    .where(MEMBERSHIP.ID.eq(membershipId))
-                    .and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
-                    .execute();
+            int updated;
+            try {
+                updated = dsl.update(MEMBERSHIP)
+                        .set(MEMBERSHIP.EMPLOYEE_ID, employeeId)
+                        .where(MEMBERSHIP.ID.eq(membershipId))
+                        .and(MEMBERSHIP.CLINIC_ID.eq(clinicId))
+                        .execute();
+            } catch (DuplicateKeyException e) {
+                throw new IllegalArgumentException("ملف الموظف مرتبط بحساب آخر", e);
+            }
             if (updated == 0) {
                 throw new IllegalArgumentException("العضوية غير موجودة");
             }

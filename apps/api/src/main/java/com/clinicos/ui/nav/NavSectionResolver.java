@@ -15,7 +15,6 @@ import java.util.Set;
  *   <li>{@code quick} shows quick access and {@code ceo} shows the dashboard</li>
  *   <li>tasks needs {@code tasksTab} but is superseded by the dashboard
  *       ({@code ceo})</li>
- *   <li>the prep section is unconditional (no permission gates it)</li>
  *   <li>the academy needs either {@code acadVerify} or {@code acadEdit}</li>
  *   <li>inventory appears when any inventory-area code is present</li>
  * </ul>
@@ -33,6 +32,7 @@ public final class NavSectionResolver {
             new NavSection("quick", "evaluation", "تقييم وتحقّق", "تقييم وتحقّق", "تقييم الأداء الشهري للموظفين", NavIcon.BOLT),
             new NavSection("tasks", "tasks", "المهام", "المهام", "إدارة المهام اليومية", NavIcon.TASKS),
             new NavSection("prep", "prep", "تحضير الجلسات", "تحضير الجلسات", "إعداد قوائم الإجراءات الطبية", NavIcon.CLIPBOARD_CHECK),
+            new NavSection("leaves", "leaves/me", "الإجازات", "الإجازات", "طلب الإجازة ومتابعتها واعتمادها", NavIcon.CALENDAR),
             new NavSection("acad", "academy", "الأكاديمية", "الأكاديمية", "البرامج التدريبية الأكاديمية", NavIcon.STAR),
             new NavSection("inv", "inventory", "المخزن", "المخزن", "إدارة مخزون العيادة وتكاليف الإجراءات", NavIcon.ARCHIVE),
             new NavSection("ceo", "admin-dashboard", "لوحة التحكم", "لوحة التحكم", "التحليلات التشغيلية والإدارية", NavIcon.CHART));
@@ -66,6 +66,7 @@ public final class NavSectionResolver {
                     }
                 }
                 case "prep" -> visible.add(section);
+                case "leaves" -> visible.add(section);
                 case "acad" -> {
                     if (permissionCodes.contains("acadVerify") || permissionCodes.contains("acadEdit")) {
                         visible.add(section);
