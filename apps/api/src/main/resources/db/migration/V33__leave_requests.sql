@@ -40,9 +40,8 @@ create table leave_request (
 );
 
 create index idx_leave_request_clinic_employee on leave_request (clinic_id, employee_id, start_date);
--- The approver queue reads pending rows for the clinic; scoring reads approved
--- ranges for one employee, both of which this index's leading (clinic_id,
--- employee_id) prefix cannot serve on their own.
+-- The pending queue filters by clinic without employee_id; this partial index
+-- keeps that lookup limited to pending requests.
 create index idx_leave_request_pending on leave_request (clinic_id, start_date) where status = 'pending';
 
 -- One active request per employee per day. Rejected rows are excluded so a
