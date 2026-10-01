@@ -339,7 +339,7 @@ public class DefaultLeaveRequestService implements LeaveRequestService {
     }
 
     private LeaveRequest toLeaveRequest(LeaveRequestRecord r, String employeeName) {
-        return new LeaveRequest(r.getId(), r.getEmployeeId(), employeeName, null, r.getStartDate(), r.getEndDate(),
+        return new LeaveRequest(r.getId(), r.getEmployeeId(), employeeName, r.getStartDate(), r.getEndDate(),
                 r.getReason(), LeaveRequestService.LeaveStatus.of(r.getStatus().getLiteral()), r.getDecidedBy(),
                 r.getDecisionNote(), r.getCreatedAt());
     }

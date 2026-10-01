@@ -37,7 +37,6 @@ public interface LeaveRequestService {
             UUID id,
             UUID employeeId,
             String employeeName,
-            String requesterRoleCode,
             LocalDate start,
             LocalDate end,
             String reason,

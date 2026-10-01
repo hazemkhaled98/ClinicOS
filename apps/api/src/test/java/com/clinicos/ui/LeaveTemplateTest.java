@@ -184,7 +184,7 @@ class LeaveTemplateTest {
     }
 
     private static LeaveRequest request(LeaveStatus status, String note) {
-        return new LeaveRequest(UUID.randomUUID(), UUID.randomUUID(), "سارة", "assistant",
+        return new LeaveRequest(UUID.randomUUID(), UUID.randomUUID(), "سارة",
                 LocalDate.of(2026, 10, 12), LocalDate.of(2026, 10, 14), "ظرف عائلي", status,
                 null, note, OffsetDateTime.now());
     }
