@@ -18,6 +18,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.identity.api.RoleHierarchy;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
@@ -92,9 +93,8 @@ public class DefaultUserAdminService implements UserAdminService {
         transactionTemplate.executeWithoutResult(status -> {
             Target target = resolveTarget(clinicId, userId);
             String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
-            if (!RoleRanks.OWNER.equals(actorRole)
-                    && !target.membershipId().equals(actorMembershipId)
-                    && RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+            if (!target.membershipId().equals(actorMembershipId)
+                    && (!canAdminister(actorRole, target.roleCode()))) {
                 throw new IllegalArgumentException("لا يمكنك تغيير كلمة مرور حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserPassword(dsl.configuration(), clinicId, userId, newPasswordHash);
@@ -113,7 +113,7 @@ public class DefaultUserAdminService implements UserAdminService {
                 throw new IllegalArgumentException("تعليق حساب المالك من صلاحيات إدارة النظام فقط");
             }
             String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
-            if (RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+            if (!canAdminister(actorRole, target.roleCode())) {
                 throw new IllegalArgumentException("لا يمكنك تعليق حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserStatus(dsl.configuration(), clinicId, userId, "suspended");
@@ -126,7 +126,7 @@ public class DefaultUserAdminService implements UserAdminService {
         transactionTemplate.executeWithoutResult(status -> {
             Target target = resolveTarget(clinicId, userId);
             String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
-            if (RoleRanks.of(target.roleCode()) >= RoleRanks.of(actorRole)) {
+            if (!canAdminister(actorRole, target.roleCode())) {
                 throw new IllegalArgumentException("لا يمكنك تفعيل حساب بدور أعلى أو مساوٍ لدورك");
             }
             setUserStatus(dsl.configuration(), clinicId, userId, "active");
@@ -150,7 +150,7 @@ public class DefaultUserAdminService implements UserAdminService {
             String targetRole = RoleRanks.ofMembership(dsl, clinicId, membershipId);
             String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
             if (!RoleRanks.OWNER.equals(actorRole)) {
-                if (RoleRanks.of(targetRole) >= RoleRanks.of(actorRole)) {
+                if (!canAdminister(actorRole, targetRole)) {
                     throw new IllegalArgumentException("لا يمكنك تغيير دور حساب بدور أعلى أو مساوٍ لدورك");
                 }
                 if (RoleRanks.of(roleCode) >= RoleRanks.of(actorRole)) {
@@ -187,6 +187,10 @@ public class DefaultUserAdminService implements UserAdminService {
             }
             notifyOwners(clinicId, actorMembershipId, usernameOf(clinicId, membershipId));
         });
+    }
+
+    private static boolean canAdminister(String actorRole, String targetRole) {
+        return RoleHierarchy.canAdminister(actorRole, targetRole);
     }
 
     private void notifyOwners(UUID clinicId, UUID actorMembershipId, String username) {

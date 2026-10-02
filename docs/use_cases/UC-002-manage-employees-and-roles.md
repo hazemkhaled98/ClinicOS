@@ -71,7 +71,7 @@ An employee is either an assistant or a receptionist; the role determines which 
 
 ### BR-005: Role Hierarchy and Manager Authority
 
-Clinic roles rank: owner > manager > assistant/receptionist. The owner may assign or change any role, including the manager role, and manage any account's permissions. A manager may only manage employees with a strictly lower role (assistant or receptionist), cannot assign, demote, or promote a role at or above their own, cannot suspend, reactivate, or change the password of a peer or superior, and edits permissions only for roles strictly below their own. The owner role cannot be assigned through the role form.
+Clinic roles rank: owner > manager > doctor > assistant/receptionist. Ranking expresses seniority only; it does not by itself grant account administration. The owner may assign or change any role, including the manager role, and manage any account's permissions. A manager may only manage employees with a strictly lower role (doctor, assistant, or receptionist), cannot assign, demote, or promote a role at or above their own, cannot suspend, reactivate, or change the password of a peer or superior, and edits permissions only for roles strictly below their own. Account administration — changing a password, suspending, reactivating, assigning a role, or editing a role's permissions — is restricted to the owner and a manager; a doctor outranks assistant and receptionist but holds no account administration over them. The owner role cannot be assigned through the role form.
 
 ### BR-002: Evaluation Months Freeze Automatically
 

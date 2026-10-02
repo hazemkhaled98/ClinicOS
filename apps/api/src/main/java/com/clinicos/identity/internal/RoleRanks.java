@@ -7,20 +7,22 @@ import java.util.UUID;
 
 import org.jooq.DSLContext;
 
+import com.clinicos.identity.api.RoleHierarchy;
+
 final class RoleRanks {
 
-    static final String OWNER = "owner";
-    static final String MANAGER = "manager";
+    static final String OWNER = RoleHierarchy.OWNER;
+    static final String MANAGER = RoleHierarchy.MANAGER;
 
     private RoleRanks() {
     }
 
     static int of(String roleCode) {
-        return switch (roleCode) {
-            case OWNER -> 3;
-            case MANAGER -> 2;
-            default -> 1;
-        };
+        return RoleHierarchy.rankOf(roleCode);
+    }
+
+    static boolean canAdministerAccounts(String actorRole) {
+        return RoleHierarchy.canAdministerAccounts(actorRole);
     }
 
     static String ofMembership(DSLContext dsl, UUID clinicId, UUID membershipId) {

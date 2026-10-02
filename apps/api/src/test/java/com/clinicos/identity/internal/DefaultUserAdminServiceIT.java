@@ -367,6 +367,61 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
         userAdminService.changePassword(clinicA, manager.id(), "hash-new", owner.membershipId());
     }
 
+    @Test
+    void managerCanAdministerDoctorAccount() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary actor = createUser(clinicA, "doc-mgr");
+        setRoleDirect(clinicA, actor.membershipId(), "manager");
+        UserSummary doctor = createUser(clinicA, "doc-target");
+        setRoleDirect(clinicA, doctor.membershipId(), "doctor");
+
+        userAdminService.changePassword(clinicA, doctor.id(), "hash-doc", actor.membershipId());
+        userAdminService.suspend(clinicA, doctor.id(), actor.membershipId());
+
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(u -> u.id().equals(doctor.id())).singleElement()
+                .extracting(UserSummary::status).isEqualTo("suspended");
+    }
+
+    @Test
+    void doctorCannotAdministerAssistantOrReceptionistAccounts() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary doctor = createUser(clinicA, "doc-actor");
+        setRoleDirect(clinicA, doctor.membershipId(), "doctor");
+        UserSummary assistant = createUser(clinicA, "doc-assistant");
+        setRoleDirect(clinicA, assistant.membershipId(), "assistant");
+        UserSummary receptionist = createUser(clinicA, "doc-receptionist");
+        setRoleDirect(clinicA, receptionist.membershipId(), "receptionist");
+
+        for (UserSummary target : new UserSummary[] { assistant, receptionist }) {
+            assertThatThrownBy(() -> userAdminService.changePassword(
+                    clinicA, target.id(), "hash-x", doctor.membershipId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("أعلى أو مساوٍ");
+            assertThatThrownBy(() -> userAdminService.suspend(
+                    clinicA, target.id(), doctor.membershipId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("أعلى أو مساوٍ");
+            assertThatThrownBy(() -> userAdminService.reactivate(
+                    clinicA, target.id(), doctor.membershipId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("أعلى أو مساوٍ");
+            assertThatThrownBy(() -> userAdminService.assignRole(
+                    clinicA, target.membershipId(), "receptionist", doctor.membershipId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("أعلى أو مساوٍ");
+        }
+    }
+
+    @Test
+    void doctorCannotChangeOwnPasswordButCanChangeItThemselves() throws Exception {
+        TenantContext.set(clinicA);
+        UserSummary doctor = createUser(clinicA, "doc-self");
+        setRoleDirect(clinicA, doctor.membershipId(), "doctor");
+
+        userAdminService.changePassword(clinicA, doctor.id(), "hash-self", doctor.membershipId());
+    }
+
     private UserSummary createUser(UUID clinicId, String suffix) {
         return userAdminService.create(clinicId, new UserCreateRequest(
                 suffix + "-" + UUID.randomUUID(), "مستخدم", null, "hash"), actorOf(clinicId));

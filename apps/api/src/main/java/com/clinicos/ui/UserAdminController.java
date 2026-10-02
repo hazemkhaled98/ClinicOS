@@ -1,6 +1,7 @@
 package com.clinicos.ui;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.clinicos.identity.api.RoleHierarchy;
 import com.clinicos.identity.api.UserAdminService;
 import com.clinicos.identity.api.UserAdminService.UserCreateRequest;
 import com.clinicos.identity.api.UserAdminService.UserSummary;
@@ -177,12 +179,25 @@ public class UserAdminController {
     }
 
     private void renderCard(Model model, UUID clinicId, UUID currentMembershipId, String actorRole, UserForm addForm) {
-        model.addAttribute("users", userAdminService.list(clinicId));
+        List<UserAdminService.UserSummary> users = userAdminService.list(clinicId);
+        model.addAttribute("users", users);
         model.addAttribute("currentMembershipId", currentMembershipId);
         model.addAttribute("addForm", addForm);
         model.addAttribute("roleNames", roleNames());
         model.addAttribute("actorRole", actorRole);
+        model.addAttribute("administerableRoles", administerableRoles(actorRole));
     }
+
+    /**
+     * Roles the actor may administer. Mirrors {@link RoleHierarchy#canAdminister}
+     * so the UI never offers a control the service layer would refuse.
+     */
+    private static List<String> administerableRoles(String actorRole) {
+        return ROLES.stream().filter(code -> RoleHierarchy.canAdminister(actorRole, code)).toList();
+    }
+
+    private static final List<String> ROLES =
+            List.of("owner", "manager", "doctor", "assistant", "receptionist");
 
     private static Map<String, String> roleNames() {
         return Map.of(

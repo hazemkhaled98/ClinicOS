@@ -15,6 +15,7 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.clinicos.identity.api.RoleHierarchy;
 import com.clinicos.identity.api.RolePermissionService;
 import com.clinicos.shared.NotificationKind;
 import com.clinicos.shared.NotificationService;
@@ -51,8 +52,8 @@ public class DefaultRolePermissionService implements RolePermissionService {
         }
         transactionTemplate.executeWithoutResult(status -> {
             String actorRole = RoleRanks.ofMembership(dsl, clinicId, actorMembershipId);
-            if (!RoleRanks.OWNER.equals(actorRole)
-                    && RoleRanks.of(roleCode) >= RoleRanks.of(actorRole)) {
+            if (!RoleHierarchy.canAdministerAccounts(actorRole)
+                    || RoleHierarchy.rankOf(roleCode) >= RoleHierarchy.rankOf(actorRole)) {
                 throw new IllegalArgumentException("لا يمكنك تعديل صلاحيات دور أعلى أو مساوٍ لدورك");
             }
             UUID roleId = dsl.select(ROLE.ID)
