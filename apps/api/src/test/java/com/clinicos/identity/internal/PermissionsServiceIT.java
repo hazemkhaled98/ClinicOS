@@ -29,7 +29,7 @@ import com.clinicos.shared.TenantContext;
 class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
 
     private static final Set<String> FULL_CATALOG = Set.of(
-            "emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit",
+            "emp", "quick", "ceo", "tasksTab", "acadVerify", "acadEdit", "academy",
             "tray", "issue", "procs", "myprocs", "manage", "orders", "receive", "returns",
             "suppliers", "dash", "profit", "analytics", "waste", "doctors", "supAnalysis",
             "received", "itemAnalysis", "approvals", "ledger");
@@ -73,7 +73,8 @@ class PermissionsServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(access.roleCode()).isEqualTo("manager");
         assertThat(access.permissionCodes()).contains("procs");
         assertThat(access.permissionCodes()).doesNotContain("ledger");
-        assertThat(access.permissionCodes()).hasSize(FULL_CATALOG.size() - 1);
+        // Manager defaults are the 25 codes TestFixtures seeds; only `ledger` was revoked.
+        assertThat(access.permissionCodes()).hasSize(24);
     }
 
     @Test
