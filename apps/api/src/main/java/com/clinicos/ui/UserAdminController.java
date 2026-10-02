@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Controller
 public class UserAdminController {
@@ -281,6 +282,7 @@ public class UserAdminController {
 
     public static class PasswordForm {
         @NotBlank(message = "كلمة المرور مطلوبة")
+        @Size(min = 8, message = "كلمة المرور يجب أن تكون 8 محارف على الأقل")
         private String newPassword;
 
         static PasswordForm of(String newPassword) {

@@ -32,6 +32,17 @@
 
       <div class="flex items-center gap-2 me-auto">
         <span th:if="${user.roleCode() == 'owner'}" class="clinicos-chip clinicos-chip--success">صلاحيات كاملة – لا تُحذف</span>
+        <form th:if="${user.membershipId().equals(currentMembershipId) or administerableRoles.contains(user.roleCode())}"
+              th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/password'"
+              hx-target="#users-card" hx-swap="outerHTML"
+              class="flex items-center gap-2">
+          <label class="sr-only" th:for="${'newPassword_' + user.id()}"
+                 th:text="${user.membershipId().equals(currentMembershipId)} ? 'كلمة المرور الجديدة' : 'كلمة مرور ' + ${user.username()}">كلمة المرور الجديدة</label>
+          <input type="password" th:id="${'newPassword_' + user.id()}" name="newPassword"
+                 class="clinicos-input w-36 text-xs" placeholder="كلمة مرور جديدة"
+                 minlength="8" autocomplete="new-password" required>
+          <button type="submit" class="clinicos-btn text-xs">تغيير كلمة المرور</button>
+        </form>
         <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId) and administerableRoles.contains(user.roleCode())}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/suspend'"
               hx-target="#users-card" hx-swap="outerHTML"
