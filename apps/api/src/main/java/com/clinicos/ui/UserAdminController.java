@@ -188,6 +188,7 @@ public class UserAdminController {
         return Map.of(
                 "owner", LayoutModel.roleDisplayName("owner"),
                 "manager", LayoutModel.roleDisplayName("manager"),
+                "doctor", LayoutModel.roleDisplayName("doctor"),
                 "assistant", LayoutModel.roleDisplayName("assistant"),
                 "receptionist", LayoutModel.roleDisplayName("receptionist"));
     }

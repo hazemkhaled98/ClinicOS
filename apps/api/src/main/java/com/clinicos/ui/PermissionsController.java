@@ -30,7 +30,7 @@ public class PermissionsController {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionsController.class);
 
-    private static final List<String> ROLE_CODES = List.of("owner", "manager", "assistant", "receptionist");
+    private static final List<String> ROLE_CODES = List.of("owner", "manager", "doctor", "assistant", "receptionist");
 
     private static final Map<String, String> PERMISSION_LABELS = Map.ofEntries(
             Map.entry("emp", "الموظفين"),
@@ -39,6 +39,7 @@ public class PermissionsController {
             Map.entry("tasksTab", "تبويب المهام"),
             Map.entry("acadVerify", "التحقق الأكاديمي"),
             Map.entry("acadEdit", "تعديل الأكاديمي"),
+            Map.entry("academy", "الأكاديمية"),
             Map.entry("tray", "الصينية"),
             Map.entry("issue", "الإصدار"),
             Map.entry("procs", "الإجراءات"),

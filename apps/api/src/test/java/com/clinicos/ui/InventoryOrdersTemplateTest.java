@@ -50,6 +50,14 @@ class InventoryOrdersTemplateTest {
                 .doesNotContain("لا توجد موردون", "لا توجد نواقص");
     }
 
+    @Test
+    void zeroQuantityOrderCannotSubmitEmptyLineSet() {
+        String rendered = render(List.of(supplier()), List.of(shortage()), List.of());
+
+        assertThat(rendered).contains("$el.querySelectorAll('[data-row]')", "$event.preventDefault()",
+                "quantityError", "أدخل كمية واحدة على الأقل للطلب");
+    }
+
     private String render(List<Supplier> suppliers, List<Shortage> shortages, List<Order> orders) {
         WebContext context = new WebContext(
                 JakartaServletWebApplication.buildApplication(new MockServletContext())

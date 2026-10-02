@@ -129,16 +129,29 @@ class PurchasingControllerTest {
     }
 
     @Test
-    void placeOrderFiltersZeroQtyLines() {
+    void placeOrderRejectsOnlyZeroQtyLines() {
         HttpSession session = session("assistant", "orders");
         RedirectAttributes redirect = mock(RedirectAttributes.class);
-        when(purchasingService.placeOrder(eq(CLINIC), any(), eq(SUPPLIER), any()))
-                .thenReturn(placedOrders().get(0));
 
-        controller.placeOrder(SUPPLIER, List.of(ITEM), List.of(BigDecimal.ZERO), Collections.singletonList(null), session, redirect);
+        String view = controller.placeOrder(SUPPLIER, List.of(ITEM), List.of(BigDecimal.ZERO),
+                Collections.singletonList(null), session, redirect);
 
-        verify(purchasingService).placeOrder(eq(CLINIC), any(), eq(SUPPLIER), ArgumentMatchers
-                .<List<OrderLineRequest>>argThat(lines -> lines.isEmpty()));
+        assertThat(view).isEqualTo("redirect:/inventory/orders");
+        verify(purchasingService, never()).placeOrder(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastMessage", "أدخل كمية واحدة على الأقل للطلب");
+    }
+
+    @Test
+    void placeOrderWithNoSubmittedQuantityShowsArabicError() {
+        HttpSession session = session("assistant", "orders");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.placeOrder(SUPPLIER, null, null, null, session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/orders");
+        verify(purchasingService, never()).placeOrder(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastType", "error");
+        verify(redirect).addFlashAttribute("toastMessage", "بيانات أصناف الطلب غير مكتملة");
     }
 
     @Test
@@ -235,6 +248,43 @@ class PurchasingControllerTest {
                         && lines.get(0).qty().compareTo(new BigDecimal("3")) == 0));
         verify(redirect).addFlashAttribute("toastType", "success");
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "inventory.return.request", "supplier_return");
+    }
+
+    @Test
+    void requestReturnWithNoSubmittedQuantityShowsArabicError() {
+        HttpSession session = session("assistant", "returns");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.requestReturn(ORDER, null, null, session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/returns");
+        verify(purchasingService, never()).requestReturn(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastType", "error");
+        verify(redirect).addFlashAttribute("toastMessage", "بيانات أصناف الإرجاع غير مكتملة");
+    }
+
+    @Test
+    void placeOrderWithMismatchedLineParametersShowsArabicError() {
+        HttpSession session = session("assistant", "orders");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.placeOrder(SUPPLIER, List.of(ITEM), null, null, session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/orders");
+        verify(purchasingService, never()).placeOrder(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastMessage", "بيانات أصناف الطلب غير مكتملة");
+    }
+
+    @Test
+    void requestReturnWithMismatchedLineParametersShowsArabicError() {
+        HttpSession session = session("assistant", "returns");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.requestReturn(ORDER, List.of(UUID.randomUUID()), null, session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/returns");
+        verify(purchasingService, never()).requestReturn(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastMessage", "بيانات أصناف الإرجاع غير مكتملة");
     }
 
     @Test

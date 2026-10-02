@@ -91,7 +91,9 @@ public class AcademyController {
             return "redirect:/login";
         }
         model.addAttribute("layout", layoutModel.forRequest(session, "academy"));
-        if (employeeId.equals(employeeId(session))) {
+        boolean isOwnCurriculum = employeeId.equals(employeeId(session));
+        model.addAttribute("isOwnCurriculum", isOwnCurriculum);
+        if (isOwnCurriculum) {
             model.addAttribute("track", new AcademyService.TraineeTrack(
                     employeeId, employeeName(session),
                     academyService.myCurriculum(clinicId(session), actor(session))));
@@ -344,12 +346,20 @@ public class AcademyController {
 
     private void renderIndex(HttpSession session, Model model) {
         model.addAttribute("layout", layoutModel.forRequest(session, "academy"));
-        List<Employee> employees = employeeService.list(clinicId(session));
+        boolean canVerify = canVerify(session);
+        List<Employee> employees;
+        if (canVerify) {
+            employees = employeeService.list(clinicId(session));
+        } else {
+            Employee employee = employeeService.findByMembership(clinicId(session),
+                    (UUID) session.getAttribute(SessionKeys.MEMBERSHIP_ID));
+            employees = employee == null ? List.of() : List.of(employee);
+        }
         model.addAttribute("employees", employees);
         model.addAttribute("audiences",
                 employees.stream().collect(java.util.stream.Collectors.toMap(Employee::id,
                         emp -> academyService.audienceOf(clinicId(session), emp.id()))));
-        model.addAttribute("canVerify", canVerify(session));
+        model.addAttribute("canVerify", canVerify);
     }
 
     private void renderQueue(HttpSession session, Model model) {

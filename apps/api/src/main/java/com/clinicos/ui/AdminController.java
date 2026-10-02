@@ -188,19 +188,48 @@ public class AdminController {
     private static Map<String, String> activityLabels() {
         return Map.ofEntries(
                 Map.entry("login", "دخول النظام"), Map.entry("signup", "إنشاء العيادة"),
-                Map.entry("volume.record", "تسجيل حجم الإنتاج"), Map.entry("eval.override", "تعديل حد التقييم"),
-                Map.entry("eval.unlock", "فتح شهر للتقييم"), Map.entry("employee.update", "تعديل موظف"),
-                Map.entry("inventory.issue", "صرف مخزون"), Map.entry("inventory.receive", "استلام مخزون"),
+                Map.entry("clinic.identity_changed", "تعديل بيانات العيادة"),
                 Map.entry("permissions.update", "تحديث الصلاحيات"), Map.entry("user.create", "إنشاء مستخدم"),
-                Map.entry("user.suspend", "تعليق مستخدم"), Map.entry("user.reactivate", "إعادة تفعيل مستخدم"),
-                Map.entry("user.password_change", "تغيير كلمة المرور"), Map.entry("user.assign_role", "تعديل الدور"));
+                Map.entry("user.password_change", "تغيير كلمة المرور"), Map.entry("user.suspend", "تعليق مستخدم"),
+                Map.entry("user.reactivate", "إعادة تفعيل مستخدم"), Map.entry("user.assign_role", "تعديل الدور"),
+                Map.entry("volume.record", "تسجيل حجم الإنتاج"), Map.entry("eval.override", "تعديل حد التقييم"),
+                Map.entry("eval.unlock", "فتح شهر للتقييم"), Map.entry("eval.approve", "اعتماد إنجاز"),
+                Map.entry("eval.reject", "رفض إنجاز"), Map.entry("eval.assign", "إسناد مهمة"),
+                Map.entry("employee.update", "تعديل موظف"), Map.entry("employee.archive", "أرشفة موظف"),
+                Map.entry("gamification.settings", "تعديل إعدادات التحفيز"),
+                Map.entry("gamification.goals", "تعديل هدف أسبوعي"),
+                Map.entry("gamification.thresholds", "تعديل مستويات الشارات"),
+                Map.entry("selfcheck.checkin", "تسجيل حضور"), Map.entry("selfcheck.checkout", "تسجيل انصراف"),
+                Map.entry("task.create", "إضافة مهمة"), Map.entry("task.update", "تعديل مهمة"),
+                Map.entry("task.delete", "حذف مهمة"), Map.entry("task.complete", "إنجاز مهمة"),
+                Map.entry("task.uncomplete", "إلغاء إنجاز مهمة"),
+                Map.entry("assignment.propose", "اقتراح مهمة"), Map.entry("assignment.done", "إنجاز مهمة مقترحة"),
+                Map.entry("prep.create", "إنشاء قائمة تجهيز"), Map.entry("prep.edit", "تعديل قائمة تجهيز"),
+                Map.entry("prep.import", "استيراد قائمة تجهيز جاهزة"), Map.entry("prep.reset", "إعادة ضبط قائمة التجهيز"),
+                Map.entry("prep.toggle", "تحديث عنصر في قائمة التجهيز"), Map.entry("prep.archive", "أرشفة قائمة التجهيز"),
+                Map.entry("prep.approve", "اعتماد قائمة التجهيز"), Map.entry("prep.unapprove", "إلغاء اعتماد قائمة التجهيز"),
+                Map.entry("academy.verify", "اعتماد وحدة تدريبية"), Map.entry("academy.reject", "رفض وحدة تدريبية"),
+                Map.entry("academy.submitPhoto", "رفع صورة إنجاز تدريبي"),
+                Map.entry("academy.markDone", "إكمال وحدة تدريبية"),
+                Map.entry("academy.submitExam", "تسليم الامتحان التدريبي"),
+                Map.entry("academy.importCurriculum", "استيراد المنهج التدريبي"),
+                Map.entry("academy.saveUnit", "حفظ وحدة تدريبية"),
+                Map.entry("leave.submit", "تقديم طلب إجازة"), Map.entry("leave.cancel", "إلغاء طلب إجازة"),
+                Map.entry("leave.approve", "اعتماد طلب إجازة"), Map.entry("leave.reject", "رفض طلب إجازة"),
+                Map.entry("inventory.issue", "صرف مخزون"), Map.entry("inventory.receive", "استلام مخزون"),
+                Map.entry("inventory.item.create", "إضافة صنف مخزون"), Map.entry("inventory.order.place", "إنشاء طلب شراء"),
+                Map.entry("inventory.supplier.save", "حفظ بيانات مورد"),
+                Map.entry("inventory.procedure.create", "إضافة إجراء للمخزون"),
+                Map.entry("inventory.return.request", "طلب إرجاع مخزون"),
+                Map.entry("inventory.approval.approve", "اعتماد طلب مخزون"),
+                Map.entry("inventory.approval.reject", "رفض طلب مخزون"));
     }
 
     private static String activityActions(String category) {
         return switch (category == null ? "all" : category) {
-        case "auth" -> "login,signup,user.create,user.suspend,user.reactivate,user.password_change,user.assign_role,permissions.update";
-        case "finance" -> "volume.record,eval.override,eval.unlock,employee.update,inventory.issue,inventory.receive,gamification";
-        case "operations" -> "selfcheck,task,assignment,prep,academy,eval.approve,eval.reject,eval.assign";
+        case "auth" -> "login,signup,user,permissions.update,clinic.identity_changed";
+        case "finance" -> "volume.record,eval,inventory,gamification";
+        case "operations" -> "selfcheck,task,assignment,prep,academy,leave,employee";
         default -> "all";
         };
     }

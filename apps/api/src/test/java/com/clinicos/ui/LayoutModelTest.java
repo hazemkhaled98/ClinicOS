@@ -28,6 +28,7 @@ class LayoutModelTest {
         assertThat(LayoutModel.roleDisplayName("manager")).isEqualTo("مدير");
         assertThat(LayoutModel.roleDisplayName("assistant")).isEqualTo("مساعد");
         assertThat(LayoutModel.roleDisplayName("receptionist")).isEqualTo("موظف استقبال");
+        assertThat(LayoutModel.roleDisplayName("doctor")).isEqualTo("طبيب");
         assertThat(LayoutModel.roleDisplayName(null)).isEqualTo("مستخدم");
     }
 

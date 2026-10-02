@@ -62,6 +62,8 @@ class PermissionsControllerTest {
         assertThat(view).isEqualTo("admin/permissions-page");
         assertThat(model.getAttribute("rolePermissionMap")).isNotNull();
         assertThat((java.util.Map<String, ?>) model.getAttribute("rolePermissionMap")).containsKey("manager");
+        assertThat(((java.util.Map<?, ?>) model.getAttribute("permissionLabels")).get("academy"))
+                .isEqualTo("الأكاديمية");
         assertThat(model.getAttribute("toastMessage")).isNull();
     }
 
@@ -85,7 +87,7 @@ class PermissionsControllerTest {
 
         controller.permissions(null, session, model);
 
-        String[] expected = {"owner", "manager", "assistant", "receptionist"};
+        String[] expected = {"owner", "manager", "doctor", "assistant", "receptionist"};
         assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
                 .containsExactlyInAnyOrder(expected);
     }
@@ -101,7 +103,7 @@ class PermissionsControllerTest {
         controller.permissions(null, session, model);
 
         assertThat((java.util.List<String>) model.getAttribute("roleCodes"))
-                .containsExactlyInAnyOrder("assistant", "receptionist");
+                .containsExactlyInAnyOrder("doctor", "assistant", "receptionist");
     }
 
     @Test

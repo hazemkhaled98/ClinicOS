@@ -189,7 +189,7 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
 
         evaluationService.setOverride(clinicA, employeeId, june, ClinicSettingsService.Category.FANNI,
                 new BigDecimal("70"), membershipId(employeeId));
-        evaluationService.unlock(clinicA, employeeId, june, membershipId(employeeId));
+        assertThat(evaluationService.unlock(clinicA, employeeId, june, membershipId(employeeId))).isTrue();
 
         MonthlyEvaluation after = evaluationService.evaluate(clinicA, employeeId, june);
 
@@ -198,6 +198,14 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(component(after, "fanni").rawScore()).isEqualByComparingTo("70.00");
         assertThat(component(after, "fanni").overrideFloor()).isEqualByComparingTo("70.00");
         assertThat(after.frozen()).isTrue();
+    }
+
+    @Test
+    void unlockReturnsFalseWhenNoFrozenSnapshotMatches() {
+        TenantContext.set(clinicA);
+
+        assertThat(evaluationService.unlock(clinicA, UUID.randomUUID(), YearMonth.now().minusMonths(1),
+                UUID.randomUUID())).isFalse();
     }
 
     @Test

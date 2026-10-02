@@ -50,7 +50,7 @@ public class ClinicOSSecurityConfig {
             TenantSessionFilter tenantSessionFilter) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/signup", "/error",
-                        "/css/**", "/js/**", "/fonts/**", "/branding/**")
+                        "/css/**", "/js/**", "/fonts/**", "/branding/**", "/icons/**")
                 .permitAll()
                 .anyRequest().authenticated());
         http.formLogin(f -> f.loginPage("/login")

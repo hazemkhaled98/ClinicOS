@@ -71,8 +71,9 @@
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           الدور
           <select name="roleCode" class="clinicos-input w-32">
-            <option th:if="${actorRole == 'owner'}" value="manager"
+          <option th:if="${actorRole == 'owner'}" value="manager"
                     th:selected="${addForm.getRoleCode() == 'manager'}">مدير</option>
+            <option value="doctor" th:selected="${addForm.getRoleCode() == 'doctor'}">طبيب</option>
             <option value="assistant" th:selected="${addForm.getRoleCode() == 'assistant'}">مساعد</option>
             <option value="receptionist"
                     th:selected="${addForm.getRoleCode() == 'receptionist'}">موظف استقبال</option>

@@ -71,12 +71,17 @@ public class PurchasingController {
 
     @PostMapping("/inventory/orders")
     public String placeOrder(@RequestParam UUID supplierId,
-            @RequestParam List<UUID> itemId,
-            @RequestParam List<BigDecimal> qty,
+            @RequestParam(required = false) List<UUID> itemId,
+            @RequestParam(required = false) List<BigDecimal> qty,
             @RequestParam(required = false) List<BigDecimal> unitCost,
             HttpSession session, RedirectAttributes redirect) {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "orders")) {
             return "redirect:/inventory";
+        }
+        if (itemId == null || qty == null || itemId.size() != qty.size()) {
+            redirect.addFlashAttribute("toastMessage", "بيانات أصناف الطلب غير مكتملة");
+            redirect.addFlashAttribute("toastType", "error");
+            return "redirect:/inventory/orders";
         }
         List<OrderLineRequest> lines = new ArrayList<>();
         for (int i = 0; i < itemId.size(); i++) {
@@ -86,6 +91,11 @@ public class PurchasingController {
             }
             BigDecimal belt = unitCost != null && i < unitCost.size() ? unitCost.get(i) : null;
             lines.add(new OrderLineRequest(itemId.get(i), requested, belt));
+        }
+        if (lines.isEmpty()) {
+            redirect.addFlashAttribute("toastMessage", "أدخل كمية واحدة على الأقل للطلب");
+            redirect.addFlashAttribute("toastType", "error");
+            return "redirect:/inventory/orders";
         }
         try {
             var order = purchasingService.placeOrder(clinicId(session), actor(session), supplierId, lines);
@@ -177,11 +187,16 @@ public class PurchasingController {
 
     @PostMapping("/inventory/returns")
     public String requestReturn(@RequestParam UUID orderId,
-            @RequestParam List<UUID> orderLineId,
-            @RequestParam List<BigDecimal> qty,
+            @RequestParam(required = false) List<UUID> orderLineId,
+            @RequestParam(required = false) List<BigDecimal> qty,
             HttpSession session, RedirectAttributes redirect) {
         if (!hasSession(session) || !AdminAccess.hasCode(session, "returns")) {
             return "redirect:/inventory";
+        }
+        if (orderLineId == null || qty == null || orderLineId.size() != qty.size()) {
+            redirect.addFlashAttribute("toastMessage", "بيانات أصناف الإرجاع غير مكتملة");
+            redirect.addFlashAttribute("toastType", "error");
+            return "redirect:/inventory/returns";
         }
         List<ReturnLineRequest> lines = new ArrayList<>();
         for (int i = 0; i < orderLineId.size(); i++) {
@@ -189,6 +204,11 @@ public class PurchasingController {
             if (value != null && value.signum() > 0) {
                 lines.add(new ReturnLineRequest(orderLineId.get(i), value));
             }
+        }
+        if (lines.isEmpty()) {
+            redirect.addFlashAttribute("toastMessage", "أدخل كمية واحدة على الأقل للإرجاع");
+            redirect.addFlashAttribute("toastType", "error");
+            return "redirect:/inventory/returns";
         }
         try {
             purchasingService.requestReturn(clinicId(session), actor(session), orderId, lines);

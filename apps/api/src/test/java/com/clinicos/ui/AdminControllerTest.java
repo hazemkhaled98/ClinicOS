@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -178,6 +179,33 @@ class AdminControllerTest {
 
         assertThat(controller.activity("2026-09-19", "all", session, model)).isEqualTo("admin/activity-page");
         assertThat(model.getAttribute("day")).isEqualTo(LocalDate.of(2026, 9, 19));
+    }
+
+    @Test
+    void activityLabelsEveryLoggedActionInArabic() {
+        HttpSession session = session();
+        allowDashboard();
+        when(activityLogService.forDay(eq(CLINIC), any(LocalDate.class), eq("all"))).thenReturn(List.of());
+
+        controller.activity("2026-09-19", "all", session, model);
+
+        Map<?, ?> labels = (Map<?, ?>) model.getAttribute("labels");
+        assertThat(labels.keySet().stream().map(Object::toString).toList()).contains(
+                "login", "signup", "clinic.identity_changed", "permissions.update",
+                "user.create", "user.password_change", "user.suspend", "user.reactivate", "user.assign_role",
+                "volume.record", "eval.override", "eval.unlock", "eval.approve", "eval.reject", "eval.assign",
+                "employee.update", "employee.archive", "gamification.settings", "gamification.goals",
+                "gamification.thresholds", "selfcheck.checkin", "selfcheck.checkout", "task.create",
+                "task.update", "task.delete", "task.complete", "task.uncomplete", "assignment.propose",
+                "assignment.done", "prep.create", "prep.import", "prep.reset", "prep.toggle", "prep.edit",
+                "prep.archive", "prep.approve", "prep.unapprove", "academy.verify", "academy.reject",
+                "academy.submitPhoto", "academy.markDone", "academy.submitExam", "academy.importCurriculum",
+                "academy.saveUnit",
+                "leave.submit", "leave.cancel", "leave.approve", "leave.reject", "inventory.issue",
+                "inventory.receive", "inventory.item.create", "inventory.order.place", "inventory.supplier.save",
+                "inventory.procedure.create", "inventory.return.request", "inventory.approval.approve",
+                "inventory.approval.reject");
+        assertThat(labels.values()).allSatisfy(value -> assertThat(value.toString()).matches(".*[\\p{IsArabic}].*"));
     }
 
     @Test

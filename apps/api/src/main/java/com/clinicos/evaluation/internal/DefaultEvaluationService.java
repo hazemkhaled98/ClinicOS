@@ -391,14 +391,14 @@ public class DefaultEvaluationService implements EvaluationService {
     }
 
     @Override
-    public void unlock(UUID clinicId, UUID employeeId, YearMonth month, UUID unlockedByMembershipId) {
-        transactionTemplate.executeWithoutResult(status -> dsl.update(EVALUATION_SNAPSHOT)
+    public boolean unlock(UUID clinicId, UUID employeeId, YearMonth month, UUID unlockedByMembershipId) {
+        return transactionTemplate.execute(status -> dsl.update(EVALUATION_SNAPSHOT)
                 .set(EVALUATION_SNAPSHOT.UNLOCKED_AT, OffsetDateTime.now())
                 .set(EVALUATION_SNAPSHOT.UNLOCKED_BY, unlockedByMembershipId)
                 .where(EVALUATION_SNAPSHOT.CLINIC_ID.eq(clinicId))
                 .and(EVALUATION_SNAPSHOT.EMPLOYEE_ID.eq(employeeId))
                 .and(EVALUATION_SNAPSHOT.PERIOD_MONTH.eq(month.atDay(1)))
                 .and(EVALUATION_SNAPSHOT.UNLOCKED_AT.isNull())
-                .execute());
+                .execute() > 0);
     }
 }

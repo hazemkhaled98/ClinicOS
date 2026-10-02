@@ -17,8 +17,8 @@
           <h2 class="text-xl font-bold text-teal-900">طلب إرجاع جديد</h2>
         </div>
         <form th:each="o : ${orders}" method="post" th:action="@{/inventory/returns}"
-              class="clinicos-card p-6 mb-6"
-              @submit="document.querySelectorAll('[data-rrow]').forEach(r => { const v = r.querySelector('input[name=qty]'); const off = !(+v.value > 0); v.disabled = off; r.querySelector('input[name=orderLineId]').disabled = off; })">
+              class="clinicos-card p-6 mb-6" x-data="{ quantityError: false }"
+              @submit="const rows = Array.from($el.querySelectorAll('[data-rrow]')); if (!rows.some(r => Number(r.querySelector('input[name=qty]').value) > 0)) { quantityError = true; $event.preventDefault(); return; } quantityError = false; rows.forEach(r => { const v = r.querySelector('input[name=qty]'); const off = !(Number(v.value) > 0); v.disabled = off; r.querySelector('input[name=orderLineId]').disabled = off; })">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="orderId" th:value="${o.id()}">
           <div class="flex items-center justify-between mb-4">
@@ -51,6 +51,7 @@
               </tr>
             </tbody>
           </table>
+          <p x-show="quantityError" x-cloak role="alert" class="mt-3 text-sm text-danger-600">أدخل كمية واحدة على الأقل للإرجاع</p>
           <div class="mt-4 flex justify-end">
             <button class="clinicos-btn clinicos-btn--danger" type="submit">إرسال طلب الإرجاع</button>
           </div>

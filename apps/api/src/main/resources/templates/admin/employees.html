@@ -31,6 +31,7 @@
             الدور في العيادة
             <select name="roleCode" class="clinicos-input w-36">
               <option th:if="${actorRole == 'owner'}" value="manager" th:selected="${employeeRoles[employee.id()].roleCode() == 'manager'}">مدير</option>
+              <option value="doctor" th:selected="${employeeRoles[employee.id()].roleCode() == 'doctor'}">طبيب</option>
               <option value="assistant" th:selected="${employeeRoles[employee.id()].roleCode() == 'assistant'}">مساعد</option>
               <option value="receptionist" th:selected="${employeeRoles[employee.id()].roleCode() == 'receptionist'}">موظف استقبال</option>
             </select>

@@ -68,7 +68,8 @@ public final class NavSectionResolver {
                 case "prep" -> visible.add(section);
                 case "leaves" -> visible.add(section);
                 case "acad" -> {
-                    if (permissionCodes.contains("acadVerify") || permissionCodes.contains("acadEdit")) {
+                    if (permissionCodes.contains("academy") || permissionCodes.contains("acadVerify")
+                            || permissionCodes.contains("acadEdit")) {
                         visible.add(section);
                     }
                 }

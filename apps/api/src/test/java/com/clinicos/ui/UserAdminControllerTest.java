@@ -71,6 +71,7 @@ class UserAdminControllerTest {
         assertThat(view).isEqualTo("admin/users-page");
         assertThat(model.getAttribute("users")).isEqualTo(List.of());
         assertThat(model.getAttribute("addForm")).isNotNull();
+        assertThat(((java.util.Map<?, ?>) model.getAttribute("roleNames")).get("doctor")).isEqualTo("طبيب");
     }
 
     @Test
