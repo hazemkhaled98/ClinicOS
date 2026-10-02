@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
@@ -614,7 +615,8 @@ class DefaultLeaveRequestServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     private static LocalDate workingDay(LocalDate date) {
-        return date.getDayOfWeek().getValue() >= 6 ? date.plusDays(2) : date;
+        // clinic_settings.working_weekdays defaults to Sat-Thu (V20), so Friday is the day off.
+        return date.getDayOfWeek() == DayOfWeek.FRIDAY ? date.plusDays(3) : date;
     }
 
     private UUID insertEmployeeMembership(String name, String roleCode) throws Exception {
