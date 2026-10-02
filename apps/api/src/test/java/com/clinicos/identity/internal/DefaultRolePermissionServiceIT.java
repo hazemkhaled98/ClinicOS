@@ -151,11 +151,17 @@ class DefaultRolePermissionServiceIT extends AbstractPostgresIntegrationTest {
     }
 
     @Test
-    void ownerCanSetOwnerRolePermissions() throws Exception {
+    void ownerRolePermissionsAreReadOnly() throws Exception {
         TenantContext.set(clinicA);
-        rolePermissionService.setPermissions(clinicA, ownerMembership(clinicA), "owner", Set.of("emp"));
+        UUID owner = ownerMembership(clinicA);
 
-        assertThat(rolePermissionService.effectiveCodes(clinicA, "owner")).containsExactly("emp");
+        // The owner role is granted every permission regardless of role_permission
+        // (BR-G03), so editing it is refused for every actor, the owner included.
+        assertThatThrownBy(() -> rolePermissionService.setPermissions(clinicA, owner, "owner", Set.of("emp")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("أعلى أو مساوٍ");
+
+        assertThat(rolePermissionService.effectiveCodes(clinicA, "owner")).isEmpty();
     }
 
     private UUID ownerMembership(UUID clinicId) throws Exception {

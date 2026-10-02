@@ -149,12 +149,11 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void suspendSelfThrows() {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "self-" + UUID.randomUUID(), "ذاتي", null, "hash"), actorA);
-        UUID userId = userAdminService.list(clinicA).get(0).id();
-        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
+        UserSummary created = userAdminService.create(clinicA,
+                new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                        "self-" + UUID.randomUUID(), "ذاتي", null, "hash"), actorA);
 
-        assertThatThrownBy(() -> userAdminService.suspend(clinicA, userId, membershipId))
+        assertThatThrownBy(() -> userAdminService.suspend(clinicA, created.id(), created.membershipId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("الخاص");
     }
@@ -175,25 +174,29 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
     @Test
     void suspendCrossClinicThrowsAndLeavesClinicAUnaffected() {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "cross-" + UUID.randomUUID(), "عبر العيادات", null, "hash"), actorA);
-        UUID userId = userAdminService.list(clinicA).get(0).id();
+        UserSummary created = userAdminService.create(clinicA,
+                new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                        "cross-" + UUID.randomUUID(), "عبر العيادات", null, "hash"), actorA);
 
         TenantContext.set(clinicB);
-        assertThatThrownBy(() -> userAdminService.suspend(clinicB, userId, UUID.randomUUID()))
+        assertThatThrownBy(() -> userAdminService.suspend(clinicB, created.id(), UUID.randomUUID()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("غير موجود");
 
         TenantContext.set(clinicA);
-        assertThat(userAdminService.list(clinicA).get(0).status()).isEqualTo("active");
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(user -> user.id().equals(created.id()))
+                .singleElement()
+                .extracting(UserSummary::status)
+                .isEqualTo("active");
     }
 
     @Test
     void listShowsLinkedEmployeeId() throws Exception {
         TenantContext.set(clinicA);
-        userAdminService.create(clinicA, new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
-                "emp-" + UUID.randomUUID(), "مربوط", null, "hash"), actorA);
-        UUID membershipId = userAdminService.list(clinicA).get(0).membershipId();
+        UserSummary created = userAdminService.create(clinicA,
+                new com.clinicos.identity.api.UserAdminService.UserCreateRequest(
+                        "emp-" + UUID.randomUUID(), "مربوط", null, "hash"), actorA);
         UUID employeeId;
         try (Connection connection = superuser()) {
             try (var statement = connection.prepareStatement(
@@ -206,9 +209,14 @@ class DefaultUserAdminServiceIT extends AbstractPostgresIntegrationTest {
                 }
             }
         }
-        userAdminService.linkEmployee(clinicA, membershipId, employeeId, actorA);
+        userAdminService.linkEmployee(clinicA, created.membershipId(), employeeId, actorA);
 
-        assertThat(userAdminService.list(clinicA).get(0).employeeId()).isEqualTo(employeeId);
+        // list() has no ORDER BY, so match by membership rather than by row position.
+        assertThat(userAdminService.list(clinicA))
+                .filteredOn(user -> user.membershipId().equals(created.membershipId()))
+                .singleElement()
+                .extracting(UserSummary::employeeId)
+                .isEqualTo(employeeId);
     }
 
     @Test
