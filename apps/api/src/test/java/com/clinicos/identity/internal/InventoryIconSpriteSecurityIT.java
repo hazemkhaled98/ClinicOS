@@ -36,6 +36,6 @@ class InventoryIconSpriteSecurityIT extends AbstractPostgresIntegrationTest {
     void inventoryIconSpriteIsPublicStaticAsset() throws Exception {
         mockMvc.perform(get("/icons/inventory.svg"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("symbol id=\"items\"")));
+                .andExpect(content().string(containsString("symbol id=\"manage\"")));
     }
 }

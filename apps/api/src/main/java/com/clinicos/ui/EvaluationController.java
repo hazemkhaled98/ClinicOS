@@ -188,19 +188,18 @@ public class EvaluationController {
         if (!canView(session)) {
             return "redirect:/";
         }
-        Map<String, String> errors = new HashMap<>();
+Map<String, String> errors = new HashMap<>();
         UUID clinicId = AdminAccess.clinicId(session);
-        Employee self = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
-        if (self != null && self.id().equals(employeeId)) {
-            errors.put("error", "لا يمكنك مراجعة تقييمك بنفسك");
-        } else {
-            try {
-                action.accept(clinicId);
-                activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
-            } catch (IllegalArgumentException | EvaluationConflictException e) {
-                log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
-                errors.put("error", e.getMessage());
+        try {
+            Employee self = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
+            if (self != null && self.id().equals(employeeId)) {
+                throw new IllegalArgumentException("لا يمكنك مراجعة تقييمك بنفسك");
             }
+            action.accept(clinicId);
+            activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
+        } catch (IllegalArgumentException | EvaluationConflictException e) {
+            log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
+            errors.put("error", e.getMessage());
         }
         renderGrid(model, clinicId, employeeId, parseMonth(month));
         Toasts.fromErrors(model, errors, successMessage);

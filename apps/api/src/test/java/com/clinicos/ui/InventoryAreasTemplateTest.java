@@ -2,6 +2,9 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,32 +22,12 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 class InventoryAreasTemplateTest {
 
     @Test
-    void everyInventoryAreaRendersItsOwnIcon() {
+    void everyInventoryAreaRendersItsOwnIcon() throws Exception {
         ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("templates/");
         resolver.setSuffix(".html");
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(resolver);
-        List<InventoryController.SubArea> areas = List.of(
-                new InventoryController.SubArea("items", "manage", "الأصناف", "items"),
-                new InventoryController.SubArea("tray", "tray", "صينية التحضير", "tray"),
-                new InventoryController.SubArea("issue", "issue", "صرف المخزون", "issue"),
-                new InventoryController.SubArea("orders", "orders", "النواقص والطلب", "orders"),
-                new InventoryController.SubArea("receive", "receive", "الاستلام", "receive"),
-                new InventoryController.SubArea("received", "received", "سجل الاستلام", "received"),
-                new InventoryController.SubArea("returns", "returns", "المرتجعات", "returns"),
-                new InventoryController.SubArea("suppliers", "suppliers", "الموردين", "suppliers"),
-                new InventoryController.SubArea("procs", "procs", "قوائم الإجراءات", "procs"),
-                new InventoryController.SubArea("myprocs", "myprocs", "سجل إجراءاتي", "myprocs"),
-                new InventoryController.SubArea("dash", "dash", "لوحة المخزون", "dash"),
-                new InventoryController.SubArea("profit", "profit", "الربحية", "profit"),
-                new InventoryController.SubArea("analytics", "analytics", "تحليل الاستهلاك", "analytics"),
-                new InventoryController.SubArea("waste", "waste", "الهدر", "waste"),
-                new InventoryController.SubArea("doctors", "doctors", "تحليل الأطباء", "doctors"),
-                new InventoryController.SubArea("supAnalysis", "supAnalysis", "تحليل الموردين", "supAnalysis"),
-                new InventoryController.SubArea("itemAnalysis", "itemAnalysis", "تحليل الأصناف", "itemAnalysis"),
-                new InventoryController.SubArea("ledger", "ledger", "سجل الحركة", "ledger"),
-                new InventoryController.SubArea("approvals", "approvals", "طلبات الموافقة", "approvals"));
         WebContext context = new WebContext(
                 JakartaServletWebApplication.buildApplication(new MockServletContext())
                         .buildExchange(new MockHttpServletRequest(), new MockHttpServletResponse()),
@@ -52,19 +35,19 @@ class InventoryAreasTemplateTest {
                 Map.of(
                         "_csrf", new DefaultCsrfToken("X-CSRF-TOKEN", "_csrf", "token"),
                         "layout", new LayoutModel.LayoutData(List.of(), "مالك", "عيادتي", "owner", "2026-10-02", "inventory"),
-                        "areas", areas));
+                        "areas", InventoryController.AREAS));
 
         String html = engine.process("inventory", context);
-        assertThat(html).contains(
-                "href=\"/icons/inventory.svg#items\"", "href=\"/icons/inventory.svg#tray\"",
-                "href=\"/icons/inventory.svg#issue\"", "href=\"/icons/inventory.svg#orders\"",
-                "href=\"/icons/inventory.svg#receive\"", "href=\"/icons/inventory.svg#received\"",
-                "href=\"/icons/inventory.svg#returns\"", "href=\"/icons/inventory.svg#suppliers\"",
-                "href=\"/icons/inventory.svg#procs\"", "href=\"/icons/inventory.svg#myprocs\"",
-                "href=\"/icons/inventory.svg#dash\"", "href=\"/icons/inventory.svg#profit\"",
-                "href=\"/icons/inventory.svg#analytics\"", "href=\"/icons/inventory.svg#waste\"",
-                "href=\"/icons/inventory.svg#doctors\"", "href=\"/icons/inventory.svg#supAnalysis\"",
-                "href=\"/icons/inventory.svg#itemAnalysis\"", "href=\"/icons/inventory.svg#ledger\"",
-                "href=\"/icons/inventory.svg#approvals\"");
+
+        assertThat(InventoryController.AREAS.stream().map(InventoryController.SubArea::code).distinct())
+                .doesNotHaveDuplicates();
+        for (InventoryController.SubArea area : InventoryController.AREAS) {
+            assertThat(html).contains("href=\"/icons/inventory.svg#" + area.code() + "\"");
+        }
+        String sprite = Files.readString(
+                Path.of("src/main/resources/static/icons/inventory.svg"), StandardCharsets.UTF_8);
+        for (InventoryController.SubArea area : InventoryController.AREAS) {
+            assertThat(sprite).contains("id=\"" + area.code() + "\"");
+        }
     }
 }

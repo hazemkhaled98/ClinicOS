@@ -34,26 +34,26 @@ import jakarta.servlet.http.HttpSession;
 public class InventoryController {
 
     private static final String AREA = "inventory";
-    private static final List<SubArea> AREAS = List.of(
-            new SubArea("items", "manage", "الأصناف", "items"),
-            new SubArea("tray", "tray", "صينية التحضير", "tray"),
-            new SubArea("issue", "issue", "صرف المخزون", "issue"),
-            new SubArea("orders", "orders", "النواقص والطلب", "orders"),
-            new SubArea("receive", "receive", "الاستلام", "receive"),
-            new SubArea("received", "received", "سجل الاستلام", "received"),
-            new SubArea("returns", "returns", "المرتجعات", "returns"),
-            new SubArea("suppliers", "suppliers", "الموردين", "suppliers"),
-            new SubArea("procs", "procs", "قوائم الإجراءات", "procs"),
-            new SubArea("myprocs", "myprocs", "سجل إجراءاتي", "myprocs"),
-            new SubArea("dash", "dash", "لوحة المخزون", "dash"),
-            new SubArea("profit", "profit", "الربحية", "profit"),
-            new SubArea("analytics", "analytics", "تحليل الاستهلاك", "analytics"),
-            new SubArea("waste", "waste", "الهدر", "waste"),
-            new SubArea("doctors", "doctors", "تحليل الأطباء", "doctors"),
-            new SubArea("supAnalysis", "supAnalysis", "تحليل الموردين", "supAnalysis"),
-            new SubArea("itemAnalysis", "itemAnalysis", "تحليل الأصناف", "itemAnalysis"),
-            new SubArea("ledger", "ledger", "سجل الحركة", "ledger"),
-            new SubArea("approvals", "approvals", "طلبات الموافقة", "approvals"));
+    static final List<SubArea> AREAS = List.of(
+new SubArea("items", "manage", "الأصناف"),
+            new SubArea("tray", "tray", "صينية التحضير"),
+            new SubArea("issue", "issue", "صرف المخزون"),
+            new SubArea("orders", "orders", "النواقص والطلب"),
+            new SubArea("receive", "receive", "الاستلام"),
+            new SubArea("received", "received", "سجل الاستلام"),
+            new SubArea("returns", "returns", "المرتجعات"),
+            new SubArea("suppliers", "suppliers", "الموردين"),
+            new SubArea("procs", "procs", "قوائم الإجراءات"),
+            new SubArea("myprocs", "myprocs", "سجل إجراءاتي"),
+            new SubArea("dash", "dash", "لوحة المخزون"),
+            new SubArea("profit", "profit", "الربحية"),
+            new SubArea("analytics", "analytics", "تحليل الاستهلاك"),
+            new SubArea("waste", "waste", "الهدر"),
+            new SubArea("doctors", "doctors", "تحليل الأطباء"),
+            new SubArea("supAnalysis", "supAnalysis", "تحليل الموردين"),
+            new SubArea("itemAnalysis", "itemAnalysis", "تحليل الأصناف"),
+            new SubArea("ledger", "ledger", "سجل الحركة"),
+            new SubArea("approvals", "approvals", "طلبات الموافقة"));
 
     private final LayoutModel layoutModel;
     private final InventoryService inventoryService;
@@ -288,7 +288,7 @@ public class InventoryController {
         response.addCookie(cookie);
     }
 
-    record SubArea(String route, String code, String title, String icon) {
+    record SubArea(String route, String code, String title) {
     }
 
     public static class ItemForm {
