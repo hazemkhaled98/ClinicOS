@@ -107,6 +107,48 @@ class PermissionsControllerTest {
     }
 
     @Test
+    void doctorSeesNoManageableRoleCodesAndNoActiveRole() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("doctor");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        String view = controller.permissions(null, session, model);
+
+        assertThat(view).isEqualTo("admin/permissions-page");
+        assertThat((java.util.List<String>) model.getAttribute("roleCodes")).isEmpty();
+        assertThat(model.getAttribute("activeRole")).isNull();
+    }
+
+    @Test
+    void assistantSeesNoManageableRoleCodesEither() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("assistant");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        controller.permissions(null, session, model);
+
+        assertThat((java.util.List<String>) model.getAttribute("roleCodes")).isEmpty();
+        assertThat(model.getAttribute("activeRole")).isNull();
+    }
+
+    @Test
+    void managerCannotOpenOwnRoleForEditing() {
+        HttpSession session = session();
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn("manager");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(rolePermissionService.listForClinic(CLINIC)).thenReturn(List.of());
+
+        controller.permissions("manager", session, model);
+
+        assertThat(model.getAttribute("activeRole")).isNotEqualTo("manager");
+    }
+
+    @Test
     void updatePermissionsLogsActivity() {
         HttpSession session = session();
         allowDashboard();
