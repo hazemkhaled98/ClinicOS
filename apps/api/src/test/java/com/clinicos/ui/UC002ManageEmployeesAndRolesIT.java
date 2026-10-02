@@ -188,7 +188,10 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             openAdminUsers();
             page().getByLabel("اسم المستخدم").fill("emp-" + uniqueSuffix());
             page().getByLabel("الاسم الكامل").fill(fullName);
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            // Exact match is required: the Users page also renders the signed-in user's
+            // own "كلمة المرور الجديدة" reset field, and getByLabel matches by substring.
+            page().getByLabel("كلمة المرور", new Page.GetByLabelOptions().setExact(true))
+                    .fill("correct-horse-battery-staple");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
             userRow(fullName).waitFor();
         }
@@ -207,13 +210,19 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             String duplicatedUsername = "dup-" + uniqueSuffix();
             page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
             page().getByLabel("الاسم الكامل").fill("حساب أول");
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            // Exact match is required: the Users page also renders the signed-in user's
+            // own "كلمة المرور الجديدة" reset field, and getByLabel matches by substring.
+            page().getByLabel("كلمة المرور", new Page.GetByLabelOptions().setExact(true))
+                    .fill("correct-horse-battery-staple");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
             userRow("حساب أول").waitFor();
 
             page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
             page().getByLabel("الاسم الكامل").fill("حساب ثاني");
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
+            // Exact match is required: the Users page also renders the signed-in user's
+            // own "كلمة المرور الجديدة" reset field, and getByLabel matches by substring.
+            page().getByLabel("كلمة المرور", new Page.GetByLabelOptions().setExact(true))
+                    .fill("correct-horse-battery-staple");
             page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
 
             page().getByText("اسم المستخدم موجود مسبقاً في هذه العيادة").waitFor();
