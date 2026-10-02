@@ -222,7 +222,11 @@ public class AdminController {
                 Map.entry("inventory.procedure.create", "إضافة إجراء للمخزون"),
                 Map.entry("inventory.return.request", "طلب إرجاع مخزون"),
                 Map.entry("inventory.approval.approve", "اعتماد طلب مخزون"),
-                Map.entry("inventory.approval.reject", "رفض طلب مخزون"));
+                Map.entry("inventory.approval.reject", "رفض طلب مخزون"),
+                Map.entry("inventory.item.request-change", "طلب تعديل صنف"),
+                Map.entry("inventory.procedure.request-change", "طلب تعديل إجراء"),
+                Map.entry("inventory.procedure.request-bom-change", "طلب تعديل قائمة إجراءات"),
+                Map.entry("inventory.procedure-case.create", "إضافة حالة إجراءات"));
     }
 
     private static String activityActions(String category) {

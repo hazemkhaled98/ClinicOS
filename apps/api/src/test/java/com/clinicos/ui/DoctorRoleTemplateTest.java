@@ -47,4 +47,23 @@ class DoctorRoleTemplateTest {
         assertThat(usersHtml).contains("value=\"doctor\"", "طبيب");
         assertThat(employeesHtml).contains("value=\"doctor\"", "طبيب");
     }
+
+    @Test
+    void managersSeeTheDoctorOptionButNotTheManagerOption() {
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/");
+        resolver.setSuffix(".html");
+        SpringTemplateEngine engine = new SpringTemplateEngine();
+        engine.setTemplateResolver(resolver);
+
+        Context usersContext = new Context(Locale.ROOT);
+        usersContext.setVariable("users", List.of());
+        usersContext.setVariable("currentMembershipId", UUID.randomUUID());
+        usersContext.setVariable("addForm", UserAdminController.UserForm.empty());
+        usersContext.setVariable("roleNames", Map.of("doctor", "طبيب"));
+        usersContext.setVariable("actorRole", "manager");
+        String html = engine.process("admin/users", Set.of("usersCard"), usersContext);
+
+        assertThat(html).contains("value=\"doctor\"", "طبيب").doesNotContain("value=\"manager\"");
+    }
 }

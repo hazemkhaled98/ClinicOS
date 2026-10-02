@@ -190,6 +190,7 @@ class DefaultEvaluationServiceIT extends AbstractPostgresIntegrationTest {
         evaluationService.setOverride(clinicA, employeeId, june, ClinicSettingsService.Category.FANNI,
                 new BigDecimal("70"), membershipId(employeeId));
         assertThat(evaluationService.unlock(clinicA, employeeId, june, membershipId(employeeId))).isTrue();
+        assertThat(evaluationService.unlock(clinicA, employeeId, june, membershipId(employeeId))).isFalse();
 
         MonthlyEvaluation after = evaluationService.evaluate(clinicA, employeeId, june);
 

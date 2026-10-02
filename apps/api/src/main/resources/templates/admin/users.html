@@ -70,7 +70,7 @@
         </label>
         <label class="flex flex-col gap-1 text-xs text-on-surface-variant">
           الدور
-<select name="roleCode" class="clinicos-input w-32">
+          <select name="roleCode" class="clinicos-input w-32">
             <option th:if="${actorRole == 'owner'}" value="manager"
                     th:selected="${addForm.getRoleCode() == 'manager'}">مدير</option>
             <option value="doctor" th:selected="${addForm.getRoleCode() == 'doctor'}">طبيب</option>

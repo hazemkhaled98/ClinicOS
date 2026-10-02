@@ -264,6 +264,19 @@ class PurchasingControllerTest {
     }
 
     @Test
+    void requestReturnRejectsOnlyZeroQtyLines() {
+        HttpSession session = session("assistant", "returns");
+        RedirectAttributes redirect = mock(RedirectAttributes.class);
+
+        String view = controller.requestReturn(ORDER, List.of(UUID.randomUUID()), List.of(BigDecimal.ZERO),
+                session, redirect);
+
+        assertThat(view).isEqualTo("redirect:/inventory/returns");
+        verify(purchasingService, never()).requestReturn(any(), any(), any(), any());
+        verify(redirect).addFlashAttribute("toastMessage", "أدخل كمية واحدة على الأقل للإرجاع");
+    }
+
+    @Test
     void placeOrderWithMismatchedLineParametersShowsArabicError() {
         HttpSession session = session("assistant", "orders");
         RedirectAttributes redirect = mock(RedirectAttributes.class);

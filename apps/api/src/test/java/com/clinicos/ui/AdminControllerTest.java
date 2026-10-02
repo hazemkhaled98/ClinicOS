@@ -2,7 +2,9 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -14,10 +16,12 @@ import java.util.List;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -204,8 +208,32 @@ class AdminControllerTest {
                 "leave.submit", "leave.cancel", "leave.approve", "leave.reject", "inventory.issue",
                 "inventory.receive", "inventory.item.create", "inventory.order.place", "inventory.supplier.save",
                 "inventory.procedure.create", "inventory.return.request", "inventory.approval.approve",
-                "inventory.approval.reject");
+                "inventory.approval.reject", "inventory.item.request-change",
+                "inventory.procedure.request-change", "inventory.procedure.request-bom-change",
+                "inventory.procedure-case.create");
         assertThat(labels.values()).allSatisfy(value -> assertThat(value.toString()).matches(".*[\\p{IsArabic}].*"));
+    }
+
+    @Test
+    void everyQuickFilterCategoryResolvesToRealActionPrefixes() {
+        HttpSession session = session();
+        allowDashboard();
+        when(activityLogService.forDay(eq(CLINIC), any(LocalDate.class), anyString())).thenReturn(List.of());
+
+        for (String category : new String[] { "auth", "finance", "operations" }) {
+            clearInvocations(activityLogService);
+            ArgumentCaptor<String> prefixes = ArgumentCaptor.forClass(String.class);
+            controller.activity("2026-09-19", category, session, model);
+            verify(activityLogService).forDay(eq(CLINIC), any(LocalDate.class), prefixes.capture());
+
+            Set<?> logged = ((Map<?, ?>) model.getAttribute("labels")).keySet();
+            for (String prefix : prefixes.getValue().split(",")) {
+                String action = prefix.trim();
+                assertThat(action).isNotEmpty();
+                assertThat(logged.stream().map(Object::toString)).anyMatch(known -> known.equals(action)
+                        || known.startsWith(action + "."));
+            }
+        }
     }
 
     @Test
