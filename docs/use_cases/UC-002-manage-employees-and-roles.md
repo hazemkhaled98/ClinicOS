@@ -16,7 +16,7 @@
 
 1. The manager opens the employee records section.
 2. The manager selects an employee from the list, or starts registering a new one.
-3. The manager enters or edits the employee's name, role (assistant or receptionist), base pay, maximum incentive, and work shift.
+3. The manager enters or edits the employee's name, role (doctor, assistant, or receptionist), base pay, maximum incentive, and work shift.
 4. The manager saves the changes.
 5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role. (Academy and inventory impact is deferred to Phase 6 / Phase 7; the role-based task list and evaluation are reflected now.)
 6. The manager reviews or adjusts clinic-wide settings that affect every employee's evaluation: the task list per role, evaluation category weights, monthly operating target, grace period for lateness, and gamification/badge thresholds.
@@ -71,7 +71,7 @@ An employee is either an assistant or a receptionist; the role determines which 
 
 ### BR-005: Role Hierarchy and Manager Authority
 
-Clinic roles rank: owner > manager > assistant/receptionist. The owner may assign or change any role, including the manager role, and manage any account's permissions. A manager may only manage employees with a strictly lower role (assistant or receptionist), cannot assign, demote, or promote a role at or above their own, cannot suspend, reactivate, or change the password of a peer or superior, and edits permissions only for roles strictly below their own. The owner role cannot be assigned through the role form.
+Clinic roles rank: owner > manager > doctor > assistant/receptionist. Ranking expresses seniority only; it does not by itself grant account administration. The owner may assign or change any role, including the manager role, and manage any account's permissions. A manager may only manage employees with a strictly lower role (doctor, assistant, or receptionist), cannot assign, demote, or promote a role at or above their own, cannot suspend, reactivate, or change the password of a peer or superior, and edits permissions only for roles strictly below their own. Account administration — changing a password, suspending, reactivating, assigning a role, or editing a role's permissions — is restricted to the owner and a manager; a doctor outranks assistant and receptionist but holds no account administration over them. The owner role cannot be assigned through the role form.
 
 ### BR-002: Evaluation Months Freeze Automatically
 

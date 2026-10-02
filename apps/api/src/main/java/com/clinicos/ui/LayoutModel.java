@@ -74,6 +74,7 @@ public class LayoutModel {
             case "manager" -> "مدير";
             case "assistant" -> "مساعد";
             case "receptionist" -> "موظف استقبال";
+            case "doctor" -> "طبيب";
             default -> "مستخدم";
         };
     }

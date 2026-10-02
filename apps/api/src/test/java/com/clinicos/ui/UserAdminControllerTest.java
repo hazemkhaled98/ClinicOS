@@ -71,6 +71,7 @@ class UserAdminControllerTest {
         assertThat(view).isEqualTo("admin/users-page");
         assertThat(model.getAttribute("users")).isEqualTo(List.of());
         assertThat(model.getAttribute("addForm")).isNotNull();
+        assertThat(((java.util.Map<?, ?>) model.getAttribute("roleNames")).get("doctor")).isEqualTo("طبيب");
     }
 
     @Test
@@ -223,6 +224,62 @@ class UserAdminControllerTest {
     }
 
     @Test
+    void changePasswordTooShortReportsErrorAndSkipsService() {
+        HttpSession session = session();
+        allowDashboard();
+        UUID userId = UUID.randomUUID();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        String view = controller.changePassword(userId,
+                UserAdminController.PasswordForm.of("short"),
+                Validated.of(UserAdminController.PasswordForm.of("short")), session, model);
+
+        assertThat(view).isEqualTo("admin/users :: usersCard");
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(userAdminService, never()).changePassword(any(), any(), any(), any());
+    }
+
+    @Test
+    void managerCanAdministerEveryRoleStrictlyBelowManager() {
+        HttpSession session = sessionAs("manager");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.users(session, model);
+
+        assertThat((List<String>) model.getAttribute("administerableRoles"))
+                .containsExactly("doctor", "assistant", "receptionist");
+        assertThat(model.getAttribute("actorRole")).isEqualTo("manager");
+    }
+
+    @Test
+    void doctorHasNoAdministerableRolesAtAll() {
+        HttpSession session = sessionAs("doctor");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.users(session, model);
+
+        assertThat((List<String>) model.getAttribute("administerableRoles")).isEmpty();
+    }
+
+    @Test
+    void ownerCannotAdministerThemselves() {
+        HttpSession session = sessionAs("owner");
+        allowDashboard();
+        when(userAdminService.list(CLINIC)).thenReturn(List.of());
+        when(employeeService.list(CLINIC)).thenReturn(List.of());
+
+        controller.users(session, model);
+
+        assertThat((List<String>) model.getAttribute("administerableRoles"))
+                .containsExactly("manager", "doctor", "assistant", "receptionist");
+    }
+
+    @Test
     void changePasswordServiceErrorReturnsToast() {
         HttpSession session = session();
         allowDashboard();
@@ -232,7 +289,7 @@ class UserAdminControllerTest {
         when(userAdminService.list(CLINIC)).thenReturn(List.of());
         when(employeeService.list(CLINIC)).thenReturn(List.of());
 
-        controller.changePassword(userId, UserAdminController.PasswordForm.of("newpass"), Validated.of(UserAdminController.PasswordForm.of("newpass")), session, model);
+        controller.changePassword(userId, UserAdminController.PasswordForm.of("newpassword"), Validated.of(UserAdminController.PasswordForm.of("newpassword")), session, model);
 
         assertThat(model.getAttribute("toastType")).isEqualTo("error");
         assertThat(((String) model.getAttribute("toastMessage"))).isEqualTo("المستخدم غير موجود");
@@ -309,9 +366,14 @@ class UserAdminControllerTest {
     }
 
     private static HttpSession session() {
+        return sessionAs("owner");
+    }
+
+    private static HttpSession sessionAs(String roleCode) {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute(SessionKeys.CLINIC_ID)).thenReturn(CLINIC);
         when(session.getAttribute(SessionKeys.MEMBERSHIP_ID)).thenReturn(MEMBERSHIP);
+        when(session.getAttribute(SessionKeys.ROLE_CODE)).thenReturn(roleCode);
         return session;
     }
 }

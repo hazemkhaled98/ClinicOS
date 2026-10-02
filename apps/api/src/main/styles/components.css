@@ -485,6 +485,21 @@
     transition: none;
   }
 
+  #activity-panel.htmx-added {
+    animation: activity-panel-settle 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes activity-panel-settle {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .notification-count--pulse {
     animation: notification-count-pulse 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
   }
@@ -502,6 +517,10 @@
 
     .htmx-swapping {
       transition-duration: 1ms;
+    }
+
+    #activity-panel.htmx-added {
+      animation: none;
     }
   }
 }

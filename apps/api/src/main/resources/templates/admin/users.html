@@ -32,13 +32,24 @@
 
       <div class="flex items-center gap-2 me-auto">
         <span th:if="${user.roleCode() == 'owner'}" class="clinicos-chip clinicos-chip--success">صلاحيات كاملة – لا تُحذف</span>
-        <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId) and (actorRole == 'owner' or user.roleCode() == 'assistant' or user.roleCode() == 'receptionist')}"
+        <form th:if="${user.membershipId().equals(currentMembershipId) or administerableRoles.contains(user.roleCode())}"
+              th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/password'"
+              hx-target="#users-card" hx-swap="outerHTML"
+              class="flex items-center gap-2">
+          <label class="sr-only" th:for="${'newPassword_' + user.id()}"
+                 th:text="${user.membershipId().equals(currentMembershipId)} ? 'كلمة المرور الجديدة' : 'كلمة مرور ' + ${user.username()}">كلمة المرور الجديدة</label>
+          <input type="password" th:id="${'newPassword_' + user.id()}" name="newPassword"
+                 class="clinicos-input w-36 text-xs" placeholder="كلمة مرور جديدة"
+                 minlength="8" autocomplete="new-password" required>
+          <button type="submit" class="clinicos-btn text-xs">تغيير كلمة المرور</button>
+        </form>
+        <form th:if="${user.status() == 'active' and user.roleCode() != 'owner' and !user.membershipId().equals(currentMembershipId) and administerableRoles.contains(user.roleCode())}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/suspend'"
               hx-target="#users-card" hx-swap="outerHTML"
               hx-confirm="هل أنت متأكد من تعليق هذا المستخدم؟">
           <button type="submit" class="clinicos-btn clinicos-btn--danger text-xs">تعليق</button>
         </form>
-        <form th:if="${user.status() == 'suspended' and user.roleCode() != 'owner' and (actorRole == 'owner' or user.roleCode() == 'assistant' or user.roleCode() == 'receptionist')}"
+        <form th:if="${user.status() == 'suspended' and user.roleCode() != 'owner' and administerableRoles.contains(user.roleCode())}"
               th:attr="hx-post='/admin-dashboard/users/' + ${user.id()} + '/reactivate'"
               hx-target="#users-card" hx-swap="outerHTML">
           <button type="submit" class="clinicos-btn text-xs">تفعيل</button>
@@ -73,6 +84,7 @@
           <select name="roleCode" class="clinicos-input w-32">
             <option th:if="${actorRole == 'owner'}" value="manager"
                     th:selected="${addForm.getRoleCode() == 'manager'}">مدير</option>
+            <option value="doctor" th:selected="${addForm.getRoleCode() == 'doctor'}">طبيب</option>
             <option value="assistant" th:selected="${addForm.getRoleCode() == 'assistant'}">مساعد</option>
             <option value="receptionist"
                     th:selected="${addForm.getRoleCode() == 'receptionist'}">موظف استقبال</option>

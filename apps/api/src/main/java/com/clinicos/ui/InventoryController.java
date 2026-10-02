@@ -34,8 +34,8 @@ import jakarta.servlet.http.HttpSession;
 public class InventoryController {
 
     private static final String AREA = "inventory";
-    private static final List<SubArea> AREAS = List.of(
-            new SubArea("items", "manage", "الأصناف"),
+    static final List<SubArea> AREAS = List.of(
+new SubArea("items", "manage", "الأصناف"),
             new SubArea("tray", "tray", "صينية التحضير"),
             new SubArea("issue", "issue", "صرف المخزون"),
             new SubArea("orders", "orders", "النواقص والطلب"),

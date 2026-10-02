@@ -126,13 +126,17 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
         try (Connection connection = superuserConnection()) {
             DSLContext superuserDsl = DSL.using(connection, SQLDialect.POSTGRES);
             assertThat(grantedCodes(superuserDsl, result.clinicId(), "receptionist"))
-                    .contains("orders", "receive", "returns", "suppliers")
-                    .doesNotContain("ledger", "tray", "issue");
+                    .contains("orders", "receive", "returns", "suppliers", "ledger", "academy")
+                    .doesNotContain("tray", "issue");
             assertThat(grantedCodes(superuserDsl, result.clinicId(), "assistant"))
-                    .contains("tray", "issue", "myprocs", "manage")
-                    .doesNotContain("procs", "ledger");
+                    .contains("tray", "issue", "procs", "myprocs", "manage", "academy")
+                    .doesNotContain("ledger");
             assertThat(grantedCodes(superuserDsl, result.clinicId(), "manager"))
-                    .contains("approvals", "analytics", "ledger");
+                    .contains("approvals", "analytics", "ledger", "academy");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "assistant")).contains("academy");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "receptionist")).contains("academy");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "doctor"))
+                    .containsExactlyInAnyOrder("emp", "academy", "myprocs");
         }
     }
 

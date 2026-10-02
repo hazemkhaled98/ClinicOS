@@ -50,6 +50,14 @@ class NavSectionResolverTest {
     }
 
     @Test
+    void doctorGetsClinicalNavigationWithoutStaffReviewOrAdminSections() {
+        var visible = NavSectionResolver.resolve(Set.of("emp", "academy", "myprocs"), "doctor");
+
+        assertThat(keys(visible)).containsExactly("emp", "myeval", "prep", "leaves", "acad", "inv")
+                .doesNotContain("quick", "tasks", "ceo");
+    }
+
+    @Test
     void noPermissionsStillShowsPrepAndLeavesSections() {
         var visible = NavSectionResolver.resolve(Set.of(), "assistant");
 

@@ -6,7 +6,11 @@
 <body>
 <div th:fragment="permissionsCard(rolePermissionMap, usersByRole)"
      th:attr="data-toast=${toastMessage},data-toast-type=${toastType}">
-  <div class="flex flex-wrap gap-2 mb-6">
+  <div th:if="${activeRole == null}" class="p-4 bg-neutral-100 rounded-xl">
+    <p class="text-sm text-on-surface-variant">لا تملك صلاحية تعديل صلاحيات أي دور.</p>
+  </div>
+
+  <div th:unless="${activeRole == null}" class="flex flex-wrap gap-2 mb-6">
     <a th:each="roleCode : ${roleCodes}"
        th:href="'/admin-dashboard/permissions?role=' + ${roleCode}"
        class="clinicos-admin-tab"
@@ -27,7 +31,7 @@
     </div>
   </div>
 
-  <form th:unless="${activeRole == 'owner'}"
+  <form th:if="${activeRole != null and activeRole != 'owner'}"
         th:id="'perm-form-' + ${activeRole}"
         hx-post="/admin-dashboard/permissions"
         hx-target="#permissions-body" hx-swap="innerHTML">
@@ -44,7 +48,7 @@
     <button type="submit" class="clinicos-btn mt-4">حفظ الصلاحيات</button>
   </form>
 
-  <div class="mt-3">
+  <div class="mt-3" th:if="${activeRole != null}">
     <p th:if="${usersByRole.get(activeRole) == null or #lists.isEmpty(usersByRole.get(activeRole))}"
        class="text-xs text-on-surface-variant mb-2">مفيش حد على التوصيف ده لسه</p>
     <div th:unless="${usersByRole.get(activeRole) == null or #lists.isEmpty(usersByRole.get(activeRole))}"

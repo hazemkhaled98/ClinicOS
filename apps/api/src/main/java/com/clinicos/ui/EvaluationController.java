@@ -71,7 +71,11 @@ public class EvaluationController {
         }
         UUID clinicId = AdminAccess.clinicId(session);
         YearMonth selectedMonth = parseMonth(month);
-        List<Employee> employees = employeeService.list(clinicId);
+        Employee self = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
+        UUID selfId = self == null ? null : self.id();
+        List<Employee> employees = employeeService.list(clinicId).stream()
+                .filter(candidate -> !candidate.id().equals(selfId))
+                .toList();
         UUID selectedId = parseEmployee(employee, employees);
 
         model.addAttribute("layout", layoutModel.forRequest(session, "evaluation"));
@@ -169,9 +173,13 @@ public class EvaluationController {
     public String unlock(@PathVariable UUID employeeId, @RequestParam String month,
             HttpSession session, Model model) {
         return handleAction(session, model, employeeId, month,
-                "eval.unlock", "evaluation_snapshot", "تم فتح الشهر لإعادة التقييم ✔",
-                clinicId -> evaluationService.unlock(clinicId, employeeId, parseMonth(month),
-                        AdminAccess.membershipId(session)));
+                "eval.unlock", "evaluation_snapshot", "تمت إعادة الحساب وتثبيت النتيجة",
+                clinicId -> {
+                    if (!evaluationService.unlock(clinicId, employeeId, parseMonth(month),
+                            AdminAccess.membershipId(session))) {
+                        throw new IllegalArgumentException("لم يتم فتح شهر مجمّد لإعادة التقييم");
+                    }
+                });
     }
 
     private String handleAction(HttpSession session, Model model, UUID employeeId, String month,
@@ -182,12 +190,17 @@ public class EvaluationController {
         }
         Map<String, String> errors = new HashMap<>();
         UUID clinicId = AdminAccess.clinicId(session);
-        try {
-            action.accept(clinicId);
-            activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
-        } catch (IllegalArgumentException | EvaluationConflictException e) {
-            log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
-            errors.put("error", e.getMessage());
+        Employee self = employeeService.findByMembership(clinicId, AdminAccess.membershipId(session));
+        if (self != null && self.id().equals(employeeId)) {
+            errors.put("error", "لا يمكنك مراجعة تقييمك بنفسك");
+        } else {
+            try {
+                action.accept(clinicId);
+                activityLogService.log(clinicId, AdminAccess.membershipId(session), logAction, logEntity);
+            } catch (IllegalArgumentException | EvaluationConflictException e) {
+                log.warn("evaluation action failed: clinicId={}, logAction={}", clinicId, logAction, e);
+                errors.put("error", e.getMessage());
+            }
         }
         renderGrid(model, clinicId, employeeId, parseMonth(month));
         Toasts.fromErrors(model, errors, successMessage);

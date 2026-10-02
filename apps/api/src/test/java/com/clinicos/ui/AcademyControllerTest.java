@@ -72,10 +72,24 @@ class AcademyControllerTest {
     @Test
     void UC007_authenticatedTraineeCanOpenAcademy() {
         when(employeeService.list(CLINIC)).thenReturn(List.of(employee()));
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
         when(academyService.audienceOf(CLINIC, EMPLOYEE)).thenReturn(
                 com.clinicos.shared.jooq.enums.AcademyAudience.assistant);
 
         assertThat(controller.index(session(), model)).isEqualTo("academy");
+        assertThat(model.getAttribute("employees")).isEqualTo(List.of(employee()));
+    }
+
+    @Test
+    void traineeOnlySeesTheirOwnLearnerCard() {
+        Employee other = new Employee(UUID.randomUUID(), "موظف آخر", null, null, null, null, false, null, null);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(employee(), other));
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
+        when(academyService.audienceOf(CLINIC, EMPLOYEE)).thenReturn(AcademyAudience.assistant);
+        when(academyService.audienceOf(CLINIC, other.id())).thenReturn(AcademyAudience.assistant);
+
+        assertThat(controller.index(session(), model)).isEqualTo("academy");
+
         assertThat(model.getAttribute("employees")).isEqualTo(List.of(employee()));
     }
 
@@ -89,6 +103,21 @@ class AcademyControllerTest {
         assertThat(controller.myLearning(session(), model)).isEqualTo("academy-learner");
         var track = (AcademyService.TraineeTrack) model.getAttribute("track");
         assertThat(track.units()).extracting(TraineeUnit::requiresPhoto).containsExactly(true);
+        assertThat(model.getAttribute("isOwnCurriculum")).isEqualTo(true);
+    }
+
+    @Test
+    void verifierViewingOtherLearnerGetsReadOnlyCurriculum() {
+        UUID targetId = UUID.randomUUID();
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(employee());
+        when(academyService.audienceOf(CLINIC, targetId)).thenReturn(AcademyAudience.assistant);
+        when(academyService.traineeCurriculum(CLINIC, new Actor(MEMBERSHIP, "manager", EMPLOYEE),
+                targetId, AcademyAudience.assistant))
+                .thenReturn(new AcademyService.TraineeTrack(targetId, "متدرب", List.of()));
+
+        assertThat(controller.learner(targetId, session("manager"), model)).isEqualTo("academy-learner");
+
+        assertThat(model.getAttribute("isOwnCurriculum")).isEqualTo(false);
     }
 
     @Test

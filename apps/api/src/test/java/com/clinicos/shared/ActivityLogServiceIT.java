@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 
 import org.jooq.SQLDialect;
@@ -79,6 +82,39 @@ class ActivityLogServiceIT extends AbstractPostgresIntegrationTest {
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())) {
             assertThat(countActivityRowsForClinic(connection, clinicId)).isZero();
         }
+    }
+
+    @Test
+    void forDayMatchesExactActionsAndPrefixesButNotUnrelatedActions() {
+        TenantContext.set(clinicId);
+        activityLogService.log(clinicId, membershipId, "inventory.order.place", "purchase_order");
+        activityLogService.log(clinicId, membershipId, "inventory.issue", "stock");
+        activityLogService.log(clinicId, membershipId, "task.create", "task");
+        activityLogService.log(clinicId, membershipId, "task", "task");
+        LocalDate day = LocalDate.now(ZoneId.of("Africa/Cairo"));
+
+        assertThat(actions(forDay(clinicId, day, "all"))).hasSize(4);
+        assertThat(actions(forDay(clinicId, day, "volume.record,inventory")))
+                .containsExactlyInAnyOrder("inventory.order.place", "inventory.issue");
+        assertThat(actions(forDay(clinicId, day, "task"))).containsExactlyInAnyOrder("task.create", "task");
+    }
+
+    @Test
+    void forDayOnlySeesEntriesInsideTheRequestedDay() {
+        TenantContext.set(clinicId);
+        activityLogService.log(clinicId, membershipId, "login", "session");
+        LocalDate today = LocalDate.now(ZoneId.of("Africa/Cairo"));
+
+        assertThat(actions(forDay(clinicId, today, "all"))).containsExactly("login");
+        assertThat(actions(forDay(clinicId, today.plusDays(1), "all"))).isEmpty();
+    }
+
+    private List<ActivityLogService.Entry> forDay(UUID clinic, LocalDate day, String category) {
+        return activityLogService.forDay(clinic, day, category);
+    }
+
+    private static List<String> actions(List<ActivityLogService.Entry> entries) {
+        return entries.stream().map(ActivityLogService.Entry::action).toList();
     }
 
     private long countActivityRowsForClinic(Connection connection, UUID clinic) {

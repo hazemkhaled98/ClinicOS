@@ -76,6 +76,32 @@ class EvaluationControllerTest {
     }
 
     @Test
+    void excludesCurrentManagersEmployeeFromReviewOptions() {
+        allowView();
+        Employee self = new Employee(UUID.randomUUID(), "المدير", null, null, null, null, false, null, null);
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(self);
+        when(employeeService.list(CLINIC)).thenReturn(List.of(self));
+
+        controller.evaluation(null, null, session(), model);
+
+        assertThat(model.getAttribute("employees")).isEqualTo(List.of());
+        assertThat(model.getAttribute("selectedId")).isNull();
+    }
+
+    @Test
+    void rejectsReviewActionForCurrentManagersEmployee() {
+        allowView();
+        Employee self = new Employee(UUID.randomUUID(), "المدير", null, null, null, null, false, null, null);
+        when(employeeService.findByMembership(CLINIC, MEMBERSHIP)).thenReturn(self);
+
+        controller.approveCompletion(self.id(), UUID.randomUUID(), UUID.randomUUID(),
+                YearMonth.now().toString(), session(), model);
+
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        verify(dailyWorkService, never()).approveReview(any(), any(), any(), any());
+    }
+
+    @Test
     void evaluationConflictDuringRenderSurfacesConflictMessage() {
         allowView();
         UUID emp = UUID.randomUUID();
@@ -304,21 +330,37 @@ class EvaluationControllerTest {
     void unlockFrozenMonthLogs() {
         allowView();
         UUID emp = UUID.randomUUID();
+        when(evaluationService.unlock(CLINIC, emp, YearMonth.now(), MEMBERSHIP)).thenReturn(true);
 
         String view = controller.unlock(emp, YearMonth.now().toString(), session(), model);
 
         assertThat(view).isEqualTo(GRID);
         assertThat(model.getAttribute("toastType")).isEqualTo("success");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("تمت إعادة الحساب وتثبيت النتيجة");
         verify(evaluationService).unlock(CLINIC, emp, YearMonth.now(), MEMBERSHIP);
         verify(activityLogService).log(CLINIC, MEMBERSHIP, "eval.unlock", "evaluation_snapshot");
+    }
+
+    @Test
+    void unlockWithoutFrozenSnapshotShowsArabicError() {
+        allowView();
+        UUID emp = UUID.randomUUID();
+        when(evaluationService.unlock(eq(CLINIC), eq(emp), any(), eq(MEMBERSHIP))).thenReturn(false);
+
+        String view = controller.unlock(emp, YearMonth.now().toString(), session(), model);
+
+        assertThat(view).isEqualTo(GRID);
+        assertThat(model.getAttribute("toastType")).isEqualTo("error");
+        assertThat(model.getAttribute("toastMessage")).isEqualTo("لم يتم فتح شهر مجمّد لإعادة التقييم");
+        verify(activityLogService, never()).log(any(), any(), any(), any());
     }
 
     @Test
     void unlockConflictSurfacesArabicToast() {
         allowView();
         UUID emp = UUID.randomUUID();
-        doThrow(new EvaluationService.EvaluationConflictException("الشهر مقفل"))
-                .when(evaluationService).unlock(any(), any(), any(), any());
+        when(evaluationService.unlock(any(), any(), any(), any()))
+                .thenThrow(new EvaluationService.EvaluationConflictException("الشهر مقفل"));
 
         String view = controller.unlock(emp, YearMonth.now().toString(), session(), model);
 

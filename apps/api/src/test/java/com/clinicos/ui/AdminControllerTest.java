@@ -2,7 +2,9 @@ package com.clinicos.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -13,10 +15,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -178,6 +183,57 @@ class AdminControllerTest {
 
         assertThat(controller.activity("2026-09-19", "all", session, model)).isEqualTo("admin/activity-page");
         assertThat(model.getAttribute("day")).isEqualTo(LocalDate.of(2026, 9, 19));
+    }
+
+    @Test
+    void activityLabelsEveryLoggedActionInArabic() {
+        HttpSession session = session();
+        allowDashboard();
+        when(activityLogService.forDay(eq(CLINIC), any(LocalDate.class), eq("all"))).thenReturn(List.of());
+
+        controller.activity("2026-09-19", "all", session, model);
+
+        Map<?, ?> labels = (Map<?, ?>) model.getAttribute("labels");
+        assertThat(labels.keySet().stream().map(Object::toString).toList()).contains(
+                "login", "signup", "clinic.identity_changed", "permissions.update",
+                "user.create", "user.password_change", "user.suspend", "user.reactivate", "user.assign_role",
+                "volume.record", "eval.override", "eval.unlock", "eval.approve", "eval.reject", "eval.assign",
+                "employee.update", "employee.archive", "gamification.settings", "gamification.goals",
+                "gamification.thresholds", "selfcheck.checkin", "selfcheck.checkout", "task.create",
+                "task.update", "task.delete", "task.complete", "task.uncomplete", "assignment.propose",
+                "assignment.done", "prep.create", "prep.import", "prep.reset", "prep.toggle", "prep.edit",
+                "prep.archive", "prep.approve", "prep.unapprove", "academy.verify", "academy.reject",
+                "academy.submitPhoto", "academy.markDone", "academy.submitExam", "academy.importCurriculum",
+                "academy.saveUnit",
+                "leave.submit", "leave.cancel", "leave.approve", "leave.reject", "inventory.issue",
+                "inventory.receive", "inventory.item.create", "inventory.order.place", "inventory.supplier.save",
+                "inventory.procedure.create", "inventory.return.request", "inventory.approval.approve",
+                "inventory.approval.reject", "inventory.item.request-change",
+                "inventory.procedure.request-change", "inventory.procedure.request-bom-change",
+                "inventory.procedure-case.create");
+        assertThat(labels.values()).allSatisfy(value -> assertThat(value.toString()).matches(".*[\\p{IsArabic}].*"));
+    }
+
+    @Test
+    void everyQuickFilterCategoryResolvesToRealActionPrefixes() {
+        HttpSession session = session();
+        allowDashboard();
+        when(activityLogService.forDay(eq(CLINIC), any(LocalDate.class), anyString())).thenReturn(List.of());
+
+        for (String category : new String[] { "auth", "finance", "operations" }) {
+            clearInvocations(activityLogService);
+            ArgumentCaptor<String> prefixes = ArgumentCaptor.forClass(String.class);
+            controller.activity("2026-09-19", category, session, model);
+            verify(activityLogService).forDay(eq(CLINIC), any(LocalDate.class), prefixes.capture());
+
+            Set<?> logged = ((Map<?, ?>) model.getAttribute("labels")).keySet();
+            for (String prefix : prefixes.getValue().split(",")) {
+                String action = prefix.trim();
+                assertThat(action).isNotEmpty();
+                assertThat(logged.stream().map(Object::toString)).anyMatch(known -> known.equals(action)
+                        || known.startsWith(action + "."));
+            }
+        }
     }
 
     @Test

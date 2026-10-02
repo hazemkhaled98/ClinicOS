@@ -35,7 +35,7 @@ public interface EvaluationService {
      * Reopens a frozen month for a single edit (instance independent of any
      * other change, as V10 requires). The next {@link #evaluate} re-freezes it.
      */
-    void unlock(UUID clinicId, UUID employeeId, YearMonth month, UUID unlockedByMembershipId);
+    boolean unlock(UUID clinicId, UUID employeeId, YearMonth month, UUID unlockedByMembershipId);
 
     /** Month: was evaluated/written, is frozen, non-null when finalScore present. */
     record MonthlyEvaluation(
