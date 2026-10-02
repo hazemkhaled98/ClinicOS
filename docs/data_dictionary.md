@@ -30,7 +30,7 @@ Conventions: every table's primary key is `id uuid default gen_random_uuid()` un
 | created_at | timestamptz | not null, default now() |
 
 ### role / permission
-Platform-defined, no `clinic_id`. `role.code`: owner, manager, assistant, receptionist. `permission.code`: application-defined capability strings (e.g. `employees.manage`).
+Platform-defined, no `clinic_id`. `role.code`: owner, manager, doctor, assistant, receptionist. `permission.code`: application-defined capability strings (e.g. `employees.manage`).
 
 ### role_permission
 PK `(role_id, permission_id)`, both FK cascade delete.

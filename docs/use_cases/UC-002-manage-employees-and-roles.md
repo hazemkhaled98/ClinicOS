@@ -16,7 +16,7 @@
 
 1. The manager opens the employee records section.
 2. The manager selects an employee from the list, or starts registering a new one.
-3. The manager enters or edits the employee's name, role (assistant or receptionist), base pay, maximum incentive, and work shift.
+3. The manager enters or edits the employee's name, role (doctor, assistant, or receptionist), base pay, maximum incentive, and work shift.
 4. The manager saves the changes.
 5. The system stores the updated employee record and reflects it immediately in evaluation, tasks, academy and inventory sections that depend on employee role. (Academy and inventory impact is deferred to Phase 6 / Phase 7; the role-based task list and evaluation are reflected now.)
 6. The manager reviews or adjusts clinic-wide settings that affect every employee's evaluation: the task list per role, evaluation category weights, monthly operating target, grace period for lateness, and gamification/badge thresholds.
