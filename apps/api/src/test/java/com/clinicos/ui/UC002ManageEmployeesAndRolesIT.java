@@ -186,11 +186,23 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
 
         private void addEmployeeWithAccount(String fullName) {
             openAdminUsers();
-            page().getByLabel("اسم المستخدم").fill("emp-" + uniqueSuffix());
-            page().getByLabel("الاسم الكامل").fill(fullName);
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+            fillAddUserForm("emp-" + uniqueSuffix(), fullName);
+            submitAddUserForm();
             userRow(fullName).waitFor();
+        }
+
+        // Exact match is required on the password: the Users page also renders the
+        // signed-in user's own "كلمة المرور الجديدة" reset field, and getByLabel
+        // matches by substring, so a plain match resolves to both inputs.
+        private void fillAddUserForm(String username, String fullName) {
+            page().getByLabel("اسم المستخدم").fill(username);
+            page().getByLabel("الاسم الكامل").fill(fullName);
+            page().getByLabel("كلمة المرور", new Page.GetByLabelOptions().setExact(true))
+                    .fill("correct-horse-battery-staple");
+        }
+
+        private void submitAddUserForm() {
+            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
         }
 
         @Test
@@ -205,16 +217,12 @@ class UC002ManageEmployeesAndRolesIT extends AbstractBrowserIT {
             openAdminUsers();
 
             String duplicatedUsername = "dup-" + uniqueSuffix();
-            page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
-            page().getByLabel("الاسم الكامل").fill("حساب أول");
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+            fillAddUserForm(duplicatedUsername, "حساب أول");
+            submitAddUserForm();
             userRow("حساب أول").waitFor();
 
-            page().getByLabel("اسم المستخدم").fill(duplicatedUsername);
-            page().getByLabel("الاسم الكامل").fill("حساب ثاني");
-            page().getByLabel("كلمة المرور").fill("correct-horse-battery-staple");
-            page().getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("+ إضافة مستخدم")).click();
+            fillAddUserForm(duplicatedUsername, "حساب ثاني");
+            submitAddUserForm();
 
             page().getByText("اسم المستخدم موجود مسبقاً في هذه العيادة").waitFor();
             PlaywrightAssertions.assertThat(page().getByText("اسم المستخدم موجود مسبقاً في هذه العيادة")).isVisible();
