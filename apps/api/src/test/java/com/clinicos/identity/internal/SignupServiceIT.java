@@ -137,6 +137,9 @@ class SignupServiceIT extends AbstractPostgresIntegrationTest {
             assertThat(grantedCodes(superuserDsl, result.clinicId(), "receptionist")).contains("academy");
             assertThat(grantedCodes(superuserDsl, result.clinicId(), "doctor"))
                     .containsExactlyInAnyOrder("emp", "academy", "myprocs");
+            assertThat(grantedCodes(superuserDsl, result.clinicId(), "owner"))
+                    .containsExactlyInAnyOrderElementsOf(
+                            superuserDsl.select(PERMISSION.CODE).from(PERMISSION).fetchSet(PERMISSION.CODE));
         }
     }
 

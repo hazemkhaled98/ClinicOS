@@ -100,23 +100,22 @@ class ClinicSettingsServiceIT extends AbstractPostgresIntegrationTest {
         assertThat(settings.tiers()).extracting(Tier::name)
                 .containsExactly("ممتاز", "جيد جداً", "جيد", "يحتاج تطوير");
         assertThat(settings.tiers().get(0).incentivePct()).isEqualByComparingTo("100");
-
-        // The gamification defaults are not reachable through ClinicSettingsService, so
-        // they need their own check: nothing else would catch the signup function
-        // dropping them the way it dropped the other three. The shared fixture never
-        // seeds them, so the contrast below proves these counts come from the signup
-        // function's own rows rather than from something present in every clinic.
+        // The gamification defaults are not reachable through ClinicSettingsService, and
+        // DefaultGamificationService creates a settings row on demand, so nothing else
+        // would catch signup dropping them the way it dropped the other three.
         try (Connection connection = superuser()) {
             DSLContext dsl = DSL.using(connection, SQLDialect.POSTGRES);
             assertThat(dsl.fetchCount(GAMIFICATION_SETTINGS, GAMIFICATION_SETTINGS.CLINIC_ID.eq(clinicId)))
                     .isEqualTo(1);
-            assertThat(dsl.fetchCount(WEEKLY_GOAL, WEEKLY_GOAL.CLINIC_ID.eq(clinicId))).isEqualTo(3);
-            assertThat(dsl.fetchCount(BADGE_THRESHOLD, BADGE_THRESHOLD.CLINIC_ID.eq(clinicId))).isEqualTo(5);
-
-            assertThat(dsl.fetchCount(GAMIFICATION_SETTINGS, GAMIFICATION_SETTINGS.CLINIC_ID.eq(clinicA)))
-                    .isZero();
-            assertThat(dsl.fetchCount(WEEKLY_GOAL, WEEKLY_GOAL.CLINIC_ID.eq(clinicA))).isZero();
-            assertThat(dsl.fetchCount(BADGE_THRESHOLD, BADGE_THRESHOLD.CLINIC_ID.eq(clinicA))).isZero();
+            assertThat(dsl.select(WEEKLY_GOAL.SLOT).from(WEEKLY_GOAL)
+                    .where(WEEKLY_GOAL.CLINIC_ID.eq(clinicId))
+                    .orderBy(WEEKLY_GOAL.SLOT)
+                    .fetch(WEEKLY_GOAL.SLOT)).containsExactly(1, 2, 3);
+            assertThat(dsl.select(BADGE_THRESHOLD.NAME).from(BADGE_THRESHOLD)
+                    .where(BADGE_THRESHOLD.CLINIC_ID.eq(clinicId))
+                    .fetch(BADGE_THRESHOLD.NAME))
+                    .containsExactlyInAnyOrder(
+                            "نجم الأسبوع", "الأكثر إنجازاً", "مبدع", "ملتزم", "متميز");
         }
     }
 
